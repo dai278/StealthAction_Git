@@ -23,6 +23,7 @@ class UInputAction;
 struct FInputActionValue;  
 class UPrimitiveComponent;
 class UNoiseListenerComponent;
+class AEnemy_1;//エネミーの基底クラスにする日髙変更
 
 
 //パラメーター更新が起きた時のイベントディスパッチャー宣言
@@ -316,7 +317,12 @@ private:
 	FCameraViewSetting m_cameraInitPos[(int)ECameraStatus::Num];	//各視点変更時最初の視点
 
 	TArray <AActor*> m_hitActors;//衝突対処のアドレス
-		//デバック用
+
+	//日髙変更点
+	//隠密キル対象のアドレス
+	AEnemy_1* m_pStealthKillEnemy;
+	
+	//デバック用
 	UNoiseListenerComponent* noise;
 	public:
 	void OnNoiseHeard(const int& _noiseVolume, const FVector& _pos);

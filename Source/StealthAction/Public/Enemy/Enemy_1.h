@@ -134,6 +134,11 @@ public:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
+public:
+	//プレイヤーを見つけているかどうか
+	//確認が取れてないので仮でfalse返す
+	//確認取れたらCpp側で実装予定
+	bool IsPlayerFound() const { return false; }
 private:
 
 	//UPROPERTY()
