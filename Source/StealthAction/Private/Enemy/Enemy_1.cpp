@@ -26,6 +26,14 @@
 
 #include "Enemy_Route/Enemy_RouteManager.h"						//ルート検索用
 
+//-----------------------------------------------------------
+//検証用
+//-----------------------------------------------------------
+#include "GameFramework/PlayerController.h"
+#include "InputCoreTypes.h"
+#include "Engine/World.h"
+
+
 //#include "Enemy_Weapon/Enemy_Weapon_1.h"			//
 //
 //#include "Enemy_Weapon/Enemy_Bullet/Enemy_Bullet_1.h"
@@ -120,6 +128,7 @@ AEnemy_1::AEnemy_1()
 	, m_randomRoute(false)
 	, m_routeNum(0)
 	, m_routeCounter(0)
+	, m_deadCheck(false)
 {
 	// 毎フレーム、このクラスのTick()を呼ぶかどうかを決めるフラグ
 	PrimaryActorTick.bCanEverTick = true;
@@ -156,6 +165,9 @@ AEnemy_1::AEnemy_1()
 void AEnemy_1::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 入力を有効化（検証用）
+	EnableInput(GetWorld()->GetFirstPlayerController());
 
 	UE_LOG(LogTemp, Warning, TEXT("AEnemy_1 BeginPlay"));
 
@@ -237,11 +249,19 @@ void AEnemy_1::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//死亡処理
+	// ===== 検証用：Kキーで強制死亡 =====
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (PC && PC->WasInputKeyJustPressed(EKeys::K))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[[]]K Pressed"));
+		m_HP = 0;
+	}
+	//死亡判定
 	if (m_HP <= 0)
 	{
-		CaseDead(DeltaTime);
-		return;
+		m_enemyCurrentState = EEnemy_1Status::Dead;
+		/*CaseDead(DeltaTime);
+		return;*/
 	}
 
 	//視界処理
@@ -268,8 +288,45 @@ void AEnemy_1::Tick(float DeltaTime)
 //------------------------------------------------------------------------------------------------------------
 void AEnemy_1::CaseDead(float _deltaTime)
 {
-	//
-	UE_LOG(LogTemp, Warning, TEXT("Dead"));
+	// 初回のみ実行
+	if (!m_deadCheck)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[[]]Dead"));
+
+		m_deadCheck = true;
+
+		// 移動停止
+		GetCharacterMovement()->StopMovementImmediately();
+		GetCharacterMovement()->DisableMovement();
+
+		// Nav移動停止
+		m_moveStop_Nav = true;
+
+		// 判定系を全て止める
+		m_searchStopper = true;
+		m_hearingStopper = true;
+
+		m_visionCheck = false;
+		m_noiseCheck = false;
+
+		// 各状態フラグを全OFF
+		m_alertCheck = false;
+		m_patrolCheck = false;
+		m_doubtCheck = false;
+		m_doubtNoiseCheck = false;
+		m_cautionCheck = false;
+		m_cautionNoiseCheck = false;
+		m_battleCheck = false;
+		m_battleNoiseCheck = false;
+		m_missCheck = false;
+		m_returnCheck = false;
+
+		// コリジョンは残す or 無効化（お好み）
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		// 回転しないように
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+	}
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -677,6 +734,12 @@ void AEnemy_1::ResetStateValues(float _deltaTime)
 //------------------------------------------------------------------------------------------------------------
 void AEnemy_1::UpdateStatus(float _deltaTime)
 {
+	if (m_HP <= 0)
+	{
+		CaseDead(_deltaTime);
+		return;
+	}
+
 	//エネミーのステータス
 	switch (m_enemyCurrentState)
 	{

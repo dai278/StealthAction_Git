@@ -292,6 +292,8 @@ private:
 
 	bool m_playerShadowCheck;		//プレイヤーが影状態か？
 
+	bool m_deadCheck;			//死亡したか
+
 
 	//ステータス関連
 	EEnemy_1Status m_enemyCurrentState; //エネミーのステータス

@@ -45,8 +45,8 @@ void AExtendedSpotLight::BeginPlay()
 
 	//マネージャーに登録
 	GetWorld()->GetSubsystem<UExtendedSpotLightManager>()->AddLight(this);
-	//デフォルとで影を出さない
-	m_pSpotLight->SetCastShadows(false);
+	//影を出す
+	m_pSpotLight->SetCastShadows(true);
 
 }
 
@@ -58,10 +58,6 @@ void AExtendedSpotLight::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FVector newPos = GetActorLocation();
-	newPos.X += 200.f * DeltaTime;
-	
-	SetActorLocation(newPos);
 
 	// スポットライトの位置（ワールド座標）
 	FVector Origin = m_pSpotLight->GetComponentLocation();

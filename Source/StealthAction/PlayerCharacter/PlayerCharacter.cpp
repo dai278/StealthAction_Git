@@ -20,7 +20,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 
 #include "Noise/NoiseManager.h"
-//#include "Light/UExtendedSpotLightManager.h"
+#include "Light/ExtendedSpotLightManager.h"
 
 
 //----------------------------------------------------------
@@ -690,6 +690,8 @@ void APlayerCharacter::Enhanced_InShadow(const FInputActionValue& Value)
 	//“ü—Í‚ª–³‚¯‚ê‚Î‰½‚à‚µ‚È‚¢
 	//if (!Value.Get<bool>()) { return; }
 
+	
+
 	//ó‘Ô‚ª‰e‚È‚çƒfƒtƒHƒ‹ƒg‚É–ß‚·
 	if (m_status == EPlayerStatus::InShadow)
 	{
@@ -697,7 +699,11 @@ void APlayerCharacter::Enhanced_InShadow(const FInputActionValue& Value)
 		return;
 	}
 
-	if (m_bOnShadow) {
+	//‰e‚Ìã(‘«Œ³‚ªŒõ‚ÉÆ‚ç‚³‚ê‚Ä‚¢‚È‚¯‚ê‚Î‰eó‘Ô‚É
+	FVector targetPos = GetActorLocation();
+	const float capselHeighiHalf= GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	targetPos.Z -= capselHeighiHalf;
+	if (!GetWorld()->GetSubsystem<UExtendedSpotLightManager>()->IsHitLight(targetPos)) {
 		m_status = EPlayerStatus::InShadow;
 		m_bUsingMesh = true;
 	}

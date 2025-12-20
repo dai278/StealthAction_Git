@@ -9,6 +9,7 @@
 #include "Light/ExtendedSpotLight.h"
 
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 
 //---------------------------------------
 // コンストラクタ
@@ -22,19 +23,12 @@ UShadowComponent::UShadowComponent()
 	, m_scaleType(EShadowScaleType::OriginalScale)
 	, m_isUsingAbsoluteRotation(true)
 {
-	PrimaryComponentTick.bCanEverTick = false;
-	//PrimaryComponentTick.bStartWithTickEnabled = true;
-	//PrimaryComponentTick.bAllowTickOnDedicatedServer = true;
-	//PrimaryComponentTick.bTickEvenWhenPaused = true;      // ← NEW!!!
-
-	//PrimaryComponentTick.TickGroup = TG_PrePhysics;       // ← NEW!!!
-	//bWantsInitializeComponent = true;                     // ← NEW!!!
-	//bAutoActivate = true;                                 // ← NEW!!!
-
+	// Tickを有効にするなんか有効かしなかったからいっぱい試してる
+	PrimaryComponentTick.bCanEverTick = true;
 	SetComponentTickEnabled(true);
 	SetAutoActivate(true);
 
-
+	//メッシュコンポーネント生成
 	m_pShadowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("shadowMesh"));
 	if (m_pShadowMesh) {
 		//メッシュのコリジョンをOFF
@@ -43,9 +37,6 @@ UShadowComponent::UShadowComponent()
 		m_pShadowMesh->SetGenerateOverlapEvents(false);
 		m_pShadowMesh->SetVisibility(true);
 		m_pShadowMesh->SetHiddenInGame(false);
-
-		//m_pShadowMesh->SetRelativeLocation(FVector::ZeroVector);
-		//m_pShadowMesh->SetRelativeRotation(FRotator::ZeroRotator);
 	}
 
 	//コリジョン
@@ -60,18 +51,9 @@ UShadowComponent::UShadowComponent()
 		m_pCollisionBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 		//仮サイズ
 		m_pCollisionBox->SetBoxExtent(FVector{ 40.f,40.f,40.f });
-		//
-		//m_pCollisionBox->SetRelativeLocation(FVector::ZeroVector);
 		//オーバラップイベントを発生させるか
 		m_pCollisionBox->SetGenerateOverlapEvents(true);
 	}
-
-
-	/*if (m_pShadowMesh && m_pCollisionBox)
-	{
-		m_pShadowMesh->SetupAttachment(this);
-		m_pCollisionBox->SetupAttachment(this);
-	}*/
 	
 }
 
@@ -80,19 +62,10 @@ UShadowComponent::UShadowComponent()
 //------------------------------------------
 void UShadowComponent::OnRegister()
 {
-	Super::OnRegister();
-
-	//回転をアタッチするか？デフォはアタッチ
-	if (!m_isUsingAbsoluteRotation) {
-		SetUsingAbsoluteRotation(true);
-	}
+	Super::OnRegister();	
 
 	if (m_pShadowMesh && m_pCollisionBox)
 	{
-		// Mesh と Collision は ShadowComponent に直接アタッチ
-		/*m_pShadowMesh->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-		m_pCollisionBox->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);*/
-
 		m_pCollisionBox->SetCollisionProfileName(TEXT("Shadow"));
 	}
 	SetActive(true);
@@ -103,15 +76,11 @@ void UShadowComponent::OnRegister()
 		m_pShadowMesh->SetupAttachment(this);
 		m_pCollisionBox->SetupAttachment(this);
 	}
+
+	// 回転を親の影響にしない（あなたの意図通り）
+	SetUsingAbsoluteRotation(true);
+
 }
-
-
-//void UShadowComponent::OnComponentCreated()
-//{
-//	Super::OnComponentCreated();
-//
-//	
-//}
 
 
 //--------------------------------------
@@ -169,77 +138,6 @@ void UShadowComponent::BeginPlay()
 	 //ワールドサイズを補正
 	 SetWorldScale3D(newScale);
 
-	////コリジョンにスケールを反映
-	//m_pCollisionBox->SetWorldScale3D(newScale);
-	////メッシュにスケールを反映
-	//m_pShadowMesh->SetWorldScale3D(newScale);
-	//FVector newLocation = m_pCollisionBox->GetRelativeLocation();
-	//FVector meshLocation = m_pShadowMesh->GetRelativeLocation();
-	//newLocation.Z = meshLocation.Z;
-	//m_pCollisionBox->SetRelativeLocation(newLocation);
-	
-
-
-//
-//	// ===== サイズを Mesh の Bounds に合わせる ===== 	
-//	float collisionSizeZ = 40.f;
-//
-//	// ① ローカルBounds取得（Min / Max）
-//	FVector Min, Max;
-//	m_pShadowMesh->GetLocalBounds(Min, Max);
-//
-//	// ② ローカル実サイズ（直径）
-//	FVector LocalSize = Max - Min;
-//
-//	// ③ スケールを反映（重要！）
-//	FVector WorldSize = LocalSize * owner->GetActorScale();
-//
-//	// ④ BoxExtent は半径（half-size）
-//	FVector HalfExtent = WorldSize * 0.5f;
-//
-//	HalfExtent.Z = collisionSizeZ;
-//	HalfExtent.Y = HalfExtent.Y / ownerScale.Y;
-//
-//	m_pCollisionBox->SetBoxExtent(HalfExtent);
-//
-//	
-//	//メッシュのスケールを取得
-//	FVector newSceal = m_pShadowMesh->GetComponentScale();
-//	////メッシュのY軸の長さを高さに依存
-//	newSceal = { newSceal.X,newSceal.Y/ownerScale.Y*ownerScale.Z,newSceal.Z};
-//	//m_pShadowMesh->SetWorldScale3D(newSceal);
-//	m_pCollisionBox->SetWorldScale3D(FVector{newSceal.X/ownerScale.X,newSceal.Y,1.f});
-//
-//
-//
-//	//メッシュの半径を取得
-//	FVector extent = m_pShadowMesh->GetStaticMesh()->GetBounds().BoxExtent;
-//	//FVector bounds = m_pCollisionBox();
-//	//=============ここ要変更======================
-//	
-//	// ====== BoxCollision のスケール反映後の半径取得 ======
-//	FVector BoxExtent = m_pCollisionBox->GetScaledBoxExtent();
-//
-//	m_pCollisionBox->SetWorldLocation(m_pShadowMesh->GetComponentLocation());
-//// ====== Y軸に半径分オフセット ======
-//	FVector NewLocation = m_pShadowMesh-> GetRelativeLocation();
-//	//NewLocation.Y += BoxExtent.Y/2.f;
-//	m_pCollisionBox->SetRelativeLocation(NewLocation);
-//
-//	//FVector componentLocation = GetRelativeLocation();
-//	//componentLocation.Y -= BoxExtent.Y ;
-//	//SetRelativeLocation(componentLocation);
-//
-//	//アクティブにする
-//	SetActive(true);
-//	m_pShadowMesh->SetActive(true);
-//	m_pCollisionBox->SetActive(true);
-//		if (!m_pShadowMesh || !m_pCollisionBox)
-//			return;
-//
-//
-//
-//	
 	
 
 }
@@ -251,117 +149,67 @@ void UShadowComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	//UE_LOG(LogTemp, Warning, TEXT("Shadow Tick!!"));
-	//UpdateTransform();
+	UpdateTransform();
 }
 
 
 //--------------------------------------
-//オーナーに対して位置などを合わせる
+//オーナーに対して角度などを合わせる
 //--------------------------------------
 void UShadowComponent::UpdateTransform()
 {
+	AActor* owner = GetOwner();
+	if (!owner || !m_pLight)
+	{
+		return;
+	}
+	// オーナーの位置
+	FVector origin = owner->GetActorLocation();
+	// カプセルコンポーネントがあれば上端に調整
+	if (UCapsuleComponent* capsule = owner->FindComponentByClass<UCapsuleComponent>())
+	{
+		const float halfHeight = capsule->GetScaledCapsuleHalfHeight();
+		origin += FVector(0.f, 0.f, halfHeight); // 上端
+	}
 
-	////オーナーの取得
-	//AActor* owner = GetOwner();
-	////nullチェック
-	//if (!owner || !m_pLight) {
-	//	return;
-	//}
+	// ライト位置
+	const FVector lightPos = m_pLight->GetLightLocation();
 
-	//
+	// 距離がライトの届く範囲外ならスキップ
+	const float lightLength = m_pLight->GetLightLength();
+	const float dist = FVector::Distance(origin, lightPos);
+	if (lightLength > 0.f && dist > lightLength)
+	{
+		return;
+	}
 
-	////オーナのメッシュ
-	//UStaticMeshComponent* ownerMesh = owner->FindComponentByClass<UStaticMeshComponent>();
-	//if (!ownerMesh) { return; }
+	// 光の進行方向
+	FVector lightToObj = (origin - lightPos);
+	if (lightToObj.IsNearlyZero())
+	{
+		return;
+	}
+	lightToObj.Normalize();
 
-	////ワールド空間の上でのサイズ位置を取得
-	//const const FBoxSphereBounds worldBounds = ownerMesh->CalcBounds(ownerMesh->GetComponentTransform());	
-	//const FVector worldCenter = worldBounds.Origin;//中心位置
-	//const FVector worldExtent = worldBounds.BoxExtent;//半径
-	//const float width = worldExtent.X*2.f;//幅
-	//const float depth = worldExtent.Y*2.f;//奥行き
-	//const float hight = worldExtent.Z*2.f;//高さ
-	//const FVector  bottom = { worldCenter.X,worldCenter.Y,worldCenter.Z - worldExtent.Z };//地面の高さの中心
-	//const FVector top = { worldCenter.X,worldCenter.Y,worldCenter.Z + worldExtent.Z };//頂点の中心
+	// 影方向（オブジェクト→影が伸びる方向）
+	FVector shadowDir = -lightToObj;
 
+	// 地面（XY平面）へ投
+	shadowDir.Z = 0.f;
 
-	////float width = extents.X * 2.0f;  // メッシュの横幅
-	////float depth = extents.Y * 2.0f;  // メッシュの奥行
-	////float height = extents.Z * 2.0f;// メッシュの高さ
-	////FVector bottom = origin - FVector{ 0, 0, extents.Z };              //下
-	////FVector top = origin + FVector(0, 0, extents.Z);                 //上
+	// 真上か真下だと方向が定まらない
+	if (shadowDir.IsNearlyZero())
+	{
+		return;
+	}
+	//正規化
+	shadowDir.Normalize();
 
-	//const FVector lightPos = m_pLight->GetLightLocation();           //ライトの位置
-	//const FVector lightForward = m_pLight->GetLightForwardVector();  //ライトの向き
-	//float outerConeAngleDeg = m_pLight->GetLightOuterAngle();        //ライトの外側角度
-	//float lightLength = m_pLight->GetLightLength();					 //ライトの届く最大距離
-	//float groundZ = 0.f;                                             //地面の高さ
-	//FVector outShadowPos;                                            //影出力位置
+	// RadiansをDegreesに変換
+	const float yawDeg = FMath::RadiansToDegrees(FMath::Atan2(shadowDir.Y, shadowDir.X));
 
-	////ライト→オブジェクトへの向き
-	//const FVector lightvecter = (top - lightPos);	
-	////ライトの最大距離よりとおければ処理しない
-	//if (lightLength < lightvecter.Length()) { return; }
-
-	////正規化したベクトル
-	//const FVector direction = lightvecter.GetSafeNormal();
-	//
-	////Z軸を消したベクトルを正規化
-	//FVector shadowDir = FVector(direction.X, direction.Y, 0.f).GetSafeNormal();
-	////Z成分がほぼ0ライトが水平だからかげが落ちない
-	//if (direction.Z > 0)
-	//{
-	//	return;
-	//}
-	//else {
-	//}
-
-	//// 影の方向Yaw	
-	////度数に変換
-	//float yawDeg = FMath::RadiansToDegrees(FMath::Atan2(shadowDir.Y, shadowDir.X));
-
-
-	////影メッシュのサイズ
-	//FVector shadowMeshExtent = m_pShadowMesh->Bounds.BoxExtent;
-
-	////影の長さ
-	//float shadowLength = height / abs(direction.Z) * 1.5f;//少し短いから1.5倍で補正
-	////引数2~3までの範囲に収める関数極端に長くなるなどを防ぐ
-	//shadowLength = FMath::Clamp(shadowLength, 0.3f, height * 5.f);
-	////スケールに変換
-	//float shadowLengthScale = shadowLength / (height);
-
-	////Z軸はオーナーのスケールと一致させたくないので
-	//
-	////スケール
-	//FVector newScale = FVector{ shadowLengthScale ,1.f,m_collisionScaleZ };
-	//m_pShadowMesh->SetRelativeScale3D(newScale);
-
-	//m_pCollisionBox->SetRelativeScale3D(newScale);
-
-
-	//// Pivot のローカル座標は常に (0,0,0)
-	//FVector localPivot = FVector::ZeroVector;
-
-	//// 世界座標に変換
-	//FVector worldPivot = ownerMesh->GetComponentTransform().TransformPosition(localPivot);
-
-	////描画開始地点（オーナーから見た
-	//FVector startShadowPos = FVector{ origin.X, origin.Y, bottom.Z };
-
-	////影の中心位置
-	//outShadowPos = startShadowPos + shadowDir * (shadowLength * 0.5f);
-	////ローカル座標に変換
-	//FVector local = GetOwner()->GetRootComponent()
-	//	->GetComponentTransform()
-	//	.InverseTransformPosition(outShadowPos);
-
-
-	////位置
-	//SetRelativeLocation(local);
-	////回転
-	//SetRelativeRotation(FRotator(0, yawDeg, 0));
-
+	// ワールド回転に変換
+	SetWorldRotation(FRotator(0.f, yawDeg+90.f, 0.f));
 
 }
 
