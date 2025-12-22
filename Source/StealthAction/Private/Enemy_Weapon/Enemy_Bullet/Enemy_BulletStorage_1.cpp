@@ -16,7 +16,7 @@ void AEnemy_BulletStorage_1::BeginPlay()
 {
     Super::BeginPlay();
 
-    UWorld* World =GetWorld();
+    UWorld* World = GetWorld();
     if (!World) return;
 
     for (int i = 0; i < BulletStock; i++)

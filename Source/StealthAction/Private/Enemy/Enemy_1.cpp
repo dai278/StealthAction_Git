@@ -26,6 +26,9 @@
 
 #include "Enemy_Route/Enemy_RouteManager.h"						//ルート検索用
 
+#include "Enemy_Weapon/Enemy_Bullet/Enemy_Bullet_1.h"			//銃弾発射用
+#include "Enemy_Weapon/Enemy_Weapon_1.h"			
+
 //-----------------------------------------------------------
 //検証用
 //-----------------------------------------------------------
@@ -81,14 +84,15 @@ AEnemy_1::AEnemy_1()
 	, m_missTime_Limit(1.0)
 	, m_returnTime_Limit(2.0)
 	, m_hearingTime_Limit(2.0)
+	, m_attackingTime_Limit(0.2)
 	, m_chaseSpeed_Slow(200.0f)
 	, m_chaseSpeed_Normal(300.0f)
 	, m_chaseSpeed_Fast(400.0f)
-	, m_chaseRotSpeed(4.f)
+	, m_chaseRotSpeed(6.f)
 	, m_hitDamage(5)
 	, m_stopDistance_Player(150.0)
 	, m_stopDistance_2D(50.0)
-	, m_stopDistance_Nav(0.0)	//
+	, m_stopDistance_Nav(0.0)
 	, m_attackDistance(150.0)
 	, m_patrolCancel(false)
 	, m_moveStop_Nav(false)
@@ -229,8 +233,9 @@ void AEnemy_1::BeginPlay()
 	m_pEnemy_Route = GetWorld()->GetSubsystem<UEnemy_RouteManager>()->AddRoute(m_routeNum, m_randomRoute);
 
 
-	//BulletStorage->SetBulletClass(BulletClass);
-	//Weapon->SetBulletPool(BulletStorage);
+	AActor* Weapon = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemy_Weapon_1::StaticClass());
+	m_pEnemy_Weapon = Cast<AEnemy_Weapon_1>(Weapon);
+
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -1300,8 +1305,8 @@ void AEnemy_1::CaseBattle(float _deltaTime)
 
 	if (m_battleTime < m_battleTime_Limit)
 	{
-		//ひとつ前のステータスが失踪だった場合
-		if (m_enemyCurrentState_Keeper == EEnemy_1Status::Miss)
+		//ひとつ前のステータスが巡回もしくは帰還以外だった場合
+		if (m_enemyCurrentState_Keeper != EEnemy_1Status::Patrol && m_enemyCurrentState_Keeper != EEnemy_1Status::Return)
 		{
 			m_battleTime = m_battleTime_Limit;				//発見猶予時間カット
 		}
@@ -1323,7 +1328,7 @@ void AEnemy_1::CaseBattle(float _deltaTime)
 
 
 		//近づいたら攻撃
-		if(m_visionRange_Short > distance)
+		if (m_visionRange_Short > distance)
 		{
 			//攻撃処理
 			UpdateAttack(_deltaTime);
@@ -1712,8 +1717,13 @@ void AEnemy_1::UpdateAttack(float _deltaTime)
 {
 	//
 	UE_LOG(LogTemp, Warning, TEXT("Attack"));
+	m_attackingTime += _deltaTime;
 
-	//Weapon->BulletFire();
+	if (m_attackingTime_Limit < m_attackingTime)
+	{
+		m_pEnemy_Weapon->BulletFire(_deltaTime);
+		m_attackingTime = 0;
+	}
 
 }
 

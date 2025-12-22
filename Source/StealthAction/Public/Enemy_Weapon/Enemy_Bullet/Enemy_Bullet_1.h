@@ -29,7 +29,7 @@ private:
     UProjectileMovementComponent* Movement;
 
     UFUNCTION()
-    void OnBulletOverlap(UPrimitiveComponent* OverlappedComponent,AActor* OtherActor,UPrimitiveComponent* OtherComp,int OtherBodyIndex,bool bFromSweep,const FHitResult&SweepResult);
+    void OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 
 
@@ -44,7 +44,7 @@ public:
     float m_bullletRadius;			//îºåa
     UPROPERTY(EditAnywhere, Category = "BullletSize")
     float m_bullletHeight;			//çÇÇ≥
-    
+
     UPROPERTY(EditAnywhere, Category = "BullletTime")
     float m_bullletDeleteTime;			//íeÇÃè¡ñ≈éûä‘
 

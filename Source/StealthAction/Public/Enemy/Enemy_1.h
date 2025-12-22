@@ -14,9 +14,8 @@
 class APlayerCharacter;
 class UNoiseListenerComponent;
 class UShadowComponent;
-//class UEnemy_Weapon_1;
-//class UEnemy_BulletStorage_1;
-//class AEnemy_Bullet_1;
+class AEnemy_Bullet_1;
+class AEnemy_Weapon_1;
 
 //エネミーの状態
 UENUM(BlueprintType)
@@ -141,19 +140,17 @@ public:
 	bool IsPlayerFound() const { return false; }
 private:
 
-	//UPROPERTY()
-	//UEnemy_Weapon_1* Weapon;
-
-	//UPROPERTY()
-	//UEnemy_BulletStorage_1* BulletStorage;
-
-	//UPROPERTY(EditAnywhere)
-	//TSubclassOf<AEnemy_Bullet_1> BulletClass;
 
 	UPROPERTY()
 	APlayerCharacter* m_pPlayerChara;	//プレイヤーキャラクターポインタ
 
 	TArray<AEnemy_1*> m_pOtherEnemy_1;	//その他のエネミー_1ポインタ
+
+	AEnemy_Weapon_1* m_pEnemy_Weapon;			//銃弾ポインタ
+
+	UPROPERTY()
+	AEnemy_Bullet_1* Bullet;
+
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UShadowComponent* m_pShadow;  //影
@@ -241,6 +238,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Time")
 	double m_hearingTime_Limit;			//聴覚時間制限
 
+	UPROPERTY(EditAnywhere, Category = "Time")
+	double m_attackingTime_Limit;			//攻撃時間制限
+
+
 	double m_patrolTime;				//巡回時間
 	double m_patrol_TurningCheckingTime;			//旋回している時間
 	double m_doubtTime;					//疑念時間
@@ -254,7 +255,7 @@ private:
 	double m_missTime;					//失踪時間
 	double m_returnTime;				//帰還時間
 	double m_hearingTime;				//聴覚時間
-
+	double m_attackingTime;				//攻撃時間
 
 	//移動関連
 	UPROPERTY(EditAnywhere, Category = "Chase")

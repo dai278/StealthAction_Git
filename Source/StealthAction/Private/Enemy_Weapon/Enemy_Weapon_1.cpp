@@ -21,7 +21,7 @@ AEnemy_Weapon_1::AEnemy_Weapon_1()
 }
 void AEnemy_Weapon_1::BeginPlay()
 {
-    m_bulletPool =Cast<AEnemy_BulletStorage_1>(UGameplayStatics::GetActorOfClass(this,AEnemy_BulletStorage_1::StaticClass()));
+    m_bulletPool = Cast<AEnemy_BulletStorage_1>(UGameplayStatics::GetActorOfClass(this, AEnemy_BulletStorage_1::StaticClass()));
 
     if (m_bulletPool)
     {
@@ -52,10 +52,12 @@ void AEnemy_Weapon_1::BulletFire(float _deltaTime)
 
     Bullet->ActivateBullet(StartPos, StartDir);
 
+
     m_shotTime += _deltaTime;
 
-    if (m_shotTime>m_shotTime_Limit)
-    {
-        m_shotTime = 0;
-    }
+    //if (m_shotTime>m_shotTime_Limit)
+    //{
+    //    m_shotTime = 0;
+
+    //}
 }
