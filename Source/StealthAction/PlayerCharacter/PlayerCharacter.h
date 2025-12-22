@@ -24,6 +24,7 @@ struct FInputActionValue;
 class UPrimitiveComponent;
 class UNoiseListenerComponent;
 class AEnemy_1;//エネミーの基底クラスにする日髙変更
+class UExtendedSpotLightManager;//拡張スポットライトマネージャーの前方宣言
 
 
 //パラメーター更新が起きた時のイベントディスパッチャー宣言
@@ -142,8 +143,13 @@ private:
 
 	//影状態の更新処理
 	void UpdateShadow(float _deltaTime);
+	//影から通常状態へ変化
+	void TransformationShadowToIdle(const bool _bLightHit=false);
+	//影状態へ変化
+	void TransformationToShadow();
 
-	void TransformationShadowToIdle(bool flag = false);
+	//足元座標の取得
+	FVector GetFeetLocation()const;
 
 protected:
 	//---入力用---
@@ -321,6 +327,8 @@ private:
 	//日髙変更点
 	//隠密キル対象のアドレス
 	AEnemy_1* m_pStealthKillEnemy;
+	//拡張スポットライトマネージャーのアドレス
+	UExtendedSpotLightManager* m_pExtendedSpotLightManager;
 	
 	//デバック用
 	UNoiseListenerComponent* noise;

@@ -69,6 +69,7 @@ APlayerCharacter::APlayerCharacter()
 	, AttackDamage(10.f)
 	, bCanAttack(true)
 	, AttackCooldown(0.3f)
+	, m_pExtendedSpotLightManager(nullptr)
 
 {
 	//毎フレームTickを呼ぶか決めるフラグ
@@ -155,6 +156,8 @@ void APlayerCharacter::BeginPlay()
 	////カメラのkより
 	//m_pSpringArm->TargetArmLength = m_cameraInitPos[(int)ECameraStatus::ThirdPerson].springArmLength;
 
+	//毎フレームライトマネージャーを取得するのは無駄なのでBeginPlayで取得しておく
+	m_pExtendedSpotLightManager = GetWorld()->GetSubsystem<UExtendedSpotLightManager>();
 }
 
 //----------------------------------------------------------
@@ -482,8 +485,6 @@ void APlayerCharacter::UpdateDead(float _deltaTime)
 //----------------------------------------------------------
 void APlayerCharacter::UpdateShadow(float _deltaTime)
 {
-
-
 	if (m_bUsingMesh)
 	{
 		GetMesh()->SetSkeletalMesh(m_isShadowMesh);
@@ -498,10 +499,18 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 
 	m_timer += _deltaTime;
 
+	//影状態時間が最大時間を超えたらアイドル状態に戻す
 	if (m_timer > m_maxShadowTime) {
 		TransformationShadowToIdle();
+		return;
 	}
-
+	//足元が光に照らされていたらアイドル状態に戻す
+	if (m_pExtendedSpotLightManager->IsHitLight(GetFeetLocation()))
+	{
+		TransformationShadowToIdle(true);
+		return;
+	}
+	//移動処理
 	UpdateMove(_deltaTime);
 }
 
@@ -583,6 +592,19 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 bool APlayerCharacter::IsInShadow()const
 {
 	return m_status == EPlayerStatus::InShadow;
+}
+
+
+//-------------------------------------------------------
+//足元座標取得
+//-------------------------------------------------------
+FVector APlayerCharacter::GetFeetLocation() const
+{
+	//影の上(足元が光に照らされていなければ影状態に
+	FVector targetPos = GetActorLocation();
+	const float capselHeighiHalf = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	targetPos.Z -= capselHeighiHalf;
+	return targetPos;
 }
 
 //------------------------------------------------------
@@ -699,11 +721,8 @@ void APlayerCharacter::Enhanced_InShadow(const FInputActionValue& Value)
 		return;
 	}
 
-	//影の上(足元が光に照らされていなければ影状態に
-	FVector targetPos = GetActorLocation();
-	const float capselHeighiHalf= GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-	targetPos.Z -= capselHeighiHalf;
-	if (!GetWorld()->GetSubsystem<UExtendedSpotLightManager>()->IsHitLight(targetPos)) {
+	//足元がライトに当たっていなければ影状態へ
+	if (!m_pExtendedSpotLightManager->IsHitLight(GetFeetLocation())) {
 		m_status = EPlayerStatus::InShadow;
 		m_bUsingMesh = true;
 	}
@@ -858,12 +877,38 @@ void APlayerCharacter::OnNoiseHeard(const int& _noiseVolume, const FVector& _pos
 	m_bOnShadow = false;
 }
 
-void APlayerCharacter::TransformationShadowToIdle(bool flag /* = false*/)
+
+//----------------------------------------------------------
+// 影状態から通常状態へ変化
+//----------------------------------------------------------
+void APlayerCharacter::TransformationShadowToIdle(const bool _bLightHit/*=false*/)
 {
-	GetMesh()->SetSkeletalMesh(m_defaultMesh);
-	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight);
-	m_bUsingMesh = false;
-	m_status = EPlayerStatus::Idle;
-	m_timer = 0.f;
+	//ライトに当たっているなら普通に戻す
+	if (!_bLightHit) {
+		GetMesh()->SetSkeletalMesh(m_defaultMesh);
+		m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight);
+		m_bUsingMesh = false;
+		m_status = EPlayerStatus::Idle;
+		m_timer = 0.f;
+	}
+	else
+	{
+		//ライトに当たっているなら通常状態へ、スタンみたいなの入れたい
+		//一旦仮で普通に戻す
+		GetMesh()->SetSkeletalMesh(m_defaultMesh);
+		m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight);
+		m_bUsingMesh = false;
+		m_status = EPlayerStatus::Idle;
+		m_timer = 0.f;
+	}
+}
+
+//----------------------------------------------------------
+//影状態への変化
+//----------------------------------------------------------
+void APlayerCharacter::TransformationToShadow()
+{
+	m_status = EPlayerStatus::InShadow;
+	m_bUsingMesh = true;
 	return;
 }
