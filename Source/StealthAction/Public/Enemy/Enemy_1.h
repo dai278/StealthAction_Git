@@ -16,6 +16,8 @@ class UNoiseListenerComponent;
 class UShadowComponent;
 class AEnemy_Bullet_1;
 class AEnemy_Weapon_1;
+class AExtendedSpotLight;
+
 
 //エネミーの状態
 UENUM(BlueprintType)
@@ -356,6 +358,14 @@ private:
 	FVector m_enemyDirection_Return;		//エネミーの元居たの向き
 
 	float m_allTime;
+
+
+	// ライトSpawn  Attach
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AExtendedSpotLight> m_spotLightClass;   // 生成に使うライトBPクラス
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<AExtendedSpotLight> m_spotLightInstance; // 生成されたライト実体
 
 	UNoiseListenerComponent* noise;
 	void OnNoiseHeard(const int& _noiseVolume, const FVector& _pos);

@@ -27,7 +27,9 @@
 #include "Enemy_Route/Enemy_RouteManager.h"						//ルート検索用
 
 #include "Enemy_Weapon/Enemy_Bullet/Enemy_Bullet_1.h"			//銃弾発射用
-#include "Enemy_Weapon/Enemy_Weapon_1.h"			
+#include "Enemy_Weapon/Enemy_Weapon_1.h"	
+
+#include "Light/ExtendedSpotLight.h"							//ライト情報を取得するため
 
 //-----------------------------------------------------------
 //検証用
@@ -245,14 +247,40 @@ void AEnemy_1::BeginPlay()
 
 	//ポインタを入力
 	m_pEnemy_Route = GetWorld()->GetSubsystem<UEnemy_RouteManager>()->AddRoute(m_routeNum, m_randomRoute);
-
-
+	
+	//コメントアウトなおしたら治ったよ
+	AActor* Weapon = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemy_Weapon_1::StaticClass());
+	m_pEnemy_Weapon = Cast<AEnemy_Weapon_1>(Weapon);
 	if (m_pEnemy_Weapon)
 	{
 		m_pEnemy_Weapon->SetOwner(this);
 	}
-	//AActor* Weapon = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemy_Weapon_1::StaticClass());
-	//m_pEnemy_Weapon = Cast<AEnemy_Weapon_1>(Weapon);
+
+
+
+		// ライトBPクラスが設定されていなければ何もしない
+	if (!m_spotLightClass) return;
+
+	FActorSpawnParameters Params;
+	Params.Owner = this;
+	Params.Instigator = GetInstigator();
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	// 生成（初期位置は敵の位置）
+	m_spotLightInstance = GetWorld()->SpawnActor<AExtendedSpotLight>(
+		m_spotLightClass,
+		GetActorLocation(),
+		GetActorRotation(),
+		Params
+	);
+
+	if (!m_spotLightInstance) return;
+
+	// 敵にアタッチ（敵のルートにくっつける）
+	m_spotLightInstance->AttachToComponent(
+		GetRootComponent(),
+		FAttachmentTransformRules::KeepWorldTransform
+	);
 
 }
 
