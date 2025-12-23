@@ -138,6 +138,9 @@ public:
 	//確認が取れてないので仮でfalse返す
 	//確認取れたらCpp側で実装予定
 	bool IsPlayerFound() const { return false; }
+
+public:
+
 private:
 
 
@@ -146,10 +149,11 @@ private:
 
 	TArray<AEnemy_1*> m_pOtherEnemy_1;	//その他のエネミー_1ポインタ
 
+	UPROPERTY(EditAnywhere, Category = "Weapon")
 	AEnemy_Weapon_1* m_pEnemy_Weapon;			//銃弾ポインタ
 
 	UPROPERTY()
-	AEnemy_Bullet_1* Bullet;
+	TArray<AEnemy_Bullet_1*> m_pALLBullet_1;
 
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
@@ -351,6 +355,7 @@ private:
 	FVector m_enemyPos_Return;				//エネミーの元居たの座標
 	FVector m_enemyDirection_Return;		//エネミーの元居たの向き
 
+	float m_allTime;
 
 	UNoiseListenerComponent* noise;
 	void OnNoiseHeard(const int& _noiseVolume, const FVector& _pos);

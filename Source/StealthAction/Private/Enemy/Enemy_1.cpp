@@ -93,7 +93,7 @@ AEnemy_1::AEnemy_1()
 	, m_stopDistance_Player(150.0)
 	, m_stopDistance_2D(50.0)
 	, m_stopDistance_Nav(0.0)
-	, m_attackDistance(150.0)
+	, m_attackDistance(1500.0)
 	, m_patrolCancel(false)
 	, m_moveStop_Nav(false)
 	, m_visionCheck(false)
@@ -133,6 +133,7 @@ AEnemy_1::AEnemy_1()
 	, m_routeNum(0)
 	, m_routeCounter(0)
 	, m_deadCheck(false)
+	, m_allTime(0)
 {
 	// 毎フレーム、このクラスのTick()を呼ぶかどうかを決めるフラグ
 	PrimaryActorTick.bCanEverTick = true;
@@ -188,16 +189,29 @@ void AEnemy_1::BeginPlay()
 	//検索対象は全てActor
 	TSubclassOf<AActor> findClass;
 	findClass = AActor::StaticClass();
-	TArray<AActor*> actors;
-	UGameplayStatics::GetAllActorsOfClass(this, AEnemy_1::StaticClass(), actors);
+	TArray<AActor*> Enemy_1_Actors;
+	UGameplayStatics::GetAllActorsOfClass(this, AEnemy_1::StaticClass(), Enemy_1_Actors);
 
-	for (AActor* actor : actors)
+	for (AActor* actor : Enemy_1_Actors)
 	{
 		AEnemy_1* enemy = Cast<AEnemy_1>(actor);
 		if (enemy && enemy != this)
 		{
 			// 自分以外の敵
 			m_pOtherEnemy_1.Add(enemy);
+		}
+	}
+
+	TArray<AActor*> Enemy_Bullet_1_Actors;
+	UGameplayStatics::GetAllActorsOfClass(this, AEnemy_Bullet_1::StaticClass(), Enemy_Bullet_1_Actors);
+
+	for (AActor* actor : Enemy_Bullet_1_Actors)
+	{
+		AEnemy_Bullet_1* bullet = Cast<AEnemy_Bullet_1>(actor);
+		if (bullet)
+		{
+			// 自分以外の敵
+			m_pALLBullet_1.Add(bullet);
 		}
 	}
 
@@ -233,8 +247,12 @@ void AEnemy_1::BeginPlay()
 	m_pEnemy_Route = GetWorld()->GetSubsystem<UEnemy_RouteManager>()->AddRoute(m_routeNum, m_randomRoute);
 
 
-	AActor* Weapon = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemy_Weapon_1::StaticClass());
-	m_pEnemy_Weapon = Cast<AEnemy_Weapon_1>(Weapon);
+	if (m_pEnemy_Weapon)
+	{
+		m_pEnemy_Weapon->SetOwner(this);
+	}
+	//AActor* Weapon = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemy_Weapon_1::StaticClass());
+	//m_pEnemy_Weapon = Cast<AEnemy_Weapon_1>(Weapon);
 
 }
 
@@ -642,6 +660,8 @@ void AEnemy_1::UpdateAlert(float _deltaTime)
 //------------------------------------------------------------------------------------------------------------
 void AEnemy_1::ResetStateValues(float _deltaTime)
 {
+	m_allTime += _deltaTime;
+
 	//一つ前のステータスを保存
 	if (m_enemyCurrentState != m_enemyCurrentState_Check && m_enemyCurrentState_Check != m_enemyCurrentState_Keeper)
 	{
@@ -1320,23 +1340,50 @@ void AEnemy_1::CaseBattle(float _deltaTime)
 	if (m_battleTime >= m_battleTime_Limit)
 	{
 		//プレイヤーの一定距離に近づくまで追いかける
-		if (m_attackDistance < distance)
+		if (m_stopDistance_Player < distance)
 		{
 			//移動処理
 			UpdateMove_Nav(_deltaTime);
 		}
 
 
-		//近づいたら攻撃
-		if (m_visionRange_Short > distance)
-		{
-			//攻撃処理
-			UpdateAttack(_deltaTime);
+		//攻撃範囲に入ったら攻撃
+		if (m_attackDistance > distance)
+		{	
+			FVector WeaponPos = m_pEnemy_Weapon->GetActorLocation();
+			FVector WeaponForwardVector = m_pEnemy_Weapon->GetActorForwardVector();
+			FVector WeaponForwardPos = WeaponPos + WeaponForwardVector* m_attackDistance;
+			//レイを飛ばして銃の直線状に遮蔽物がないかを確認
+			//コリジョン判定で無視する項目を指定（今回は敵キャラクター（this)、武器）
+			FCollisionQueryParams CollisionParams;
+			CollisionParams.AddIgnoredActor(this);
+			CollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
+			for (AEnemy_Bullet_1* bullet : m_pALLBullet_1)
+			{
+				CollisionParams.AddIgnoredActor(bullet);
+			}
 
+			FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
+
+			//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
+			bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, WeaponPos, WeaponForwardPos, FCollisionObjectQueryParams::AllObjects, CollisionParams);
+
+			//ヒットするオブジェクトがある場合
+			if (isHit)
+			{
+				AActor* hitActor = HitCollision.GetActor();
+
+				//当たったコリジョンがプレイヤーだった場合
+				if (hitActor->ActorHasTag("Player"))
+				{
+					//攻撃処理
+					UpdateAttack(_deltaTime);
+				}
+			}
 		}
-
 	}
 
+	//見失った後どっちの方向に曲がったか覚えておく
 	if (!m_visionCheck)
 	{
 		if (m_battleFalseTime <= m_battleFalseTime_Limit)
@@ -1717,13 +1764,13 @@ void AEnemy_1::UpdateAttack(float _deltaTime)
 {
 	//
 	UE_LOG(LogTemp, Warning, TEXT("Attack"));
-	m_attackingTime += _deltaTime;
+	//m_attackingTime += _deltaTime;
 
-	if (m_attackingTime_Limit < m_attackingTime)
-	{
-		m_pEnemy_Weapon->BulletFire(_deltaTime);
-		m_attackingTime = 0;
-	}
+	//if (m_attackingTime_Limit < m_attackingTime)
+	//{
+		m_pEnemy_Weapon->BulletFire(m_allTime,this);
+	//	m_attackingTime = 0;
+	//}
 
 }
 

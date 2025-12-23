@@ -15,7 +15,7 @@ class STEALTHACTION_API AEnemy_Weapon_1 : public AActor
 public:
     AEnemy_Weapon_1();
 
-    void BulletFire(float _deltaTime);
+    void BulletFire(float Time, AActor* Caller);
 
     AEnemy_BulletStorage_1* m_bulletPool;
 
@@ -31,15 +31,18 @@ private:
     UPROPERTY(EditAnywhere, Category = "Amo")
     int m_maxAmo;	//弾倉
 
-    UPROPERTY(EditAnywhere, Category = "Amo")
-    int m_reloadTime_Limit;	//リロードタイム
-
-    int m_reloadTime;	//リロードタイム計算用
+    int m_usedAmo;   //使用した弾数
 
     UPROPERTY(EditAnywhere, Category = "Amo")
-    int m_shotTime_Limit;	//銃をうつ間隔
+    float m_reloadTime_Limit;	//リロードタイム
 
-    int m_shotTime;	//銃を撃つ間隔計算用
+    float m_reloadTime;	//リロードタイム計算用
 
+    UPROPERTY(EditAnywhere, Category = "Amo")
+    float m_shotTime_Limit;	//銃をうつ間隔
+
+    float m_shotTime;	//銃を撃つ間隔計算用
+
+    float m_recordTime; //先ほど呼ばれた時間を記録するためのもの
 
 };

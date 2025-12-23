@@ -7,7 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 
 AEnemy_Bullet_1::AEnemy_Bullet_1()
-    : m_bullletSpeed(3000.)
+    : m_bullletSpeed(6000.)
     , m_bullletRadius(25.)
     , m_bullletHeight(100.)
     , m_bullletDeleteTime(1.)

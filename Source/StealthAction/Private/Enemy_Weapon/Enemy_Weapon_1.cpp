@@ -6,11 +6,13 @@
 #include "Enemy_Weapon/Enemy_Bullet/Enemy_Bullet_1.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Actor.h"
+#include "Engine/Engine.h"
 
 AEnemy_Weapon_1::AEnemy_Weapon_1()
     : m_maxAmo(30)
-    , m_reloadTime_Limit(3)
-    , m_shotTime_Limit(0.5)
+    , m_usedAmo(0)
+    , m_reloadTime_Limit(5.)
+    , m_shotTime_Limit(0.2)
 {
     PrimaryActorTick.bCanEverTick = false;
     RootComponent = Mesh;
@@ -32,11 +34,18 @@ void AEnemy_Weapon_1::BeginPlay()
     {
         UE_LOG(LogTemp, Error, TEXT("Weapon BeginPlay: BulletStorage NOT FOUND"));
     }
+
+    Tags.AddUnique(FName("Weapon"));
 }
 
 
-void AEnemy_Weapon_1::BulletFire(float _deltaTime)
+void AEnemy_Weapon_1::BulletFire(float Time ,AActor* Caller)
 {
+    if (Caller != GetOwner())
+    {
+        return;
+    }
+
     if (!m_bulletPool)
     {
         return;
@@ -46,18 +55,38 @@ void AEnemy_Weapon_1::BulletFire(float _deltaTime)
     {
         return;
     }
+    float IntervalTime = 0.;
 
-    FVector StartPos = GetActorLocation();
-    FVector StartDir = GetActorForwardVector();
+    //DeltaTime代わり（このクラスにはDeltaTimeがないため）
+    IntervalTime = Time - m_recordTime;
 
-    Bullet->ActivateBullet(StartPos, StartDir);
+    m_shotTime += IntervalTime;
 
+    //弾がなくなったらいロード
+    if (m_maxAmo <= m_usedAmo)
+    {
+        //リロード時間カウント
+        m_reloadTime += IntervalTime;
+        //リロードが完了したら
+        if (m_reloadTime > m_reloadTime_Limit)
+        {
+            m_usedAmo = 0;
+            m_reloadTime = 0;
+        }
+    }
+    //弾の発射タイミング
+    else if (m_shotTime>m_shotTime_Limit)
+    {
+        FVector StartPos = GetActorLocation();
+        FVector StartDir = GetActorForwardVector();
 
-    m_shotTime += _deltaTime;
+        Bullet->ActivateBullet(StartPos, StartDir);
+        //弾の消費
+        m_usedAmo += 1;
+        //発射タイミングリセット
+        m_shotTime = 0;
+    }
 
-    //if (m_shotTime>m_shotTime_Limit)
-    //{
-    //    m_shotTime = 0;
-
-    //}
+    //時間の更新
+    m_recordTime = Time;
 }
