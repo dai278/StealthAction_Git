@@ -31,6 +31,8 @@
 
 #include "Light/ExtendedSpotLight.h"							//ライト情報を取得するため
 
+#include "EnemyManager/EnemyManager.h"
+
 //-----------------------------------------------------------
 //検証用
 //-----------------------------------------------------------
@@ -257,8 +259,7 @@ void AEnemy_1::BeginPlay()
 	}
 
 
-
-		// ライトBPクラスが設定されていなければ何もしない
+	// ライトBPクラスが設定されていなければ何もしない
 	if (!m_spotLightClass) return;
 
 	FActorSpawnParameters Params;
@@ -281,6 +282,13 @@ void AEnemy_1::BeginPlay()
 		GetRootComponent(),
 		FAttachmentTransformRules::KeepWorldTransform
 	);
+
+	//エネミーマネージャー登録
+	UEnemyManager* enemyManager = GetWorld()->GetSubsystem<UEnemyManager>();
+	if (enemyManager)
+	{
+		enemyManager->RegisterEnemy(this);
+	}
 
 }
 

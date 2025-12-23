@@ -95,3 +95,18 @@ bool UExtendedSpotLightManager::IsHitLight(const FVector& _pos)const
 
 	return false;
 }
+
+//---------------------
+//敵ライトとの衝突チェック
+//-------------------
+bool UExtendedSpotLightManager::IsHitEnemyLight(const FVector& _pos)const
+{
+	for (int i = 0; i < m_pEnemyLights.Num(); ++i)
+	{
+		if (m_pEnemyLights[i]->IsHit(_pos))
+		{
+			return true;
+		}
+	}
+	return false;
+}

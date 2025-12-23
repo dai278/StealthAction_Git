@@ -29,6 +29,7 @@ public:
 
 	//lightの衝突チェック
 	bool IsHitLight(const FVector& _pos)const;
+	bool IsHitEnemyLight(const FVector& _pos)const;
 
 
 protected:

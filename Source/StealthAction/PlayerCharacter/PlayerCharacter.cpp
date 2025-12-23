@@ -505,11 +505,19 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 		return;
 	}
 	//足元が光に照らされていたらアイドル状態に戻す
-	if (m_pExtendedSpotLightManager->IsHitLight(GetFeetLocation()))
+	if (m_pExtendedSpotLightManager->IsHitLight(GetFeetLocation())&&!m_bOnShadow)
 	{
 		TransformationShadowToIdle(true);
 		return;
 	}
+
+	//敵の入っていた場合メインのライトではなく敵ライトだけと判定
+	if(m_pExtendedSpotLightManager->IsHitEnemyLight(GetFeetLocation())&&m_bOnShadow)
+	{
+		TransformationShadowToIdle(true);
+		return;
+	}
+	
 	//移動処理
 	UpdateMove(_deltaTime);
 }
@@ -722,7 +730,7 @@ void APlayerCharacter::Enhanced_InShadow(const FInputActionValue& Value)
 	}
 
 	//足元がライトに当たっていなければ影状態へ
-	if (!m_pExtendedSpotLightManager->IsHitLight(GetFeetLocation())) {
+	if (!m_pExtendedSpotLightManager->IsHitLight(GetFeetLocation())||m_bOnShadow) {
 		m_status = EPlayerStatus::InShadow;
 		m_bUsingMesh = true;
 	}
@@ -844,10 +852,15 @@ void APlayerCharacter::OnBeginOverlap(
 )
 {
 	if (OtherActor) {
+		if(OtherComp->ComponentHasTag(TEXT("ShadowA"))==false)
+		{
+			return;
+		}
 		//衝突対象を追加
 		m_hitActors.Add(OtherActor);
+		m_bOnShadow = true;
+
 	}
-	m_bOnShadow = true;
 }
 
 //-------------------------------------------------
@@ -860,14 +873,17 @@ void APlayerCharacter::OnEndOverlap(
 	int32 OtherBodyIndex
 )
 {
-	if (OtherActor)
-	{
-		//衝突対象を減らす
-		m_hitActors.Remove(OtherActor);
-	}
 
-	if (m_hitActors.Num() < 1) {
+	if (OtherActor) {
+		if (OtherComp->ComponentHasTag(TEXT("ShadowA")) == false)
+		{
+			return;
+		}
+		//衝突対象を追加
+		m_hitActors.Remove(OtherActor);
+		if (m_hitActors.Num() <= 0)
 		m_bOnShadow = false;
+
 	}
 }
 
