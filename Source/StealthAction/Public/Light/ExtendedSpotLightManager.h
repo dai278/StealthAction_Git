@@ -34,6 +34,8 @@ public:
 protected:
 	//レベル上のライトを管理する
 	TArray <AExtendedSpotLight*> m_pLights;
+	//敵のライト
+	TArray <AExtendedSpotLight*> m_pEnemyLights;
 
 	
 };

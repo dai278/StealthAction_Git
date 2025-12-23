@@ -12,6 +12,8 @@ void UExtendedSpotLightManager::OnWorldBeginPlay(UWorld&)
 	//Super::OnWorldBeginPlay();
 	//ライト配列を空に
 	m_pLights.Empty();
+	//敵ライト配列を空に
+	m_pEnemyLights.Empty();
 }
 
 
@@ -21,7 +23,13 @@ void UExtendedSpotLightManager::OnWorldBeginPlay(UWorld&)
 //-------------------------------------------
 void UExtendedSpotLightManager::AddLight(AExtendedSpotLight* _pLight)
 {
-	if (_pLight->GetIndex() == -1) { return; }
+
+	if (_pLight->GetIndex() == -1) { 
+		//-1なら敵ライト配列に追加
+			m_pEnemyLights.Add(_pLight);
+		return; 
+	}
+
 
 	//ライトを追加する要素数を特定
 	for (int i = 0;i < m_pLights.Num(); ++i)
@@ -77,5 +85,13 @@ bool UExtendedSpotLightManager::IsHitLight(const FVector& _pos)const
 			return true;
 		}
 	}
+	for(int i = 0; i < m_pEnemyLights.Num(); ++i)
+	{
+		if (m_pEnemyLights[i]->IsHit(_pos))
+		{
+			return true;
+		}
+	}
+
 	return false;
 }

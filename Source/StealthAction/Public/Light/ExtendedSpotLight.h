@@ -50,7 +50,6 @@ public:
 	//ライトが動くか?
 	bool IsMove()const;
 
-
 	//ライトのon,off設定
 	UFUNCTION(BlueprintCallable)
 	void SetVisibility(const bool isVisibility);
@@ -58,6 +57,10 @@ public:
 	//ライトとの衝突チェック
 	bool IsHit(const FVector& _pos)const;
 
+	//所持者が敵か？
+	bool IsEnemy()const;
+
+	void SetIsEnemy(const bool _isEnemy=false);
 
 //	// 位置
 //	FVector LightPos = SpotLight->GetComponentLocation();
@@ -83,8 +86,7 @@ protected:
 	bool m_bCanEverTick;                        //毎フレーム更新するか、Bpでも設定できるようにする
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
-	UStaticMeshComponent* m_pMesh; //メッシュ
+	UStaticMeshComponent* m_pMesh; //メッシュ	
 
-	
-
+	bool m_isEnemy;//所持者が敵か
 };

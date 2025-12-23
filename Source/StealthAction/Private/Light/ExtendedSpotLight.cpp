@@ -11,10 +11,13 @@
 // コンストラクタ
 //------------------------------------------
 AExtendedSpotLight::AExtendedSpotLight()
-	:m_bCanEverTick(false)
+	: m_bCanEverTick(false)
 	, m_lightIndex(-1)
 	, m_pSpotLight(nullptr)
+	, m_pMesh(nullptr)
+	, m_isEnemy(false)
 {
+
 	//毎フレーム更新処理を行うか.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -31,6 +34,7 @@ AExtendedSpotLight::AExtendedSpotLight()
 	m_pSpotLight->SetupAttachment(RootComponent);
 
 }
+
 
 //------------------------------------------
 // BeginPlay（ゲーム開始時）
