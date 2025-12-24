@@ -131,9 +131,6 @@ public:
 	//UŒ‚‚Ìˆ—
 	void UpdateAttack(float _deltaTime);
 
-	//ƒ_ƒ[ƒWˆ—
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
 	//Õ“Ë”»’è
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
