@@ -178,6 +178,7 @@ void AEnemy_1::BeginPlay()
 	// 入力を有効化（検証用）
 	EnableInput(GetWorld()->GetFirstPlayerController());
 
+
 	UE_LOG(LogTemp, Warning, TEXT("AEnemy_1 BeginPlay"));
 
 	//ゲーム全体び対するActorの検索処理はコストが高いため、BeingPlayで一回保存しておくだけにする
@@ -250,9 +251,9 @@ void AEnemy_1::BeginPlay()
 	//ポインタを入力
 	m_pEnemy_Route = GetWorld()->GetSubsystem<UEnemy_RouteManager>()->AddRoute(m_routeNum, m_randomRoute);
 	
-	//コメントアウトなおしたら治ったよ
-	AActor* Weapon = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemy_Weapon_1::StaticClass());
-	m_pEnemy_Weapon = Cast<AEnemy_Weapon_1>(Weapon);
+	////コメントアウトなおしたら治ったよ
+	//AActor* Weapon = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemy_Weapon_1::StaticClass());
+	//m_pEnemy_Weapon = Cast<AEnemy_Weapon_1>(Weapon);
 	if (m_pEnemy_Weapon)
 	{
 		m_pEnemy_Weapon->SetOwner(this);
@@ -323,6 +324,15 @@ void AEnemy_1::Tick(float DeltaTime)
 		return;*/
 	}
 
+	//------------------------------------------------------------
+   // 死亡状態の場合は死亡処理のみ行う
+   //------------------------------------------------------------
+	if (m_enemyCurrentState == EEnemy_1Status::Dead)
+	{
+		CaseDead(DeltaTime);
+		return;
+	}
+
 	//視界処理
 	UpdateVisiblity(DeltaTime);
 
@@ -380,8 +390,7 @@ void AEnemy_1::CaseDead(float _deltaTime)
 		m_missCheck = false;
 		m_returnCheck = false;
 
-		// コリジョンは残す or 無効化（お好み）
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		//GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 		// 回転しないように
 		GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -1848,4 +1857,44 @@ void AEnemy_1::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPri
 		if (!pPlayer) { return; }		//NULLチェック
 
 	}
+}
+
+//------------------------------------------------------------------------------------------------------------
+//ダメージを受けた時の処理
+//------------------------------------------------------------------------------------------------------------
+float AEnemy_1::TakeDamage(
+	float DamageAmount,
+	FDamageEvent const& DamageEvent,
+	AController* EventInstigator,
+	AActor* DamageCauser
+)
+{
+	//すでに死亡している場合は処理しない
+	if (m_deadCheck)
+	{
+		return 0.f;
+	}
+
+	//------------------------------
+	//HPを減らす
+	//------------------------------
+	m_HP -= static_cast<int>(DamageAmount);
+
+	UE_LOG(LogTemp, Warning,
+		TEXT("[[Enemy]] Damage :%.1f  /  HP : %d"),
+		DamageAmount, m_HP
+	);
+
+	//------------------------------
+	// HPが0以下になったら死亡状態へ
+	//------------------------------
+	if (m_HP <= 0)
+	{
+		m_HP = 0;
+
+		// ステートを死亡に変更
+		m_enemyCurrentState = EEnemy_1Status::Dead;
+	}
+
+	return DamageAmount;
 }

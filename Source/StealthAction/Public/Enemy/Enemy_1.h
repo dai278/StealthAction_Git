@@ -131,6 +131,9 @@ public:
 	//攻撃の処理
 	void UpdateAttack(float _deltaTime);
 
+	//ダメージ処理
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 	//衝突判定
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
@@ -305,7 +308,6 @@ private:
 	bool m_playerShadowCheck;		//プレイヤーが影状態か？
 
 	bool m_deadCheck;			//死亡したか
-
 
 	//ステータス関連
 	EEnemy_1Status m_enemyCurrentState; //エネミーのステータス
