@@ -29,7 +29,7 @@ public:
 	void RegisterEnemy(AEnemy_1* _pEnemy);
 	
 	//一番近いエネミー取得関数
-	AEnemy_1* GetNearestEnemy(const FVector& _pos,const int32& _eriaNum) const;
+	AEnemy_1* GetNearestEnemy(const FVector& _pos,const int32& _eriaNum,const float& _maxDistance) const;
 	
 	////エネミー全取得関数
 	//const TArray<AEnemy_1*>& GetAllEnemy() const { return m_pAllEnemy_1; }

@@ -21,6 +21,8 @@
 
 #include "Noise/NoiseManager.h"
 #include "Light/ExtendedSpotLightManager.h"
+#include "EnemyManager/EnemyManager.h"
+#include"Enemy/Enemy_1.h"
 
 
 //----------------------------------------------------------
@@ -158,6 +160,9 @@ void APlayerCharacter::BeginPlay()
 
 	//毎フレームライトマネージャーを取得するのは無駄なのでBeginPlayで取得しておく
 	m_pExtendedSpotLightManager = GetWorld()->GetSubsystem<UExtendedSpotLightManager>();
+	//上記のエネミーマネージャーバージョン
+	m_pEnemyManager = GetWorld()->GetSubsystem<UEnemyManager>();
+
 }
 
 //----------------------------------------------------------
@@ -399,69 +404,22 @@ void APlayerCharacter::UpdateCrouch(float _deltaTime)
 //----------------------------------------------------------
 void APlayerCharacter::UpdateAttack(float _deltaTime)
 {
-	if (!bCanAttack) return;
-	bCanAttack = false;
-
-	// ===== カメラ方向を取得 =====
-	FRotator ControlRot = GetControlRotation();
-	ControlRot.Pitch = 0.f;   // 上下無視（地面攻撃用）
-	ControlRot.Roll = 0.f;
-
-	FVector AttackDir = FRotationMatrix(ControlRot).GetUnitAxis(EAxis::X);
-
-	FVector Start = GetActorLocation();
-	FVector End = Start + AttackDir * AttackRange;
-	// ==========================
-
-	FCollisionShape Shape = FCollisionShape::MakeSphere(AttackRadius);
-
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-
-	TArray<FHitResult> Hits;
-
-	bool bHit = GetWorld()->SweepMultiByChannel(
-		Hits,
-		Start,
-		End,
-		FQuat::Identity,
-		ECC_Pawn,
-		Shape,
-		Params
-	);
-
-	// ===== デバッグ =====
-	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1.f);
-	DrawDebugSphere(GetWorld(), End, AttackRadius, 12, FColor::Red, false, 1.f);
-	// ====================
-
-	if (bHit)
+	//攻撃が終わればアイドルに
+	if (!bCanAttack)
 	{
-		for (const FHitResult& Hit : Hits)
-		{
-			if (AActor* HitActor = Hit.GetActor())
-			{
-				UGameplayStatics::ApplyDamage(
-					HitActor,
-					AttackDamage,
-					GetController(),
-					this,
-					nullptr
-				);
-			}
-		}
+		m_status=EPlayerStatus::Idle;
+		return;
 	}
-
-	// クールタイム
-	GetWorldTimerManager().SetTimer(
-		AttackCooldownHandle,
-		[this]()
-		{
-			bCanAttack = true;
-		},
-		AttackCooldown,
-		false
-	);
+	const float maxAtackTime = 1.f;
+	//仮で時間で攻撃状態を終わらせる
+	m_attackCount += _deltaTime;
+	
+	if (m_attackCount < maxAtackTime)
+	{
+		bCanAttack = false;
+		m_status = EPlayerStatus::Idle;
+		return;
+	}	
 }
 
 //----------------------------------------------------------
@@ -520,6 +478,21 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 	
 	//移動処理
 	UpdateMove(_deltaTime);
+	
+}
+
+
+//----------------------------------------------------------
+//敵にばれているか判別しそれに応じた処理する関数
+//----------------------------------------------------------
+void APlayerCharacter::UpdateCheckEnemyDetection()
+{
+	if (!m_pEnemyManager) { return; }
+	 m_pNearestEnemy = m_pEnemyManager->GetNearestEnemy(GetActorLocation(), 0, 10000.f);
+	if (!m_pNearestEnemy) { return; }
+	if (!m_pNearestEnemy->IsPlayerFound()) { return; }
+	//ここでUIの呼び出し
+
 }
 
 //----------------------------------------------------------
@@ -709,7 +682,20 @@ void APlayerCharacter::Enhanced_MoveJump(const FInputActionValue& Value)
 //------------------------------------------------------
 void APlayerCharacter::Enhanced_Attack(const FInputActionValue& Value)
 {
-	UpdateAttack();
+	m_status = EPlayerStatus::Attack;
+	bCanAttack=true;
+	//一番近くの敵がプイレイヤーを見つけていなければ
+	if (m_pNearestEnemy) 
+	{ 
+		if (m_pNearestEnemy->IsPlayerFound())
+		{
+			m_bSneakKill = true;
+		}
+	}
+	else
+	{
+		m_bSneakKill = false;
+	}
 }
 
 //------------------------------------------------------
@@ -718,9 +704,7 @@ void APlayerCharacter::Enhanced_Attack(const FInputActionValue& Value)
 void APlayerCharacter::Enhanced_InShadow(const FInputActionValue& Value)
 {
 	//入力が無ければ何もしない
-	//if (!Value.Get<bool>()) { return; }
-
-	
+	//if (!Value.Get<bool>()) { return; }	
 
 	//状態が影ならデフォルトに戻す
 	if (m_status == EPlayerStatus::InShadow)

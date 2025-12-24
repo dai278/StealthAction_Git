@@ -44,7 +44,7 @@ void UEnemyManager::RegisterEnemy(AEnemy_1* _pEnemy)
 //------------------------------------------------
 //一番近いエネミー取得関
 //------------------------------------------------
-AEnemy_1* UEnemyManager::GetNearestEnemy(const FVector& _pos,const int32& _eriaNum) const
+AEnemy_1* UEnemyManager::GetNearestEnemy(const FVector& _pos, const int32& _eriaNum, const float& _maxDistance) const
 {
 	//エリア番号が配列外ならnullptrを返す
 	if (_eriaNum < 0 || m_pAllEnemies.Num() <= _eriaNum)
@@ -62,14 +62,14 @@ AEnemy_1* UEnemyManager::GetNearestEnemy(const FVector& _pos,const int32& _eriaN
 		if (!pEnemy) { continue; }
 		//エネミーと指定座標の距離を計算
 		const float distance = FVector::Dist(pEnemy->GetActorLocation(), _pos);
-		//最短距離より近ければ更新
+		//最短距離より近く検知の最大距離より近ければ更新
 		if (distance < nearestDistance)
 		{
 			nearestDistance = distance;
-			pNearestEnemy = pEnemy;
+			if (distance < _maxDistance) {
+				pNearestEnemy = pEnemy;
+			}
 		}
-
 	}
-
 	return pNearestEnemy;
 }

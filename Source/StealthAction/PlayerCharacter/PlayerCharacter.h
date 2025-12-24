@@ -23,7 +23,8 @@ class UInputAction;
 struct FInputActionValue;  
 class UPrimitiveComponent;
 class UNoiseListenerComponent;
-class AEnemy_1;//エネミーの基底クラスにする日髙変更
+class UEnemyManager;//エネミーの基底クラスにする日髙変更
+class AEnemy_1;
 class UExtendedSpotLightManager;//拡張スポットライトマネージャーの前方宣言
 
 
@@ -122,6 +123,9 @@ private:
 	//カメラ視点切り替え
 	void ViewpointSwitching(float _deltaTime);
 
+	//敵にばれているかなどの参照用
+	void UpdateCheckEnemyDetection();
+
 private:
 	//アイドル状態の更新処理
 	void UpdateIdle(float _deltaTime);
@@ -144,7 +148,7 @@ private:
 	//影状態の更新処理
 	void UpdateShadow(float _deltaTime);
 	//影から通常状態へ変化
-	void TransformationShadowToIdle(const bool _bLightHit=false);
+	void TransformationShadowToIdle(const bool _bLightHit = false);
 	//影状態へ変化
 	void TransformationToShadow();
 
@@ -312,10 +316,11 @@ private:
 	bool m_bOnShadow;                               //影の上にいるか
 
 	bool m_bUsingMesh;								//使ってるメッシュを管理するフラグ
-	
 	bool m_bIsCrouch;
-
 	bool bCanAttack;
+	bool m_bSneakKill;									//スニークキルしているか
+	float m_attackCount;//攻撃時間
+
 
 	FVector2D m_charaMoveInput;						//キャラ移動入力量
 	FVector2D m_cameraRotateInput;					//カメラ回転量
@@ -325,10 +330,10 @@ private:
 	TArray <AActor*> m_hitActors;//衝突対処のアドレス
 
 	//日髙変更点
-	//隠密キル対象のアドレス
-	AEnemy_1* m_pStealthKillEnemy;
+	UEnemyManager* m_pEnemyManager;//エネミーマネージャー毎フレーム検索は重いので
 	//拡張スポットライトマネージャーのアドレス
 	UExtendedSpotLightManager* m_pExtendedSpotLightManager;
+	AEnemy_1* m_pNearestEnemy;//一番近い敵のポインタ
 	
 	//デバック用
 	UNoiseListenerComponent* noise;
