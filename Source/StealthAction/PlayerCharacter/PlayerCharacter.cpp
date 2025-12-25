@@ -445,8 +445,9 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 {
 	if (m_bUsingMesh)
 	{
+
 		GetMesh()->SetSkeletalMesh(m_isShadowMesh);
-		m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight / 3.f);
+	
 		m_bUsingMesh = false;
 		//UE_LOG(LogTemp, Log, TEXT("Mesh Chaged Shadow !!"));
 	}
@@ -463,7 +464,7 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 		return;
 	}
 	//足元が光に照らされていたらアイドル状態に戻す
-	if (m_pExtendedSpotLightManager->IsHitLight(GetFeetLocation())&&!m_bOnShadow)
+	if (m_pExtendedSpotLightManager->IsHitShadowDrawLight(GetFeetLocation())&&!m_bOnShadow)
 	{
 		TransformationShadowToIdle(true);
 		return;
@@ -714,9 +715,12 @@ void APlayerCharacter::Enhanced_InShadow(const FInputActionValue& Value)
 	}
 
 	//足元がライトに当たっていなければ影状態へ
-	if (!m_pExtendedSpotLightManager->IsHitLight(GetFeetLocation())||m_bOnShadow) {
-		m_status = EPlayerStatus::InShadow;
-		m_bUsingMesh = true;
+	if (!m_pExtendedSpotLightManager->IsHitAllLight(GetFeetLocation())
+		||(m_bOnShadow
+		&&!m_pExtendedSpotLightManager->IsHitEnemyLight(GetFeetLocation()))) 
+	{
+	
+		TransformationToShadow();
 	}
 }
 
@@ -835,8 +839,10 @@ void APlayerCharacter::OnBeginOverlap(
 	const FHitResult& SweepResult
 )
 {
+	UE_LOG(LogTemp, Display, TEXT("unnti"));
+
 	if (OtherActor) {
-		if(OtherComp->ComponentHasTag(TEXT("ShadowA"))==false)
+		if(OtherComp->ComponentHasTag(TEXT("Shadow"))==false)
 		{
 			return;
 		}
@@ -858,8 +864,9 @@ void APlayerCharacter::OnEndOverlap(
 )
 {
 
+	UE_LOG(LogTemp, Display, TEXT("unnti"));
 	if (OtherActor) {
-		if (OtherComp->ComponentHasTag(TEXT("ShadowA")) == false)
+		if (OtherComp->ComponentHasTag(TEXT("Shadow")) == false)
 		{
 			return;
 		}
@@ -909,6 +916,11 @@ void APlayerCharacter::TransformationShadowToIdle(const bool _bLightHit/*=false*
 void APlayerCharacter::TransformationToShadow()
 {
 	m_status = EPlayerStatus::InShadow;
+	FVector newLocation = GetActorLocation();
+	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight / 3.f);
+	newLocation.Z -= m_capsuleHeight / 3.f;
+	SetActorLocation(newLocation);
+
 	m_bUsingMesh = true;
-	return;
+	
 }

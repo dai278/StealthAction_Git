@@ -28,8 +28,9 @@ public:
 	AExtendedSpotLight* GetLight(const int32 _lightIndex);
 
 	//lightの衝突チェック
-	bool IsHitLight(const FVector& _pos)const;
+	bool IsHitAllLight(const FVector& _pos)const;
 	bool IsHitEnemyLight(const FVector& _pos)const;
+	bool IsHitShadowDrawLight(const FVector& _pos)const;
 
 
 protected:

@@ -49,6 +49,7 @@ UShadowComponent::UShadowComponent()
 		m_pCollisionBox->SetCollisionResponseToAllChannels(ECR_Ignore);
 		//そしてプレイヤーだけ追加
 		m_pCollisionBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+		m_pCollisionBox->SetCollisionProfileName(TEXT("Shadow"));
 		//仮サイズ
 		m_pCollisionBox->SetBoxExtent(FVector{ 40.f,40.f,40.f });
 		//オーバラップイベントを発生させるか

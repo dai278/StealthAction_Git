@@ -76,7 +76,7 @@ AExtendedSpotLight* UExtendedSpotLightManager::GetLight(const int32 _lightIndex)
 //---------------------
 //ライトとの衝突チェック
 //-------------------
-bool UExtendedSpotLightManager::IsHitLight(const FVector& _pos)const
+bool UExtendedSpotLightManager::IsHitAllLight(const FVector& _pos)const
 {
 	for (int i = 0; i < m_pLights.Num(); ++i)
 	{
@@ -104,6 +104,22 @@ bool UExtendedSpotLightManager::IsHitEnemyLight(const FVector& _pos)const
 	for (int i = 0; i < m_pEnemyLights.Num(); ++i)
 	{
 		if (m_pEnemyLights[i]->IsHit(_pos))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+//-----------------------
+//影を落とすライトとに照らされている以下
+//------------------------
+bool UExtendedSpotLightManager::IsHitShadowDrawLight(const FVector& _pos)const
+{
+	for (int i = 0; i<m_pLights.Num(); ++i)
+	{
+		if (m_pLights[i]==nullptr) { continue; }
+		if (m_pLights[i]->IsHit(_pos))
 		{
 			return true;
 		}

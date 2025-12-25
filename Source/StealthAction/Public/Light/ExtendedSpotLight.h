@@ -57,11 +57,6 @@ public:
 	//ライトとの衝突チェック
 	bool IsHit(const FVector& _pos)const;
 
-	//所持者が敵か？
-	bool IsEnemy()const;
-
-	void SetIsEnemy(const bool _isEnemy=false);
-
 //	// 位置
 //	FVector LightPos = SpotLight->GetComponentLocation();
 //

@@ -251,9 +251,9 @@ void AEnemy_1::BeginPlay()
 	//ポインタを入力
 	m_pEnemy_Route = GetWorld()->GetSubsystem<UEnemy_RouteManager>()->AddRoute(m_routeNum, m_randomRoute);
 	
-	////コメントアウトなおしたら治ったよ
-	//AActor* Weapon = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemy_Weapon_1::StaticClass());
-	//m_pEnemy_Weapon = Cast<AEnemy_Weapon_1>(Weapon);
+	//コメントアウトなおしたら治ったよ
+	AActor* Weapon = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemy_Weapon_1::StaticClass());
+	m_pEnemy_Weapon = Cast<AEnemy_Weapon_1>(Weapon);
 	if (m_pEnemy_Weapon)
 	{
 		m_pEnemy_Weapon->SetOwner(this);
