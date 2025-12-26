@@ -66,11 +66,12 @@ APlayerCharacter::APlayerCharacter()
 	, m_bIsCrouch(false)
 	, m_maxShadowTime(5.f)
 	, m_timer(0.f)
-	, AttackRange(150.f)
-	, AttackRadius(50.f)
-	, AttackDamage(10.f)
-	, bCanAttack(true)
-	, AttackCooldown(0.3f)
+	, m_attackRange(300.f)
+	, m_attackRadius(50.f)
+	, m_sneakKillDamage(10)
+	, m_NormalAttack(2)
+	, m_bCanAttack(true)
+	, m_attackCooldown(0.3f)
 	, m_pExtendedSpotLightManager(nullptr)
 
 {
@@ -405,7 +406,7 @@ void APlayerCharacter::UpdateCrouch(float _deltaTime)
 void APlayerCharacter::UpdateAttack(float _deltaTime)
 {
 	//攻撃が終わればアイドルに
-	if (!bCanAttack)
+	if (!m_bCanAttack)
 	{
 		m_status=EPlayerStatus::Idle;
 		return;
@@ -416,7 +417,7 @@ void APlayerCharacter::UpdateAttack(float _deltaTime)
 	
 	if (m_attackCount < maxAtackTime)
 	{
-		bCanAttack = false;
+		m_bCanAttack = false;
 		m_status = EPlayerStatus::Idle;
 		return;
 	}	
@@ -489,7 +490,7 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 void APlayerCharacter::UpdateCheckEnemyDetection()
 {
 	if (!m_pEnemyManager) { return; }
-	 m_pNearestEnemy = m_pEnemyManager->GetNearestEnemy(GetActorLocation(), 0, 10000.f);
+	 m_pNearestEnemy = m_pEnemyManager->GetNearestEnemy(GetActorLocation(), 0, m_attackRange);
 	if (!m_pNearestEnemy) { return; }
 	if (!m_pNearestEnemy->IsPlayerFound()) { return; }
 	//ここでUIの呼び出し
@@ -684,15 +685,36 @@ void APlayerCharacter::Enhanced_MoveJump(const FInputActionValue& Value)
 void APlayerCharacter::Enhanced_Attack(const FInputActionValue& Value)
 {
 	m_status = EPlayerStatus::Attack;
-	bCanAttack=true;
-	//一番近くの敵がプイレイヤーを見つけていなければ
+	m_bCanAttack=true;
+	//一番近くの敵がプイレイヤーを見つけていればスニークキルするか判定
 	if (m_pNearestEnemy) 
 	{ 
-		if (m_pNearestEnemy->IsPlayerFound())
+		//みつかっていればリターン
+		if(m_pNearestEnemy->IsPlayerFound()) { 
+			m_bSneakKill=false; 
+		}
+		else
 		{
-			m_bSneakKill = true;
+			//敵までのベクトル
+			FVector toEnemyVector = FVector{ m_pNearestEnemy->GetActorLocation() - GetActorLocation() }.GetSafeNormal();
+			FVector forwardVector = GetActorForwardVector().GetSafeNormal();
+			//内積を求める
+			const float dot = FVector::DotProduct(toEnemyVector, forwardVector);
+			const float maxAngle = 0.4f;
+
+			//1~0.4以上なら
+			if (dot > maxAngle)
+			{
+				m_bSneakKill = true;
+			}
+			//0.4未満ならスニークキル不可
+			else
+			{
+				m_bSneakKill = false;
+			}
 		}
 	}
+
 	else
 	{
 		m_bSneakKill = false;

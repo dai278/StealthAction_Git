@@ -297,16 +297,19 @@ private:
 	float m_timer;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackRange;
+	float m_attackRange;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackRadius;
+	float m_attackRadius;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackDamage;
+	int m_sneakKillDamage;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackCooldown;
+	int m_NormalAttack;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float m_attackCooldown;
 
 	FTimerHandle AttackCooldownHandle;
 
@@ -317,7 +320,7 @@ private:
 
 	bool m_bUsingMesh;								//使ってるメッシュを管理するフラグ
 	bool m_bIsCrouch;
-	bool bCanAttack;
+	bool m_bCanAttack;
 	bool m_bSneakKill;									//スニークキルしているか
 	float m_attackCount;//攻撃時間
 
