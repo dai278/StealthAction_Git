@@ -464,7 +464,7 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 		return;
 	}
 	//‘«Œ³‚ªŒõ‚ÉÆ‚ç‚³‚ê‚Ä‚¢‚½‚çƒAƒCƒhƒ‹ó‘Ô‚É–ß‚·
-	if (m_pExtendedSpotLightManager->IsHitShadowDrawLight(GetFeetLocation())&&!m_bOnShadow)
+	if (m_pExtendedSpotLightManager->IsHitAllLight(GetFeetLocation())&&!m_bOnShadow)
 	{
 		TransformationShadowToIdle(true);
 		return;

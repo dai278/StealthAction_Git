@@ -6,7 +6,6 @@
 
 #include "Light/ExtendedSpotLightManager.h"
 
-
 //------------------------------------------
 // コンストラクタ
 //------------------------------------------
@@ -192,11 +191,21 @@ bool AExtendedSpotLight::IsHit(const FVector& _pos)const
 
 	// 遮蔽物チェック（影判定）
 	FHitResult Hit;
-	bool bHit = GetWorld()->LineTraceSingleByChannel(
+	FCollisionObjectQueryParams ObjParams;
+	ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
+	ObjParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	// Shadow専用ObjectTypeは「入れない」
+
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(LightOcclusion), false);
+	Params.AddIgnoredActor(this);
+
+	/* 影が複数コンポーネントなら全部 AddIgnoredComponent */
+	bool bHit = GetWorld()->LineTraceSingleByObjectType(
 		Hit,
 		lightPos,
 		_pos,
-		ECC_Visibility
+		ObjParams,
+		Params
 	);
 
 	if (bHit && Hit.Location != _pos) { return false; }

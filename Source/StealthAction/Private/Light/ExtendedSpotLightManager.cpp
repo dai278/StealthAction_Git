@@ -17,7 +17,6 @@ void UExtendedSpotLightManager::OnWorldBeginPlay(UWorld&)
 }
 
 
-
 //-------------------------------------------
 //ƒ‰ƒCƒg‚Ì’Ç‰Á
 //-------------------------------------------
@@ -103,6 +102,8 @@ bool UExtendedSpotLightManager::IsHitEnemyLight(const FVector& _pos)const
 {
 	for (int i = 0; i < m_pEnemyLights.Num(); ++i)
 	{
+		if (m_pEnemyLights[i] == nullptr) { return false; };
+		
 		if (m_pEnemyLights[i]->IsHit(_pos))
 		{
 			return true;
