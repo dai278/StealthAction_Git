@@ -125,6 +125,9 @@ public:
 	//警戒の処理
 	void UpdateAlert(float _deltaTime);
 
+	//初めの処理
+	void StartStateValues(float _deltaTime);
+
 	//リセットの処理
 	void ResetStateValues(float _deltaTime);
 
@@ -152,7 +155,7 @@ private:
 	TArray<AEnemy_1*> m_pOtherEnemy_1;	//その他のエネミー_1ポインタ
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
-	AEnemy_Weapon_1* m_pEnemy_Weapon;			//銃弾ポインタ
+	AEnemy_Weapon_1* m_pEnemy_Weapon;			//銃ポインタ
 
 	UPROPERTY()
 	TArray<AEnemy_Bullet_1*> m_pALLBullet_1;

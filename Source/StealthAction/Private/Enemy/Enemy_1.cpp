@@ -252,8 +252,8 @@ void AEnemy_1::BeginPlay()
 	m_pEnemy_Route = GetWorld()->GetSubsystem<UEnemy_RouteManager>()->AddRoute(m_routeNum, m_randomRoute);
 	
 	//コメントアウトなおしたら治ったよ
-	AActor* Weapon = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemy_Weapon_1::StaticClass());
-	m_pEnemy_Weapon = Cast<AEnemy_Weapon_1>(Weapon);
+	//AActor* Weapon = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemy_Weapon_1::StaticClass());
+	//m_pEnemy_Weapon = Cast<AEnemy_Weapon_1>(Weapon);
 	if (m_pEnemy_Weapon)
 	{
 		m_pEnemy_Weapon->SetOwner(this);
@@ -283,6 +283,8 @@ void AEnemy_1::BeginPlay()
 		GetRootComponent(),
 		FAttachmentTransformRules::KeepWorldTransform
 	);
+
+	m_spotLightInstance->SetActorRotation(FRotator{ -110.,0.,0. });
 
 	//エネミーマネージャー登録
 	UEnemyManager* enemyManager = GetWorld()->GetSubsystem<UEnemyManager>();
@@ -332,6 +334,9 @@ void AEnemy_1::Tick(float DeltaTime)
 		CaseDead(DeltaTime);
 		return;
 	}
+
+	//初めの処理
+	StartStateValues(DeltaTime);
 
 	//視界処理
 	UpdateVisiblity(DeltaTime);
@@ -398,17 +403,24 @@ void AEnemy_1::CaseDead(float _deltaTime)
 }
 
 //------------------------------------------------------------------------------------------------------------
+//初めの処理
+//------------------------------------------------------------------------------------------------------------
+void AEnemy_1::StartStateValues(float _deltaTime)
+{
+	m_enemyPos = GetActorLocation();								//エネミーの座標
+	m_enemyForward = GetActorForwardVector();						//エネミーの正面ベクトル
+	m_enemyRight = GetActorRightVector();							//エネミーの右ベクトル
+	m_playerPos = m_pPlayerChara->GetActorLocation();		//プレイヤーの座標
+
+}
+
+//------------------------------------------------------------------------------------------------------------
 //視界処理
 //------------------------------------------------------------------------------------------------------------
 void AEnemy_1::UpdateVisiblity(float _deltaTime)
 {
 	//プレイヤーキャラが見つからなければ終了
 	if (!m_pPlayerChara) { return; }
-
-	m_enemyPos = GetActorLocation();								//エネミーの座標
-	m_enemyForward = GetActorForwardVector();						//エネミーの正面ベクトル
-	m_enemyRight = GetActorRightVector();							//エネミーの右ベクトル
-	m_playerPos = m_pPlayerChara->GetActorLocation();		//プレイヤーの座標
 
 	double distance = (m_playerPos - m_enemyPos).Length();			//プレイヤーとの距離を測る(Vectorの長さ）
 
@@ -435,6 +447,7 @@ void AEnemy_1::UpdateVisiblity(float _deltaTime)
 	//コリジョン判定で無視する項目を指定（今回は敵キャラクター自身（this)）
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this);
+	CollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
 	for (AEnemy_1* enemy : m_pOtherEnemy_1)
 	{
 		CollisionParams.AddIgnoredActor(enemy);
@@ -444,17 +457,6 @@ void AEnemy_1::UpdateVisiblity(float _deltaTime)
 
 	//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
 	bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, m_playerPos, FCollisionObjectQueryParams::AllObjects, CollisionParams);
-
-	//DrawDebugLine(
-	//	GetWorld(),
-	//	m_enemyPos,
-	//	m_playerPos,
-	//	FColor::Red,     // 色
-	//	false,           // 持続 (true = 永続、false = 時間限定)
-	//	1.0f,            // 持続時間（秒）
-	//	0,               // 深度優先
-	//	2.0f             // 太さ
-	//);
 
 	//ヒットするオブジェクトがある場合
 	if (isHit)
@@ -895,6 +897,7 @@ void AEnemy_1::CasePatrol(float _deltaTime)
 		FCollisionQueryParams CollisionParams;
 		CollisionParams.AddIgnoredActor(m_pPlayerChara);
 		CollisionParams.AddIgnoredActor(this);
+		CollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
 
 		FHitResult HitCollision;	//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
 
@@ -999,6 +1002,7 @@ void AEnemy_1::CasePatrol(float _deltaTime)
 		FCollisionQueryParams CollisionParams;
 		CollisionParams.AddIgnoredActor(m_pPlayerChara);
 		CollisionParams.AddIgnoredActor(this);
+		CollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
 
 		FHitResult HitCollision;	//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
 
@@ -1114,6 +1118,7 @@ void AEnemy_1::CasePatrol(float _deltaTime)
 		FCollisionQueryParams CollisionParams;
 		CollisionParams.AddIgnoredActor(m_pPlayerChara);
 		CollisionParams.AddIgnoredActor(this);
+		CollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
 
 		FHitResult HitCollision;	//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
 
@@ -1392,37 +1397,41 @@ void AEnemy_1::CaseBattle(float _deltaTime)
 		}
 
 
-		//攻撃範囲に入ったら攻撃
-		if (m_attackDistance > distance)
-		{	
-			FVector WeaponPos = m_pEnemy_Weapon->GetActorLocation();
-			FVector WeaponForwardVector = m_pEnemy_Weapon->GetActorForwardVector();
-			FVector WeaponForwardPos = WeaponPos + WeaponForwardVector* m_attackDistance;
-			//レイを飛ばして銃の直線状に遮蔽物がないかを確認
-			//コリジョン判定で無視する項目を指定（今回は敵キャラクター（this)、武器）
-			FCollisionQueryParams CollisionParams;
-			CollisionParams.AddIgnoredActor(this);
-			CollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
-			for (AEnemy_Bullet_1* bullet : m_pALLBullet_1)
+		if (m_pEnemy_Weapon)
+		{
+
+			//攻撃範囲に入ったら攻撃
+			if (m_attackDistance > distance)
 			{
-				CollisionParams.AddIgnoredActor(bullet);
-			}
-
-			FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
-
-			//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
-			bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, WeaponPos, WeaponForwardPos, FCollisionObjectQueryParams::AllObjects, CollisionParams);
-
-			//ヒットするオブジェクトがある場合
-			if (isHit)
-			{
-				AActor* hitActor = HitCollision.GetActor();
-
-				//当たったコリジョンがプレイヤーだった場合
-				if (hitActor->ActorHasTag("Player"))
+				FVector WeaponPos = m_pEnemy_Weapon->GetActorLocation();
+				FVector WeaponForwardVector = m_pEnemy_Weapon->GetActorForwardVector();
+				FVector WeaponForwardPos = WeaponPos + WeaponForwardVector * m_attackDistance;
+				//レイを飛ばして銃の直線状に遮蔽物がないかを確認
+				//コリジョン判定で無視する項目を指定（今回は敵キャラクター（this)、武器）
+				FCollisionQueryParams CollisionParams;
+				CollisionParams.AddIgnoredActor(this);
+				CollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
+				for (AEnemy_Bullet_1* bullet : m_pALLBullet_1)
 				{
-					//攻撃処理
-					UpdateAttack(_deltaTime);
+					CollisionParams.AddIgnoredActor(bullet);
+				}
+
+				FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
+
+				//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
+				bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, WeaponPos, WeaponForwardPos, FCollisionObjectQueryParams::AllObjects, CollisionParams);
+
+				//ヒットするオブジェクトがある場合
+				if (isHit)
+				{
+					AActor* hitActor = HitCollision.GetActor();
+
+					//当たったコリジョンがプレイヤーだった場合
+					if (hitActor->ActorHasTag("Player"))
+					{
+						//攻撃処理
+						UpdateAttack(_deltaTime);
+					}
 				}
 			}
 		}
@@ -1562,6 +1571,7 @@ void AEnemy_1::CaseMiss(float _deltaTime)
 		FCollisionQueryParams CollisionParams;
 		CollisionParams.AddIgnoredActor(m_pPlayerChara);
 		CollisionParams.AddIgnoredActor(this);
+		CollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
 
 		FHitResult HitCollision;	//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
 
@@ -1807,16 +1817,14 @@ void AEnemy_1::UpdateMove_Nav(float _deltaTime)
 //------------------------------------------------------------------------------------------------------------
 void AEnemy_1::UpdateAttack(float _deltaTime)
 {
-	//
-	UE_LOG(LogTemp, Warning, TEXT("Attack"));
-	//m_attackingTime += _deltaTime;
+		UE_LOG(LogTemp, Warning, TEXT("Attack"));
+		//m_attackingTime += _deltaTime;
 
-	//if (m_attackingTime_Limit < m_attackingTime)
-	//{
-		m_pEnemy_Weapon->BulletFire(m_allTime,this);
-	//	m_attackingTime = 0;
-	//}
-
+		//if (m_attackingTime_Limit < m_attackingTime)
+		//{
+		m_pEnemy_Weapon->BulletFire(m_allTime, this);
+		//	m_attackingTime = 0;
+		//}
 }
 
 //------------------------------------------------------------------------------------------------------------
