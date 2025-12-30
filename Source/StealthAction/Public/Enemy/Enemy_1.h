@@ -145,7 +145,7 @@ public:
 	//ƒvƒŒƒCƒ„[‚ğŒ©‚Â‚¯‚Ä‚¢‚é‚©‚Ç‚¤‚©
 	//Šm”F‚ªæ‚ê‚Ä‚È‚¢‚Ì‚Å‰¼‚Åfalse•Ô‚·
 	//Šm”Fæ‚ê‚½‚çCpp‘¤‚ÅÀ‘•—\’è
-	bool IsPlayerFound() const { return false; }
+	bool IsPlayerFound() const { return m_battleCheck; }
 
 public:
 
@@ -297,11 +297,11 @@ private:
 	bool m_alertCheck;			//Œx‰úó‘Ô‚©
 	bool m_patrolCheck;			//„‰ñó‘Ô‚©
 	bool m_doubtCheck;			//‹^”Oó‘Ô‚©
-	bool m_doubtNoiseCheck;			//•¨‰¹‹^”Oó‘Ô‚©
+	bool m_doubtNoiseCheck;		//•¨‰¹‹^”Oó‘Ô‚©
 	bool m_cautionCheck;		//’ˆÓó‘Ô‚©
-	bool m_cautionNoiseCheck;			//•¨‰¹’ˆÓó‘Ô‚©
+	bool m_cautionNoiseCheck;	//•¨‰¹’ˆÓó‘Ô‚©
 	bool m_battleCheck;			//í“¬ó‘Ô‚©
-	bool m_battleNoiseCheck;			//•¨‰¹í“¬ó‘Ô‚©
+	bool m_battleNoiseCheck;	//•¨‰¹í“¬ó‘Ô‚©
 	bool m_missCheck;			//¸çHó‘Ô‚©
 	bool m_returnCheck;			//‹AŠÒó‘Ô‚©
 
