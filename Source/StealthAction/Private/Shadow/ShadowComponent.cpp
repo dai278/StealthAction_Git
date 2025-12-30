@@ -137,10 +137,7 @@ void UShadowComponent::BeginPlay()
 	 }
 	}
 	 //ワールドサイズを補正
-	 SetWorldScale3D(newScale);
-
-	
-
+	 SetWorldScale3D(newScale);	
 }
 
 //--------------------------------------

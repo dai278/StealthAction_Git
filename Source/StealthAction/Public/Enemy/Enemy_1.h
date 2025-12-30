@@ -134,6 +134,9 @@ public:
 	//UŒ‚‚Ìˆ—
 	void UpdateAttack(float _deltaTime);
 
+	//UŒ‚‚ğó‚¯‚½‚Æ‚«‚Ìˆ—
+	void OnDamage(const int& _damage,const FVector& _knockBackVector, const bool& _bSneakKill);
+
 	//Õ“Ë”»’è
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);

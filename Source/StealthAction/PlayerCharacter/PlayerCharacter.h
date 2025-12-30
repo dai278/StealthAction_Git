@@ -26,6 +26,7 @@ class UNoiseListenerComponent;
 class UEnemyManager;//エネミーの基底クラスにする日髙変更
 class AEnemy_1;
 class UExtendedSpotLightManager;//拡張スポットライトマネージャーの前方宣言
+class USwordAttackComponent;//ソード攻撃コンポーネントの前方宣言
 
 
 //パラメーター更新が起きた時のイベントディスパッチャー宣言
@@ -131,7 +132,7 @@ private:
 	void UpdateIdle(float _deltaTime);
 
 	//歩き状態の更新処理
-	void UpdateMove(float _deltaTime);
+	void UpdateMove(float _deltaTime,const bool _bInShadow=false);
 
 	//しゃがみ状態の更新処理
 	void UpdateCrouch(float _deltaTime);
@@ -154,6 +155,9 @@ private:
 
 	//足元座標の取得
 	FVector GetFeetLocation()const;
+
+	//攻撃終了コールバック
+	void OnAttackEnd();
 
 protected:
 	//---入力用---
@@ -310,6 +314,13 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float m_attackCooldown;
+
+	//UPROPERTY(EditAnywhere, Category = "weapon");
+	//USwordAttackComponent* m_pSword;			//ソード攻撃コンポーネント
+	
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	USwordAttackComponent* m_sword;	//ソード攻撃コンポーネント
+
 
 	FTimerHandle AttackCooldownHandle;
 

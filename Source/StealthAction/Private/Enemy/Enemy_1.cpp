@@ -1867,3 +1867,24 @@ void AEnemy_1::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPri
 	}
 }
 
+
+//------------------------------------------------------------------------------------------------------------
+//ダメージ処理
+//------------------------------------------------------------------------------------------------------------
+void AEnemy_1::OnDamage(const int& _damage, const FVector& _knockBackVector, const bool& _bSneakKill)
+{
+	//体力減少
+	//デバック用に死亡
+	m_deadCheck = false;
+	CaseDead(1.f);
+
+	if(_bSneakKill)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Sneak Kill"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Sneak Miss"));
+
+	}
+}

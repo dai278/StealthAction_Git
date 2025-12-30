@@ -23,6 +23,10 @@
 #include "Light/ExtendedSpotLightManager.h"
 #include "EnemyManager/EnemyManager.h"
 #include"Enemy/Enemy_1.h"
+#include "Sword/SwordAttackComponent.h"
+#include "CollisionQueryParams.h"
+#include "Engine/EngineTypes.h"
+#include "Engine/CollisionProfile.h"
 
 
 //----------------------------------------------------------
@@ -67,7 +71,7 @@ APlayerCharacter::APlayerCharacter()
 	, m_maxShadowTime(5.f)
 	, m_timer(0.f)
 	, m_attackRange(300.f)
-	, m_attackRadius(50.f)
+	, m_attackRadius(100.f)
 	, m_sneakKillDamage(10)
 	, m_NormalAttack(2)
 	, m_bCanAttack(true)
@@ -110,12 +114,25 @@ APlayerCharacter::APlayerCharacter()
 		m_pSpringArm->CameraRotationLagSpeed = 5.0f;
 	}
 
+
+	//剣の攻撃コンポーネント生成
+	m_sword = CreateDefaultSubobject<USwordAttackComponent>(TEXT("Sword"));
+
+	if (m_sword)
+	{
+		m_sword->SetupAttachment(GetMesh());
+		m_sword->SetRelativeLocation(FVector::ZeroVector);
+		m_sword->SetRelativeRotation(FRotator::ZeroRotator);
+
+	}
+
 	//カメラオブジェクトを設定
 	m_pCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("m_pCamera"));
 	if ((m_pCamera != nullptr) && (m_pSpringArm != nullptr)) {
 		//カメラをスプリングアームにタッチさせる
 		m_pCamera->SetupAttachment(m_pSpringArm, USpringArmComponent::SocketName);
 	}
+
 }
 
 //----------------------------------------------------------
@@ -163,6 +180,22 @@ void APlayerCharacter::BeginPlay()
 	m_pExtendedSpotLightManager = GetWorld()->GetSubsystem<UExtendedSpotLightManager>();
 	//上記のエネミーマネージャーバージョン
 	m_pEnemyManager = GetWorld()->GetSubsystem<UEnemyManager>();
+
+
+	//ソード攻撃コンポーネントの初期化
+	if (m_sword)
+	{
+		//念のため衝突対象クリア
+		m_sword->ClearCollisionObjectType();
+		//コリジョンプロファイル名の設定
+		m_sword->SetProfileName(FName("PlayerWeapon"));
+		//攻撃範囲の設定
+		m_sword->SetSwordAttackScale(m_attackRadius);
+		//攻撃時間の設定
+		m_sword->SetAttackTime(1.f);
+		//コールバック関数の登録
+		m_sword->RegisterSwingEndCallback(CreateSwingEndCallback(APlayerCharacter::OnAttackEnd));
+	}
 
 }
 
@@ -213,6 +246,8 @@ void APlayerCharacter::Tick(float _deltaTime)
 	UpdateCamera(_deltaTime);
 	//カメラと遮蔽物のコリジョン判定
 	UpdateCameraCollision();
+	//敵に見つかっているかとかの更新
+	UpdateCheckEnemyDetection();
 
 	//視点変更
 	ViewpointSwitching(_deltaTime);
@@ -324,7 +359,7 @@ void APlayerCharacter::UpdateIdle(float _deltaTime)
 //----------------------------------------------------------
 // 移動処理
 //----------------------------------------------------------
-void APlayerCharacter::UpdateMove(float _deltaTime)
+void APlayerCharacter::UpdateMove(float _deltaTime, const bool _bInShadow /*= false*/)
 {
 	//移動入力がある場合
 	if (!m_charaMoveInput.IsZero()) {
@@ -357,11 +392,15 @@ void APlayerCharacter::UpdateMove(float _deltaTime)
 			AddMovementInput(forwardVec, m_charaMoveInput.Y);
 			AddMovementInput(rightVec, m_charaMoveInput.X);
 
-			//デバック用
-			UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
-			if (manager)
+			//影の中にいなければ音を出す
+			if (!_bInShadow)
 			{
-				manager->MakeNoise(1, GetActorLocation());
+				//デバック用にコメントアウト
+				/*UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
+				if (manager)
+				{
+					manager->MakeNoise(1, GetActorLocation());
+				}*/
 			}
 		}
 
@@ -411,16 +450,6 @@ void APlayerCharacter::UpdateAttack(float _deltaTime)
 		m_status=EPlayerStatus::Idle;
 		return;
 	}
-	const float maxAtackTime = 1.f;
-	//仮で時間で攻撃状態を終わらせる
-	m_attackCount += _deltaTime;
-	
-	if (m_attackCount < maxAtackTime)
-	{
-		m_bCanAttack = false;
-		m_status = EPlayerStatus::Idle;
-		return;
-	}	
 }
 
 //----------------------------------------------------------
@@ -479,7 +508,7 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 	}
 	
 	//移動処理
-	UpdateMove(_deltaTime);
+	UpdateMove(_deltaTime,true);
 	
 }
 
@@ -567,6 +596,15 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 		//視点切り替え中フラグをfalseに
 		m_bCameraSwitching = false;
 	}
+}
+
+//-----------------------------------------------------
+//攻撃終了処理
+//-----------------------------------------------------
+void APlayerCharacter::OnAttackEnd()
+{
+	m_bCanAttack = false;
+	m_attackCount = 0.f;
 }
 
 //-----------------------------------------------------
@@ -696,8 +734,10 @@ void APlayerCharacter::Enhanced_Attack(const FInputActionValue& Value)
 		else
 		{
 			//敵までのベクトル
-			FVector toEnemyVector = FVector{ m_pNearestEnemy->GetActorLocation() - GetActorLocation() }.GetSafeNormal();
-			FVector forwardVector = GetActorForwardVector().GetSafeNormal();
+			FVector toEnemyVector = FVector{m_pNearestEnemy->GetActorLocation()- GetActorLocation() }.GetSafeNormal();
+			FVector forwardVector =  GetMesh()->GetRightVector();     // = Y軸
+
+
 			//内積を求める
 			const float dot = FVector::DotProduct(toEnemyVector, forwardVector);
 			const float maxAngle = 0.4f;
@@ -719,6 +759,9 @@ void APlayerCharacter::Enhanced_Attack(const FInputActionValue& Value)
 	{
 		m_bSneakKill = false;
 	}
+	//剣の攻撃処理
+//------------この前に振れる状態か確認-----------------
+	m_sword->Swinging(m_bSneakKill);
 }
 
 //------------------------------------------------------

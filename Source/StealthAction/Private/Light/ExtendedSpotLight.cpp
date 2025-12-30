@@ -19,19 +19,14 @@ AExtendedSpotLight::AExtendedSpotLight()
 
 	//毎フレーム更新処理を行うか.
 	PrimaryActorTick.bCanEverTick = true;
-
 	//スポットライト生成
 	m_pSpotLight = CreateDefaultSubobject<USpotLightComponent>(TEXT("SpotLight"));
-
 	//Rootを作成
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-
 	//メッシュの生成
 	m_pMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-
 	//RootにSpotLightをアタッチ
 	m_pSpotLight->SetupAttachment(RootComponent);
-
 }
 
 
@@ -50,7 +45,6 @@ void AExtendedSpotLight::BeginPlay()
 	GetWorld()->GetSubsystem<UExtendedSpotLightManager>()->AddLight(this);
 	//影を出す
 	m_pSpotLight->SetCastShadows(true);
-
 }
 
 
