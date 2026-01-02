@@ -14,6 +14,7 @@ USwordAttackComponent::USwordAttackComponent()
 	, m_swingEndCallback(nullptr)
 	, m_swordCollision(nullptr)
 	, m_bSneakKill(false)
+	, m_bIsSwinging(false)
 {
 	//振っている間のみTick有効化、最初は無効化
 	PrimaryComponentTick.bCanEverTick = true;
@@ -128,6 +129,11 @@ void USwordAttackComponent::SetAttackTime(const float& _time)
 //------------------------------
 void USwordAttackComponent::Swinging(const int& _damage, const FVector& _location, const float& _radius, const float& _attackTime, const bool& _bSneakKill)
 {
+	if(m_bIsSwinging)
+	{
+		//すでに振っているなら無視
+		return;
+	}
 	m_damage = _damage;
 	m_radius = _radius;
 	m_swingEndTime = _attackTime;
@@ -140,9 +146,15 @@ void USwordAttackComponent::Swinging(const int& _damage, const FVector& _locatio
 //------------------------------
 void USwordAttackComponent::Swinging(const bool& _bSneakKill)
 {
+	
+	if(m_bIsSwinging)
+	{
+		//すでに振っているなら無視
+		return;
+	}
 	UE_LOG(LogTemp, Display, TEXT("KenHutta"));
 	SetComponentTickEnabled(true);
-
+	m_bIsSwinging = true;
 	m_timer = 0.0f;
 	m_bSneakKill = _bSneakKill;
 	
@@ -151,7 +163,6 @@ void USwordAttackComponent::Swinging(const bool& _bSneakKill)
 		m_swordCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		m_swordCollision->SetGenerateOverlapEvents(true);
 	}
-
 }
 
 //------------------------------
@@ -168,6 +179,8 @@ void USwordAttackComponent::SwingEnd()
 	m_timer = 0.0f;
 	//スニークキルでない状態に戻す
 	m_bSneakKill=false;
+	//剣を振っている状態を解除
+	m_bIsSwinging = false;
 	//コリジョン無効化
 	if (m_swordCollision)
 	{

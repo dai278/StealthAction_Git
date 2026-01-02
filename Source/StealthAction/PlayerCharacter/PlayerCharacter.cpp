@@ -423,7 +423,10 @@ void APlayerCharacter::UpdateMove(float _deltaTime, const bool _bInShadow /*= fa
 			if (m_cameraStatus == ECameraStatus::ThirdPerson)
 			{
 				//“ü—Í‚µ‚½Šp“x{ƒƒbƒVƒ…‚Ì‰ñ“]Šp“x{Actor‚É‘Î‚µ‚Ä‰ñ“]‚µ‚Ä‚¢‚éSpringArm‚Ì‘Š‘ÎŠp“x
-				newYaw = angleDeg + GetBaseRotationOffsetRotator().Yaw + m_pSpringArm->GetRelativeRotation().Yaw;
+				//newYaw = angleDeg + GetBaseRotationOffsetRotator().Yaw + m_pSpringArm->GetRelativeRotation().Yaw;
+				 FVector camForwardVec = m_pSpringArm->GetForwardVector();
+				 FRotator camRot = camForwardVec.Rotation();
+				 newYaw = camRot.Yaw-90.f;
 			}
 			else
 			{

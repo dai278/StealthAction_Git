@@ -78,4 +78,5 @@ private:
 	float m_timer;						//持続時間タイマー
 	float m_swingEndTime;				//剣を振り終わる時間
 	bool m_bSneakKill;						//スニークキルかどうか
+	bool m_bIsSwinging;                   //剣を振っている最中かどうか
 };
