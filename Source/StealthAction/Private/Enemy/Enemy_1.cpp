@@ -33,6 +33,7 @@
 
 #include "EnemyManager/EnemyManager.h"
 
+#include "Sword/SwordAttackComponent.h"							//剣用
 //-----------------------------------------------------------
 //検証用
 //-----------------------------------------------------------
@@ -130,9 +131,9 @@ AEnemy_1::AEnemy_1()
 	, m_enemyPos_Return(0., 0., 0.)
 	, m_enemyDirection_Return(0., 0., 0.)
 	, m_playerShadowCheck(false)
-	, m_enemyCurrentState(EEnemy_1Status::Patrol)
-	, m_enemyCurrentState_Check(EEnemy_1Status::Empty)
-	, m_enemyCurrentState_Keeper(EEnemy_1Status::Empty)
+	, m_enemyCurrentState(EEnemyStatus::Patrol)
+	, m_enemyCurrentState_Check(EEnemyStatus::Empty)
+	, m_enemyCurrentState_Keeper(EEnemyStatus::Empty)
 	, m_randomRoute(false)
 	, m_routeNum(0)
 	, m_routeCounter(0)
@@ -164,8 +165,15 @@ AEnemy_1::AEnemy_1()
 		m_pShadow->SetRelativeRotation(FRotator::ZeroRotator);
 	}
 
-	//BulletStorage = CreateDefaultSubobject<UEnemy_BulletStorage_1>(TEXT("BulletStorage"));
-	//Weapon = CreateDefaultSubobject<UEnemy_Weapon_1>(TEXT("Weapon"));
+	//
+	m_sword=CreateDefaultSubobject<USwordAttackComponent>(TEXT("Sword"));
+
+	if (m_sword)
+	{
+		m_sword->SetupAttachment(GetMesh());
+		m_sword->SetRelativeLocation(FVector::ZeroVector);
+		m_sword->SetRelativeRotation(FRotator::ZeroRotator);
+	}
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -231,7 +239,7 @@ void AEnemy_1::BeginPlay()
 	//コリジョンプリセットをプレイヤー
 	capsel->SetCollisionProfileName(TEXT("Enemy"));
 
-	m_enemyCurrentState = EEnemy_1Status::Patrol;		//初めのステータスを巡回に設定
+	m_enemyCurrentState = EEnemyStatus::Patrol;		//初めのステータスを巡回に設定
 
 	//旋回速度
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 360.f, 0.f);
@@ -293,6 +301,21 @@ void AEnemy_1::BeginPlay()
 		enemyManager->RegisterEnemy(this);
 	}
 
+
+	//
+	if (m_sword)
+	{
+		//
+		m_sword->ClearCollisionObjectType();
+		//
+		m_sword->SetProfileName(FName("EnemyAttack"));
+		//
+		m_sword->SetSwordAttackScale(50.0);
+		//
+		m_sword->SetAttackTime(1.0);
+		//
+		m_sword->RegisterSwingEndCallback(CreateSwingEndCallback(AEnemy_1::OnAttackEnd));
+	}
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -321,7 +344,7 @@ void AEnemy_1::Tick(float DeltaTime)
 	//死亡判定
 	if (m_HP <= 0)
 	{
-		m_enemyCurrentState = EEnemy_1Status::Dead;
+		m_enemyCurrentState = EEnemyStatus::Dead;
 		/*CaseDead(DeltaTime);
 		return;*/
 	}
@@ -329,7 +352,7 @@ void AEnemy_1::Tick(float DeltaTime)
 	//------------------------------------------------------------
    // 死亡状態の場合は死亡処理のみ行う
    //------------------------------------------------------------
-	if (m_enemyCurrentState == EEnemy_1Status::Dead)
+	if (m_enemyCurrentState == EEnemyStatus::Dead)
 	{
 		CaseDead(DeltaTime);
 		return;
@@ -607,12 +630,12 @@ void AEnemy_1::UpdateSearch(float _deltaTime)
 	//m_noiseLevel_keeper  =Patrol(0,1) Doubt(2) Caution(3) Battle(4,5) Miss(6,7) Return(8,9)
 	if (m_battleCheck)
 	{
-		m_enemyCurrentState = EEnemy_1Status::Battle;
+		m_enemyCurrentState = EEnemyStatus::Battle;
 
 	}
 	else if (m_cautionCheck)
 	{
-		m_enemyCurrentState = EEnemy_1Status::Caution;
+		m_enemyCurrentState = EEnemyStatus::Caution;
 
 	}
 	else if (m_visionCheck)
@@ -620,57 +643,57 @@ void AEnemy_1::UpdateSearch(float _deltaTime)
 		//巡回
 		if (m_visionLevel <= 1)
 		{
-			m_enemyCurrentState = EEnemy_1Status::Patrol;
+			m_enemyCurrentState = EEnemyStatus::Patrol;
 		}
 		//疑念
 		else if (m_visionLevel == 2)
 		{
-			m_enemyCurrentState = EEnemy_1Status::Doubt;
+			m_enemyCurrentState = EEnemyStatus::Doubt;
 		}
 		//注意
 		else if (m_visionLevel == 3)
 		{
-			m_enemyCurrentState = EEnemy_1Status::Caution;
+			m_enemyCurrentState = EEnemyStatus::Caution;
 		}
 		//戦闘
 		else if (m_visionLevel == 4 || m_visionLevel == 5)
 		{
-			m_enemyCurrentState = EEnemy_1Status::Battle;
+			m_enemyCurrentState = EEnemyStatus::Battle;
 		}
 	}
 	else if (m_noiseCheck)
 	{
 		if (m_noiseLevel_keeper <= 1)
 		{
-			m_enemyCurrentState = EEnemy_1Status::Patrol;
+			m_enemyCurrentState = EEnemyStatus::Patrol;
 		}
 		else if (m_noiseLevel_keeper == 2)
 		{
-			m_enemyCurrentState = EEnemy_1Status::Doubt_Noise;
+			m_enemyCurrentState = EEnemyStatus::Doubt_Noise;
 		}
 		else if (m_noiseLevel_keeper == 3)
 		{
-			m_enemyCurrentState = EEnemy_1Status::Caution_Noise;
+			m_enemyCurrentState = EEnemyStatus::Caution_Noise;
 		}
 		else if (m_noiseLevel_keeper == 4 || m_noiseLevel_keeper == 5)
 		{
-			m_enemyCurrentState = EEnemy_1Status::Battle_Noise;
+			m_enemyCurrentState = EEnemyStatus::Battle_Noise;
 		}
 	}
 	//失踪の場合
 	else if (m_visionLevel == 6 || m_visionLevel == 7 || m_noiseLevel_keeper == 6 || m_noiseLevel_keeper == 7)
 	{
-		m_enemyCurrentState = EEnemy_1Status::Miss;
+		m_enemyCurrentState = EEnemyStatus::Miss;
 	}
 	//帰還の場合
 	else if (m_visionLevel == 8 || m_visionLevel == 9 || m_noiseLevel_keeper == 8 || m_noiseLevel_keeper == 9)
 	{
-		m_enemyCurrentState = EEnemy_1Status::Return;
+		m_enemyCurrentState = EEnemyStatus::Return;
 	}
 	//巡回の場合
 	else if (m_visionLevel <= 1 || m_noiseLevel_keeper <= 1)
 	{
-		m_enemyCurrentState = EEnemy_1Status::Patrol;
+		m_enemyCurrentState = EEnemyStatus::Patrol;
 	}
 
 
@@ -687,7 +710,7 @@ void AEnemy_1::UpdateAlert(float _deltaTime)
 	}
 
 	//警戒時間の持続
-	if (m_enemyCurrentState == EEnemy_1Status::Battle || m_enemyCurrentState == EEnemy_1Status::Battle_Noise)
+	if (m_enemyCurrentState == EEnemyStatus::Battle || m_enemyCurrentState == EEnemyStatus::Battle_Noise)
 	{
 		m_alertTime = 0;
 		return;
@@ -723,7 +746,7 @@ void AEnemy_1::ResetStateValues(float _deltaTime)
 	//m_noiseLevel_keeper  =Patrol(0,1) Doubt(2) Caution(3) Battle(4,5) Miss(6,7) Return(8,9)
 
 	//以前のステータスが巡回の場合
-	if (m_enemyCurrentState_Keeper == EEnemy_1Status::Patrol)
+	if (m_enemyCurrentState_Keeper == EEnemyStatus::Patrol)
 	{
 		m_patrol_TurningCheck = false;		//旋回終了
 
@@ -733,56 +756,56 @@ void AEnemy_1::ResetStateValues(float _deltaTime)
 	}
 
 	//以前のステータスが疑念の場合
-	else if (m_enemyCurrentState_Keeper == EEnemy_1Status::Doubt)
+	else if (m_enemyCurrentState_Keeper == EEnemyStatus::Doubt)
 	{
 		m_doubtCheck = false;	//疑念チェックOF
 		m_doubtTime = 0;		//疑念タイマーリセット
 	}
 
 	//以前のステータスが物音疑念の場合
-	else if (m_enemyCurrentState_Keeper == EEnemy_1Status::Doubt_Noise)
+	else if (m_enemyCurrentState_Keeper == EEnemyStatus::Doubt_Noise)
 	{
 		m_doubtNoiseCheck = false;	//物音疑念チェックOF
 		m_doubtNoiseTime = 0;		//物音疑念タイマーリセット
 	}
 
 	//以前のステータスが注意の場合
-	else if (m_enemyCurrentState_Keeper == EEnemy_1Status::Caution)
+	else if (m_enemyCurrentState_Keeper == EEnemyStatus::Caution)
 	{
 		m_cautionCheck = false;	//注意チェックOF
 		m_cautionTime = 0;		//注意タイマーリセット
 	}
 
 	//以前のステータスが物音注意の場合
-	else if (m_enemyCurrentState_Keeper == EEnemy_1Status::Caution_Noise)
+	else if (m_enemyCurrentState_Keeper == EEnemyStatus::Caution_Noise)
 	{
 		m_cautionNoiseCheck = false;//物音注意チェックOF
 		m_cautionNoiseTime = 0;		//物音注意タイマーリセット
 	}
 
 	//以前のステータスが戦闘の場合
-	else if (m_enemyCurrentState_Keeper == EEnemy_1Status::Battle)
+	else if (m_enemyCurrentState_Keeper == EEnemyStatus::Battle)
 	{
 		m_battleCheck = false;	//戦闘チェックOF
 		m_battleTime = 0;		//戦闘タイマーリセット
 	}
 
 	//以前のステータスが物音戦闘の場合
-	else if (m_enemyCurrentState_Keeper == EEnemy_1Status::Battle_Noise)
+	else if (m_enemyCurrentState_Keeper == EEnemyStatus::Battle_Noise)
 	{
 		m_battleNoiseCheck = false;	//物音戦闘チェックOF
 		m_battleNoiseTime = 0;		//物音戦闘タイマーリセット
 	}
 
 	//以前のステータスが失踪の場合
-	else if (m_enemyCurrentState_Keeper == EEnemy_1Status::Miss)
+	else if (m_enemyCurrentState_Keeper == EEnemyStatus::Miss)
 	{
 		m_missCheck = false;	//失踪チェックOF
 		m_missTime = 0;			//失踪時間リセット
 	}
 
 	//以前のステータスが帰還の場合
-	else if (m_enemyCurrentState_Keeper == EEnemy_1Status::Return)
+	else if (m_enemyCurrentState_Keeper == EEnemyStatus::Return)
 	{
 		//もし動いていたらMoveToを止める
 		if (m_returnCheck)
@@ -815,43 +838,43 @@ void AEnemy_1::UpdateStatus(float _deltaTime)
 	//エネミーのステータス
 	switch (m_enemyCurrentState)
 	{
-	case EEnemy_1Status::Patrol:
+	case EEnemyStatus::Patrol:
 		CasePatrol(_deltaTime);
 		break;
 
-	case EEnemy_1Status::Doubt:
+	case EEnemyStatus::Doubt:
 		CaseDoubt(_deltaTime);
 		break;
 
-	case EEnemy_1Status::Doubt_Noise:
+	case EEnemyStatus::Doubt_Noise:
 		CaseDoubt_Noise(_deltaTime);
 		break;
 
-	case EEnemy_1Status::Caution:
+	case EEnemyStatus::Caution:
 		CaseCaution(_deltaTime);
 		break;
 
-	case EEnemy_1Status::Caution_Noise:
+	case EEnemyStatus::Caution_Noise:
 		CaseCaution_Noise(_deltaTime);
 		break;
 
-	case EEnemy_1Status::Battle:
+	case EEnemyStatus::Battle:
 		CaseBattle(_deltaTime);
 		break;
 
-	case EEnemy_1Status::Battle_Noise:
+	case EEnemyStatus::Battle_Noise:
 		CaseBattle_Noise(_deltaTime);
 		break;
 
-	case EEnemy_1Status::Miss:
+	case EEnemyStatus::Miss:
 		CaseMiss(_deltaTime);
 		break;
 
-	case EEnemy_1Status::Return:
+	case EEnemyStatus::Return:
 		CaseReturn(_deltaTime);
 		break;
 
-	case EEnemy_1Status::Dead:
+	case EEnemyStatus::Dead:
 		CaseDead(_deltaTime);
 		break;
 	}
@@ -1272,7 +1295,7 @@ void AEnemy_1::CaseCaution(float _deltaTime)
 	if (m_cautionTime < m_cautionTime_Limit)
 	{
 		//ひとつ前のステータスが疑念だった場合
-		if (m_enemyCurrentState_Keeper == EEnemy_1Status::Doubt)
+		if (m_enemyCurrentState_Keeper == EEnemyStatus::Doubt)
 		{
 			m_cautionTime = m_cautionTime_Limit;				//発見猶予時間カット
 		}
@@ -1376,7 +1399,7 @@ void AEnemy_1::CaseBattle(float _deltaTime)
 	if (m_battleTime < m_battleTime_Limit)
 	{
 		//ひとつ前のステータスが巡回もしくは帰還以外だった場合
-		if (m_enemyCurrentState_Keeper != EEnemy_1Status::Patrol && m_enemyCurrentState_Keeper != EEnemy_1Status::Return)
+		if (m_enemyCurrentState_Keeper != EEnemyStatus::Patrol && m_enemyCurrentState_Keeper != EEnemyStatus::Return)
 		{
 			m_battleTime = m_battleTime_Limit;				//発見猶予時間カット
 		}
@@ -1396,13 +1419,20 @@ void AEnemy_1::CaseBattle(float _deltaTime)
 			UpdateMove_Nav(_deltaTime);
 		}
 
+		if (m_sword)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Swing"));
+			m_sword->Swinging(false);
+		}
 
+		//武器を持っていたら
 		if (m_pEnemy_Weapon)
 		{
 
 			//攻撃範囲に入ったら攻撃
 			if (m_attackDistance > distance)
 			{
+
 				FVector WeaponPos = m_pEnemy_Weapon->GetActorLocation();
 				FVector WeaponForwardVector = m_pEnemy_Weapon->GetActorForwardVector();
 				FVector WeaponForwardPos = WeaponPos + WeaponForwardVector * m_attackDistance;
@@ -1483,7 +1513,7 @@ void AEnemy_1::CaseBattle_Noise(float _deltaTime)
 	if (m_battleNoiseTime < m_battleNoiseTime_Limit)
 	{
 		//ひとつ前のステータスが失踪だった場合
-		if (m_enemyCurrentState_Keeper == EEnemy_1Status::Miss)
+		if (m_enemyCurrentState_Keeper == EEnemyStatus::Miss)
 		{
 			m_battleNoiseTime = m_battleTime_Limit;				//発見猶予時間カット
 		}
@@ -1544,7 +1574,7 @@ void AEnemy_1::CaseMiss(float _deltaTime)
 	const float m_missTime_Limit4 = m_missTime_Limit * 4;
 
 	//前のステータスが戦闘もしくは注意だった場合
-	if (m_missTime < m_missTime_Limit1 && m_enemyCurrentState_Keeper == EEnemy_1Status::Battle)
+	if (m_missTime < m_missTime_Limit1 && m_enemyCurrentState_Keeper == EEnemyStatus::Battle)
 	{
 		m_enemyPos_Forward_Miss = m_enemyPos + m_enemyForward * m_visionRange_Short;			//エネミーの正面の座標
 		m_enemyPos_Left_Miss = m_enemyPos - GetActorRightVector() * m_visionRange_Short;		//エネミー座標から左座標
@@ -1820,11 +1850,17 @@ void AEnemy_1::UpdateAttack(float _deltaTime)
 		UE_LOG(LogTemp, Warning, TEXT("Attack"));
 		//m_attackingTime += _deltaTime;
 
-		//if (m_attackingTime_Limit < m_attackingTime)
-		//{
-		m_pEnemy_Weapon->BulletFire(m_allTime, this);
-		//	m_attackingTime = 0;
-		//}
+		//m_pEnemy_Weapon->BulletFire(m_allTime, this);
+
+		m_sword->Swinging(false);
+}
+
+//------------------------------------------------------------------------------------------------------------
+//攻撃が終わったことを通知する処理
+//------------------------------------------------------------------------------------------------------------
+void AEnemy_1::OnAttackEnd()
+{
+
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -1876,7 +1912,7 @@ void AEnemy_1::OnDamage(const int& _damage, const FVector& _knockBackVector, con
 	//体力減少
 	//デバック用に死亡
 	m_deadCheck = false;
-	CaseDead(1.f);
+	m_enemyCurrentState = EEnemyStatus::Dead;
 
 	if(_bSneakKill)
 	{

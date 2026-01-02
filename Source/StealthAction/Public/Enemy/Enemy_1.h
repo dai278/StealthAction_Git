@@ -17,11 +17,11 @@ class UShadowComponent;
 class AEnemy_Bullet_1;
 class AEnemy_Weapon_1;
 class AExtendedSpotLight;
-
+class USwordAttackComponent;
 
 //エネミーの状態
 UENUM(BlueprintType)
-enum class EEnemy_1Status :uint8
+enum class EEnemyStatus :uint8
 {
 	Empty			UMETA(DisplayName = "Empty"),
 
@@ -141,17 +141,21 @@ public:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
+	//攻撃が終わったことを通知するコールバック関数
+	void OnAttackEnd();
+
 public:
 	//プレイヤーを見つけているかどうか
 	//確認が取れてないので仮でfalse返す
 	//確認取れたらCpp側で実装予定
 	bool IsPlayerFound() const { return m_battleCheck; }
 
-public:
+protected:
+	//デバック用
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	USwordAttackComponent* m_sword;
 
 private:
-
-
 	UPROPERTY()
 	APlayerCharacter* m_pPlayerChara;	//プレイヤーキャラクターポインタ
 
@@ -168,12 +172,11 @@ private:
 	UShadowComponent* m_pShadow;  //影
 
 	//基本ステータス
-	UPROPERTY(EditAnywhere, Category = "Enemy_1_Status")
+	UPROPERTY(EditAnywhere, Category = "Enemy_Status")
 	int m_HP;	//HP
 	//基本ステータス
-	UPROPERTY(EditAnywhere, Category = "Enemy_1_Status")
+	UPROPERTY(EditAnywhere, Category = "Enemy_Status")
 	float m_hitDamage;			//ダメージ量
-
 
 	//視界用
 	UPROPERTY(EditAnywhere, Category = "Visiblity")
@@ -313,9 +316,9 @@ private:
 	bool m_deadCheck;			//死亡したか
 
 	//ステータス関連
-	EEnemy_1Status m_enemyCurrentState; //エネミーのステータス
-	EEnemy_1Status m_enemyCurrentState_Keeper; //一つ前のステータス(1F)
-	EEnemy_1Status m_enemyCurrentState_Check; //チェック用のステータス(1F)
+	EEnemyStatus m_enemyCurrentState; //エネミーのステータス
+	EEnemyStatus m_enemyCurrentState_Keeper; //一つ前のステータス(1F)
+	EEnemyStatus m_enemyCurrentState_Check; //チェック用のステータス(1F)
 
 
 	//座標関連
