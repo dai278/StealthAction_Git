@@ -146,6 +146,9 @@ private:
 	//やられ状態の更新処理
 	void UpdateDead(float _deltaTime);
 
+	//無敵時間の更新処理
+	void UpdateInvincibleTime(float _deltaTime);
+
 	//影状態の更新処理
 	void UpdateShadow(float _deltaTime);
 	//影から通常状態へ変化
@@ -158,6 +161,9 @@ private:
 
 	//攻撃終了コールバック
 	void OnAttackEnd();
+
+	//ダメージ処理
+	void OnDamage(const int& _damage);
 
 protected:
 	//---入力用---
@@ -182,6 +188,7 @@ protected:
 
 	void Enhanced_CameraPitchReleased(const FInputActionValue& Value);	//カメラピッチ
 	void Enhanced_CameraYawReleased(const FInputActionValue& Value);	//カメラヨー
+
 
 protected:
 	// デフォルトで使う Input Mapping Context
@@ -321,12 +328,22 @@ private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	USwordAttackComponent* m_sword;	//ソード攻撃コンポーネント
 
+	bool m_bInvincible;//無敵状態か
+	float m_invincibleTimer;//無敵時間
+
+	FVector m_knockBackVelocity;//ノックバック速度
+	float m_damageTime;//ダメージ時間
+
+	UPROPERTY(EditAnywhere, Category = "Damage")
+	float m_invincibleTimeLimit;//無敵時間制限
+
 
 	FTimerHandle AttackCooldownHandle;
 
 	bool m_bCameraSwitching;						//カメラ視点切り替え中か？
 	bool m_bCanControl;								//操作可能状態か
 
+	UPROPERTY(VisibleAnywhere, Category = "Sahdow")
 	bool m_bOnShadow;                               //影の上にいるか
 
 	bool m_bUsingMesh;								//使ってるメッシュを管理するフラグ

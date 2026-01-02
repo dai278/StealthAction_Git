@@ -133,8 +133,6 @@ void USwordAttackComponent::Swinging(const int& _damage, const FVector& _locatio
 	m_swingEndTime = _attackTime;
 	bHiddenInGame = true;
 	Swinging(_bSneakKill);
-
-
 }
 
 //------------------------------

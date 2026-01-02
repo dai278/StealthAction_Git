@@ -1885,6 +1885,5 @@ void AEnemy_1::OnDamage(const int& _damage, const FVector& _knockBackVector, con
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Sneak Miss"));
-
 	}
 }

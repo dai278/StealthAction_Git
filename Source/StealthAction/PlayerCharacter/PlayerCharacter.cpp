@@ -77,6 +77,10 @@ APlayerCharacter::APlayerCharacter()
 	, m_bCanAttack(true)
 	, m_attackCooldown(0.3f)
 	, m_pExtendedSpotLightManager(nullptr)
+	, m_bInvincible(false)
+	, m_invincibleTimer(0.f)
+	, m_invincibleTimeLimit(1.0f)
+	, m_knockBackVelocity(FVector::ZeroVector)
 
 {
 	//毎フレームTickを呼ぶか決めるフラグ
@@ -187,13 +191,13 @@ void APlayerCharacter::BeginPlay()
 	{
 		//念のため衝突対象クリア
 		m_sword->ClearCollisionObjectType();
-		//コリジョンプロファイル名の設定
+		//コリジョンpreset名の設定
 		m_sword->SetProfileName(FName("PlayerWeapon"));
 		//攻撃範囲の設定
 		m_sword->SetSwordAttackScale(m_attackRadius);
 		//攻撃時間の設定
 		m_sword->SetAttackTime(1.f);
-		//コールバック関数の登録
+		//振り終わりのコールバック関数登録
 		m_sword->RegisterSwingEndCallback(CreateSwingEndCallback(APlayerCharacter::OnAttackEnd));
 	}
 
@@ -457,7 +461,13 @@ void APlayerCharacter::UpdateAttack(float _deltaTime)
 //----------------------------------------------------------
 void APlayerCharacter::UpdateDamaged(float _deltaTime)
 {
-
+	//一定時間経過したらアイドルに戻す
+	//無敵時間タイマーはダメージ処理時起動するため使用
+	if (m_invincibleTimer > m_damageTime)
+	{
+		m_status = EPlayerStatus::Idle;
+		m_knockBackVelocity = FVector::ZeroVector;
+	}		
 }
 
 //----------------------------------------------------------
@@ -524,6 +534,20 @@ void APlayerCharacter::UpdateCheckEnemyDetection()
 	if (!m_pNearestEnemy->IsPlayerFound()) { return; }
 	//ここでUIの呼び出し
 
+}
+
+//----------------------------------------------------------
+// 無敵時間の更新
+//----------------------------------------------------------
+void APlayerCharacter::UpdateInvincibleTime(float _deltaTime)
+{
+	if (!m_bInvincible) { return; }
+	m_invincibleTimer += _deltaTime;
+	if (m_invincibleTimer > m_invincibleTimeLimit)
+	{
+		m_bInvincible = false;
+		m_invincibleTimer = 0.f;
+	}
 }
 
 //----------------------------------------------------------
@@ -605,6 +629,28 @@ void APlayerCharacter::OnAttackEnd()
 {
 	m_bCanAttack = false;
 	m_attackCount = 0.f;
+}
+
+//-----------------------------------------------------
+//ダメージ処理
+//-----------------------------------------------------
+void APlayerCharacter::OnDamage(const int& _damage)
+{
+	//無敵時間中ならダメージを受けない
+	if (m_bInvincible) { return; }
+	//ダメージ処理
+	//UE_LOG(LogTemp, Log, TEXT("Player Damaged : %d"), _damage);
+	
+	//入力制御
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC)
+	{
+		PC->SetIgnoreMoveInput(true);   // 止める
+	}
+	//無敵時間開始
+	m_bInvincible = true;
+	m_invincibleTimer = 0.f;
+	m_status = EPlayerStatus::Damage;	
 }
 
 //-----------------------------------------------------
@@ -725,9 +771,10 @@ void APlayerCharacter::Enhanced_Attack(const FInputActionValue& Value)
 	m_status = EPlayerStatus::Attack;
 	m_bCanAttack=true;
 	//一番近くの敵がプイレイヤーを見つけていればスニークキルするか判定
+	//nullなら敵がいない
 	if (m_pNearestEnemy) 
 	{ 
-		//みつかっていればリターン
+		//みつかっていればスニークキル失敗
 		if(m_pNearestEnemy->IsPlayerFound()) { 
 			m_bSneakKill=false; 
 		}
@@ -735,19 +782,17 @@ void APlayerCharacter::Enhanced_Attack(const FInputActionValue& Value)
 		{
 			//敵までのベクトル
 			FVector toEnemyVector = FVector{m_pNearestEnemy->GetActorLocation()- GetActorLocation() }.GetSafeNormal();
+			//プレイヤーの正面ベクトル
 			FVector forwardVector =  GetMesh()->GetRightVector();     // = Y軸
 
-
-			//内積を求める
+			//ベクトルの差を-1~1の範囲で取得
+			//1に近いほど正面同士
 			const float dot = FVector::DotProduct(toEnemyVector, forwardVector);
-			const float maxAngle = 0.4f;
-
-			//1~0.4以上なら
-			if (dot > maxAngle)
+			const float minAngle = 0.4f;
+			if (dot > minAngle)
 			{
 				m_bSneakKill = true;
 			}
-			//0.4未満ならスニークキル不可
 			else
 			{
 				m_bSneakKill = false;
@@ -907,14 +952,18 @@ void APlayerCharacter::OnBeginOverlap(
 	UE_LOG(LogTemp, Display, TEXT("unnti"));
 
 	if (OtherActor) {
-		if(OtherComp->ComponentHasTag(TEXT("Shadow"))==false)
+		//影オブジェクトと衝突したか
+		if(OtherComp->ComponentHasTag(TEXT("Shadow"))==true)
 		{
-			return;
+			//衝突対象を追加
+			m_hitActors.Add(OtherActor);
+			m_bOnShadow = true;
 		}
-		//衝突対象を追加
-		m_hitActors.Add(OtherActor);
-		m_bOnShadow = true;
 
+		if(OtherComp->ComponentHasTag(TEXT("EnemyWeapon"))==true)
+		{
+			OnDamage(1);
+		}
 	}
 }
 
