@@ -32,6 +32,7 @@
 #include "Light/ExtendedSpotLight.h"							//ライト情報を取得するため
 
 #include "EnemyManager/EnemyManager.h"
+#include "Enemy/EnemyBase_1.h"
 
 #include "Sword/SwordAttackComponent.h"							//剣用
 //-----------------------------------------------------------
@@ -293,7 +294,8 @@ void AEnemy_1::BeginPlay()
 	);
 
 	m_spotLightInstance->SetActorRotation(FRotator{ -110.,0.,0. });
-
+	m_spotLightInstance->SetActorLocation(m_spotLightInstance->GetActorLocation() + FVector{0.,0.,50.});
+                   
 	//エネミーマネージャー登録
 	UEnemyManager* enemyManager = GetWorld()->GetSubsystem<UEnemyManager>();
 	if (enemyManager)
@@ -316,6 +318,9 @@ void AEnemy_1::BeginPlay()
 		//
 		m_sword->RegisterSwingEndCallback(CreateSwingEndCallback(AEnemy_1::OnAttackEnd));
 	}
+
+	//
+	m_enemyPos_Return = GetActorLocation();
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -378,6 +383,9 @@ void AEnemy_1::Tick(float DeltaTime)
 
 	//ステータス管理処理
 	UpdateStatus(DeltaTime);
+
+	//
+	m_pEnemyBase->UpdateVisiblity(this);
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -1557,8 +1565,6 @@ void AEnemy_1::CaseMiss(float _deltaTime)
 	{
 		//
 		UE_LOG(LogTemp, Warning, TEXT("Miss"));
-		m_currentChaseSpeed = m_chaseSpeed_Normal;	//追跡速度の変更
-		GetCharacterMovement()->MaxWalkSpeed = m_currentChaseSpeed;
 		m_missCheck = true;//失踪中
 		m_visionCheck = false;
 		m_noiseCheck = false;

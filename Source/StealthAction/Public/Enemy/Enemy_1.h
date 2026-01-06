@@ -18,6 +18,7 @@ class AEnemy_Bullet_1;
 class AEnemy_Weapon_1;
 class AExtendedSpotLight;
 class USwordAttackComponent;
+class UEnemyBase_1;
 
 //エネミーの状態
 UENUM(BlueprintType)
@@ -155,7 +156,7 @@ protected:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	USwordAttackComponent* m_sword;
 
-private:
+public:
 	UPROPERTY()
 	APlayerCharacter* m_pPlayerChara;	//プレイヤーキャラクターポインタ
 
@@ -167,6 +168,8 @@ private:
 	UPROPERTY()
 	TArray<AEnemy_Bullet_1*> m_pALLBullet_1;
 
+	UPROPERTY(EditAnywhere, Category = "EnemyBase")
+	UEnemyBase_1* m_pEnemyBase;			//銃ポインタ
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UShadowComponent* m_pShadow;  //影

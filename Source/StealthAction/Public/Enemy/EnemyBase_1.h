@@ -14,4 +14,12 @@ class STEALTHACTION_API UEnemyBase_1 : public UWorldSubsystem
 {
 	GENERATED_BODY()
 	
+public:
+	//コンストラクタ
+	UEnemyBase_1();
+
+public:
+
+	//視界処理
+	void UpdateVisiblity(ACharacter* m_pEnemy);
 };
