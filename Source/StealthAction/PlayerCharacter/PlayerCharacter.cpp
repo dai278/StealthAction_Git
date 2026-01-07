@@ -27,6 +27,9 @@
 #include "CollisionQueryParams.h"
 #include "Engine/EngineTypes.h"
 #include "Engine/CollisionProfile.h"
+#include "GameInstance/PlayDataInfo.h"
+
+
 
 
 //----------------------------------------------------------
@@ -81,6 +84,7 @@ APlayerCharacter::APlayerCharacter()
 	, m_invincibleTimer(0.f)
 	, m_invincibleTimeLimit(1.0f)
 	, m_knockBackVelocity(FVector::ZeroVector)
+	, m_playerInfo(10)
 
 {
 	//毎フレームTickを呼ぶか決めるフラグ
@@ -121,7 +125,6 @@ APlayerCharacter::APlayerCharacter()
 
 	//剣の攻撃コンポーネント生成
 	m_sword = CreateDefaultSubobject<USwordAttackComponent>(TEXT("Sword"));
-
 	if (m_sword)
 	{
 		m_sword->SetupAttachment(GetMesh());
@@ -138,6 +141,7 @@ APlayerCharacter::APlayerCharacter()
 	}
 
 }
+
 
 //----------------------------------------------------------
 // BeginPlay（ゲーム開始時）
@@ -676,6 +680,15 @@ FVector APlayerCharacter::GetFeetLocation() const
 	targetPos.Z -= capselHeighiHalf;
 	return targetPos;
 }
+
+//------------------------------------------------------
+//プレイヤー情報取得
+//------------------------------------------------------
+FPlayerInfo& APlayerCharacter::GetPlayerInfo()
+{
+	return m_playerInfo;
+}
+
 
 //------------------------------------------------------
 //Y軸移動

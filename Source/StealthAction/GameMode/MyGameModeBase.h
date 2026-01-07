@@ -13,5 +13,10 @@ UCLASS()
 class STEALTHACTION_API AMyGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+
+public:
+	//void RestartPlayer(class AController* NewPlayer) override;
+
+
 	
 };

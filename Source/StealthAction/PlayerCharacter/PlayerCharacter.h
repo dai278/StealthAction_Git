@@ -11,8 +11,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GameInstance/PlayDataInfo.h"//プレイデータ構造体が複数あるものPlayerInfoのみ使用
 #include "PlayerCharacter.generated.h"
-
 
 //前方宣言
 class USpringArmComponent;
@@ -113,7 +113,8 @@ public:
 		int32 OtherBodyIndex
 	);
 
-
+	UFUNCTION()
+	FPlayerInfo& GetPlayerInfo();
 private:
 	//カメラ更新
 	void UpdateCamera(float _deltaTime);
@@ -370,5 +371,9 @@ private:
 	UNoiseListenerComponent* noise;
 	public:
 	void OnNoiseHeard(const int& _noiseVolume, const FVector& _pos);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info")
+	FPlayerInfo m_playerInfo; //プレイヤー情報構造体
+
 
 };
