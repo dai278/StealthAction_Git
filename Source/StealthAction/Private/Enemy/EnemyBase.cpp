@@ -53,7 +53,6 @@
 //----------------------------------------------------------
 AEnemyBase::AEnemyBase()
 	: m_pPlayerChara(NULL)
-	, m_HP(100)
 	, m_visiblityAngle(0.2)
 	, m_visionLevel(0)
 	, m_visionRange_Short(1000.0)
@@ -362,10 +361,10 @@ void AEnemyBase::Tick(float DeltaTime)
 	if (PC && PC->WasInputKeyJustPressed(EKeys::K))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[[]]K Pressed"));
-		m_HP = 0;
+		m_enemyInfo.hp = 0;
 	}
 	//Ž€–S”»’è
-	if (m_HP <= 0)
+	if (m_enemyInfo.hp <= 0)
 	{
 		m_enemyCurrentState = EEnemyStatus::Dead;
 		/*CaseDead(DeltaTime);
@@ -665,7 +664,7 @@ void AEnemyBase::ResetStateValues(float _deltaTime)
 //------------------------------------------------------------------------------------------------------------
 void AEnemyBase::UpdateStatus(float _deltaTime)
 {
-	if (m_HP <= 0)
+	if (m_enemyInfo.hp <= 0)
 	{
 		CaseDead(_deltaTime);
 		return;
@@ -1913,3 +1912,5 @@ void AEnemyBase::UpdateMove_Nav(float _deltaTime)
 		AIMove->MoveToLocation(m_enemyPos_Return, m_stopDistance_Nav, true, true, true, false);
 	}
 }
+
+

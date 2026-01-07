@@ -8,6 +8,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GameInstance/PlayDataInfo.h"
 #include "EnemyBase.generated.h"
 
 // 前方宣言
@@ -142,6 +143,10 @@ public:
 	//確認が取れてないので仮でfalse返す
 	//確認取れたらCpp側で実装予定
 	bool IsPlayerFound() const { return m_battleCheck; }
+	//エネミー情報の登録
+	void SetEnemyInfo(const FEnemyInfo& _EnemyInfo) { m_enemyInfo = _EnemyInfo; }
+	//エネミー情報の取得
+	FEnemyInfo GetEnemyInfo()const { return m_enemyInfo; }
 
 public:
 	//デバック用
@@ -174,10 +179,13 @@ public:
 
 		//基本ステータス
 		UPROPERTY(EditDefaultsOnly, Category = "Enemy_Status")
-		int m_HP;	//HP
-		UPROPERTY(EditDefaultsOnly, Category = "Enemy_Status")
 		float m_hitDamage;			//ダメージ量
 
+		//Enemy情報構造体
+		UPROPERTY(EditDefaultsOnly, Category = "Enemy_Status")
+		FEnemyInfo m_enemyInfo;
+		 
+		
 		//視界用
 		UPROPERTY(EditDefaultsOnly, Category = "Visiblity")
 		float m_visiblityAngle;			//視野角
