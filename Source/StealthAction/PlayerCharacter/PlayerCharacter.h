@@ -165,6 +165,8 @@ private:
 
 	//ダメージ処理
 	void OnDamage(const int& _damage);
+	//HP取得
+	int32 GetPlayerHP() const { return m_playerInfo.hp; }
 
 protected:
 	//---入力用---

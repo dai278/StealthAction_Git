@@ -12,6 +12,10 @@ struct FPlayerInfo
 	int32 hp = 100; // ‘Ì—Í
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
+	bool isAlive = true; // ¶‘¶‚µ‚Ä‚¢‚é‚©
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
 	bool bIsGetKeyItem = false; // Œ®ƒAƒCƒeƒ€‚ğæ“¾‚µ‚Ä‚¢‚é‚©
 };
 

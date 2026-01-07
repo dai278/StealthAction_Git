@@ -654,6 +654,14 @@ void APlayerCharacter::OnDamage(const int& _damage)
 	{
 		PC->SetIgnoreMoveInput(true);   // Ž~‚ß‚é
 	}
+	m_playerInfo.hp -= _damage;
+	
+	if (m_playerInfo.hp<0)
+	{
+		m_playerInfo.isAlive = false;
+		m_status = EPlayerStatus::Dead;
+		return;
+	}
 	//–³“GŽžŠÔŠJŽn
 	m_bInvincible = true;
 	m_invincibleTimer = 0.f;
