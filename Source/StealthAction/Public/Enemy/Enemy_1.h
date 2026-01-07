@@ -45,6 +45,9 @@
 //class STEALTHACTION_API AEnemy_1 : public ACharacter
 //{
 //
+//};
+//{
+//
 //	//エネミー情報格納用構造体
 //	//struct Enemy_1_INFO
 //	//{

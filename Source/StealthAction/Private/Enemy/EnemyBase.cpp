@@ -138,6 +138,8 @@ AEnemyBase::AEnemyBase()
 	, m_routeCounter(0)
 	, m_deadCheck(false)
 	, m_allTime(0)
+	, IsUseVisiblity(true)
+	, IsUseHearing(true)
 {
 	// 毎フレーム、このクラスのTick()を呼ぶかどうかを決めるフラグ
 	PrimaryActorTick.bCanEverTick = true;
@@ -395,7 +397,7 @@ void AEnemyBase::Tick(float DeltaTime)
 	//警戒の処理
 	UpdateAlert(DeltaTime);
 
-	//終了時処理
+	//リセット処理
 	ResetStateValues(DeltaTime);
 
 	//ステータス管理処理
@@ -462,6 +464,185 @@ void AEnemyBase::StartStateValues(float _deltaTime)
 
 	m_deltaTime = _deltaTime;
 	m_allTime += _deltaTime;
+}
+
+//------------------------------------------------------------------------------------------------------------
+//視界処理
+//------------------------------------------------------------------------------------------------------------
+void AEnemyBase::UpdateVisiblity(float _deltaTime)
+{
+	//プレイヤーキャラが見つからなければ終了
+	if (!m_pPlayerChara) { return; }
+
+	if (!IsUseVisiblity)
+	{
+		m_visionCheck = false;		//視界OF
+		return;
+	}
+
+	double distance = (m_playerPos - m_enemyPos).Length();			//プレイヤーとの距離を測る(Vectorの長さ）
+
+
+	//プレイヤーが探索距離に入っていなければ、探索失敗で終了
+	if (distance > m_visionRange_Long)
+	{
+		m_visionCheck = false;
+		return;
+	}
+
+	FVector Target_Vector_V = (m_playerPos - m_enemyPos).GetSafeNormal();			//エネミーからプレイヤーへのベクトル
+
+	float View_Value = FVector::DotProduct(m_enemyForward, Target_Vector_V);		//エネミー正面からプレイヤーへの角度
+
+	//プレイヤーが視界内に入っていなければ、探索失敗で終了
+	if (View_Value < m_visiblityAngle)
+	{
+		m_visionCheck = false;
+		return;
+	}
+
+	//レイを飛ばして敵とプレイヤーの間に遮蔽物がないかを確認
+	//コリジョン判定で無視する項目を指定（今回は敵キャラクター自身（this)）
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+	CollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
+	for (AEnemyBase* enemy : m_pOtherEnemyBase)
+	{
+		CollisionParams.AddIgnoredActor(enemy);
+	}
+
+	FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
+
+	//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
+	bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, m_playerPos, FCollisionObjectQueryParams::AllObjects, CollisionParams);
+
+	//ヒットするオブジェクトがある場合
+	if (isHit)
+	{
+		AActor* hitActor = HitCollision.GetActor();
+
+		//当たったコリジョンがプレイヤー以外だった場合
+		if (!hitActor->ActorHasTag("Player"))
+		{
+			//探索失敗で終了
+			m_visionCheck = false;
+			return;
+		}
+	}
+	else
+	{
+		//探索失敗で終了
+		m_visionCheck = false;
+		return;
+	}
+
+	//プレイヤーが影に入っているか？
+	m_playerShadowCheck = m_pPlayerChara->IsInShadow();
+
+	//入っている場合
+	if (m_playerShadowCheck)
+	{
+		//探索失敗で終了
+		m_visionCheck = false;
+		return;
+	}
+
+	m_visionCheck = true;			//視界内にプレイヤーが映っている
+
+	m_playerPos_LastSeen = m_playerPos;		//見えているときの座標を取得
+
+	//探索レベルの設定
+	//視界範囲（良）の場合
+	if (distance <= m_visionRange_Short)
+	{
+		m_visionLevel = 4;
+	}
+	//視界範囲（普）の場合
+	else if (distance <= m_visionRange_Normal)
+	{
+		m_visionLevel = 3;
+	}
+	//視界範囲（不）の場合
+	else if (distance <= m_visionRange_Long)
+	{
+		m_visionLevel = 2;
+	}
+
+	//警戒状態の場合
+	if (m_alertCheck)
+	{
+		m_visionLevel += 1;
+	}
+
+	//優先順位
+	if (m_visionLevel == 4 || m_visionLevel == 5)
+	{
+		m_cautionCheck = false;
+	}
+}
+
+//------------------------------------------------------------------------------------------------------------
+//聴覚処理
+//------------------------------------------------------------------------------------------------------------
+void AEnemyBase::UpdateHearing(float _deltaTime)
+{
+	if (!IsUseHearing)
+	{
+		m_noiseCheck = false;		//聴覚OF
+		return;
+	}
+
+	//
+	if (m_battleCheck)
+	{
+		m_noiseCheck = false;		//物音チェックOF
+		return;
+	}
+
+	double distance = (m_noise_Pos - m_enemyPos).Length();			//物音との距離を測る(Vectorの長さ）
+	double distance_keeper = (m_noise_Pos_keeper - m_enemyPos).Length();			//以前の物音との距離を測る(Vectorの長さ）
+
+	//物音が遠くでした場合
+	if (!m_noiseCheck && distance > m_hearingRange_Long)
+	{
+		m_noiseCheck = false;		//物音チェックOF
+		return;
+	}
+
+	//物音が出たはじめのみ
+	if (!m_noiseCheck && m_noiseLevel_keeper < 6)
+	{
+		m_noiseLevel_keeper = 0;//物音レベルをリセット
+		m_hearingTime = 0;		//聴覚時間リセット
+		m_noiseCheck = true;		//物音チェックON
+	}
+
+	m_hearingTime = _deltaTime;	//聴覚時間の更新
+
+	//音の更新
+	if (m_hearingTime < m_hearingTime_Limit)
+	{
+		//以前の物音が今の物音より小さい場合
+		if (m_noiseLevel_keeper <= m_noiseLevel)
+		{
+			m_noiseLevel_keeper = m_noiseLevel;			//物音レベルを更新
+			m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
+			m_hearingTime = 0;	//聴覚時間リセット
+		}
+		if (m_noiseLevel_keeper > 5 && m_noiseLevel_keeper != 0)
+		{
+			m_noiseLevel_keeper = m_noiseLevel;			//物音レベルを更新
+			m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
+			m_hearingTime = 0;	//聴覚時間リセット
+		}
+
+	}
+	else
+	{
+		m_noiseLevel_keeper = m_noiseLevel;			//物音レベルを更新
+		m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
+		m_hearingTime = 0;	//聴覚時間リセット
+	}
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -558,6 +739,33 @@ void AEnemyBase::UpdateSearch(float _deltaTime)
 	}
 
 
+}
+
+//------------------------------------------------------------------------------------------------------------
+//警戒の処理
+//------------------------------------------------------------------------------------------------------------
+void AEnemyBase::UpdateAlert(float _deltaTime)
+{
+	//アラートチェック
+	if (!m_alertCheck)
+	{
+		return;
+	}
+
+	//警戒時間の持続
+	if (m_enemyCurrentState == EEnemyStatus::Battle || m_enemyCurrentState == EEnemyStatus::Battle_Noise)
+	{
+		m_alertTime = 0;
+		return;
+	}
+
+	m_alertTime += _deltaTime;		//警戒時間の経過
+
+	//警戒時間が一定時間経過した場合
+	if (m_alertTime >= m_alertTime_Limit)
+	{
+		m_alertCheck = false;
+	}
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -714,281 +922,6 @@ void AEnemyBase::UpdateStatus(float _deltaTime)
 		break;
 	}
 
-}
-
-//
-//------------------------------------------------------------------------------------------------------------
-//攻撃の処理
-//------------------------------------------------------------------------------------------------------------
-void AEnemyBase::UpdateAttack(float _deltaTime)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Attack"));
-	//m_attackingTime += _deltaTime;
-
-	//m_pEnemy_Weapon->BulletFire(m_allTime, this);
-
-	m_sword->Swinging(false);
-}
-
-//------------------------------------------------------------------------------------------------------------
-//攻撃が終わったことを通知する処理
-//------------------------------------------------------------------------------------------------------------
-void AEnemyBase::OnAttackEnd()
-{
-
-}
-
-//------------------------------------------------------------------------------------------------------------
-//物音の受け取り
-//------------------------------------------------------------------------------------------------------------
-void AEnemyBase::OnNoiseHeard(const int& _noiseVolume, const FVector& _pos)
-{
-	//
-	if (_noiseVolume > 0)
-	{
-		m_noiseLevel = _noiseVolume + 1;
-		m_noise_Pos = _pos;
-	}
-	//巡回状態にならない場合があるため
-	else
-	{
-		m_noiseLevel = _noiseVolume;
-		m_noise_Pos = _pos;
-	}
-	//警戒状態の場合
-	if (m_alertCheck)
-	{
-		m_noiseLevel += 1;
-	}
-}
-
-//------------------------------------------------------------------------------------------------------------
-//衝突判定
-//------------------------------------------------------------------------------------------------------------
-void AEnemyBase::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	//オーバーラップしたのがプレイヤーの時のみ反応させたい
-	//PlayerCharaBp->Actor->Tagに設定したタグ「Player」で、プレイヤー識別する
-	if (OtherActor->ActorHasTag("Player"))
-	{
-		//プレイヤーにキャストしてアイテム獲得時のイベントを起こす
-		APlayerCharacter* pPlayer = Cast<APlayerCharacter>(OtherActor);
-		if (!pPlayer) { return; }		//NULLチェック
-
-	}
-}
-
-
-//------------------------------------------------------------------------------------------------------------
-//ダメージ処理
-//------------------------------------------------------------------------------------------------------------
-void AEnemyBase::OnDamage(const int& _damage, const FVector& _knockBackVector, const bool& _bSneakKill)
-{
-	//体力減少
-	//デバック用に死亡
-	m_deadCheck = false;
-	m_enemyCurrentState = EEnemyStatus::Dead;
-
-	if (_bSneakKill)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Sneak Kill"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Sneak Miss"));
-	}
-}
-//------------------------------------------------------------------------------------------------------------
-//警戒の処理
-//------------------------------------------------------------------------------------------------------------
-void AEnemyBase::UpdateAlert(float _deltaTime)
-{
-	//アラートチェック
-	if (!m_alertCheck)
-	{
-		return;
-	}
-
-	//警戒時間の持続
-	if (m_enemyCurrentState == EEnemyStatus::Battle || m_enemyCurrentState == EEnemyStatus::Battle_Noise)
-	{
-		m_alertTime = 0;
-		return;
-	}
-
-	m_alertTime += _deltaTime;		//警戒時間の経過
-
-	//警戒時間が一定時間経過した場合
-	if (m_alertTime >= m_alertTime_Limit)
-	{
-		m_alertCheck = false;
-	}
-}
-
-//------------------------------------------------------------------------------------------------------------
-//視界処理
-//------------------------------------------------------------------------------------------------------------
-void AEnemyBase::UpdateVisiblity(float _deltaTime)
-{
-	//プレイヤーキャラが見つからなければ終了
-	if (!m_pPlayerChara) { return; }
-
-	double distance = (m_playerPos - m_enemyPos).Length();			//プレイヤーとの距離を測る(Vectorの長さ）
-
-
-	//プレイヤーが探索距離に入っていなければ、探索失敗で終了
-	if (distance > m_visionRange_Long)
-	{
-		m_visionCheck = false;
-		return;
-	}
-
-	FVector Target_Vector_V = (m_playerPos - m_enemyPos).GetSafeNormal();			//エネミーからプレイヤーへのベクトル
-
-	float View_Value = FVector::DotProduct(m_enemyForward, Target_Vector_V);		//エネミー正面からプレイヤーへの角度
-
-	//プレイヤーが視界内に入っていなければ、探索失敗で終了
-	if (View_Value < m_visiblityAngle)
-	{
-		m_visionCheck = false;
-		return;
-	}
-
-	//レイを飛ばして敵とプレイヤーの間に遮蔽物がないかを確認
-	//コリジョン判定で無視する項目を指定（今回は敵キャラクター自身（this)）
-	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(this);
-	CollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
-	for (AEnemyBase* enemy : m_pOtherEnemyBase)
-	{
-		CollisionParams.AddIgnoredActor(enemy);
-	}
-
-	FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
-
-	//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
-	bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, m_playerPos, FCollisionObjectQueryParams::AllObjects, CollisionParams);
-
-	//ヒットするオブジェクトがある場合
-	if (isHit)
-	{
-		AActor* hitActor = HitCollision.GetActor();
-
-		//当たったコリジョンがプレイヤー以外だった場合
-		if (!hitActor->ActorHasTag("Player"))
-		{
-			//探索失敗で終了
-			m_visionCheck = false;
-			return;
-		}
-	}
-	else
-	{
-		//探索失敗で終了
-		m_visionCheck = false;
-		return;
-	}
-
-	//プレイヤーが影に入っているか？
-	m_playerShadowCheck = m_pPlayerChara->IsInShadow();
-
-	//入っている場合
-	if (m_playerShadowCheck)
-	{
-		//探索失敗で終了
-		m_visionCheck = false;
-		return;
-	}
-
-	m_visionCheck = true;			//視界内にプレイヤーが映っている
-
-	m_playerPos_LastSeen = m_playerPos;		//見えているときの座標を取得
-
-	//探索レベルの設定
-	//視界範囲（良）の場合
-	if (distance <= m_visionRange_Short)
-	{
-		m_visionLevel = 4;
-	}
-	//視界範囲（普）の場合
-	else if (distance <= m_visionRange_Normal)
-	{
-		m_visionLevel = 3;
-	}
-	//視界範囲（不）の場合
-	else if (distance <= m_visionRange_Long)
-	{
-		m_visionLevel = 2;
-	}
-
-	//警戒状態の場合
-	if (m_alertCheck)
-	{
-		m_visionLevel += 1;
-	}
-
-	//優先順位
-	if (m_visionLevel == 4 || m_visionLevel == 5)
-	{
-		m_cautionCheck = false;
-	}
-}
-
-//------------------------------------------------------------------------------------------------------------
-//聴覚処理
-//------------------------------------------------------------------------------------------------------------
-void AEnemyBase::UpdateHearing(float _deltaTime)
-{
-	//
-	if (m_battleCheck)
-	{
-		m_noiseCheck = false;		//物音チェックOF
-		return;
-	}
-	double distance = (m_noise_Pos - m_enemyPos).Length();			//物音との距離を測る(Vectorの長さ）
-	double distance_keeper = (m_noise_Pos_keeper - m_enemyPos).Length();			//以前の物音との距離を測る(Vectorの長さ）
-
-	//物音が遠くでした場合
-	if (!m_noiseCheck && distance > m_hearingRange_Long)
-	{
-		m_noiseCheck = false;		//物音チェックOF
-		return;
-	}
-
-	//物音が出たはじめのみ
-	if (!m_noiseCheck && m_noiseLevel_keeper < 6)
-	{
-		m_noiseLevel_keeper = 0;//物音レベルをリセット
-		m_hearingTime = 0;		//聴覚時間リセット
-		m_noiseCheck = true;		//物音チェックON
-	}
-
-	m_hearingTime = _deltaTime;	//聴覚時間の更新
-
-	//音の更新
-	if (m_hearingTime < m_hearingTime_Limit)
-	{
-		//以前の物音が今の物音より小さい場合
-		if (m_noiseLevel_keeper <= m_noiseLevel)
-		{
-			m_noiseLevel_keeper = m_noiseLevel;			//物音レベルを更新
-			m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
-			m_hearingTime = 0;	//聴覚時間リセット
-		}
-		if (m_noiseLevel_keeper > 5 && m_noiseLevel_keeper != 0)
-		{
-			m_noiseLevel_keeper = m_noiseLevel;			//物音レベルを更新
-			m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
-			m_hearingTime = 0;	//聴覚時間リセット
-		}
-
-	}
-	else
-	{
-		m_noiseLevel_keeper = m_noiseLevel;			//物音レベルを更新
-		m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
-		m_hearingTime = 0;	//聴覚時間リセット
-	}
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -1913,4 +1846,84 @@ void AEnemyBase::UpdateMove_Nav(float _deltaTime)
 	}
 }
 
+//------------------------------------------------------------------------------------------------------------
+//攻撃の処理
+//------------------------------------------------------------------------------------------------------------
+void AEnemyBase::UpdateAttack(float _deltaTime)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Attack"));
+	//m_attackingTime += _deltaTime;
 
+	//m_pEnemy_Weapon->BulletFire(m_allTime, this);
+
+	m_sword->Swinging(false);
+}
+
+//------------------------------------------------------------------------------------------------------------
+//攻撃が終わったことを通知する処理
+//------------------------------------------------------------------------------------------------------------
+void AEnemyBase::OnAttackEnd()
+{
+
+}
+
+//------------------------------------------------------------------------------------------------------------
+//物音の受け取り
+//------------------------------------------------------------------------------------------------------------
+void AEnemyBase::OnNoiseHeard(const int& _noiseVolume, const FVector& _pos)
+{
+	//
+	if (_noiseVolume > 0)
+	{
+		m_noiseLevel = _noiseVolume + 1;
+		m_noise_Pos = _pos;
+	}
+	//巡回状態にならない場合があるため
+	else
+	{
+		m_noiseLevel = _noiseVolume;
+		m_noise_Pos = _pos;
+	}
+	//警戒状態の場合
+	if (m_alertCheck)
+	{
+		m_noiseLevel += 1;
+	}
+}
+
+//------------------------------------------------------------------------------------------------------------
+//衝突判定
+//------------------------------------------------------------------------------------------------------------
+void AEnemyBase::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	//オーバーラップしたのがプレイヤーの時のみ反応させたい
+	//PlayerCharaBp->Actor->Tagに設定したタグ「Player」で、プレイヤー識別する
+	if (OtherActor->ActorHasTag("Player"))
+	{
+		//プレイヤーにキャストしてアイテム獲得時のイベントを起こす
+		APlayerCharacter* pPlayer = Cast<APlayerCharacter>(OtherActor);
+		if (!pPlayer) { return; }		//NULLチェック
+
+	}
+}
+
+
+//------------------------------------------------------------------------------------------------------------
+//ダメージ処理
+//------------------------------------------------------------------------------------------------------------
+void AEnemyBase::OnDamage(const int& _damage, const FVector& _knockBackVector, const bool& _bSneakKill)
+{
+	//体力減少
+	//デバック用に死亡
+	m_deadCheck = false;
+	m_enemyCurrentState = EEnemyStatus::Dead;
+
+	if (_bSneakKill)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Sneak Kill"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Sneak Miss"));
+	}
+}

@@ -154,7 +154,7 @@ public:
 	USwordAttackComponent* m_sword;
 
 	// ライトSpawn  Attach
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AExtendedSpotLight> m_spotLightClass;   // 生成に使うライトBPクラス
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = "true"))
@@ -168,32 +168,32 @@ public:
 
 		TArray<AEnemyBase*> m_pOtherEnemyBase;	//その他のエネミー_1ポインタ
 
-		UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+		UPROPERTY(EditAnywhere, Category = "Weapon")
 		AEnemy_Weapon_1* m_pEnemy_Weapon;			//銃ポインタ
 
 		UPROPERTY()
 		TArray<AEnemy_Bullet_1*> m_pALLBullet_1;
 
-		UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+		UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 		UShadowComponent* m_pShadow;  //影
 
 		//基本ステータス
-		UPROPERTY(EditDefaultsOnly, Category = "Enemy_Status")
+		UPROPERTY(EditAnywhere, Category = "Enemy_Status")
 		float m_hitDamage;			//ダメージ量
 
 		//Enemy情報構造体
-		UPROPERTY(EditDefaultsOnly, Category = "Enemy_Status")
+		UPROPERTY(EditAnywhere, Category = "Enemy_Status")
 		FEnemyInfo m_enemyInfo;
 		 
 		
 		//視界用
-		UPROPERTY(EditDefaultsOnly, Category = "Visiblity")
+		UPROPERTY(EditAnywhere, Category = "Visiblity")
 		float m_visiblityAngle;			//視野角
-		UPROPERTY(EditDefaultsOnly, Category = "Visiblity")
+		UPROPERTY(EditAnywhere, Category = "Visiblity")
 		double m_visionRange_Short;		//視界範囲(近い)
-		UPROPERTY(EditDefaultsOnly, Category = "Visiblity")
+		UPROPERTY(EditAnywhere, Category = "Visiblity")
 		double m_visionRange_Normal;	//視界範囲(普)
-		UPROPERTY(EditDefaultsOnly, Category = "Visiblity")
+		UPROPERTY(EditAnywhere, Category = "Visiblity")
 		double m_visionRange_Long;		//視界範囲(遠い)
 
 		int m_visionLevel;				//視界レベル
@@ -201,14 +201,14 @@ public:
 
 
 		//聴覚用
-		UPROPERTY(EditDefaultsOnly, Category = "Hearing")
+		UPROPERTY(EditAnywhere, Category = "Hearing")
 		double m_hearingRange_Short;	//聴覚範囲(良)
-		UPROPERTY(EditDefaultsOnly, Category = "Hearing")
+		UPROPERTY(EditAnywhere, Category = "Hearing")
 		double m_hearingRange_Normal;	//聴覚範囲(普)
-		UPROPERTY(EditDefaultsOnly, Category = "Hearing")
+		UPROPERTY(EditAnywhere, Category = "Hearing")
 		double m_hearingRange_Long;	//聴覚範囲(不)
 
-		UPROPERTY(EditDefaultsOnly, Category = "Hearing")
+		UPROPERTY(EditAnywhere, Category = "Hearing")
 		double m_stopDistance_Noise;		//音に近づける限界距離
 
 		bool m_noiseCheck;					//物音チェック
@@ -219,49 +219,49 @@ public:
 
 
 		//時間関連
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_patrolTime_Limit;	//巡回時間制限
 
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_patrol_TurningTime_Limit;			//巡回旋回時間制限
 
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_patrol_TurningCheckingTime_Limit;	//巡回旋回時間制限
 
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_doubtTime_Limit;			//疑念時間制限
 
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_doubtNoiseTime_Limit;			//疑念時間制限
 
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_cautionTime_Limit;			//注意時間制限
 
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_cautionNoiseTime_Limit;			//注意時間制限
 
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_battleTime_Limit;			//戦闘時間制限
 
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_battleFalseTime_Limit;			//戦闘時間制限
 
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_battleNoiseTime_Limit;			//戦闘時間制限
 
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_alertTime_Limit;			//警戒時間制限
 
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_missTime_Limit;			//失踪時間制限
 
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_returnTime_Limit;			//帰還時間制限
 
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_hearingTime_Limit;			//聴覚時間制限
 
-		UPROPERTY(EditDefaultsOnly, Category = "Time")
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_attackingTime_Limit;			//攻撃時間制限
 
 
@@ -281,22 +281,22 @@ public:
 		double m_attackingTime;				//攻撃時間
 
 		//移動関連
-		UPROPERTY(EditDefaultsOnly, Category = "Chase")
+		UPROPERTY(EditAnywhere, Category = "Chase")
 		float m_chaseSpeed_Slow;			//追跡速度(遅い)
-		UPROPERTY(EditDefaultsOnly, Category = "Chase")
+		UPROPERTY(EditAnywhere, Category = "Chase")
 		float m_chaseSpeed_Normal;			//追跡速度(普通)
-		UPROPERTY(EditDefaultsOnly, Category = "Chase")
+		UPROPERTY(EditAnywhere, Category = "Chase")
 		float m_chaseSpeed_Fast;			//追跡速度(早い)
 
-		UPROPERTY(EditDefaultsOnly, Category = "Chase")
+		UPROPERTY(EditAnywhere, Category = "Chase")
 		float m_chaseRotSpeed;		//追跡中キャラ回転速度
-		UPROPERTY(EditDefaultsOnly, Category = "Chase")
+		UPROPERTY(EditAnywhere, Category = "Chase")
 		double m_stopDistance_Player;		//プレイヤーに近づける限界距離
-		UPROPERTY(EditDefaultsOnly, Category = "Chase")
+		UPROPERTY(EditAnywhere, Category = "Chase")
 		double m_stopDistance_2D;		//プレイヤーに近づける限界距離（2D）
-		UPROPERTY(EditDefaultsOnly, Category = "Chase")
+		UPROPERTY(EditAnywhere, Category = "Chase")
 		double m_stopDistance_Nav;		//プレイヤーに近づける限界距離（Nav）
-		UPROPERTY(EditDefaultsOnly, Category = "Chase")
+		UPROPERTY(EditAnywhere, Category = "Chase")
 		double m_attackDistance;	//攻撃範囲
 
 		float m_currentChaseSpeed;			//現在の追跡速度
@@ -338,9 +338,9 @@ public:
 		FVector m_playerPos_Nav_LastSeen;		//見えてた時のプレイヤーの座標（Nav）
 
 		//ルート関係
-		UPROPERTY(EditDefaultsOnly, Category = "Route")
+		UPROPERTY(EditAnywhere, Category = "Route")
 		bool m_randomRoute;			//ランダムパトロールか？
-		UPROPERTY(EditDefaultsOnly, Category = "Route")
+		UPROPERTY(EditAnywhere, Category = "Route")
 		int m_routeNum;			//ルート番号
 		FVector m_routePos;			//ルートの座標か？
 		int m_routeCounter;			//進行中のルート番号
@@ -349,12 +349,12 @@ public:
 
 
 		//巡回関係
-		UPROPERTY(EditDefaultsOnly, Category = "Patrol")
+		UPROPERTY(EditAnywhere, Category = "Patrol")
 		bool m_patrolCancel;			//巡回中動くか？
 
 		bool	m_patrol_TurningCheck;			//旋回しているか
 		int	m_patrol_TurnDirection;				//旋回方向の決定
-		UPROPERTY(EditDefaultsOnly, Category = "Patrol")
+		UPROPERTY(EditAnywhere, Category = "Patrol")
 		double m_stopDistance_Wall;				//壁に近づける距離
 
 		FVector m_enemyPos_XY_Wall[4];				//エネミーの上下左右の座標
@@ -376,12 +376,14 @@ public:
 		float m_deltaTime;
 		float m_allTime;
 
-		//
+		//Rayが無視するオブジェクト
 		FCollisionQueryParams DefaultCollisionParams;
 		FCollisionQueryParams BattleCollisionParams;
 
-		//
+
+		//視界を使うかどうか？
 		bool IsUseVisiblity;
+		//聴覚を使うかどうか？
 		bool IsUseHearing;
 
 };
