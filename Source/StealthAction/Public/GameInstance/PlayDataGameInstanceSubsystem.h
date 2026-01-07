@@ -22,11 +22,28 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	//ゲーム終了時一度のみ呼ばれる終了処理
 	virtual void Deinitialize() override;
+	
+	//プレイヤーの情報登録
+	void SetPlayerInfo(const FPlayerInfo _playInfo) { m_playDataInfo.PlayerInfo = _playInfo; }
+	
+	//エネミー情報の登録
+	void SetEnemyInfo(const TArray<FEnemyInfo> _enemyInfo)
+	{
+		//一度リセット
+		m_playDataInfo.EnemyInfo.Empty();
+		m_playDataInfo.EnemyInfo = _enemyInfo;
+	}
 
-private:
+	//クリアしたステージ
+
+
 	//プレイヤー情報の取得
 	UFUNCTION()
-	//FPlayerInfo GetPlayerInfo()const;
+	FPlayerInfo GetPlayerInfo()const { return m_playDataInfo.PlayerInfo; }//プレイヤー情報の取得
+	FEnemyInfo GetEnemyInfo(const int32 _index)const;//エネミー情報の取得 
+
+
+private:
 
 	//BeginPlay
 	void BeginPlayHandler(UWorld* World);

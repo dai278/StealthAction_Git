@@ -56,6 +56,9 @@ struct FPlayDataInfo
 	FPlayerInfo PlayerInfo; // プレイヤー情報
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
+	TArray< FEnemyInfo> EnemyInfo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
 	FCheckpointInfo CheckpointInfo; // チェックポイント情報
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
