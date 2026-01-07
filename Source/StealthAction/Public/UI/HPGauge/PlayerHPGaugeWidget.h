@@ -1,0 +1,30 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Blueprint/UserWidget.h"
+#include "PlayerHPGaugeWidget.generated.h"
+
+class UProgressBar;
+
+UCLASS()
+class STEALTHACTION_API UPlayerHPGaugeWidget : public UUserWidget
+{
+	GENERATED_BODY()
+
+protected:
+	//Widgetê∂ê¨éûÇ…åƒÇŒÇÍÇÈ
+	virtual void NativeConstruct() override;
+
+public:
+	//HPäÑçáÇê›íË
+	UFUNCTION(BlueprintCallable, Category = "HP")
+	void SetHPPercent(float Percent);
+
+protected:
+	//UMGë§ÇÃProgressBarÇ∆ïRÇ√ÇØÇÈ
+	UPROPERTY(meta = (BindWidget))
+	UProgressBar* HPProgressBar;
+
+};
