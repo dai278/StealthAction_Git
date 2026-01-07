@@ -2,7 +2,7 @@
 
 
 #include "EnemyManager/EnemyManager.h"
-#include "Enemy/Enemy_1.h"
+#include "Enemy/EnemyBase.h"
 
 //------------------------------------------------
 // コンストラクタ
@@ -24,7 +24,7 @@ void UEnemyManager::OnWorldBeginPlay(UWorld& )
 //------------------------------------------------
 //エネミー登録関数
 //------------------------------------------------
-void UEnemyManager::RegisterEnemy(AEnemy_1* _pEnemy)
+void UEnemyManager::RegisterEnemy(AEnemyBase* _pEnemy)
 {
 	if (!_pEnemy)
 	{
@@ -35,7 +35,7 @@ void UEnemyManager::RegisterEnemy(AEnemy_1* _pEnemy)
 	//エリア番号分の配列がないなら追加
 	while (m_pAllEnemies.Num() <= EriaNum)
 	{
-		m_pAllEnemies.Add(TArray<AEnemy_1*>());
+		m_pAllEnemies.Add(TArray<AEnemyBase*>());
 	}
 	//エリア配列にエネミーを追加
 	m_pAllEnemies[EriaNum].Add(_pEnemy);
@@ -44,7 +44,7 @@ void UEnemyManager::RegisterEnemy(AEnemy_1* _pEnemy)
 //------------------------------------------------
 //一番近いエネミー取得関
 //------------------------------------------------
-AEnemy_1* UEnemyManager::GetNearestEnemy(const FVector& _pos, const int32& _eriaNum, const float& _maxDistance) const
+AEnemyBase* UEnemyManager::GetNearestEnemy(const FVector& _pos, const int32& _eriaNum, const float& _maxDistance) const
 {
 	//エリア番号が配列外ならnullptrを返す
 	if (_eriaNum < 0 || m_pAllEnemies.Num() <= _eriaNum)
@@ -53,11 +53,11 @@ AEnemy_1* UEnemyManager::GetNearestEnemy(const FVector& _pos, const int32& _eria
 	}
 	//一番近いエネミーを探す
 	//return用変数
-	AEnemy_1* pNearestEnemy = nullptr;
+	AEnemyBase* pNearestEnemy = nullptr;
 	//最短距離保存するよう変数,初期値は最大値
 	float nearestDistance = TNumericLimits<float>::Max();
 	//エリア内のエネミー全てを確認
-	for (AEnemy_1* pEnemy : m_pAllEnemies[_eriaNum])
+	for (AEnemyBase* pEnemy : m_pAllEnemies[_eriaNum])
 	{
 		if (!pEnemy) { continue; }
 		//エネミーと指定座標の距離を計算

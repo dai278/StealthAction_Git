@@ -22,7 +22,7 @@
 #include "Noise/NoiseManager.h"
 #include "Light/ExtendedSpotLightManager.h"
 #include "EnemyManager/EnemyManager.h"
-#include"Enemy/Enemy_1.h"
+#include"Enemy/EnemyBase.h"
 #include "Sword/SwordAttackComponent.h"
 #include "CollisionQueryParams.h"
 #include "Engine/EngineTypes.h"

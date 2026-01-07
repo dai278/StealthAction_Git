@@ -3,7 +3,7 @@
 
 #include "Sword/SwordAttackComponent.h"
 #include "Components/SphereComponent.h"
-#include "Enemy/Enemy_1.h"
+#include "Enemy/EnemyBase.h"
 
 //コンストラクタ
 USwordAttackComponent::USwordAttackComponent()
@@ -215,7 +215,7 @@ void USwordAttackComponent::OnSwordBeginOverlap(
 	{
 		UE_LOG(LogTemp, Display, TEXT("Hitttttt"));
 		//ダメージ与える処理
-		Cast<AEnemy_1>(OtherActor)->OnDamage(m_damage, FVector::ZeroVector,m_bSneakKill);
+		Cast<AEnemyBase>(OtherActor)->OnDamage(m_damage, FVector::ZeroVector,m_bSneakKill);
 	}
 
 }

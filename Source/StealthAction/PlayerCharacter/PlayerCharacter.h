@@ -24,7 +24,7 @@ struct FInputActionValue;
 class UPrimitiveComponent;
 class UNoiseListenerComponent;
 class UEnemyManager;//エネミーの基底クラスにする日髙変更
-class AEnemy_1;
+class AEnemyBase;
 class UExtendedSpotLightManager;//拡張スポットライトマネージャーの前方宣言
 class USwordAttackComponent;//ソード攻撃コンポーネントの前方宣言
 
@@ -365,7 +365,7 @@ private:
 	UEnemyManager* m_pEnemyManager;//エネミーマネージャー毎フレーム検索は重いので
 	//拡張スポットライトマネージャーのアドレス
 	UExtendedSpotLightManager* m_pExtendedSpotLightManager;
-	AEnemy_1* m_pNearestEnemy;//一番近い敵のポインタ
+	AEnemyBase* m_pNearestEnemy;//一番近い敵のポインタ
 	
 	//デバック用
 	UNoiseListenerComponent* noise;

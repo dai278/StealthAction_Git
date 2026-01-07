@@ -1,7 +1,7 @@
 #include "UI/RadarMap/RadarWidget.h"
 
 #include "Kismet/GameplayStatics.h"
-#include "Enemy/Enemy_1.h"
+#include "Enemy/EnemyBase.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 
 #include "SlateCore.h"
@@ -83,7 +83,7 @@ int32 URadarWidget::NativePaint(
 	TArray<AActor*> Enemies;
 	UGameplayStatics::GetAllActorsOfClass(
 		GetWorld(),
-		AEnemy_1::StaticClass(),
+		AEnemyBase::StaticClass(),
 		Enemies
 	);
 
