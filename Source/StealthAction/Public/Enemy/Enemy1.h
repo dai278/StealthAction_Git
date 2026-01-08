@@ -1,4 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//----------------------------------------------------------
+// 概要				：エネミー1を制御するオブジェクト
+// 更新日　　　　 　：
+// 担当				：24CU0237廣川菖
+//----------------------------------------------------------
 
 #pragma once
 
@@ -14,4 +18,13 @@ class STEALTHACTION_API AEnemy1 : public AEnemyBase
 {
 	GENERATED_BODY()
 	
+public:
+	// コンストラクタ
+	AEnemy1();
+
+protected:
+	// ゲームスタート時、または生成時に呼ばれる処理
+	virtual void BeginPlay() override;
+//
+//public:
 };

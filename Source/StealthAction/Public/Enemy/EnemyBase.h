@@ -1,5 +1,5 @@
 //----------------------------------------------------------
-// 概要				：エネミー1を制御するオブジェクト
+// 概要				：エネミーを制御するオブジェクト
 // 更新日　　　　 　：
 // 担当				：24CU0237廣川菖
 //----------------------------------------------------------
@@ -377,8 +377,6 @@ public:
 		float m_allTime;
 
 		//Rayが無視するオブジェクト
-		FCollisionQueryParams DefaultCollisionParams;
-		FCollisionQueryParams BattleCollisionParams;
 
 
 		//視界を使うかどうか？

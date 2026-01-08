@@ -1,5 +1,5 @@
 //----------------------------------------------------------
-// 概要				：エネミー1を制御するオブジェクト
+// 概要				：エネミーを制御するオブジェクト
 // 更新日　　　　 　：
 // 担当				：24CU0237廣川菖
 //----------------------------------------------------------
@@ -8,8 +8,6 @@
 #include "Enemy/EnemyBase.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"		//プレイヤーも情報を参照するため
 #include "Components/CapsuleComponent.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Kismet/GameplayStatics.h"
 #include "Engine/World.h" 
 
 #include "GameFramework/CharacterMovementComponent.h"
@@ -26,27 +24,19 @@
 
 #include "Enemy_Route/Enemy_RouteManager.h"						//ルート検索用
 
+#include "Enemy_Weapon/Enemy_Bullet/Enemy_BulletStorage_1.h"	//弾の格納庫
 #include "Enemy_Weapon/Enemy_Bullet/Enemy_Bullet_1.h"			//銃弾発射用
 #include "Enemy_Weapon/Enemy_Weapon_1.h"	
-
 #include "Light/ExtendedSpotLight.h"							//ライト情報を取得するため
-
 #include "EnemyManager/EnemyManager.h"
-#include "Enemy/EnemyBase.h"
-
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Sword/SwordAttackComponent.h"							//剣用
 //-----------------------------------------------------------
 //検証用
 //-----------------------------------------------------------
 #include "GameFramework/PlayerController.h"
 #include "InputCoreTypes.h"
-
-
-#include "Enemy_Weapon/Enemy_Weapon_1.h"			
-
-#include "Enemy_Weapon/Enemy_Bullet/Enemy_Bullet_1.h"
-#include "Enemy_Weapon/Enemy_Weapon_1.h"
-#include "Enemy_Weapon/Enemy_Bullet/Enemy_BulletStorage_1.h"
 
 //----------------------------------------------------------
 // コンストラクタ
@@ -260,86 +250,65 @@ void AEnemyBase::BeginPlay()
 	//ポインタを入力
 	m_pEnemy_Route = GetWorld()->GetSubsystem<UEnemy_RouteManager>()->AddRoute(m_routeNum, m_randomRoute);
 
-	//コメントアウトなおしたら治ったよ
-	//AActor* Weapon = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemy_Weapon_1::StaticClass());
-	//m_pEnemy_Weapon = Cast<AEnemy_Weapon_1>(Weapon);
-	if (m_pEnemy_Weapon)
-	{
-		m_pEnemy_Weapon->SetOwner(this);
-	}
+	////
+	//if (m_pEnemy_Weapon)
+	//{
+	//	m_pEnemy_Weapon->SetOwner(this);
+	//}
 
 
-	// ライトBPクラスが設定されていなければ何もしない
-	if (!m_spotLightClass) return;
+	//// ライトBPクラスが設定されていなければ何もしない
+	//if (!m_spotLightClass) return;
 
-	FActorSpawnParameters Params;
-	Params.Owner = this;
-	Params.Instigator = GetInstigator();
-	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	//FActorSpawnParameters Params;
+	//Params.Owner = this;
+	//Params.Instigator = GetInstigator();
+	//Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	// 生成（初期位置は敵の位置）
-	m_spotLightInstance = GetWorld()->SpawnActor<AExtendedSpotLight>(
-		m_spotLightClass,
-		GetActorLocation(),
-		GetActorRotation(),
-		Params
-	);
+	//// 生成（初期位置は敵の位置）
+	//m_spotLightInstance = GetWorld()->SpawnActor<AExtendedSpotLight>(
+	//	m_spotLightClass,
+	//	GetActorLocation(),
+	//	GetActorRotation(),
+	//	Params
+	//);
 
-	if (!m_spotLightInstance) return;
+	//if (!m_spotLightInstance) return;
 
-	// 敵にアタッチ（敵のルートにくっつける）
-	m_spotLightInstance->AttachToComponent(
-		GetRootComponent(),
-		FAttachmentTransformRules::KeepWorldTransform
-	);
+	//// 敵にアタッチ（敵のルートにくっつける）
+	//m_spotLightInstance->AttachToComponent(
+	//	GetRootComponent(),
+	//	FAttachmentTransformRules::KeepWorldTransform
+	//);
 
-	m_spotLightInstance->SetActorRotation(FRotator{ -110.,0.,0. });
-	m_spotLightInstance->SetActorLocation(m_spotLightInstance->GetActorLocation() + FVector{ 0.,0.,50. });
+	//m_spotLightInstance->SetActorRotation(FRotator{ -110.,0.,0. });
+	//m_spotLightInstance->SetActorLocation(m_spotLightInstance->GetActorLocation() + FVector{ 0.,0.,50. });
 
-	//エネミーマネージャー登録
-	UEnemyManager* enemyManager = GetWorld()->GetSubsystem<UEnemyManager>();
-	if (enemyManager)
-	{
-		enemyManager->RegisterEnemy(this);
-	}
+	////エネミーマネージャー登録
+	//UEnemyManager* enemyManager = GetWorld()->GetSubsystem<UEnemyManager>();
+	//if (enemyManager)
+	//{
+	//	enemyManager->RegisterEnemy(this);
+	//}
 
 
-	//
-	if (m_sword)
-	{
-		//
-		m_sword->ClearCollisionObjectType();
-		//
-		m_sword->SetProfileName(FName("EnemyAttack"));
-		//
-		m_sword->SetSwordAttackScale(50.0);
-		//
-		m_sword->SetAttackTime(1.0);
-		//
-		m_sword->RegisterSwingEndCallback(CreateSwingEndCallback(AEnemyBase::OnAttackEnd));
-	}
+	////
+	//if (m_sword)
+	//{
+	//	//
+	//	m_sword->ClearCollisionObjectType();
+	//	//
+	//	m_sword->SetProfileName(FName("EnemyAttack"));
+	//	//
+	//	m_sword->SetSwordAttackScale(50.0);
+	//	//
+	//	m_sword->SetAttackTime(1.0);
+	//	//
+	//	m_sword->RegisterSwingEndCallback(CreateSwingEndCallback(AEnemyBase::OnAttackEnd));
+	//}
 
-	//
-	m_enemyPos_Return = GetActorLocation();
-
-	//レイを飛ばして敵とプレイヤーの間に遮蔽物がないかを確認
-	//コリジョン判定で無視する項目を指定（今回Visiblityの場合）	//
-	DefaultCollisionParams.AddIgnoredActor(m_pPlayerChara);
-	DefaultCollisionParams.AddIgnoredActor(this);
-	DefaultCollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
-	for (AEnemy_Bullet_1* bullet : m_pALLBullet_1)
-	{
-		DefaultCollisionParams.AddIgnoredActor(bullet);
-	}
-
-	//				
-	BattleCollisionParams.AddIgnoredActor(this);
-	BattleCollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
-	for (AEnemy_Bullet_1* bullet : m_pALLBullet_1)
-	{
-		BattleCollisionParams.AddIgnoredActor(bullet);
-	}
-
+	////
+	//m_enemyPos_Return = GetActorLocation();
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -963,6 +932,17 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 		//旋回中は呼ばない
 		if (!m_patrol_TurningCheck)
 		{
+			
+			FCollisionQueryParams DefaultCollisionParams;
+
+			DefaultCollisionParams.AddIgnoredActor(m_pPlayerChara);
+			DefaultCollisionParams.AddIgnoredActor(this);
+			DefaultCollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
+			for (AEnemy_Bullet_1* bullet : m_pALLBullet_1)
+			{
+				DefaultCollisionParams.AddIgnoredActor(bullet);
+			}
+
 			//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
 			bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, EnemyBaseForward_Pos, FCollisionObjectQueryParams::AllObjects, DefaultCollisionParams);
 
@@ -1000,6 +980,16 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 
 			for (int i = 0; i < 4; i++)
 			{
+				FCollisionQueryParams DefaultCollisionParams;
+
+				DefaultCollisionParams.AddIgnoredActor(m_pPlayerChara);
+				DefaultCollisionParams.AddIgnoredActor(this);
+				DefaultCollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
+				for (AEnemy_Bullet_1* bullet : m_pALLBullet_1)
+				{
+					DefaultCollisionParams.AddIgnoredActor(bullet);
+				}
+
 				//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
 				bool isHitXY = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, m_enemyPos_XY_Wall[i], FCollisionObjectQueryParams::AllObjects, DefaultCollisionParams);
 
@@ -1061,6 +1051,16 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 		//旋回中は呼ばない
 		if (!m_patrol_TurningCheck)
 		{
+			FCollisionQueryParams DefaultCollisionParams;
+
+			DefaultCollisionParams.AddIgnoredActor(m_pPlayerChara);
+			DefaultCollisionParams.AddIgnoredActor(this);
+			DefaultCollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
+			for (AEnemy_Bullet_1* bullet : m_pALLBullet_1)
+			{
+				DefaultCollisionParams.AddIgnoredActor(bullet);
+			}
+
 			//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
 			bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, EnemyBaseForward_Pos, FCollisionObjectQueryParams::AllObjects, DefaultCollisionParams);
 
@@ -1098,6 +1098,16 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 
 			for (int i = 0; i < 4; i++)
 			{
+				FCollisionQueryParams DefaultCollisionParams;
+
+				DefaultCollisionParams.AddIgnoredActor(m_pPlayerChara);
+				DefaultCollisionParams.AddIgnoredActor(this);
+				DefaultCollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
+				for (AEnemy_Bullet_1* bullet : m_pALLBullet_1)
+				{
+					DefaultCollisionParams.AddIgnoredActor(bullet);
+				}
+
 				//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
 				bool isHitXY = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, m_enemyPos_XY_Wall[i], FCollisionObjectQueryParams::AllObjects, DefaultCollisionParams);
 
@@ -1166,6 +1176,16 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 		m_routePos = m_pEnemy_Route[m_routeCounter]->GetActorLocation();
 
 		FHitResult HitCollision;	//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
+
+		FCollisionQueryParams DefaultCollisionParams;
+
+		DefaultCollisionParams.AddIgnoredActor(m_pPlayerChara);
+		DefaultCollisionParams.AddIgnoredActor(this);
+		DefaultCollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
+		for (AEnemy_Bullet_1* bullet : m_pALLBullet_1)
+		{
+			DefaultCollisionParams.AddIgnoredActor(bullet);
+		}
 
 		//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
 		bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, EnemyBaseForward_Pos, FCollisionObjectQueryParams::AllObjects, DefaultCollisionParams);
@@ -1421,7 +1441,7 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 	if (m_battleTime < m_battleTime_Limit)
 	{
 		//ひとつ前のステータスが巡回もしくは帰還以外だった場合
-		if (m_enemyCurrentState_Keeper != EEnemyStatus::Patrol && m_enemyCurrentState_Keeper != EEnemyStatus::Return)
+		if (m_enemyCurrentState_Keeper == EEnemyStatus::Miss)
 		{
 			m_battleTime = m_battleTime_Limit;				//発見猶予時間カット
 		}
@@ -1459,7 +1479,16 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 				FVector WeaponForwardVector = m_pEnemy_Weapon->GetActorForwardVector();
 				FVector WeaponForwardPos = WeaponPos + WeaponForwardVector * m_attackDistance;
 
+				
 				FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
+				
+				FCollisionQueryParams BattleCollisionParams;
+				BattleCollisionParams.AddIgnoredActor(this);
+				BattleCollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
+				for (AEnemy_Bullet_1* bullet : m_pALLBullet_1)
+				{
+					BattleCollisionParams.AddIgnoredActor(bullet);
+				}
 
 				//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
 				bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, WeaponPos, WeaponForwardPos, FCollisionObjectQueryParams::AllObjects, BattleCollisionParams);
@@ -1608,6 +1637,16 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 		FVector EnemyBaseForward_Pos = m_enemyPos + m_enemyForward * m_stopDistance_Wall;		//エネミーの正面,m_stopDistance_Wall先の座標
 
 		FHitResult HitCollision;	//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
+
+		FCollisionQueryParams DefaultCollisionParams;
+
+		DefaultCollisionParams.AddIgnoredActor(m_pPlayerChara);
+		DefaultCollisionParams.AddIgnoredActor(this);
+		DefaultCollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
+		for (AEnemy_Bullet_1* bullet : m_pALLBullet_1)
+		{
+			DefaultCollisionParams.AddIgnoredActor(bullet);
+		}
 
 		//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
 		bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, EnemyBaseForward_Pos, FCollisionObjectQueryParams::AllObjects, DefaultCollisionParams);
