@@ -4,31 +4,54 @@
 #include "UI/HPGauge/PlayerHPGaugeWidget.h"
 
 #include "Components/ProgressBar.h"
+#include "Kismet/GameplayStatics.h"
+#include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 
 void UPlayerHPGaugeWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// 初期値（満タン）
-	if (HPProgressBar)
+	// PlayerCharacter取得
+	PlayerCharacter = Cast<APlayerCharacter>(
+		UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)
+	);
+
+	if (!PlayerCharacter)
 	{
-		HPProgressBar->SetPercent(1.0f);
+		UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter not found"));
+		return;
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("HPProgressBar is not bound"));
-	}
+
+	// 最大HPを取得（初期値を最大HPとして扱う）
+	MaxHP = PlayerCharacter->GetPlayerInfo().hp;
+
+	// 初期表示
+	UpdateHP();
 }
 
-void UPlayerHPGaugeWidget::SetHPPercent(float Percent)
+void UPlayerHPGaugeWidget::NativeTick(
+	const FGeometry& MyGeometry,
+	float InDeltaTime
+)
 {
-	if (!HPProgressBar)
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	UpdateHP();
+}
+
+void UPlayerHPGaugeWidget::UpdateHP()
+{
+	if (!PlayerCharacter || !HPProgressBar || MaxHP <= 0)
 	{
 		return;
 	}
 
-	// 安全のため 0～1 にクランプ
-	const float ClampedPercent = FMath::Clamp(Percent, 0.0f, 1.0f);
-	HPProgressBar->SetPercent(ClampedPercent);
-}
+	const int32 CurrentHP = PlayerCharacter->GetPlayerInfo().hp;
+	const float HPPercent = FMath::Clamp(
+		static_cast<float>(CurrentHP) / static_cast<float>(MaxHP),
+		0.0f,
+		1.0f
+	);
 
+	HPProgressBar->SetPercent(HPPercent);
+}

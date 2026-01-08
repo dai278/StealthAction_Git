@@ -7,6 +7,7 @@
 #include "PlayerHPGaugeWidget.generated.h"
 
 class UProgressBar;
+class APlayerCharacter;
 
 UCLASS()
 class STEALTHACTION_API UPlayerHPGaugeWidget : public UUserWidget
@@ -14,17 +15,27 @@ class STEALTHACTION_API UPlayerHPGaugeWidget : public UUserWidget
 	GENERATED_BODY()
 
 protected:
-	//Widget生成時に呼ばれる
+	// Widget生成時
 	virtual void NativeConstruct() override;
 
-public:
-	//HP割合を設定
-	UFUNCTION(BlueprintCallable, Category = "HP")
-	void SetHPPercent(float Percent);
+	// 毎フレーム更新
+	virtual void NativeTick(
+		const FGeometry& MyGeometry,
+		float InDeltaTime
+	) override;
 
-protected:
-	//UMG側のProgressBarと紐づける
+private:
+	// HPバー（UMGのProgressBarとバインド）
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* HPProgressBar;
 
+	// プレイヤーキャラクター参照
+	UPROPERTY()
+	APlayerCharacter* PlayerCharacter;
+
+	// 最大HP（初期化時に取得）
+	int32 MaxHP;
+
+	// HP更新処理
+	void UpdateHP();
 };
