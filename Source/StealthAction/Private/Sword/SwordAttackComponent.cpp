@@ -4,6 +4,7 @@
 #include "Sword/SwordAttackComponent.h"
 #include "Components/SphereComponent.h"
 #include "Enemy/EnemyBase.h"
+#include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 
 //コンストラクタ
 USwordAttackComponent::USwordAttackComponent()
@@ -15,6 +16,7 @@ USwordAttackComponent::USwordAttackComponent()
 	, m_swordCollision(nullptr)
 	, m_bSneakKill(false)
 	, m_bIsSwinging(false)
+	, m_KnockBackValu(100000.f)
 {
 	//振っている間のみTick有効化、最初は無効化
 	PrimaryComponentTick.bCanEverTick = true;
@@ -208,14 +210,27 @@ void USwordAttackComponent::OnSwordBeginOverlap(
 {
 	if (!OtherActor || OtherActor == GetOwner()) return;
 
-	UE_LOG(LogTemp, Display, TEXT("Hitttttt"));
+	UE_LOG(LogTemp, Display, TEXT("NanikaniHit"));
+
+	//ノックバック
+	FVector knockBackvector = GetComponentLocation() - OtherActor->GetActorLocation();
+	knockBackvector.Z = 0.f;
+	knockBackvector = knockBackvector.GetSafeNormal();
+	knockBackvector *= m_KnockBackValu;
 
 	//ダメージ処理など
 	if(OtherActor->ActorHasTag(TEXT("Enemy")))
 	{
-		UE_LOG(LogTemp, Display, TEXT("Hitttttt"));
+		UE_LOG(LogTemp, Display, TEXT("Hit to Enemy"));
 		//ダメージ与える処理
-		Cast<AEnemyBase>(OtherActor)->OnDamage(m_damage, FVector::ZeroVector,m_bSneakKill);
+		Cast<AEnemyBase>(OtherActor)->OnDamage(m_damage, knockBackvector,m_bSneakKill);
+	}
+	if (OtherActor->ActorHasTag(TEXT("Player")))
+	{
+		UE_LOG(LogTemp, Display, TEXT("Hit to Player"));
+
+		//ダメージ与える処理
+		Cast<APlayerCharacter>(OtherActor)->OnDamage(m_damage, knockBackvector);
 	}
 
 }

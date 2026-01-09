@@ -115,6 +115,11 @@ public:
 
 	UFUNCTION()
 	FPlayerInfo GetPlayerInfo();
+
+
+	//ダメージ処理
+	void OnDamage(const int& _damage, const FVector& _knockBackVelocity);
+
 private:
 	//カメラ更新
 	void UpdateCamera(float _deltaTime);
@@ -162,9 +167,6 @@ private:
 
 	//攻撃終了コールバック
 	void OnAttackEnd();
-
-	//ダメージ処理
-	void OnDamage(const int& _damage);
 	//HP取得
 	int32 GetPlayerHP() const { return m_playerInfo.hp; }
 

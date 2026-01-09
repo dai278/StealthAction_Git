@@ -84,9 +84,10 @@ APlayerCharacter::APlayerCharacter()
 	, m_pExtendedSpotLightManager(nullptr)
 	, m_bInvincible(false)
 	, m_invincibleTimer(0.f)
-	, m_invincibleTimeLimit(1.0f)
+	, m_invincibleTimeLimit(3.0f)
 	, m_knockBackVelocity(FVector::ZeroVector)
-	, m_playerInfo(10)
+	, m_playerInfo()
+	,m_damageTime(1.f)
 
 {
 	//毎フレームTickを呼ぶか決めるフラグ
@@ -272,6 +273,9 @@ void APlayerCharacter::Tick(float _deltaTime)
 	UpdateCameraCollision();
 	//敵に見つかっているかとかの更新
 	UpdateCheckEnemyDetection();
+	//無敵時間の更新処理
+	UpdateInvincibleTime(_deltaTime);
+	
 
 	//視点変更
 	ViewpointSwitching(_deltaTime);
@@ -484,12 +488,18 @@ void APlayerCharacter::UpdateAttack(float _deltaTime)
 //----------------------------------------------------------
 void APlayerCharacter::UpdateDamaged(float _deltaTime)
 {
+	FVector vec = m_knockBackVelocity *= _deltaTime;
+	
+	LaunchCharacter(vec, true, false);
+	m_knockBackVelocity *= 0.9f;
+
 	//一定時間経過したらアイドルに戻す
 	//無敵時間タイマーはダメージ処理時起動するため使用
 	if (m_invincibleTimer > m_damageTime)
 	{
 		m_status = EPlayerStatus::Idle;
 		m_knockBackVelocity = FVector::ZeroVector;
+		m_bCanControl = true;
 	}		
 }
 
@@ -657,31 +667,34 @@ void APlayerCharacter::OnAttackEnd()
 //-----------------------------------------------------
 //ダメージ処理
 //-----------------------------------------------------
-void APlayerCharacter::OnDamage(const int& _damage)
+void APlayerCharacter::OnDamage(const int& _damage, const FVector& _knockBackVelocity)
 {
 	//無敵時間中ならダメージを受けない
 	if (m_bInvincible) { return; }
 	//ダメージ処理
 	//UE_LOG(LogTemp, Log, TEXT("Player Damaged : %d"), _damage);
-	
+	UE_LOG(LogTemp, Display, TEXT("hp："), m_playerInfo.hp);
+
 	//入力制御
-	APlayerController* PC = Cast<APlayerController>(GetController());
-	if (PC)
-	{
-		PC->SetIgnoreMoveInput(true);   // 止める
-	}
+	m_bCanControl = false;
+	//ダメージ
 	m_playerInfo.hp -= _damage;
-	
-	if (m_playerInfo.hp<0)
+	//Hpが0になったら死亡
+	if (m_playerInfo.hp<=0)
 	{
+		m_playerInfo.bIsGetKeyItem = 0;
 		m_playerInfo.isAlive = false;
 		m_status = EPlayerStatus::Dead;
 		return;
 	}
+	/*生きていれば*/
 	//無敵時間開始
 	m_bInvincible = true;
 	m_invincibleTimer = 0.f;
-	m_status = EPlayerStatus::Damage;	
+	m_status = EPlayerStatus::Damage;
+	m_knockBackVelocity = _knockBackVelocity;
+
+	UE_LOG(LogTemp, Display, TEXT("hp："),m_playerInfo.hp);
 }
 
 //-----------------------------------------------------
@@ -998,11 +1011,6 @@ void APlayerCharacter::OnBeginOverlap(
 			//衝突対象を追加
 			m_hitActors.Add(OtherActor);
 			m_bOnShadow = true;
-		}
-
-		if(OtherComp->ComponentHasTag(TEXT("EnemyWeapon"))==true)
-		{
-			OnDamage(1);
 		}
 	}
 }

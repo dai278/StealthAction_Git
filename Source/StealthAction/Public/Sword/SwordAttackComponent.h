@@ -41,6 +41,13 @@ public:
 	void SetSwordAttackScale(const float& _radius);
 	//持続時間設定
 	void SetAttackTime(const float& _time);
+	//ノックバックの大きさ登録
+	void SetKnockBackValu(const float& _knockBackValu) { m_KnockBackValu = _knockBackValu; }
+
+	//ノックバックの大きさ取得
+	float GetKnockBackValu()const { return m_KnockBackValu; }
+	//ダメージ取得
+
 	//剣を振る
 	//引数：ダメージ,判定持続時間,半径,
 	//攻撃二段目などに対応できるようオーバーロードも用意
@@ -77,6 +84,7 @@ private:
 	float m_radius;						//攻撃範囲の大きさ
 	float m_timer;						//持続時間タイマー
 	float m_swingEndTime;				//剣を振り終わる時間
-	bool m_bSneakKill;						//スニークキルかどうか
-	bool m_bIsSwinging;                   //剣を振っている最中かどうか
+	bool m_bSneakKill;					//スニークキルかどうか
+	bool m_bIsSwinging;                 //剣を振っている最中かどうか
+	float m_KnockBackValu;              //ノックバックの大きさ
 };
