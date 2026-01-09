@@ -29,14 +29,21 @@ public:
 	void RegisterEnemy(AEnemyBase* _pEnemy);
 	
 	//一番近いエネミー取得関数
-	AEnemyBase* GetNearestEnemy(const FVector& _pos,const int32& _eriaNum,const float& _maxDistance) const;
+	AEnemyBase* GetNearestEnemy(const FVector& _pos,const float& _maxDistance) const;
 	
+	//全エネミーの情報をPlayDataに記録する
+	void RegisterEnemyInfoAllToPlayData();
+
 	////エネミー全取得関数
 	//const TArray<EnemyBase*>& GetAllEnemy() const { return m_pAllEnemy_1; }
 
 private:
+
+	//全エネミーにエネミー情報を登録する関数
+	void SetEnemyInfoAll();
+
 	//エネミー配列
 	//　m_pAllEnemies[敵のいるエリア][そのエリアの敵全員]
-	TArray<TArray<AEnemyBase*>> m_pAllEnemies;
+	TArray<AEnemyBase*> m_pAllEnemies;
 	
 };

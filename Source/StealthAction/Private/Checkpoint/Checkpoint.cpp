@@ -5,11 +5,12 @@
 #include "Components/BoxComponent.h"
 #include "Checkpoint/CheckpointManager.h"
 
+
 //----------------------------------------------------------
 // コンストラクタ
 //----------------------------------------------------------
 ACheckpoint::ACheckpoint()
-	:m_index(0)
+	:m_checkpointInfo()
 	, m_pMesh(nullptr)
 	, m_pCollisionBox(nullptr)
 {
@@ -18,10 +19,17 @@ ACheckpoint::ACheckpoint()
 
 	//メッシュコンポーネントの生成
 	m_pMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	if (m_pMesh)
+	{
+	}
 
 	//コリジョンコンポーネントの生成
 	m_pCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
-
+	if (m_pCollisionBox && m_pMesh)
+	{
+		m_pCollisionBox->SetupAttachment(m_pMesh);
+		m_pCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ACheckpoint::OnBeginOverlap);
+	}
 }
 
 
@@ -38,7 +46,15 @@ void ACheckpoint::BeginPlay()
 	{
 		checkpointManager->AddCheckpoint(this);
 	}
+
+	m_checkpointInfo.Location = GetActorLocation();
 	
+	if (m_checkpointInfo.Index == checkpointManager->GetCurrentCheckpointIndex())
+	{
+		m_checkpointInfo.bHasCheckpoint = false;
+		m_pCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	}
 }
 
 //----------------------------------------------------------
@@ -55,7 +71,7 @@ void ACheckpoint::Tick(float DeltaTime)
 //----------------------------------------------------------
 int32 ACheckpoint::GetIndex() const
 {
-	return m_index;
+	return m_checkpointInfo.Index;
 }
 
 //----------------------------------------------------------
@@ -70,6 +86,8 @@ void ACheckpoint::OnBeginOverlap(
 	const FHitResult& SweepResult
 )
 {
+
+	UE_LOG(LogTemp, Display, TEXT("checkpointHit"));
 	//オーバーラップしたアクターがプレイヤーなら
 	//チェックポイントマネージャーに現在のチェックポイントを設定する
 	//(プレイヤー判定はActorのタグで行う)
@@ -78,8 +96,18 @@ void ACheckpoint::OnBeginOverlap(
 		UCheckpointManager* checkpointManager = GetWorld()->GetSubsystem<UCheckpointManager>();
 		if (checkpointManager)
 		{
-			checkpointManager->SetCurrentCheckpointIndex(m_index);
+			checkpointManager->SetCurrentCheckpointIndex(m_checkpointInfo.Index);
+			//ヒット時のコールバック関数の呼び出し
+			checkpointManager->OnOverlapCheckpoint();
 		}
 	}
 }
 
+//---------------------------------------------------
+//
+//---------------------------------------------------
+void ACheckpoint::SetHasCheckpoint(const bool _bHas)
+{
+	m_checkpointInfo.bHasCheckpoint = _bHas;
+	if (!_bHas) { m_pCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
+}

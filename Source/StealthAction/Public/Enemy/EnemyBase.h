@@ -1,5 +1,5 @@
 //----------------------------------------------------------
-// 概要				：エネミーを制御するオブジェクト
+// 概要				：エネミー1を制御するオブジェクト
 // 更新日　　　　 　：
 // 担当				：24CU0237廣川菖
 //----------------------------------------------------------
@@ -146,7 +146,10 @@ public:
 	//エネミー情報の登録
 	void SetEnemyInfo(const FEnemyInfo& _EnemyInfo) { m_enemyInfo = _EnemyInfo; }
 	//エネミー情報の取得
-	FEnemyInfo GetEnemyInfo()const { return m_enemyInfo; }
+	FEnemyInfo GetEnemyInfo() { 
+		m_enemyInfo.location = GetActorLocation();
+		return m_enemyInfo; 
+	}
 
 public:
 	//デバック用
@@ -377,6 +380,8 @@ public:
 		float m_allTime;
 
 		//Rayが無視するオブジェクト
+		FCollisionQueryParams DefaultCollisionParams;
+		FCollisionQueryParams BattleCollisionParams;
 
 
 		//視界を使うかどうか？

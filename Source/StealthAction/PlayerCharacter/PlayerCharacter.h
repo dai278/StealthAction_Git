@@ -114,7 +114,7 @@ public:
 	);
 
 	UFUNCTION()
-	FPlayerInfo& GetPlayerInfo();
+	FPlayerInfo GetPlayerInfo();
 private:
 	//ƒJƒƒ‰XV
 	void UpdateCamera(float _deltaTime);

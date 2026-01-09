@@ -21,8 +21,43 @@ void UPlayDataGameInstanceSubsystem::BeginPlayHandler(UWorld* World)
 	// ワールド開始時の処理
 }
 
+//------------------------------------------------
+//ステージクリアした時に呼ばれる関数
+//------------------------------------------------
+ void UPlayDataGameInstanceSubsystem::OnStageClear(const FName& _levelName)
+{
+	//クリアしたステージ名を保存
+	m_playDataInfo.ClearLevelNames.AddUnique(_levelName);
 
+	ResetCheckpointInfo();
+	ResetPlayerInfo();
+	ResetEnemyInfo();
+	m_playDataInfo.IsContinued = false;
+}
+
+ //------------------------------------------------
+ //ステージセレクトにもどった時に呼ばれる関数
+ //------------------------------------------------
+ void UPlayDataGameInstanceSubsystem::OnReturnToStageSelect()
+ {
+	 ResetCheckpointInfo();
+	 ResetPlayerInfo();
+	 ResetEnemyInfo();
+	 m_playDataInfo.IsContinued = false;
+ }
+
+//------------------------------------------------
+//コンテニュー時に呼ばれる関数
+//------------------------------------------------
+ void UPlayDataGameInstanceSubsystem::OnContinue()
+{
+	 m_playDataInfo.IsContinued = true;
+}
+
+
+//------------------------------------------------
 //エネミー情報取得
+
 FEnemyInfo UPlayDataGameInstanceSubsystem::GetEnemyInfo(const int32 _index)const
 {
 	

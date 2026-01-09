@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameInstance/PlayDataInfo.h"
 #include "Checkpoint.generated.h"
 
 class UBoxComponent;
@@ -28,6 +29,10 @@ public:
 public:
 	int32 GetIndex() const;
 
+	FCheckpointInfo GetCheckpointInfo()const { return m_checkpointInfo; }
+
+	void SetHasCheckpoint(const bool _bHas);
+	
 
 	//プレイヤーとオーバーラップした瞬間のイベント関数
 	UFUNCTION()
@@ -40,6 +45,8 @@ public:
 		const FHitResult& SweepResult
 	);
 
+	void SetCheckPointInfo(const FCheckpointInfo& _info) { m_checkpointInfo = m_checkpointInfo; }
+
 private:
 	//メッシュコンポーネント
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Checkpoint", meta = (AllowPrivateAccess = "true"))
@@ -49,8 +56,8 @@ private:
 	UBoxComponent* m_pCollisionBox;
 
 
+	//チェックポイントの情報
+	UPROPERTY(EditAnywhere, Category = "info")
+	FCheckpointInfo m_checkpointInfo;
 
-	//チェックポイントのインデックス
-	UPROPERTY(EditAnywhere, Category = "Index")
-	int32 m_index;
 };

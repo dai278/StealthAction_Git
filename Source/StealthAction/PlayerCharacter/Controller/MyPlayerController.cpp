@@ -3,22 +3,32 @@
 
 #include "StealthAction/PlayerCharacter/Controller/MyPlayerController.h"
 
+#include "UI/RadarMap/RadarWidget.h"
 #include "Blueprint/UserWidget.h"
-#include "Kismet/GameplayStatics.h"
-#include "UI/HUD/HUDWidget.h"
 
 void AMyPlayerController::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
 
-	if (HUDWidgetClass)
-	{
-		HUDWidget = CreateWidget<UHUDWidget>(this, HUDWidgetClass);
-		if (HUDWidget)
-		{
-			HUDWidget->AddToViewport();
-		}
-	}
+    // レーダーUIのクラスが設定されていなければ何もしない
+    if (!RadarWidgetClass)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("RadarWidgetClass is not set"));
+        return;
+    }
+
+    // レーダーUI生成
+    RadarWidget = CreateWidget<URadarWidget>(this, RadarWidgetClass);
+    if (!RadarWidget)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Failed to create RadarWidget"));
+        return;
+    }
+
+    // 画面に追加
+    RadarWidget->AddToViewport();
+
+    UE_LOG(LogTemp, Warning, TEXT("RadarWidget created and added to viewport"));
 }
 
 void AMyPlayerController::Tick(float DeltaSeconds)

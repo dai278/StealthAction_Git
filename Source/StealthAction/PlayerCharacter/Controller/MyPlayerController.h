@@ -6,7 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "MyPlayerController.generated.h"
 
-class UHUDWidget;
+class URadarWidget;
 
 UCLASS()
 class STEALTHACTION_API AMyPlayerController : public APlayerController
@@ -18,11 +18,11 @@ protected:
     virtual void Tick(float DeltaSeconds) override;
 
 private:
-	// HUD（InGame UI 全体）
-	UPROPERTY()
-	UHUDWidget* HUDWidget;
+    // レーダーUI
+    UPROPERTY()
+    URadarWidget* RadarWidget;
 
-	// HUD Widget クラス（BP指定）
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UHUDWidget> HUDWidgetClass;
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<URadarWidget> RadarWidgetClass;
+	
 };

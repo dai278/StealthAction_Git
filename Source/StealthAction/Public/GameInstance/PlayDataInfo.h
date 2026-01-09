@@ -14,7 +14,6 @@ struct FPlayerInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
 	bool isAlive = true; // 生存しているか
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
 	bool bIsGetKeyItem = false; // 鍵アイテムを取得しているか
 };
@@ -32,7 +31,13 @@ struct FCheckpointInfo
 	FName LevelName; // レベルの名前
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	FName CheckpointId; // ID
+	int32 Index; // ID
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
+	FVector Location;//位置
+
+
+
 };
 
 //エネミー情報構造体
@@ -49,6 +54,9 @@ struct FEnemyInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
 	bool bIsDead=false;	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
+	FVector location = FVector::ZeroVector;
 };
 
 USTRUCT(BlueprintType)
@@ -60,11 +68,14 @@ struct FPlayDataInfo
 	FPlayerInfo PlayerInfo; // プレイヤー情報
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	TArray< FEnemyInfo> EnemyInfo;
+	TArray<FEnemyInfo> EnemyInfo;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	FCheckpointInfo CheckpointInfo; // チェックポイント情報
+	FCheckpointInfo LastCheckpointInfo; // チェックポイント情報
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
 	TArray<FName> ClearLevelNames; // クリアしたレベル名
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
+	bool IsContinued = false; // コンテニューしたかどうか
 };

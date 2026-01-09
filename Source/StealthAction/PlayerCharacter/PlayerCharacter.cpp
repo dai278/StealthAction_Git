@@ -28,6 +28,8 @@
 #include "Engine/EngineTypes.h"
 #include "Engine/CollisionProfile.h"
 #include "GameInstance/PlayDataInfo.h"
+#include "GameInstance/PlayDataGameInstanceSubsystem.h"
+#include "Checkpoint/CheckpointManager.h"
 
 
 
@@ -203,6 +205,20 @@ void APlayerCharacter::BeginPlay()
 		m_sword->SetAttackTime(1.f);
 		//振り終わりのコールバック関数登録
 		m_sword->RegisterSwingEndCallback(CreateSwingEndCallback(APlayerCharacter::OnAttackEnd));
+	}
+
+	//コンテニューしていれば情報取得
+		//プレイデータの取得
+	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
+	UCheckpointManager* pCheckMng = GetWorld()->GetSubsystem<UCheckpointManager>();
+	if (!pPlayData) { return; }
+	if (pPlayData->IsIsContinued()) {
+		m_playerInfo = pPlayData->GetPlayerInfo();
+		//チェックポイントを一つでも触れていれば
+		if (pCheckMng->GetCurrentCheckpointIndex() >= 0)
+		{
+			SetActorLocation(pCheckMng->GetCurrentCheckpointLocation());
+		}
 	}
 
 }
@@ -536,7 +552,7 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 void APlayerCharacter::UpdateCheckEnemyDetection()
 {
 	if (!m_pEnemyManager) { return; }
-	 m_pNearestEnemy = m_pEnemyManager->GetNearestEnemy(GetActorLocation(), 0, m_attackRange);
+	 m_pNearestEnemy = m_pEnemyManager->GetNearestEnemy(GetActorLocation(), m_attackRange);
 	if (!m_pNearestEnemy) { return; }
 	if (!m_pNearestEnemy->IsPlayerFound()) { return; }
 	//ここでUIの呼び出し
@@ -692,7 +708,7 @@ FVector APlayerCharacter::GetFeetLocation() const
 //------------------------------------------------------
 //プレイヤー情報取得
 //------------------------------------------------------
-FPlayerInfo& APlayerCharacter::GetPlayerInfo()
+FPlayerInfo APlayerCharacter::GetPlayerInfo()
 {
 	return m_playerInfo;
 }

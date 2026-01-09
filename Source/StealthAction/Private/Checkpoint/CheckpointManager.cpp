@@ -3,6 +3,9 @@
 
 #include "Checkpoint/CheckpointManager.h"
 #include "Checkpoint/Checkpoint.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameInstance/PlayDataGameInstanceSubsystem.h"
+
 
 //----------------------------------------------------------
 //コンストラクタ
@@ -19,8 +22,29 @@ UCheckpointManager::UCheckpointManager()
 //------------------------------------------------
 void UCheckpointManager::OnWorldBeginPlay(UWorld&)
 {
+	//インゲームレベルでなければ処理しない
+	FString name = UGameplayStatics::GetCurrentLevelName(this, /*bRemovePrefix=*/true);
+	if (name == "Title") { return; }
+	if (name == "GameOver") { return; }
+	if (name == "GameClear") { return; }
+
 	//空にする
 	m_checkpoints.Empty();
+
+	//プレイデータの取得
+	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
+	if (!pPlayData)
+	{
+		UE_LOG(LogTemp, Display, TEXT("UPlayDataGameInstanceSubsystem Genereted Miss"));
+		return;
+	}
+	FCheckpointInfo info= pPlayData->GetCheckpointInfo();
+	m_currentCheckpointIndex = info.Index;
+
+	//Tickの1フレーム目に呼ばれる関数
+	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UCheckpointManager::SetCheckPointAll);
+
+
 }
 
 //----------------------------------------------------------
@@ -82,12 +106,22 @@ ACheckpoint* UCheckpointManager::GetCheckpoint(const int32 _index) const
 //----------------------------------------------------------
 FVector UCheckpointManager::GetCurrentCheckpointLocation() const
 {
-	if(!m_checkpoints[m_currentCheckpointIndex])
-	{
-		UE_LOG(LogTemp, Display, TEXT("m_currentCheckpointIndex,Miss"));
+	
+	//インゲームレベルでなければ処理しない
+	FString name = UGameplayStatics::GetCurrentLevelName(this, /*bRemovePrefix=*/true);
+	if (name == "Title"||name == "GameOver"||name == "GameClear") 
+	{ 
 		return FVector::ZeroVector;
 	}
-	return m_checkpoints[m_currentCheckpointIndex]->GetActorLocation();
+
+	for (ACheckpoint* check : m_checkpoints)
+	{
+		if (check->GetIndex() == m_currentCheckpointIndex)
+		{
+			return check->GetActorLocation();
+		}
+	}
+	return FVector::ZeroVector;
 }
 
 //----------------------------------------------------------
@@ -96,7 +130,7 @@ FVector UCheckpointManager::GetCurrentCheckpointLocation() const
 void UCheckpointManager::SetCurrentCheckpointIndex(const int32& _index)
 {
 	//インデックスが0未満か配列外、現在のチェックポイントより小さいなら設定しない
-	if (_index < 0 || m_checkpoints.Num() <= _index)
+	if (_index < 0 || _index <m_currentCheckpointIndex)
 	{
 		UE_LOG(LogTemp, Display, TEXT("SetCurrentCheckpointIndex,Miss"));
 		return;
@@ -106,9 +140,20 @@ void UCheckpointManager::SetCurrentCheckpointIndex(const int32& _index)
 		UE_LOG(LogTemp, Display, TEXT("SetCurrentCheckpointIndex,Miss"));
 		return;
 	}
-
+	UE_LOG(LogTemp, Display, TEXT("index："),_index);
 	//　不正な値でなければインデックスを設定
 	m_currentCheckpointIndex = _index;
+
+	//	//プレイデータの取得
+	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
+	if (!pPlayData)
+	{
+		UE_LOG(LogTemp, Display, TEXT("UPlayDataGameInstanceSubsystem Genereted Miss"));
+		return;
+	}
+
+	pPlayData->SetCheckpointInfo(m_checkpoints[_index]->GetCheckpointInfo());
+
 }
 
 
@@ -118,4 +163,40 @@ void UCheckpointManager::SetCurrentCheckpointIndex(const int32& _index)
 int32 UCheckpointManager::GetCurrentCheckpointIndex() const
 {
 	return m_currentCheckpointIndex;
+}
+
+//-----------------------------------------------------------
+//チェックポイントに触れた際に呼び出す関数
+//-----------------------------------------------------------
+void UCheckpointManager::OnOverlapCheckpoint()
+{
+	UE_LOG(LogTemp, Display, TEXT("OnOverlapCheckpoint"));
+	int32 num = m_OnOverlapCheckpointFunctions.Num();
+	for (std::function<void()>& func : m_OnOverlapCheckpointFunctions)
+	{
+		if (func) { func(); }
+	}
+}
+
+//---------------------------------------------------------
+//全チェックポイントの設定
+//---------------------------------------------------------
+void UCheckpointManager::SetCheckPointAll()
+{
+	//プレイデータの取得
+	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
+	if (!pPlayData) { return; }
+	if (!pPlayData->IsIsContinued()) {
+		return;
+	}
+
+	for (ACheckpoint* check : m_checkpoints)
+	{
+		//現在のインデックス以下は非アクティブに
+		if (check->GetIndex() <= m_currentCheckpointIndex)
+		{
+			check->SetHasCheckpoint(false);
+		}
+	}
+
 }
