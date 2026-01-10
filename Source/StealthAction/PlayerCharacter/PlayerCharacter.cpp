@@ -488,10 +488,6 @@ void APlayerCharacter::UpdateAttack(float _deltaTime)
 //----------------------------------------------------------
 void APlayerCharacter::UpdateDamaged(float _deltaTime)
 {
-	FVector vec = m_knockBackVelocity *= _deltaTime;
-	
-	LaunchCharacter(vec, true, false);
-	m_knockBackVelocity *= 0.9f;
 
 	//一定時間経過したらアイドルに戻す
 	//無敵時間タイマーはダメージ処理時起動するため使用
@@ -693,6 +689,8 @@ void APlayerCharacter::OnDamage(const int& _damage, const FVector& _knockBackVel
 	m_invincibleTimer = 0.f;
 	m_status = EPlayerStatus::Damage;
 	m_knockBackVelocity = _knockBackVelocity;
+
+	LaunchCharacter(m_knockBackVelocity, true, false);
 
 	UE_LOG(LogTemp, Display, TEXT("hp："),m_playerInfo.hp);
 }

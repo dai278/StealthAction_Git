@@ -16,7 +16,7 @@ USwordAttackComponent::USwordAttackComponent()
 	, m_swordCollision(nullptr)
 	, m_bSneakKill(false)
 	, m_bIsSwinging(false)
-	, m_KnockBackValu(100000.f)
+	, m_KnockBackValu(1000.f)
 {
 	//U‚Á‚Ä‚¢‚éŠÔ‚Ì‚İTick—LŒø‰»AÅ‰‚Í–³Œø‰»
 	PrimaryComponentTick.bCanEverTick = true;
