@@ -252,6 +252,8 @@ void APlayerCharacter::Tick(float _deltaTime)
 	UpdateCheckEnemyDetection();
 	//無敵時間の更新処理
 	UpdateInvincibleTime(_deltaTime);
+	//ダメージ処理
+	UpdateDamaged();
 
 	//視点変更
 	ViewpointSwitching(_deltaTime);
@@ -456,6 +458,8 @@ void APlayerCharacter::UpdateAttack()
 //----------------------------------------------------------
 void APlayerCharacter::UpdateDamaged()
 {
+	if (m_status != EPlayerStatus::Damage) { return; }
+
 
 	//一定時間経過したらアイドルに戻す
 	//無敵時間タイマーはダメージ処理時起動するため使用
