@@ -45,7 +45,7 @@ APlayerCharacter::APlayerCharacter()
 	, m_cameraRotateInput(FVector2D::ZeroVector)
 	, m_cameraPitchLimit(FVector2D(-80.f, 80.f))
 	, m_cameraStatus(ECameraStatus::ThirdPerson)
-	, m_cameRotateSpeed(3.f)
+	, m_cameraRotateSpeed(3.f)
 	, m_WalkSpeed(600.f)
 	, m_DashSpeed(1200.f)
 	, m_CrouchSpeed(300.f)
@@ -54,8 +54,7 @@ APlayerCharacter::APlayerCharacter()
 	, m_status(EPlayerStatus::Idle)
 	, m_bCanControl(true)
 	, DefaultMappingContext(nullptr)
-	, m_moveVerticalIA(nullptr)
-	, m_moveLateralIA(nullptr)
+	, m_moveIA(nullptr)
 	, m_moveJumpIA(nullptr)
 	, m_moveDashIA(nullptr)
 	, m_moveCrouchIA(nullptr)
@@ -93,6 +92,13 @@ APlayerCharacter::APlayerCharacter()
 	//毎フレームTickを呼ぶか決めるフラグ
 	PrimaryActorTick.bCanEverTick = true;
 
+	//カメラ回転にキャラを直接追従させない
+	bUseControllerRotationYaw = false;
+
+	//自動回転を行わない
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+
+
 	//デフォルトプレイヤーとして設定
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
@@ -113,16 +119,11 @@ APlayerCharacter::APlayerCharacter()
 	if (m_pSpringArm != NULL) {
 		m_pSpringArm->SetupAttachment(RootComponent);
 
-		//カメラのコリジョンテストを行うかを設定
-		m_pSpringArm->bDoCollisionTest = false;
-		//カメラ追従ラグを使うかを設定
-		m_pSpringArm->bEnableCameraLag = true;
-		//カメララグの追従速度決定
-		m_pSpringArm->CameraLagSpeed = 10.0f;
-		//カメラ回転ラグを使う決定
-		m_pSpringArm->bEnableCameraRotationLag = true;
-		//カメラ回転ラグの速度を決定	
-		m_pSpringArm->CameraRotationLagSpeed = 5.0f;
+		m_pSpringArm->TargetArmLength = 300.f;					//カメラ距離
+		m_pSpringArm->SocketOffset = FVector(0.f, 50.f, 60.f);	//肩越し視点設定
+		m_pSpringArm->bUsePawnControlRotation = true;			//カメラ回転
+		m_pSpringArm->CameraLagSpeed = 8.f;
+		m_pSpringArm->bDoCollisionTest = false;                 // 壁自動回避しない
 	}
 
 
@@ -141,6 +142,7 @@ APlayerCharacter::APlayerCharacter()
 	if ((m_pCamera != nullptr) && (m_pSpringArm != nullptr)) {
 		//カメラをスプリングアームにタッチさせる
 		m_pCamera->SetupAttachment(m_pSpringArm, USpringArmComponent::SocketName);
+		m_pCamera->bUsePawnControlRotation = false;
 	}
 
 }
@@ -171,6 +173,10 @@ void APlayerCharacter::BeginPlay()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
+
+		//カメラピッチの制限
+		PC->PlayerCameraManager->ViewPitchMin = -60.f;
+		PC->PlayerCameraManager->ViewPitchMax = 20.f;
 	}
 
 	UCapsuleComponent* capsel = GetCapsuleComponent();
@@ -222,6 +228,10 @@ void APlayerCharacter::BeginPlay()
 		}
 	}
 
+	if (Controller)
+	{
+		Controller->SetControlRotation(GetActorRotation());
+	}
 }
 
 //----------------------------------------------------------
@@ -234,39 +244,6 @@ void APlayerCharacter::Tick(float _deltaTime)
 	//デバッグ確認用
 	if (m_cameraSwitchIA == nullptr) { return; }
 
-	//ステータスによって処理を分岐
-	switch (m_status)
-	{
-		//アイドル
-	case EPlayerStatus::Idle:
-		UpdateIdle(_deltaTime);
-		break;
-		//移動
-	case EPlayerStatus::Walk:
-		UpdateMove(_deltaTime);
-		break;
-		//しゃがみ
-	case EPlayerStatus::Crouch:
-		UpdateCrouch(_deltaTime);
-		break;
-		//攻撃
-	case EPlayerStatus::Attack:
-		UpdateAttack(_deltaTime);
-		break;
-		//ダメージ
-	case EPlayerStatus::Damage:
-		UpdateDamaged(_deltaTime);
-		break;
-		//やられ
-	case EPlayerStatus::Dead:
-		UpdateDead(_deltaTime);
-		break;
-		//影潜り
-	case EPlayerStatus::InShadow:
-		UpdateShadow(_deltaTime);
-		break;
-	}
-
 	//カメラの更新処理
 	UpdateCamera(_deltaTime);
 	//カメラと遮蔽物のコリジョン判定
@@ -275,7 +252,6 @@ void APlayerCharacter::Tick(float _deltaTime)
 	UpdateCheckEnemyDetection();
 	//無敵時間の更新処理
 	UpdateInvincibleTime(_deltaTime);
-	
 
 	//視点変更
 	ViewpointSwitching(_deltaTime);
@@ -294,13 +270,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	if (!EnhancedInput) { return; }
 
 	//X軸
-	EnhancedInput->BindAction(m_moveVerticalIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_MoveVertical);
-	//Y軸
-	EnhancedInput->BindAction(m_moveLateralIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_MoveLateral);
+	EnhancedInput->BindAction(m_moveIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_Move);
 	//ダッシュ
 	EnhancedInput->BindAction(m_moveDashIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_MoveDash);
 	//しゃがみ
-	EnhancedInput->BindAction(m_moveCrouchIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_MoveCrouch);
+	EnhancedInput->BindAction(m_moveCrouchIA, ETriggerEvent::Started, this, &APlayerCharacter::Enhanced_MoveCrouch);
 	//ジャンプ
 	EnhancedInput->BindAction(m_moveJumpIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_MoveJump);
 
@@ -320,11 +294,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	//視点変更
 	EnhancedInput->BindAction(m_cameraSwitchIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_CameraSwitch);
 
-	//離した時に０の値が来るようにする
-	//移動X
-	EnhancedInput->BindAction(m_moveVerticalIA, ETriggerEvent::Completed, this, &APlayerCharacter::Enhanced_MoveVerticalReleased);
-	//移動Y
-	EnhancedInput->BindAction(m_moveLateralIA, ETriggerEvent::Completed, this, &APlayerCharacter::Enhanced_MoveLateralReleased);
 	//ダッシュ
 	EnhancedInput->BindAction(m_moveDashIA, ETriggerEvent::Completed, this, &APlayerCharacter::Enhanced_MoveDash);
 
@@ -348,19 +317,8 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 	//処理落ちしても一定速度でカメラが回るように補正
 	float rotateCorrection = CGameUtility::GetFpsCorrection(_deltaTime);
 
-	//カメラの新しい角度を求める
-	//現在の角度を取得
-	FRotator NewRotation = m_pSpringArm->GetRelativeRotation();
-
-	//Yaw
-	NewRotation.Yaw += m_cameraRotateInput.X * rotateCorrection * m_cameRotateSpeed;
-
-	//Pitchに関しては上下の制限角度ない
-	//FMath::Clampは(値,最小値,最大値
-	NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch + (m_cameraRotateInput.Y * rotateCorrection), m_cameraPitchLimit.X, m_cameraPitchLimit.Y);
-
-	//新しい角度の反映
-	m_pSpringArm->SetRelativeRotation(NewRotation);
+	AddControllerYawInput(m_cameraRotateInput.X);
+	AddControllerPitchInput(m_cameraRotateInput.Y);
 }
 
 //----------------------------------------------------------
@@ -375,7 +333,7 @@ void APlayerCharacter::UpdateCameraCollision()
 //----------------------------------------------------------
 //アイドル状態の更新
 //----------------------------------------------------------
-void APlayerCharacter::UpdateIdle(float _deltaTime)
+void APlayerCharacter::UpdateIdle()
 {
 	//ここは仮だから変えて
 	if (!m_charaMoveInput.IsZero())
@@ -387,7 +345,7 @@ void APlayerCharacter::UpdateIdle(float _deltaTime)
 //----------------------------------------------------------
 // 移動処理
 //----------------------------------------------------------
-void APlayerCharacter::UpdateMove(float _deltaTime, const bool _bInShadow /*= false*/)
+void APlayerCharacter::UpdateMove(const bool _bInShadow /*= false*/)
 {
 	//移動入力がある場合
 	if (!m_charaMoveInput.IsZero()) {
@@ -400,14 +358,17 @@ void APlayerCharacter::UpdateMove(float _deltaTime, const bool _bInShadow /*= fa
 		FVector forwardVec;
 		FVector rightVec;
 
+		//カメラヨー情報を取得する
+		const FRotator cameraYawRot(0.f, GetControlRotation().Yaw, 0.f);
+
 		//キャラクターの移動
 		{
 			// --- TPS と TopDown で使う基準が違う ---
 			if (m_cameraStatus == ECameraStatus::ThirdPerson)
 			{
 				// 三人称はカメラ方向に移動
-				forwardVec = m_pSpringArm->GetForwardVector();
-				rightVec = m_pSpringArm->GetRightVector();
+				forwardVec = FRotationMatrix(cameraYawRot).GetUnitAxis(EAxis::X);
+				rightVec = FRotationMatrix(cameraYawRot).GetUnitAxis(EAxis::Y);
 			}
 			else
 			{
@@ -415,10 +376,6 @@ void APlayerCharacter::UpdateMove(float _deltaTime, const bool _bInShadow /*= fa
 				forwardVec = GetActorForwardVector();
 				rightVec = GetActorRightVector();
 			}
-
-			// 実際の移動
-			AddMovementInput(forwardVec, m_charaMoveInput.Y);
-			AddMovementInput(rightVec, m_charaMoveInput.X);
 
 			//影の中にいなければ音を出す
 			if (!_bInShadow)
@@ -430,34 +387,26 @@ void APlayerCharacter::UpdateMove(float _deltaTime, const bool _bInShadow /*= fa
 					manager->MakeNoise(1, GetActorLocation());
 				}*/
 			}
-		}
 
-		//移動するキャラクターを回転
-		{
-			//角度はDegreeの角度の範囲で表記(-180~180)
-			USkeletalMeshComponent* pMeshComp = GetMesh();
-			if (pMeshComp == NULL) { return; }
-			//アークタンジェントを使ってコントローラの入力方向がなす角度を求める
-			float angle = atan2(m_charaMoveInput.X, m_charaMoveInput.Y);
-			//Radian値にDegreeに変換
-			float angleDeg = FMath::RadiansToDegrees(angle);
+			//移動するキャラクターを回転
+			{
+				//実際の移動方向ベクトルと移動
+				const FVector moveDirection = (forwardVec * m_charaMoveInput.Y + rightVec * m_charaMoveInput.X).GetSafeNormal();
+				AddMovementInput(moveDirection, 1.f);
 
-			float newYaw = 0.f;
-			//三人称なら
-			if (m_cameraStatus == ECameraStatus::ThirdPerson)
-			{
-				//入力した角度＋メッシュの回転角度＋Actorに対して回転しているSpringArmの相対角度
-				//newYaw = angleDeg + GetBaseRotationOffsetRotator().Yaw + m_pSpringArm->GetRelativeRotation().Yaw;
-				 FVector camForwardVec = m_pSpringArm->GetForwardVector();
-				 FRotator camRot = camForwardVec.Rotation();
-				 newYaw = camRot.Yaw-90.f;
+				{
+					const FRotator targetRot = moveDirection.ToOrientationRotator();
+
+					const FRotator NewRotation = FMath::RInterpTo(
+						GetActorRotation(),
+						targetRot,
+						GetWorld()->GetDeltaSeconds(),
+						10.f
+					);
+
+					SetActorRotation(NewRotation);
+				}
 			}
-			else
-			{
-				//カメラ方向は関係なし、Actorを基準に向きを決める
-				newYaw = angleDeg + GetActorRotation().Yaw;
-			}
-			pMeshComp->SetRelativeRotation(FRotator(pMeshComp->GetRelativeRotation().Pitch, newYaw, pMeshComp->GetRelativeRotation().Roll));
 		}
 	}
 }
@@ -465,15 +414,34 @@ void APlayerCharacter::UpdateMove(float _deltaTime, const bool _bInShadow /*= fa
 //----------------------------------------------------------
 //しゃがみ状態の更新
 //----------------------------------------------------------
-void APlayerCharacter::UpdateCrouch(float _deltaTime)
+void APlayerCharacter::UpdateCrouch()
 {
+	if (!m_bIsCrouch)
+	{
+		m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight / 2.f);
+		GetCharacterMovement()->MaxWalkSpeed = m_CrouchSpeed;
+		m_bIsCrouch = true;
 
+		//カメラ距離を変更
+		m_pSpringArm->TargetArmLength = 150.f;					//カメラ距離
+		m_pSpringArm->SocketOffset = FVector(0.f, 25.f, 30.f);	//肩越し視点設定
+	}
+	else
+	{
+		m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight);
+		GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
+		m_bIsCrouch = false;
+
+		//カメラ距離を変更
+		m_pSpringArm->TargetArmLength = 300.f;					//カメラ距離
+		m_pSpringArm->SocketOffset = FVector(0.f, 50.f, 60.f);	//肩越し視点設定
+	}
 }
 
 //----------------------------------------------------------
 //攻撃状態の更新
 //----------------------------------------------------------
-void APlayerCharacter::UpdateAttack(float _deltaTime)
+void APlayerCharacter::UpdateAttack()
 {
 	//攻撃が終わればアイドルに
 	if (!m_bCanAttack)
@@ -486,7 +454,7 @@ void APlayerCharacter::UpdateAttack(float _deltaTime)
 //----------------------------------------------------------
 //ダメージ状態の更新
 //----------------------------------------------------------
-void APlayerCharacter::UpdateDamaged(float _deltaTime)
+void APlayerCharacter::UpdateDamaged()
 {
 
 	//一定時間経過したらアイドルに戻す
@@ -496,7 +464,7 @@ void APlayerCharacter::UpdateDamaged(float _deltaTime)
 		m_status = EPlayerStatus::Idle;
 		m_knockBackVelocity = FVector::ZeroVector;
 		m_bCanControl = true;
-	}		
+	}
 }
 
 //----------------------------------------------------------
@@ -510,7 +478,7 @@ void APlayerCharacter::UpdateDead(float _deltaTime)
 //----------------------------------------------------------
 //影状態の更新
 //----------------------------------------------------------
-void APlayerCharacter::UpdateShadow(float _deltaTime)
+void APlayerCharacter::UpdateShadow()
 {
 	if (m_bUsingMesh)
 	{
@@ -525,7 +493,7 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 		m_bUsingMesh = true;
 	}
 
-	m_timer += _deltaTime;
+	m_timer += GetWorld()->GetDeltaSeconds();
 
 	//影状態時間が最大時間を超えたらアイドル状態に戻す
 	if (m_timer > m_maxShadowTime) {
@@ -547,7 +515,7 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 	}
 	
 	//移動処理
-	UpdateMove(_deltaTime,true);
+	UpdateMove(true);
 	
 }
 
@@ -678,9 +646,14 @@ void APlayerCharacter::OnDamage(const int& _damage, const FVector& _knockBackVel
 	//Hpが0になったら死亡
 	if (m_playerInfo.hp<=0)
 	{
+		m_bCanControl = false;
 		m_playerInfo.bIsGetKeyItem = 0;
 		m_playerInfo.isAlive = false;
 		m_status = EPlayerStatus::Dead;
+
+		// クリア用レベルへ遷移
+		UGameplayStatics::OpenLevel(this, FName("GameOver")); // レベル名を設定
+
 		return;
 	}
 	/*生きていれば*/
@@ -726,30 +699,23 @@ FPlayerInfo APlayerCharacter::GetPlayerInfo()
 
 
 //------------------------------------------------------
-//Y軸移動
+//移動
 //------------------------------------------------------
-void APlayerCharacter::Enhanced_MoveVertical(const FInputActionValue& Value)
+void APlayerCharacter::Enhanced_Move(const FInputActionValue& Value)
 {
 	//受け取る型にキャスト？指定して代入
-	m_charaMoveInput.Y = Value.Get<float>();
+	m_charaMoveInput = Value.Get<FVector2D>();
 	//スティックの問題なのか、UE側の問題なのかわからんが、入力なくても0.01位の値が入っちゃてるので補正
 	if (abs(m_charaMoveInput.Y) < 0.1f)
 	{
 		m_charaMoveInput.Y = 0.f;
 	}
-}
-
-//------------------------------------------------------
-//X軸移動
-//------------------------------------------------------
-void APlayerCharacter::Enhanced_MoveLateral(const FInputActionValue& Value)
-{
-	m_charaMoveInput.X = Value.Get<float>();
-	//スティックの問題なのか、UE側の問題なのかわからんが、入力なくても0.01位の値が入っちゃてるので補正
 	if (abs(m_charaMoveInput.X) < 0.1f)
 	{
 		m_charaMoveInput.X = 0.f;
 	}
+
+	UpdateMove();
 }
 
 //------------------------------------------------------
@@ -819,6 +785,9 @@ void APlayerCharacter::Enhanced_MoveJump(const FInputActionValue& Value)
 //------------------------------------------------------
 void APlayerCharacter::Enhanced_Attack(const FInputActionValue& Value)
 {
+	//プレイヤーがコントロールできなければ何もしない
+	if (m_bCanControl == false) { return; }
+
 	m_status = EPlayerStatus::Attack;
 	m_bCanAttack=true;
 	//一番近くの敵がプイレイヤーを見つけていればスニークキルするか判定
@@ -951,23 +920,6 @@ void APlayerCharacter::Enhanced_CameraSwitch(const FInputActionValue& Value)
 	if (m_bCameraSwitching) {
 		UE_LOG(LogTemp, Display, TEXT("trueeeeeeeeeeeeeeeeeeeeeeeeeee"));
 	}
-}
-
-//-----------------------------------------------------------
-//離された瞬間値を０にするよう
-//Y軸移動
-//-------------------------------------------------------------
-void APlayerCharacter::Enhanced_MoveVerticalReleased(const FInputActionValue& Value)
-{
-	m_charaMoveInput.Y = 0.f;
-}
-//-----------------------------------------------------------
-//離された瞬間値を０にするよう
-//X軸移動
-//-------------------------------------------------------------
-void APlayerCharacter::Enhanced_MoveLateralReleased(const FInputActionValue& Value)
-{
-	m_charaMoveInput.X = 0.f;
 }
 
 //-----------------------------------------------------------

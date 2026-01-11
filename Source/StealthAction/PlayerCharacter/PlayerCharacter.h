@@ -135,19 +135,19 @@ private:
 
 private:
 	//アイドル状態の更新処理
-	void UpdateIdle(float _deltaTime);
+	void UpdateIdle();
 
 	//歩き状態の更新処理
-	void UpdateMove(float _deltaTime,const bool _bInShadow=false);
+	void UpdateMove(const bool _bInShadow=false);
 
 	//しゃがみ状態の更新処理
-	void UpdateCrouch(float _deltaTime);
+	void UpdateCrouch();
 
 	//攻撃状態の更新処理
-	void UpdateAttack(float _deltaTime = 0);
+	void UpdateAttack();
 
 	//ダメージ状態の更新処理
-	void UpdateDamaged(float _deltaTime);
+	void UpdateDamaged();
 
 	//やられ状態の更新処理
 	void UpdateDead(float _deltaTime);
@@ -156,7 +156,7 @@ private:
 	void UpdateInvincibleTime(float _deltaTime);
 
 	//影状態の更新処理
-	void UpdateShadow(float _deltaTime);
+	void UpdateShadow();
 	//影から通常状態へ変化
 	void TransformationShadowToIdle(const bool _bLightHit = false);
 	//影状態へ変化
@@ -167,14 +167,18 @@ private:
 
 	//攻撃終了コールバック
 	void OnAttackEnd();
+
+	//生きているか
+	UFUNCTION(BlueprintPure, Category = "Info")
+	bool IsAlive() const { return m_playerInfo.isAlive; }
+
 	//HP取得
 	int32 GetPlayerHP() const { return m_playerInfo.hp; }
 
 protected:
 	//---入力用---
 	// Enhanced Input 関数
-	void Enhanced_MoveVertical(const FInputActionValue& Value);		//X軸移動
-	void Enhanced_MoveLateral(const FInputActionValue& Value);		//Y軸移動
+	void Enhanced_Move(const FInputActionValue& Value);		//移動	
 	void Enhanced_MoveDash(const FInputActionValue& Value);			//ダッシュ
 	void Enhanced_MoveCrouch(const FInputActionValue& Value);		//しゃがみ
 	void Enhanced_MoveJump(const FInputActionValue& Value);			//ジャンプ
@@ -187,10 +191,6 @@ protected:
 	void Enhanced_CameraReset(const FInputActionValue& Value);		//カメラリセット
 	void Enhanced_CameraSwitch(const FInputActionValue& Value);		//視点変更
 
-	//離された瞬間値を０にするよう
-	void Enhanced_MoveVerticalReleased(const FInputActionValue& Value);	//X軸移動
-	void Enhanced_MoveLateralReleased(const FInputActionValue& Value);	//Y軸移動
-
 	void Enhanced_CameraPitchReleased(const FInputActionValue& Value);	//カメラピッチ
 	void Enhanced_CameraYawReleased(const FInputActionValue& Value);	//カメラヨー
 
@@ -200,13 +200,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputMappingContext* DefaultMappingContext;
 
-	//移動Y軸
+	//移動
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* m_moveVerticalIA;
-
-	//移動X軸
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* m_moveLateralIA;
+	UInputAction* m_moveIA;
 
 	//ジャンプ
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
@@ -271,7 +267,7 @@ private:
 	FVector2D m_cameraPitchLimit;					//カメラのピッチ範囲
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
-	float m_cameRotateSpeed;						//カメラ回転速度
+	float m_cameraRotateSpeed;						//カメラ回転速度
 
 	UPROPERTY()
 	UMaterialParameterCollection* m_pMPC;			//マテリアルパラメータコレクション
