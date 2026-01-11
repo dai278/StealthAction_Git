@@ -15,6 +15,18 @@ AExtendedSpotLight::AExtendedSpotLight()
 	, m_pSpotLight(nullptr)
 	, m_pMesh(nullptr)
 	, m_isEnemy(false)
+	, m_automaticRotateYawSpeed(50.f)
+	, m_bAutomaticRotateYaw(false)
+	, m_bRotateTurn(true)
+	, m_minTurnRotate(0.f)
+	, m_maxTurnRotate(180.f)
+	, m_turnDir(1)
+	, m_bBlink(false)
+	, m_blinkOffTime(2.f)
+	, m_blinkOnTime(2.f)
+	, m_canItBeTurned(false)
+	, m_bIsOn(true)
+	, m_blinkTimer(0.f)
 {
 
 	//毎フレーム更新処理を行うか.
@@ -45,6 +57,9 @@ void AExtendedSpotLight::BeginPlay()
 	GetWorld()->GetSubsystem<UExtendedSpotLightManager>()->AddLight(this);
 	//影を出す
 	m_pSpotLight->SetCastShadows(true);
+
+	//ライトがついていない設定になっていれば消す
+	if (!m_bIsOn) { m_pSpotLight->SetVisibility(false); }
 }
 
 
@@ -74,7 +89,7 @@ void AExtendedSpotLight::Tick(float DeltaTime)
 
 	// DrawDebugConeの描画パラメータ
 	DrawDebugCone(
-		GetWorld(),      // ワールドコンテキスト
+		GetWorld(),      // ワールド
 		Origin,          // 円錐の発生点
 		Direction,       // 照射方向ベクトル
 		Length,          // 円錐の長さ(高さ)
@@ -89,6 +104,8 @@ void AExtendedSpotLight::Tick(float DeltaTime)
 	);
 
 
+	UpdateBlink(DeltaTime);
+	UpdateYawRotate(DeltaTime);
 }
 
 //------------------------------------------
@@ -207,3 +224,96 @@ bool AExtendedSpotLight::IsHit(const FVector& _pos)const
 	return true;
 
 }
+
+
+
+//-----------------------------------------------------
+//ライトを付ける処理
+//-----------------------------------------------------
+void AExtendedSpotLight::TurnOn()
+{
+	if (m_canItBeTurned) {
+		m_pSpotLight->SetVisibility(true);
+		m_bIsOn = true;
+		m_blinkTimer = 0.f;
+	}
+}
+
+//-----------------------------------------------------
+//ライトを消す
+//-----------------------------------------------------
+void AExtendedSpotLight::TurnOff()
+{
+	if (m_canItBeTurned) {
+		m_pSpotLight->SetVisibility(false);
+		m_bIsOn = false;
+		m_blinkTimer = 0.f;
+	}
+}
+
+//-----------------------------------------------------
+//自動YAw回転の更新処理
+//-----------------------------------------------------
+void AExtendedSpotLight::UpdateYawRotate(const float& _deltaTime)
+{
+	if (!m_bAutomaticRotateYaw) { return; }
+
+	FRotator newRotator = GetActorRotation();
+	
+	//ターンしないのであれば
+	if (!m_bRotateTurn)
+	{
+		//回転
+		newRotator.Yaw += m_automaticRotateYawSpeed * _deltaTime * m_turnDir;
+		SetActorRotation(newRotator);
+		return;
+	}
+	
+	//現在の回転量が最大値最小値の範囲内でなければ処理しない
+	if (newRotator.Yaw< m_minTurnRotate || newRotator.Yaw>m_maxTurnRotate)
+	{
+		return;
+	}
+	//回転
+	newRotator.Yaw += m_automaticRotateYawSpeed * _deltaTime*m_turnDir;
+		//最大値を超えたら
+		if (newRotator.Yaw > m_maxTurnRotate)
+		{
+			newRotator.Yaw = m_maxTurnRotate;
+			//向きを反転
+			m_turnDir *= -1;
+		}
+		//最小値未満になったら
+		else if (newRotator.Yaw < m_minTurnRotate)
+		{
+			newRotator.Yaw = m_minTurnRotate;
+			//向き反転
+			m_turnDir *= -1;
+		}
+
+	SetActorRotation(newRotator);
+}
+
+
+//----------------------------------------------------
+//点滅
+//----------------------------------------------------
+void AExtendedSpotLight::UpdateBlink(const float& _deltaTime)
+{
+	if (!m_bBlink) { return; }
+
+	//タイマー加算
+	m_blinkTimer += _deltaTime;
+
+	//ついていて時間を超えていれば
+	if (m_bIsOn && m_blinkTimer > m_blinkOnTime) {
+		//ライトを消す
+		TurnOff();
+	}
+	else if (!m_bIsOn && m_blinkTimer > m_blinkOffTime)
+	{
+		//ライトを付ける
+		TurnOn();
+	}
+}
+

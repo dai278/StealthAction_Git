@@ -57,18 +57,6 @@ public:
 	//ライトとの衝突チェック
 	bool IsHit(const FVector& _pos)const;
 
-//	// 位置
-//	FVector LightPos = SpotLight->GetComponentLocation();
-//
-//	// 向き
-//	FVector LightDir = SpotLight->GetForwardVector();        // 正面方向
-//	FVector ShadowDir = -SpotLight->GetForwardVector();      // 影の伸びる方向（逆方向）
-//
-//	// 照射範囲
-//	float InnerAngle = SpotLight->InnerConeAngle;           // 円錐の内側角
-//	float OuterAngle = SpotLight->OuterConeAngle;           // 円錐の外側角
-//	float Range = SpotLight->AttenuationRadius;        // 光が届く最大距離
-
 protected:
 	
 	UPROPERTY(VisibleAnywhere)
@@ -84,4 +72,58 @@ protected:
 	UStaticMeshComponent* m_pMesh; //メッシュ	
 
 	bool m_isEnemy;//所持者が敵か
+
+public:
+
+	UFUNCTION()
+	void TurnOn();//付ける
+
+	UFUNCTION()
+	void TurnOff();//消す
+
+	UFUNCTION()
+	bool IsCanItBeTurned() { return m_canItBeTurned; }
+
+private:
+	//Yaw回転の更新処理
+	void UpdateYawRotate(const float& _deltaTime);
+	//点滅の更新処理
+	void UpdateBlink(const float& _deltaTime);
+protected:
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	bool m_bAutomaticRotateYaw;//Yaw方向に自動回転するか
+
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	float m_automaticRotateYawSpeed;//Yaw方向回転スピード
+
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	bool m_bRotateTurn;                  //回転中ターンするか
+
+	
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	float m_minTurnRotate; //ターンする角度
+
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	float m_maxTurnRotate;//ターンする最大角度
+
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	int32 m_turnDir;
+
+
+	UPROPERTY(EditAnywhere, Category = "blink")
+	bool m_bBlink;     //点滅するか
+
+	UPROPERTY(EditAnywhere, Category = "blink")
+	float m_blinkOnTime;//ついているじかん
+
+	UPROPERTY(EditAnywhere, Category = "blink")
+	float m_blinkOffTime;//消えている時間
+
+	UPROPERTY(EditAnywhere, Category = "blink")
+	bool m_bIsOn;//ついているか
+	
+	float m_blinkTimer;//経過時間計測用タイマー
+
+	UPROPERTY(EditAnywhere, Category = "blink")
+	bool m_canItBeTurned;//ONOFFの操作可能か
 };

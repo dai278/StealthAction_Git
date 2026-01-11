@@ -21,6 +21,7 @@ USwordAttackComponent::USwordAttackComponent()
 	//振っている間のみTick有効化、最初は無効化
 	PrimaryComponentTick.bCanEverTick = true;
 	SetComponentTickEnabled(false);
+	
 	//コリジョン生成
 	m_swordCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SwordCollision"));
 	if (!m_swordCollision) {
@@ -30,7 +31,6 @@ USwordAttackComponent::USwordAttackComponent()
 	{
 		m_swordCollision->SetupAttachment(this);
 	}
-
 }
 
 
@@ -213,7 +213,7 @@ void USwordAttackComponent::OnSwordBeginOverlap(
 	UE_LOG(LogTemp, Display, TEXT("NanikaniHit"));
 
 	//ノックバック
-	FVector knockBackvector = GetComponentLocation() - OtherActor->GetActorLocation();
+	FVector knockBackvector = OtherActor->GetActorLocation()-GetOwner()->GetActorLocation() ;
 	knockBackvector.Z = 0.f;
 	knockBackvector = knockBackvector.GetSafeNormal();
 	knockBackvector *= m_KnockBackValu;

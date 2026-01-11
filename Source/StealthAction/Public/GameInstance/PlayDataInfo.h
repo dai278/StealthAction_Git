@@ -31,7 +31,7 @@ struct FCheckpointInfo
 	FName LevelName; // ƒŒƒxƒ‹‚Ì–¼‘O
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	int32 Index; // ID
+	int32 Index=-1; // ID
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
 	FVector Location;//ˆÊ’u
