@@ -153,7 +153,6 @@ void UEnemyManager::SetEnemyInfoAll()
 				}
 				UE_LOG(LogTemp, Warning, TEXT("After : i=%d Num=%d"), i, m_pAllEnemies.Num());
 				break;
-
 			}
 		}
 	}

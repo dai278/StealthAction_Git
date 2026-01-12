@@ -87,6 +87,9 @@ public:
 private:
 	//Yaw回転の更新処理
 	void UpdateYawRotate(const float& _deltaTime);
+	//Pitch回転
+	void UpdatePitchRotate(const float& _deltaTime);
+
 	//点滅の更新処理
 	void UpdateBlink(const float& _deltaTime);
 protected:
@@ -108,6 +111,13 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Rotate")
 	int32 m_turnDir;
+
+
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	bool m_bAutomaticRotatePitch;//Yaw方向に自動回転するか
+
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	float m_automaticRotatePitchSpeed;//Yaw方向回転スピード
 
 
 	UPROPERTY(EditAnywhere, Category = "blink")

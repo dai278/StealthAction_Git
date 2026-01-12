@@ -15,8 +15,10 @@ AExtendedSpotLight::AExtendedSpotLight()
 	, m_pSpotLight(nullptr)
 	, m_pMesh(nullptr)
 	, m_isEnemy(false)
-	, m_automaticRotateYawSpeed(50.f)
+	, m_automaticRotateYawSpeed(30.f)
 	, m_bAutomaticRotateYaw(false)
+	,m_bAutomaticRotatePitch(false)
+	, m_automaticRotatePitchSpeed(30.f)
 	, m_bRotateTurn(true)
 	, m_minTurnRotate(0.f)
 	, m_maxTurnRotate(180.f)
@@ -55,8 +57,10 @@ void AExtendedSpotLight::BeginPlay()
 
 	//マネージャーに登録
 	GetWorld()->GetSubsystem<UExtendedSpotLightManager>()->AddLight(this);
+	//インデックスが登録されていなければ登録しない
+	if(m_lightIndex==-1){ m_pSpotLight->SetCastShadows(false); }
 	//影を出す
-	m_pSpotLight->SetCastShadows(true);
+	else { m_pSpotLight->SetCastShadows(true); }
 
 	//ライトがついていない設定になっていれば消す
 	if (!m_bIsOn) { m_pSpotLight->SetVisibility(false); }
@@ -106,6 +110,7 @@ void AExtendedSpotLight::Tick(float DeltaTime)
 
 	UpdateBlink(DeltaTime);
 	UpdateYawRotate(DeltaTime);
+	UpdatePitchRotate(DeltaTime);
 }
 
 //------------------------------------------
@@ -180,6 +185,7 @@ bool AExtendedSpotLight::IsMove()const
 //------------------------------
 bool AExtendedSpotLight::IsHit(const FVector& _pos)const
 {
+	if (!m_bIsOn) { return false; }
 
 	FVector lightPos = m_pSpotLight->GetComponentLocation();
 	FVector lightDir = m_pSpotLight->GetForwardVector();
@@ -270,9 +276,13 @@ void AExtendedSpotLight::UpdateYawRotate(const float& _deltaTime)
 	}
 	
 	//現在の回転量が最大値最小値の範囲内でなければ処理しない
-	if (newRotator.Yaw< m_minTurnRotate || newRotator.Yaw>m_maxTurnRotate)
+	if (newRotator.Yaw< m_minTurnRotate )
 	{
-		return;
+		m_turnDir = 1;
+	}
+	else if (newRotator.Yaw > m_maxTurnRotate)
+	{
+		m_turnDir = -1;
 	}
 	//回転
 	newRotator.Yaw += m_automaticRotateYawSpeed * _deltaTime*m_turnDir;
@@ -293,6 +303,55 @@ void AExtendedSpotLight::UpdateYawRotate(const float& _deltaTime)
 
 	SetActorRotation(newRotator);
 }
+
+//-----------------------------------------------------
+//自動Pitch回転の更新処理
+//-----------------------------------------------------
+void AExtendedSpotLight::UpdatePitchRotate(const float& _deltaTime)
+{
+	if (!m_bAutomaticRotatePitch) { return; }
+
+	FRotator newRotator = GetActorRotation();
+
+	//ターンしないのであれば
+	if (!m_bRotateTurn)
+	{
+		//回転
+		newRotator.Pitch += m_automaticRotateYawSpeed * _deltaTime * m_turnDir;
+		SetActorRotation(newRotator);
+		return;
+	}
+
+	//現在の回転量が最大値最小値の範囲内でなければ処理しない
+	if (newRotator.Pitch < m_minTurnRotate)
+	{
+		m_turnDir = 1;
+	}
+	else if (newRotator.Pitch > m_maxTurnRotate)
+	{
+		m_turnDir = -1;
+	}
+	//回転
+	newRotator.Pitch += m_automaticRotateYawSpeed * _deltaTime * m_turnDir;
+	//最大値を超えたら
+	if (newRotator.Pitch > m_maxTurnRotate)
+	{
+		newRotator.Pitch = m_maxTurnRotate;
+		//向きを反転
+		m_turnDir = -1;
+	}
+	//最小値未満になったら
+	else if (newRotator.Pitch < m_minTurnRotate)
+	{
+		newRotator.Pitch = m_minTurnRotate;
+		//向き反転
+		m_turnDir = 1;
+	}
+
+	SetActorRotation(newRotator);
+}
+
+
 
 
 //----------------------------------------------------

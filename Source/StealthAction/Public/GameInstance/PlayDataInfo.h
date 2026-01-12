@@ -9,7 +9,7 @@ struct FPlayerInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	int32 hp = 100; // 体力
+	int32 hp = 30; // 体力
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
 	bool isAlive = true; // 生存しているか
@@ -35,9 +35,6 @@ struct FCheckpointInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
 	FVector Location;//位置
-
-
-
 };
 
 //エネミー情報構造体

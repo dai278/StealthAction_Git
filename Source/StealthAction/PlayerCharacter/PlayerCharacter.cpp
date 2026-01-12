@@ -75,7 +75,7 @@ APlayerCharacter::APlayerCharacter()
 	, m_maxShadowTime(5.f)
 	, m_timer(0.f)
 	, m_attackRange(300.f)
-	, m_attackRadius(100.f)
+	, m_attackRadius(70.f)
 	, m_sneakKillDamage(10)
 	, m_NormalAttack(2)
 	, m_bCanAttack(true)
@@ -219,7 +219,7 @@ void APlayerCharacter::BeginPlay()
 	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
 	UCheckpointManager* pCheckMng = GetWorld()->GetSubsystem<UCheckpointManager>();
 	if (!pPlayData) { return; }
-	if (pPlayData->IsIsContinued()) {
+	if (pPlayData->IsIsContinued()&&pPlayData->GetCheckpointInfo().Index!=-1) {
 		m_playerInfo = pPlayData->GetPlayerInfo();
 		//チェックポイントを一つでも触れていれば
 		if (pCheckMng->GetCurrentCheckpointIndex() >= 0)
@@ -254,6 +254,8 @@ void APlayerCharacter::Tick(float _deltaTime)
 	UpdateInvincibleTime(_deltaTime);
 	//ダメージ処理
 	UpdateDamaged();
+	//影状態
+	UpdateShadow();
 
 	//視点変更
 	ViewpointSwitching(_deltaTime);
@@ -380,14 +382,14 @@ void APlayerCharacter::UpdateMove(const bool _bInShadow /*= false*/)
 			}
 
 			//影の中にいなければ音を出す
-			if (!_bInShadow)
+			if (m_status!=EPlayerStatus::InShadow)
 			{
 				//デバック用にコメントアウト
-				/*UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
+				UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
 				if (manager)
 				{
 					manager->MakeNoise(1, GetActorLocation());
-				}*/
+				}
 			}
 
 			//移動するキャラクターを回転
@@ -484,6 +486,10 @@ void APlayerCharacter::UpdateDead(float _deltaTime)
 //----------------------------------------------------------
 void APlayerCharacter::UpdateShadow()
 {
+	if (m_status != EPlayerStatus::InShadow) {
+		return;
+	}
+
 	if (m_bUsingMesh)
 	{
 
@@ -517,9 +523,6 @@ void APlayerCharacter::UpdateShadow()
 		TransformationShadowToIdle(true);
 		return;
 	}
-	
-	//移動処理
-	UpdateMove(true);
 	
 }
 
