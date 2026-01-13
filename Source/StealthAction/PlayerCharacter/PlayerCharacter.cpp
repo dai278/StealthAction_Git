@@ -393,10 +393,10 @@ void APlayerCharacter::UpdateMove(const bool _bInShadow /*= false*/)
 			}
 
 			//移動するキャラクターを回転
-			{
-				//実際の移動方向ベクトルと移動
-				const FVector moveDirection = (forwardVec * m_charaMoveInput.Y + rightVec * m_charaMoveInput.X).GetSafeNormal();
-				AddMovementInput(moveDirection, 1.f);
+			
+		//実際の移動方向ベクトルと移動
+		const FVector moveDirection = (forwardVec * m_charaMoveInput.Y + rightVec * m_charaMoveInput.X).GetSafeNormal();
+		AddMovementInput(moveDirection, 1.f);
 
 				{
 					const FRotator targetRot = moveDirection.ToOrientationRotator();
@@ -410,7 +410,7 @@ void APlayerCharacter::UpdateMove(const bool _bInShadow /*= false*/)
 
 					SetActorRotation(NewRotation);
 				}
-			}
+			
 		}
 	}
 }
