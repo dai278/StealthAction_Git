@@ -49,7 +49,7 @@ APlayerCharacter::APlayerCharacter()
 	, m_WalkSpeed(600.f)
 	, m_DashSpeed(1200.f)
 	, m_CrouchSpeed(300.f)
-	, m_JumpVector(600.f)
+	, m_JumpVector(1000.f)
 	, m_bCameraSwitching(false)
 	, m_status(EPlayerStatus::Idle)
 	, m_bCanControl(true)
@@ -632,6 +632,7 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 void APlayerCharacter::OnAttackEnd()
 {
 	m_bCanAttack = false;
+	m_bCanControl = true;
 	m_attackCount = 0.f;
 }
 
@@ -795,6 +796,9 @@ void APlayerCharacter::Enhanced_Attack(const FInputActionValue& Value)
 	//プレイヤーがコントロールできなければ何もしない
 	if (m_bCanControl == false) { return; }
 
+	GetCharacterMovement()->GravityScale = 0.1f;
+
+	m_bCanControl = false;
 	m_status = EPlayerStatus::Attack;
 	m_bCanAttack=true;
 	//一番近くの敵がプイレイヤーを見つけていればスニークキルするか判定
