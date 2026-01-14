@@ -157,6 +157,10 @@ private:
 
 	//影状態の更新処理
 	void UpdateShadow();
+
+	//ジャンプ状態の更新処理
+	void UpdateJump(float _deltaTime);
+
 	//影から通常状態へ変化
 	void TransformationShadowToIdle(const bool _bLightHit = false);
 	//影状態へ変化
@@ -247,6 +251,9 @@ protected:
 public:
 	//影状態か？
 	bool IsInShadow()const;
+
+	//地面ついた時に呼ばれるコールバック関数
+	virtual void Landed(const FHitResult& Hit) override;
 
 private:
 
@@ -353,6 +360,8 @@ private:
 	bool m_bSneakKill;									//スニークキルしているか
 	float m_attackCount;//攻撃時間
 
+	bool m_bJumping;									//ジャンプ中か
+	float m_jumpTimer;
 
 	FVector2D m_charaMoveInput;						//キャラ移動入力量
 	FVector2D m_cameraRotateInput;					//カメラ回転量

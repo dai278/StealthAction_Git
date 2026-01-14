@@ -256,9 +256,13 @@ void APlayerCharacter::Tick(float _deltaTime)
 	UpdateDamaged();
 	//影状態
 	UpdateShadow();
+	//ジャンプ更新処理
+	UpdateJump(_deltaTime);
+
 
 	//視点変更
 	ViewpointSwitching(_deltaTime);
+
 }
 
 //----------------------------------------------------------
@@ -351,6 +355,12 @@ void APlayerCharacter::UpdateIdle()
 //----------------------------------------------------------
 void APlayerCharacter::UpdateMove(const bool _bInShadow /*= false*/)
 {
+	//地面に接地しているときだけ
+	if (!GetCharacterMovement()->IsMovingOnGround())
+	{
+		return;
+	}
+
 	//移動入力がある場合
 	if (!m_charaMoveInput.IsZero()) {
 		//コントロール不可であれば何もしない
@@ -554,6 +564,28 @@ void APlayerCharacter::UpdateInvincibleTime(float _deltaTime)
 	}
 }
 
+//---------------------------------------------------------
+//ジャンプ中の更新処理
+//---------------------------------------------------------
+void APlayerCharacter::UpdateJump(float _deltaTime)
+{
+	if (!m_bJumping) { return; }
+
+	m_jumpTimer += _deltaTime;
+
+	FVector newVelocity = GetCharacterMovement()->Velocity;
+	const float gravity = -1.f;
+	const float maxGaravity =-500.f;
+	newVelocity.Z += FMath::Pow(gravity,m_jumpTimer);
+
+	if (newVelocity.Z < maxGaravity)
+	{
+		newVelocity.Z = maxGaravity;
+	}
+	GetCharacterMovement()->Velocity = newVelocity;
+}
+
+
 //----------------------------------------------------------
 // 視点切り替え
 //----------------------------------------------------------
@@ -634,6 +666,23 @@ void APlayerCharacter::OnAttackEnd()
 	m_bCanAttack = false;
 	m_bCanControl = true;
 	m_attackCount = 0.f;
+}
+
+
+//------------------------------------------------------
+// ジャンプ終了処理
+//------------------------------------------------------
+void APlayerCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	// 着地時の処理
+	UE_LOG(LogTemp, Warning, TEXT("Player has landed!"));
+
+	m_bJumping = false;
+	m_jumpTimer = 0.f;
+	GetCharacterMovement()->GravityScale = 1.f;
+
 }
 
 //-----------------------------------------------------
@@ -777,7 +826,11 @@ void APlayerCharacter::Enhanced_MoveJump(const FInputActionValue& Value)
 	//地面に接地しているときだけ
 	if (GetCharacterMovement()->IsMovingOnGround())
 	{
+		//慣性は残すが減速
+		GetCharacterMovement()->Velocity *= 0.5f;
 		LaunchCharacter(FVector(0.f, 0.f, m_JumpVector), false, true);
+		GetCharacterMovement()->GravityScale = 0.f;
+		m_bJumping = true;
 	}
 
 	//デバック用
