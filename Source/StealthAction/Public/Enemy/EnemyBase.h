@@ -1,5 +1,5 @@
 //----------------------------------------------------------
-// 概要				：エネミー1を制御するオブジェクト
+// 概要				：エネミーを制御するオブジェクト
 // 更新日　　　　 　：
 // 担当				：24CU0237廣川菖
 //----------------------------------------------------------
@@ -65,23 +65,23 @@ public:
 
 
 	//探索処理
-	void UpdateSearch(float _deltaTime);		//エネミー別
+	virtual void UpdateSearch(float _deltaTime);		//エネミー別
 
 	//ステータス処理
-	void UpdateStatus(float _deltaTime);		//エネミー別
+	void UpdateStatus(float _deltaTime);		
 
 
 	//初めの処理
-	void StartStateValues(float _deltaTime);		//エネミー別
+	void StartStateValues(float _deltaTime);		
 
 	//リセットの処理
-	void ResetStateValues(float _deltaTime);		//エネミー別
+	void ResetStateValues(float _deltaTime);		
 
 	//攻撃の処理
-	void UpdateAttack(float _deltaTime);			//エネミー別
+	void UpdateAttack(float _deltaTime);		
 
 	//死亡の処理
-	void CaseDead(float _deltaTime);				//エネミー別
+	void CaseDead(float _deltaTime);				
 
 	//攻撃を受けたときの処理
 	void OnDamage(const int& _damage,const FVector& _knockBackVector, const bool& _bSneakKill);		//エネミー別
@@ -94,49 +94,49 @@ public:
 	void OnAttackEnd();
 
 	//視界処理
-void UpdateVisiblity(float _deltaTime);
+	void UpdateVisiblity(float _deltaTime);
 
-//聴覚処理
-void UpdateHearing(float _deltaTime);
+	//聴覚処理
+	virtual void UpdateHearing(float _deltaTime);		//エネミー別
 
-//巡回の処理
-void CasePatrol(float _deltaTime);
+	//巡回の処理
+	void CasePatrol(float _deltaTime);
 
-//疑念の処理
-void CaseDoubt(float _deltaTime);
+	//疑念の処理
+	void CaseDoubt(float _deltaTime);
 
-//注意の処理
-void CaseCaution(float _deltaTime);
+	//注意の処理
+	void CaseCaution(float _deltaTime);
 
-//戦闘の処理
-void CaseBattle(float _deltaTime);
+	//戦闘の処理
+	virtual void CaseBattle(float _deltaTime);	//エネミー別
 
-//失踪の処理
-void CaseMiss(float _deltaTime);
+	//失踪の処理
+	void CaseMiss(float _deltaTime);
 
-//帰還の処理
-void CaseReturn(float _deltaTime);
+	//帰還の処理
+	void CaseReturn(float _deltaTime);
 
-//物音疑念の処理
-void CaseDoubt_Noise(float _deltaTime);
+	//物音疑念の処理
+	void CaseDoubt_Noise(float _deltaTime);
 
-//物音注意の処理
-void CaseCaution_Noise(float _deltaTime);
+	//物音注意の処理
+	void CaseCaution_Noise(float _deltaTime);
 
-//物音戦闘の処理
-void CaseBattle_Noise(float _deltaTime);
+	//物音戦闘の処理
+	void CaseBattle_Noise(float _deltaTime);
 
-//視点移動の処理
-void UpdateViewMove(float _deltaTime);
+	//視点移動の処理
+	void UpdateViewMove(float _deltaTime);
 
-//移動の処理
-void UpdateMove(float _deltaTime);
+	//移動の処理
+	void UpdateMove(float _deltaTime);
 
-//移動(Nav)の処理
-void UpdateMove_Nav(float _deltaTime);
+	//移動(Nav)の処理
+	void UpdateMove_Nav(float _deltaTime);
 
-//警戒の処理
-void UpdateAlert(float _deltaTime);
+	//警戒の処理
+	void UpdateAlert(float _deltaTime);
 
 public:
 	//プレイヤーを見つけているかどうか
@@ -217,8 +217,9 @@ public:
 		bool m_noiseCheck;					//物音チェック
 		FVector m_noise_Pos;				//物音の座標
 		FVector m_noise_Pos_keeper;			//一個前の物音の座標
-		int m_noiseLevel;					//騒音取得用
-		int m_noiseLevel_keeper;			//一個前の物音レベル
+		int m_noiseVolume;					//騒音取得用
+		int m_noiseVolume_keeper;			//一個前の物音
+		int m_noiseLevel;			//一個前の物音
 
 
 		//時間関連
@@ -325,6 +326,9 @@ public:
 		bool m_playerShadowCheck;		//プレイヤーが影状態か？
 
 		bool m_deadCheck;			//死亡したか
+
+		bool m_isCallOnNoise;		//OnNoiseが呼ばれたかどうか？
+		bool m_isCallOnNoise_Fleam;	//OnNoiseがフレーム中に呼ばれたかどうか？
 
 		//ステータス関連
 		EEnemyStatus m_enemyCurrentState; //エネミーのステータス

@@ -1,5 +1,5 @@
 //----------------------------------------------------------
-// 概要				：エネミー1を制御するオブジェクト
+// 概要				：エネミーを制御するオブジェクト
 // 更新日　　　　 　：
 // 担当				：24CU0237廣川菖
 //----------------------------------------------------------
@@ -32,7 +32,6 @@
 #include "Light/ExtendedSpotLight.h"							//ライト情報を取得するため
 
 #include "EnemyManager/EnemyManager.h"
-#include "Enemy/EnemyBase.h"
 
 #include "Sword/SwordAttackComponent.h"							//剣用
 //-----------------------------------------------------------
@@ -112,6 +111,8 @@ AEnemyBase::AEnemyBase()
 	, m_missCheck(false)
 	, m_returnCheck(false)
 	, m_patrol_TurningCheck(false)
+	, m_isCallOnNoise(false)
+	, m_isCallOnNoise_Fleam(false)
 	, m_patrol_TurnDirection(0)
 	, m_stopDistance_Wall(400.0)
 	, m_patrol_TurningCheckingTime(0.f)
@@ -121,8 +122,9 @@ AEnemyBase::AEnemyBase()
 	, m_playerPos_LastSeen(0., 0., 0.)
 	, m_playerPos_Nav_LastSeen(0., 0., 0.)
 	, m_noise_Pos_keeper(-5000., -5000., -5000.)
+	, m_noiseVolume(0)
+	, m_noiseVolume_keeper(0)
 	, m_noiseLevel(0)
-	, m_noiseLevel_keeper(0)
 	, m_enemyPos_Forward_Miss(0., 0., 0.)
 	, m_enemyPos_Left_Miss(0., 0., 0.)
 	, m_enemyPos_Right_Miss(0., 0., 0.)
@@ -596,11 +598,14 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 		return;
 	}
 
-	//
-	if (m_battleCheck)
+	//視界処理をする場合
+	if (IsUseVisiblity)
 	{
-		m_noiseCheck = false;		//物音チェックOF
-		return;
+		if (m_battleCheck)
+		{
+			m_noiseCheck = false;		//物音チェックOF
+			return;
+		}
 	}
 
 	double distance = (m_noise_Pos - m_enemyPos).Length();			//物音との距離を測る(Vectorの長さ）
@@ -609,43 +614,155 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 	//物音が遠くでした場合
 	if (!m_noiseCheck && distance > m_hearingRange_Long)
 	{
+		m_isCallOnNoise = false;
 		m_noiseCheck = false;		//物音チェックOF
 		return;
 	}
 
-	//物音が出たはじめのみ
-	if (!m_noiseCheck && m_noiseLevel_keeper < 6)
+	//そのフレームの間にOnNoiseが呼ばれていればTrue
+	if (m_isCallOnNoise)
 	{
-		m_noiseLevel_keeper = 0;//物音レベルをリセット
+		m_isCallOnNoise_Fleam = true;
+		m_isCallOnNoise = false;
+	}
+
+	//物音が出たはじめのみ
+	if (!m_noiseCheck && m_noiseLevel < 6)
+	{
+		m_noiseLevel = 0;//物音レベルをリセット
 		m_hearingTime = 0;		//聴覚時間リセット
 		m_noiseCheck = true;		//物音チェックON
 	}
 
 	m_hearingTime = _deltaTime;	//聴覚時間の更新
 
-	//音の更新
-	if (m_hearingTime < m_hearingTime_Limit)
+	//OnNoiseが呼ばれていれば更新許可
+	if (m_isCallOnNoise_Fleam)
 	{
-		//以前の物音が今の物音より小さい場合
-		if (m_noiseLevel_keeper <= m_noiseLevel)
+		//音の更新
+		if (m_hearingTime < m_hearingTime_Limit)
 		{
-			m_noiseLevel_keeper = m_noiseLevel;			//物音レベルを更新
-			m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
-			m_hearingTime = 0;	//聴覚時間リセット
-		}
-		if (m_noiseLevel_keeper > 5 && m_noiseLevel_keeper != 0)
-		{
-			m_noiseLevel_keeper = m_noiseLevel;			//物音レベルを更新
-			m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
-			m_hearingTime = 0;	//聴覚時間リセット
-		}
+			//以前の物音が今の物音より小さい場合
+			if (m_noiseVolume_keeper <= m_noiseVolume || (m_noiseLevel > 5 && m_noiseLevel != 0))
+			{
+				m_noiseVolume_keeper = m_noiseVolume;
+				//距離に応じて聞こえる音レベルを変更
+				if (distance < m_hearingRange_Short)
+				{
+					for (int i = 2;i < 6;++i)
+					{
+						if (m_noiseVolume_keeper == i)
+						{
+							m_noiseLevel = i;//物音レベルを更新
 
-	}
-	else
-	{
-		m_noiseLevel_keeper = m_noiseLevel;			//物音レベルを更新
-		m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
-		m_hearingTime = 0;	//聴覚時間リセット
+							if (m_noiseLevel > 5)
+							{
+								m_noiseLevel = 5;
+							}
+
+						}
+					}
+				}
+				else if (distance < m_hearingRange_Normal)
+				{
+					for (int i = 2;i < 6;++i)
+					{
+						if (m_noiseVolume_keeper == i)
+						{
+							m_noiseLevel = i - 1;//物音レベルを更新
+
+							if (m_noiseLevel > 5)
+							{
+								m_noiseLevel = 5;
+							}
+
+						}
+					}
+				}
+				else
+				{
+					for (int i = 2;i < 6;++i)
+					{
+						if (m_noiseVolume_keeper == i)
+						{
+							m_noiseLevel = i - 2;//物音レベルを更新
+
+							if (m_noiseLevel > 5)
+							{
+								m_noiseLevel = 5;
+							}
+
+						}
+					}
+				}
+				m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
+				m_hearingTime = 0;	//聴覚時間リセット
+			}
+			//if (m_noiseLevel > 5 && m_noiseLevel != 0)
+			//{
+			//	m_noiseLevel = m_noiseVolume;			//物音レベルを更新
+			//	m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
+			//	m_hearingTime = 0;	//聴覚時間リセット
+			//}
+
+		}
+		else
+		{
+			m_noiseVolume_keeper = m_noiseVolume;
+
+			//距離に応じて聞こえる音レベルを変更
+			if (distance < m_hearingRange_Short)
+			{
+				for (int i = 2;i < 6;++i)
+				{
+					if (m_noiseVolume_keeper == i)
+					{
+						m_noiseLevel = i + 1;//物音レベルを更新
+
+						if (m_noiseLevel > 5)
+						{
+							m_noiseLevel = 5;
+						}
+
+					}
+				}
+			}
+			else if (distance < m_hearingRange_Normal)
+			{
+				for (int i = 2;i < 6;++i)
+				{
+					if (m_noiseVolume_keeper == i)
+					{
+						m_noiseLevel = i;//物音レベルを更新
+
+						if (m_noiseLevel > 5)
+						{
+							m_noiseLevel = 5;
+						}
+
+					}
+				}
+			}
+			else
+			{
+				for (int i = 2;i < 6;++i)
+				{
+					if (m_noiseVolume_keeper == i)
+					{
+						m_noiseLevel = i - 1;//物音レベルを更新
+
+						if (m_noiseLevel > 5)
+						{
+							m_noiseLevel = 5;
+						}
+
+					}
+				}
+			}
+
+			m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
+			m_hearingTime = 0;	//聴覚時間リセット
+		}
 	}
 }
 
@@ -660,7 +777,7 @@ void AEnemyBase::UpdateSearch(float _deltaTime)
 	//聴覚と視界のどちらを優先するか
 	if (m_noiseCheck && m_visionCheck)
 	{
-		if (m_visionLevel >= m_noiseLevel_keeper)
+		if (m_visionLevel >= m_noiseLevel)
 		{
 			m_noiseCheck = false;		//聴覚OF
 		}
@@ -673,7 +790,7 @@ void AEnemyBase::UpdateSearch(float _deltaTime)
 	//ステータス変更
 	//視界によるステータスの変更
 	//m_visionLevel 	   =Patrol(0,1) Doubt(2) Caution(3) Battle(4,5) Miss(6,7) Return(8,9)
-	//m_noiseLevel_keeper  =Patrol(0,1) Doubt(2) Caution(3) Battle(4,5) Miss(6,7) Return(8,9)
+	//m_noiseLevel  =Patrol(0,1) Doubt(2) Caution(3) Battle(4,5) Miss(6,7) Return(8,9)
 	if (m_battleCheck)
 	{
 		m_enemyCurrentState = EEnemyStatus::Battle;
@@ -709,35 +826,35 @@ void AEnemyBase::UpdateSearch(float _deltaTime)
 	}
 	else if (m_noiseCheck)
 	{
-		if (m_noiseLevel_keeper <= 1)
+		if (m_noiseLevel <= 1)
 		{
 			m_enemyCurrentState = EEnemyStatus::Patrol;
 		}
-		else if (m_noiseLevel_keeper == 2)
+		else if (m_noiseLevel == 2)
 		{
 			m_enemyCurrentState = EEnemyStatus::Doubt_Noise;
 		}
-		else if (m_noiseLevel_keeper == 3)
+		else if (m_noiseLevel == 3)
 		{
 			m_enemyCurrentState = EEnemyStatus::Caution_Noise;
 		}
-		else if (m_noiseLevel_keeper == 4 || m_noiseLevel_keeper == 5)
+		else if (m_noiseLevel == 4 || m_noiseLevel == 5)
 		{
 			m_enemyCurrentState = EEnemyStatus::Battle_Noise;
 		}
 	}
 	//失踪の場合
-	else if (m_visionLevel == 6 || m_visionLevel == 7 || m_noiseLevel_keeper == 6 || m_noiseLevel_keeper == 7)
+	else if (m_visionLevel == 6 || m_visionLevel == 7 || m_noiseLevel == 6 || m_noiseLevel == 7)
 	{
 		m_enemyCurrentState = EEnemyStatus::Miss;
 	}
 	//帰還の場合
-	else if (m_visionLevel == 8 || m_visionLevel == 9 || m_noiseLevel_keeper == 8 || m_noiseLevel_keeper == 9)
+	else if (m_visionLevel == 8 || m_visionLevel == 9 || m_noiseLevel == 8 || m_noiseLevel == 9)
 	{
 		m_enemyCurrentState = EEnemyStatus::Return;
 	}
 	//巡回の場合
-	else if (m_visionLevel <= 1 || m_noiseLevel_keeper <= 1)
+	else if (m_visionLevel <= 1 || m_noiseLevel <= 1)
 	{
 		m_enemyCurrentState = EEnemyStatus::Patrol;
 	}
@@ -790,7 +907,7 @@ void AEnemyBase::ResetStateValues(float _deltaTime)
 	}
 
 	//m_visionLevel 	   =Patrol(0,1) Doubt(2) Caution(3) Battle(4,5) Miss(6,7) Return(8,9)
-	//m_noiseLevel_keeper  =Patrol(0,1) Doubt(2) Caution(3) Battle(4,5) Miss(6,7) Return(8,9)
+	//m_noiseLevel  =Patrol(0,1) Doubt(2) Caution(3) Battle(4,5) Miss(6,7) Return(8,9)
 
 	//以前のステータスが巡回の場合
 	if (m_enemyCurrentState_Keeper == EEnemyStatus::Patrol)
@@ -926,6 +1043,10 @@ void AEnemyBase::UpdateStatus(float _deltaTime)
 		break;
 	}
 
+	if (m_isCallOnNoise_Fleam)
+	{
+		m_isCallOnNoise_Fleam = false;
+	}
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -956,12 +1077,9 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 
 	FVector EnemyBaseForward_Pos = m_enemyPos + m_enemyForward * m_stopDistance_Wall;		//エネミーの正面,m_stopDistance_Wall先の座標
 
-	//m_pEnemy_Routeになにも入っていない場合
-	if (m_pEnemy_Route.Num() == 0)
+	//ランダムルートの場合
+	if (m_randomRoute)
 	{
-		//
-		UE_LOG(LogTemp, Warning, TEXT("Patrol_NULL"));
-
 		FHitResult HitCollision;	//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
 
 		//旋回中は呼ばない
@@ -1057,9 +1175,12 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 		}
 	}
 
-	//ランダムルートの場合
-	else if (m_randomRoute)
+	//m_pEnemy_Routeになにも入っていない場合
+	else if (m_pEnemy_Route.Num() == 0)
 	{
+		//
+		UE_LOG(LogTemp, Warning, TEXT("Patrol_NULL"));
+
 		FHitResult HitCollision;	//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
 
 		//旋回中は呼ばない
@@ -1285,7 +1406,7 @@ void AEnemyBase::CaseDoubt_Noise(float _deltaTime)
 	//時間が経過すると終了(聴覚の場合)
 	if (m_doubtNoiseTime > m_doubtNoiseTime_Limit)
 	{
-		m_noiseLevel_keeper = 0;		//巡回に移行
+		m_noiseLevel = 0;		//巡回に移行
 		m_doubtNoiseTime = 0;			//疑念時間リセット
 		m_noiseCheck = false;		//聴覚中止
 		m_doubtNoiseCheck = false;
@@ -1385,7 +1506,7 @@ void AEnemyBase::CaseCaution_Noise(float _deltaTime)
 	{
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
-		m_noiseLevel_keeper = 6;		//見失うに移行
+		m_noiseLevel = 6;		//見失うに移行
 		m_noiseCheck = false;		//聴覚中止
 		m_cautionNoiseCheck = false;
 		m_noise_Pos = FVector(-5000.0, -5000., -5000.);//物音座標リセット
@@ -1445,42 +1566,29 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 			UpdateMove_Nav(_deltaTime);
 		}
 
-		if (m_sword)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Swing"));
-			m_sword->Swinging(false);
-		}
-
 		//武器を持っていたら
 		if (m_pEnemy_Weapon)
 		{
-
 			//攻撃範囲に入ったら攻撃
 			if (m_attackDistance > distance)
 			{
-
-				FVector WeaponPos = m_pEnemy_Weapon->GetActorLocation();
-				FVector WeaponForwardVector = m_pEnemy_Weapon->GetActorForwardVector();
-				FVector WeaponForwardPos = WeaponPos + WeaponForwardVector * m_attackDistance;
-
-				FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
-
-				//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
-				bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, WeaponPos, WeaponForwardPos, FCollisionObjectQueryParams::AllObjects, BattleCollisionParams);
-
-				//ヒットするオブジェクトがある場合
-				if (isHit)
-				{
-					AActor* hitActor = HitCollision.GetActor();
-
-					//当たったコリジョンがプレイヤーだった場合
-					if (hitActor->ActorHasTag("Player"))
-					{
-						//攻撃処理
-						UpdateAttack(_deltaTime);
-					}
-				}
+				//攻撃処理
+				UpdateAttack(_deltaTime);
 			}
+		}
+		else
+		{
+			//プレイヤーの一定距離に近くまで近づいたら
+			if (m_stopDistance_Player >= distance)
+			{
+				if (m_sword)
+				{
+					//攻撃処理
+					UpdateAttack(_deltaTime);
+				}
+
+			}
+
 		}
 	}
 
@@ -1556,7 +1664,7 @@ void AEnemyBase::CaseBattle_Noise(float _deltaTime)
 
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
-		m_noiseLevel_keeper = 6;			//失踪に移行
+		m_noiseLevel = 6;			//失踪に移行
 		m_battleNoiseCheck = false;//戦闘中
 		m_noiseCheck = false;		//聴覚中止
 		m_noise_Pos = FVector(-5000.0, -5000., -5000.);//物音座標リセット
@@ -1666,7 +1774,7 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 	else
 	{
 		m_visionLevel = 8;				//帰還に移行
-		m_noiseLevel_keeper = 8;		//帰還に移行
+		m_noiseLevel = 8;		//帰還に移行
 		m_missTime = 0;					//見失う時間リセット
 		m_missCheck = false;	//見失い終了
 	}
@@ -1708,7 +1816,7 @@ void AEnemyBase::CaseReturn(float _deltaTime)
 	if (m_returnTime > m_returnTime_Limit)
 	{
 		m_visionLevel = 0;				//巡回に戻る
-		m_noiseLevel_keeper = 0;				//巡回に戻る
+		m_noiseLevel = 0;				//巡回に戻る
 		m_returnTime = 0;					//帰還時間リセット
 		m_returnCheck = false;	//帰還終了
 		//
@@ -1856,11 +1964,41 @@ void AEnemyBase::UpdateMove_Nav(float _deltaTime)
 void AEnemyBase::UpdateAttack(float _deltaTime)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Attack"));
-	//m_attackingTime += _deltaTime;
 
-	//m_pEnemy_Weapon->BulletFire(m_allTime, this);
+	//攻撃処理
+	m_attackingTime += _deltaTime;
 
-	m_sword->Swinging(false);
+	//武器を持っていたら
+	if (m_pEnemy_Weapon)
+	{
+
+		FVector WeaponPos = m_pEnemy_Weapon->GetActorLocation();
+		FVector WeaponForwardVector = m_pEnemy_Weapon->GetActorForwardVector();
+		FVector WeaponForwardPos = WeaponPos + WeaponForwardVector * m_attackDistance;
+
+		FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
+
+		//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
+		bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, WeaponPos, WeaponForwardPos, FCollisionObjectQueryParams::AllObjects, BattleCollisionParams);
+
+		//ヒットするオブジェクトがある場合
+		if (isHit)
+		{
+			AActor* hitActor = HitCollision.GetActor();
+
+			//当たったコリジョンがプレイヤーだった場合
+			if (hitActor->ActorHasTag("Player"))
+			{
+				m_pEnemy_Weapon->BulletFire(m_allTime, this);
+			}
+		}
+
+	}
+	else if(m_sword)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Swing"));
+		m_sword->Swinging(false);
+	}
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -1879,20 +2017,23 @@ void AEnemyBase::OnNoiseHeard(const int& _noiseVolume, const FVector& _pos)
 	//
 	if (_noiseVolume > 0)
 	{
-		m_noiseLevel = _noiseVolume + 1;
+		m_noiseVolume = _noiseVolume + 1;
 		m_noise_Pos = _pos;
+		m_isCallOnNoise = true;
+
 	}
 	//巡回状態にならない場合があるため
 	else
 	{
-		m_noiseLevel = _noiseVolume;
+		m_noiseVolume = _noiseVolume;
 		m_noise_Pos = _pos;
 	}
 	//警戒状態の場合
 	if (m_alertCheck)
 	{
-		m_noiseLevel += 1;
+		m_noiseVolume += 1;
 	}
+
 }
 
 //------------------------------------------------------------------------------------------------------------
