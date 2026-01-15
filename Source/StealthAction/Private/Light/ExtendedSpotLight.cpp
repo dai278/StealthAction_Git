@@ -257,6 +257,18 @@ void AExtendedSpotLight::TurnOff()
 	}
 }
 
+void AExtendedSpotLight::SwitchTurn()
+{
+	if (m_bIsOn)
+	{
+		TurnOff();
+	}
+	else
+	{
+		TurnOn();
+	}
+}
+
 //-----------------------------------------------------
 //é©ìÆYAwâÒì]ÇÃçXêVèàóù
 //-----------------------------------------------------

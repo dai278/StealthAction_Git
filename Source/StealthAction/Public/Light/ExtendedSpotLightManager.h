@@ -31,8 +31,8 @@ public:
 	bool IsHitAllLight(const FVector& _pos)const;
 	bool IsHitEnemyLight(const FVector& _pos)const;
 	bool IsHitShadowDrawLight(const FVector& _pos)const;
-
-
+	
+	void SwitchTurnLight(const int32& _index);
 protected:
 	//ƒŒƒxƒ‹ã‚Ìƒ‰ƒCƒg‚ğŠÇ—‚·‚é
 	TArray <AExtendedSpotLight*> m_pLights;

@@ -49,7 +49,7 @@ APlayerCharacter::APlayerCharacter()
 	, m_WalkSpeed(600.f)
 	, m_DashSpeed(1200.f)
 	, m_CrouchSpeed(300.f)
-	, m_JumpVector(1000.f)
+	, m_JumpVector(1400.f)
 	, m_bCameraSwitching(false)
 	, m_status(EPlayerStatus::Idle)
 	, m_bCanControl(true)
@@ -574,9 +574,9 @@ void APlayerCharacter::UpdateJump(float _deltaTime)
 	m_jumpTimer += _deltaTime;
 
 	FVector newVelocity = GetCharacterMovement()->Velocity;
-	const float gravity = -1.f;
-	const float maxGaravity =-500.f;
-	newVelocity.Z += FMath::Pow(gravity,m_jumpTimer);
+	const float gravity = 800.f;
+	const float maxGaravity =-1500.f;
+	newVelocity.Z -= FMath::Pow(gravity,m_jumpTimer);
 
 	if (newVelocity.Z < maxGaravity)
 	{
@@ -827,7 +827,7 @@ void APlayerCharacter::Enhanced_MoveJump(const FInputActionValue& Value)
 	if (GetCharacterMovement()->IsMovingOnGround())
 	{
 		//Šµ«‚ÍŽc‚·‚ªŒ¸‘¬
-		GetCharacterMovement()->Velocity *= 0.5f;
+		//GetCharacterMovement()->Velocity *= 0.8f;
 		LaunchCharacter(FVector(0.f, 0.f, m_JumpVector), false, true);
 		GetCharacterMovement()->GravityScale = 0.f;
 		m_bJumping = true;

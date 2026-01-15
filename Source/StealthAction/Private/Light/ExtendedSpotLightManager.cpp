@@ -127,3 +127,17 @@ bool UExtendedSpotLightManager::IsHitShadowDrawLight(const FVector& _pos)const
 	}
 	return false;
 }
+
+
+void UExtendedSpotLightManager::SwitchTurnLight(const int32& _index)
+{
+	for (AExtendedSpotLight* p : m_pEnemyLights)
+	{
+		if (p)
+		{
+			if (p->GetIndex() == _index)
+			{
+			}
+		}
+	}
+}

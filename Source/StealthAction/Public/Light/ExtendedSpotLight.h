@@ -82,6 +82,9 @@ public:
 	void TurnOff();//è¡Ç∑
 
 	UFUNCTION()
+	void SwitchTurn();
+
+	UFUNCTION()
 	bool IsCanItBeTurned() { return m_canItBeTurned; }
 
 private:
