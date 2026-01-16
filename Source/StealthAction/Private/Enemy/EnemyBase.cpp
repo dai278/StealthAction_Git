@@ -54,12 +54,12 @@ AEnemyBase::AEnemyBase()
 	: m_pPlayerChara(NULL)
 	, m_visiblityAngle(0.2)
 	, m_visionLevel(0)
-	, m_visionRange_Short(1000.0)
-	, m_visionRange_Normal(1800.0)
-	, m_visionRange_Long(2500.0)
-	, m_hearingRange_Short(1500.0)
-	, m_hearingRange_Normal(2300.0)
-	, m_hearingRange_Long(3000.0)
+	, m_visionRange_Short(500.0)
+	, m_visionRange_Normal(1200.0)
+	, m_visionRange_Long(2000.0)
+	, m_hearingRange_Short(500.0)
+	, m_hearingRange_Normal(1000.0)
+	, m_hearingRange_Long(1700.0)
 	, m_stopDistance_Noise(50.0) //
 	, m_patrolTime(0.0)
 	, m_doubtTime(0.0)
@@ -158,6 +158,9 @@ AEnemyBase::AEnemyBase()
 	// AIController を使わせる
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	AIControllerClass = AAIController::StaticClass();
+
+	// RVO Avoidance を有効化
+	GetCharacterMovement()->bUseRVOAvoidance = true;
 
 	//影オブジェクトの生成
 	m_pShadow = CreateDefaultSubobject<UShadowComponent>(TEXT("Shadow"));
@@ -496,6 +499,17 @@ void AEnemyBase::UpdateVisiblity(float _deltaTime)
 		return;
 	}
 
+	//プレイヤーが影に入っているか？
+	m_playerShadowCheck = m_pPlayerChara->IsInShadow();
+
+	//影に入っている場合
+	if (m_playerShadowCheck)
+	{
+		//探索失敗で終了
+		m_visionCheck = false;
+		return;
+	}
+
 	FVector Target_Vector_V = (m_playerPos - m_enemyPos).GetSafeNormal();			//エネミーからプレイヤーへのベクトル
 
 	float View_Value = FVector::DotProduct(m_enemyForward, Target_Vector_V);		//エネミー正面からプレイヤーへの角度
@@ -536,17 +550,6 @@ void AEnemyBase::UpdateVisiblity(float _deltaTime)
 		}
 	}
 	else
-	{
-		//探索失敗で終了
-		m_visionCheck = false;
-		return;
-	}
-
-	//プレイヤーが影に入っているか？
-	m_playerShadowCheck = m_pPlayerChara->IsInShadow();
-
-	//入っている場合
-	if (m_playerShadowCheck)
 	{
 		//探索失敗で終了
 		m_visionCheck = false;
@@ -1077,110 +1080,9 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 
 	FVector EnemyBaseForward_Pos = m_enemyPos + m_enemyForward * m_stopDistance_Wall;		//エネミーの正面,m_stopDistance_Wall先の座標
 
-	//ランダムルートの場合
-	if (m_randomRoute)
+	//ランダムルートの場合または、m_pEnemy_Routeになにも入っていない場合
+	if (m_randomRoute|| m_pEnemy_Route.Num() == 0)
 	{
-		FHitResult HitCollision;	//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
-
-		//旋回中は呼ばない
-		if (!m_patrol_TurningCheck)
-		{
-			//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
-			bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, EnemyBaseForward_Pos, FCollisionObjectQueryParams::AllObjects, DefaultCollisionParams);
-
-			//ヒットするオブジェクトがある場合
-			if (isHit)
-			{
-				AActor* hitActor = HitCollision.GetActor();
-
-				//壁,エネミーに当たらなかった場合
-				if (!hitActor->ActorHasTag("Wall") && !hitActor->ActorHasTag("Enemy"))
-				{
-					m_routePos = EnemyBaseForward_Pos;
-
-					UpdateMove(_deltaTime);
-				}
-			}
-			else
-			{
-				m_routePos = EnemyBaseForward_Pos;
-
-				UpdateMove(_deltaTime);
-				return;
-			}
-		}
-
-		m_enemyPos_XY_Wall[0] = m_enemyPos + FVector(0.f, 1.0f, 0.f) * m_stopDistance_Wall;		//エネミー座標からY+座標(0の場合)
-		m_enemyPos_XY_Wall[1] = m_enemyPos + FVector(1.0f, 0.f, 0.f) * m_stopDistance_Wall;		//エネミー座標からX+座標(1の場合)
-		m_enemyPos_XY_Wall[2] = m_enemyPos + FVector(0.f, -1.0f, 0.f) * m_stopDistance_Wall;		//エネミー座標からY-座標(2の場合)
-		m_enemyPos_XY_Wall[3] = m_enemyPos + FVector(-1.0f, 0.f, 0.f) * m_stopDistance_Wall;		//エネミー座標からX-座標(3の場合)
-
-		if (!m_patrol_TurningCheck)
-		{
-			int Num[4] = { 0,0,0,0 };		//壁のない方向識別用
-			int Num_1 = 0;					//壁のない方向の数
-
-			for (int i = 0; i < 4; i++)
-			{
-				//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
-				bool isHitXY = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, m_enemyPos_XY_Wall[i], FCollisionObjectQueryParams::AllObjects, DefaultCollisionParams);
-
-				//ヒットするオブジェクトがある場合
-				if (isHitXY)
-				{
-					AActor* hitActor = HitCollision.GetActor();
-
-					//壁、エネミーに当たらなかった場合
-					if (!hitActor->ActorHasTag("Wall") && !hitActor->ActorHasTag("Enemy"))
-					{
-						Num[Num_1] = i;				//壁のない方向を追加
-						Num_1 += 1;					//壁のない方向の数を追加
-					}
-				}
-				else
-				{
-					Num[Num_1] = i;				//壁のない方向を追加
-					Num_1 += 1;					//壁のない方向の数を追加
-				}
-			}
-
-			//進行方向用ランダム関数
-			int Random = FMath::RandRange(0, Num_1 - 1);
-			int RandomNum = Random;
-
-			//壁のない方向をランダムで選択
-			for (int i = 0; i < Num_1; ++i)
-			{
-				if (RandomNum == i)
-				{
-					m_patrol_TurnDirection = Num[i];				//決定した方向の格納
-				}
-			}
-			m_patrol_TurningCheck = true;		//旋回中
-		}
-
-		//移動方向決定
-		FRotator DirectionRot = UKismetMathLibrary::FindLookAtRotation(m_enemyPos, m_enemyPos_XY_Wall[m_patrol_TurnDirection]);
-		FRotator newRot = FMath::RInterpTo(GetActorRotation(), DirectionRot, _deltaTime, m_chaseRotSpeed);
-		//旋回
-		SetActorRotation(FRotator(GetActorRotation().Pitch, newRot.Yaw, GetActorRotation().Roll));
-
-		m_patrol_TurningCheckingTime += _deltaTime;	//旋回経過時間
-
-		//旋回時間が経過した場合
-		if (m_patrol_TurningCheckingTime >= m_patrol_TurningCheckingTime_Limit)
-		{
-			m_patrol_TurningCheck = false;			//旋回終了
-			m_patrol_TurningCheckingTime = 0;		//旋回タイマーリセット
-		}
-	}
-
-	//m_pEnemy_Routeになにも入っていない場合
-	else if (m_pEnemy_Route.Num() == 0)
-	{
-		//
-		UE_LOG(LogTemp, Warning, TEXT("Patrol_NULL"));
-
 		FHitResult HitCollision;	//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
 
 		//旋回中は呼ばない
@@ -1310,39 +1212,43 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 
 		double distance_2D = FVector::Dist2D(m_routePos, m_enemyPos);	//ルート地点とエネミーのとの距離を測る(Vectorの長さ）
 
-		//少し右にずれる
-		if (m_patrol_TurningCheck)
-		{
-			m_patrol_TurningCheckingTime += _deltaTime;
+		////少し右にずれる
+		//if (m_patrol_TurningCheck)
+		//{
+		//	m_patrol_TurningCheckingTime += _deltaTime;
 
-			m_routePos = m_turnRight_Pos;
+		//	m_routePos = m_turnRight_Pos;
 
-			UpdateViewMove(_deltaTime);
-			UpdateMove(_deltaTime);
-		}
-		else
+		//	UpdateViewMove(_deltaTime);
+		//	UpdateMove_Nav(_deltaTime);
+		//}
+		//else
 		{
-			UpdateViewMove(_deltaTime);
+			//UpdateViewMove(_deltaTime);
 
 			if (m_stopDistance_2D < distance_2D && m_patrolTime > m_patrolTime_Limit)
 			{
-				UpdateMove(_deltaTime);
+				UpdateMove_Nav(_deltaTime);
 			}
 
 		}
 
-		//一定時間たつと元の動きに戻る
-		if (m_patrol_TurningCheckingTime > m_patrol_TurningTime_Limit)
-		{
-			m_patrol_TurningCheck = false;
-			m_patrol_TurningCheckingTime = 0;
-		}
+		////一定時間たつと元の動きに戻る
+		//if (m_patrol_TurningCheckingTime > m_patrol_TurningTime_Limit)
+		//{
+		//	m_patrol_TurningCheck = false;
+		//	m_patrol_TurningCheckingTime = 0;
+		//}
 
 		//地点についたら次の地点へ
 		if (m_stopDistance_2D >= distance_2D)
 		{
+			//一時停止のため
 			m_patrolTime = 0;
 			m_routeCounter += 1;
+
+			m_moveStop_Nav = true;		//停止（Nav）
+			UpdateMove_Nav(_deltaTime);
 		}
 	}
 }
@@ -1360,25 +1266,41 @@ void AEnemyBase::CaseDoubt(float _deltaTime)
 		m_doubtCheck = true;
 		m_currentChaseSpeed = m_chaseSpeed_Normal;		//追跡速度の変更
 		GetCharacterMovement()->MaxWalkSpeed = m_currentChaseSpeed;
+
+		m_moveStop_Nav = true;		//停止（Nav）
+		UpdateMove_Nav(_deltaTime);
+
 	}
 
 	m_doubtTime += _deltaTime;				//疑念時間の経過
-
-	//視点移動処理
-	UpdateViewMove(_deltaTime);
 
 	//時間が経過すると注意状態に移行
 	if (m_doubtTime > m_doubtTime_Limit)
 	{
 		//移動処理
 		UpdateMove_Nav(_deltaTime);
-	}
 
+		//もし視界外に出た場合
+		if (m_visionCheck == false)
+		{
+			m_visionLevel = 6;		//見失うに移行
+			m_doubtTime = 0;			//疑念時間リセット
+			m_visionCheck = false;
+			m_doubtCheck = false;
+			return;
+		}
+	}
+	//時間が経過すると視点移動処理
+	else if (m_doubtTime > m_doubtTime_Limit / 4)
+	{
+		//視点移動処理
+		UpdateViewMove(_deltaTime);
+	}
 
 	//もし視界外に出た場合
 	if (m_visionCheck == false)
 	{
-		m_visionLevel = 0;		//巡回に移行
+		m_visionLevel = 0;		//見失うに移行
 		m_doubtTime = 0;			//疑念時間リセット
 		m_visionCheck = false;
 		m_doubtCheck = false;
@@ -1396,6 +1318,10 @@ void AEnemyBase::CaseDoubt_Noise(float _deltaTime)
 		UE_LOG(LogTemp, Warning, TEXT("Doubt_Noise"));
 
 		m_doubtNoiseCheck = true;
+
+		m_moveStop_Nav = true;		//停止（Nav）
+		UpdateMove_Nav(_deltaTime);
+
 	}
 
 	m_doubtNoiseTime += _deltaTime;				//疑念時間の経過
@@ -1428,6 +1354,10 @@ void AEnemyBase::CaseCaution(float _deltaTime)
 		m_cautionCheck = true;
 		m_currentChaseSpeed = m_chaseSpeed_Normal;		//追跡速度の変更
 		GetCharacterMovement()->MaxWalkSpeed = m_currentChaseSpeed;
+
+
+		m_moveStop_Nav = true;		//停止（Nav）
+		UpdateMove_Nav(_deltaTime);
 
 	}
 
@@ -1482,6 +1412,9 @@ void AEnemyBase::CaseCaution_Noise(float _deltaTime)
 		m_currentChaseSpeed = m_chaseSpeed_Normal;		//追跡速度の変更
 		GetCharacterMovement()->MaxWalkSpeed = m_currentChaseSpeed;
 
+		m_moveStop_Nav = true;		//停止（Nav）
+		UpdateMove_Nav(_deltaTime);
+
 	}
 
 	FVector2D noise_Pos_keeper(m_noise_Pos_keeper.X, m_noise_Pos_keeper.Y);
@@ -1529,6 +1462,9 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 		m_currentChaseSpeed = m_chaseSpeed_Fast;							//追跡速度の変更
 		GetCharacterMovement()->MaxWalkSpeed = m_currentChaseSpeed;
 		m_battleFalseTime = 0;
+
+		m_moveStop_Nav = true;		//停止（Nav）
+		UpdateMove_Nav(_deltaTime);
 
 	}
 
@@ -1627,6 +1563,10 @@ void AEnemyBase::CaseBattle_Noise(float _deltaTime)
 		m_alertCheck = true;	//警戒状態ON
 		m_currentChaseSpeed = m_chaseSpeed_Fast;							//追跡速度の変更
 		GetCharacterMovement()->MaxWalkSpeed = m_currentChaseSpeed;
+
+		m_moveStop_Nav = true;		//停止（Nav）
+		UpdateMove_Nav(_deltaTime);
+
 	}
 
 	FVector2D noise_Pos_keeper(m_noise_Pos_keeper.X, m_noise_Pos_keeper.Y);
@@ -1685,6 +1625,9 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 		m_missCheck = true;//失踪中
 		m_visionCheck = false;
 		m_noiseCheck = false;
+
+		m_moveStop_Nav = true;		//停止（Nav）
+		UpdateMove_Nav(_deltaTime);
 
 	}
 
@@ -1798,6 +1741,10 @@ void AEnemyBase::CaseReturn(float _deltaTime)
 		m_returnCheck = true;//戻り中
 		m_visionCheck = false;
 		m_noiseCheck = false;
+
+		m_moveStop_Nav = true;		//停止（Nav）
+		UpdateMove_Nav(_deltaTime);
+
 	}
 
 	if (m_stopDistance_Player < distance)
@@ -1956,6 +1903,12 @@ void AEnemyBase::UpdateMove_Nav(float _deltaTime)
 	{
 		AIMove->MoveToLocation(m_enemyPos_Return, m_stopDistance_Nav, true, true, true, false);
 	}
+	//巡回の場合
+	else if (m_patrolCheck)
+	{
+		AIMove->MoveToLocation(m_routePos, m_stopDistance_Nav, true, true, true, false);
+	}
+
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -2056,7 +2009,7 @@ void AEnemyBase::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UP
 //------------------------------------------------------------------------------------------------------------
 //ダメージ処理
 //------------------------------------------------------------------------------------------------------------
-void AEnemyBase::OnDamage(const int& _damage, const FVector& _knockBackVector, const bool& _bSneakKill)
+void AEnemyBase::OnDamage(int32 Damage, FVector KnockBackValue, bool _bSneakKill)
 {
 	//体力減少
 	//デバック用に死亡

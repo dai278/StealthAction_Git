@@ -84,7 +84,7 @@ public:
 	void CaseDead(float _deltaTime);				
 
 	//攻撃を受けたときの処理
-	void OnDamage(const int& _damage,const FVector& _knockBackVector, const bool& _bSneakKill);		//エネミー別
+	void OnDamage(int32 _damage, FVector _knockBackValue, bool _bSneakKill);		//エネミー別
 
 	//衝突判定
 	UFUNCTION()
