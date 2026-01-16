@@ -257,6 +257,12 @@ public:
 	//地面ついた時に呼ばれるコールバック関数
 	virtual void Landed(const FHitResult& Hit) override;
 
+	//影潜り時間取得
+	float GetShadowTimer() const { return m_timer; }
+
+	//最大影潜り時間取得
+	float GetMaxShadowTime() const { return m_maxShadowTime; }
+
 private:
 
 	//BlueprintRedOnlyに指定しているためブループリントで見れるが、編集はできない（変数保護）

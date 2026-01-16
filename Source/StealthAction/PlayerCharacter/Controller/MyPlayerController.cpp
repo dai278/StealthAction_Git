@@ -4,12 +4,46 @@
 #include "StealthAction/PlayerCharacter/Controller/MyPlayerController.h"
 
 #include "UI/RadarMap/RadarWidget.h"
+#include "UI/HUD/HUDWidget.h"
+
+#include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 #include "Blueprint/UserWidget.h"
+
 
 void AMyPlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
+	//============================
+	// PlayerCharacter を取得
+	//============================
+	PlayerCharacter = Cast<APlayerCharacter>(GetPawn());
+
+	if (!PlayerCharacter)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter not found"));
+	}
+
+	//============================
+	// HUDWidget を生成
+	//============================
+	if (HUDWidgetClass)
+	{
+		HUDWidget = CreateWidget<UHUDWidget>(this, HUDWidgetClass);
+		if (HUDWidget)
+		{
+			HUDWidget->AddToViewport();
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HUDWidgetClass is not set"));
+	}
+
+	//============================
+	// レーダーUI生成（既存処理）
+	//============================
+	
     // レーダーUIのクラスが設定されていなければ何もしない
     if (!RadarWidgetClass)
     {
@@ -35,6 +69,5 @@ void AMyPlayerController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 
-    // 今回は Tick では特に処理なし
-
 }
+

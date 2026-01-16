@@ -8,6 +8,7 @@
 
 class URadarWidget;
 class UPlayerHPGaugeWidget;
+class UShadowTimeWidget;
 
 UCLASS()
 class STEALTHACTION_API UHUDWidget : public UUserWidget
@@ -23,4 +24,11 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UPlayerHPGaugeWidget* PlayerHPGaugeWidget;
 
+	//影滞在時間UI(BP側でバインド)
+	UPROPERTY(meta = (BindWidget))
+	UShadowTimeWidget* ShadowTimeWidget;
+
+public:
+	// PlayerController から呼ばれる更新関数
+	void UpdateShadowTime(float Rate);
 };

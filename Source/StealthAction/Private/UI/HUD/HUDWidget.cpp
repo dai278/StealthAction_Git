@@ -5,3 +5,5 @@
 
 #include "UI/RadarMap/RadarWidget.h"
 #include "UI/HPGauge/PlayerHPGaugeWidget.h"
+#include "UI/Shadow/ShadowTimeWidget.h"
+
