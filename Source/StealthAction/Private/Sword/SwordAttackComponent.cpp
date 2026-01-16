@@ -218,20 +218,10 @@ void USwordAttackComponent::OnSwordBeginOverlap(
 	knockBackvector = knockBackvector.GetSafeNormal();
 	knockBackvector *= m_KnockBackValu;
 
-	//ダメージ処理など
-	if(OtherActor->ActorHasTag(TEXT("Enemy")))
-	{
-		UE_LOG(LogTemp, Display, TEXT("Hit to Enemy"));
-		//ダメージ与える処理
-		Cast<IDamageable>(OtherActor)->OnDamage(m_damage, knockBackvector,m_bSneakKill);
-	}
-	if (OtherActor->ActorHasTag(TEXT("Player")))
-	{
-		UE_LOG(LogTemp, Display, TEXT("Hit to Player"));
-
-		//ダメージ与える処理
-		Cast<APlayerCharacter>(OtherActor)->OnDamage(m_damage, knockBackvector);
-	}
+	
+	UE_LOG(LogTemp, Display, TEXT("Hit to Enemy"));
+	//ダメージ与える処理
+	Cast<IDamageable>(OtherActor)->OnDamage(m_damage, knockBackvector,m_bSneakKill);
 
 }
 

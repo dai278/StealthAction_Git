@@ -709,7 +709,7 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 //-----------------------------------------------------
 //ダメージ処理
 //-----------------------------------------------------
-void APlayerCharacter::OnDamage(const int& _damage, const FVector& _knockBackVelocity)
+void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakKill)
 {
 	//無敵時間中ならダメージを受けない
 	if (m_bInvincible) { return; }
@@ -720,7 +720,7 @@ void APlayerCharacter::OnDamage(const int& _damage, const FVector& _knockBackVel
 	//入力制御
 	m_bCanControl = false;
 	//ダメージ
-	m_playerInfo.hp -= _damage;
+	m_playerInfo.hp -= Damage;
 	
 	//影状態なら解除
 	CancellationShadow(EPlayerStatus::Damage);
@@ -744,7 +744,7 @@ void APlayerCharacter::OnDamage(const int& _damage, const FVector& _knockBackVel
 	m_bInvincible = true;
 	m_invincibleTimer = 0.f;
 	m_status = EPlayerStatus::Damage;
-	m_knockBackVelocity = _knockBackVelocity;
+	m_knockBackVelocity = KnockBackVec;
 
 	LaunchCharacter(m_knockBackVelocity, true, false);
 
