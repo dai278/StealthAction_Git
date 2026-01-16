@@ -9,6 +9,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "GameInstance/PlayDataInfo.h"
+#include "Damage/IDamage.h"
+
 #include "EnemyBase.generated.h"
 
 // 前方宣言
@@ -42,7 +44,7 @@ enum class EEnemyStatus :uint8
 };
 
 UCLASS()
-class STEALTHACTION_API AEnemyBase : public ACharacter
+class STEALTHACTION_API AEnemyBase : public ACharacter,public IDamageable
 {
 	GENERATED_BODY()
 
@@ -84,7 +86,7 @@ public:
 	void CaseDead(float _deltaTime);				
 
 	//攻撃を受けたときの処理
-	void OnDamage(int32 _damage, FVector _knockBackValue, bool _bSneakKill);		//エネミー別
+	void OnDamage(int32 _damage, FVector _knockBackValue, bool _bSneakKill)override;		//エネミー別
 
 	//衝突判定
 	UFUNCTION()

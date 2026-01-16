@@ -3,7 +3,7 @@
 
 #include "Sword/SwordAttackComponent.h"
 #include "Components/SphereComponent.h"
-#include "Enemy/EnemyBase.h"
+#include "Damage/IDamage.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 
 //コンストラクタ
@@ -223,7 +223,7 @@ void USwordAttackComponent::OnSwordBeginOverlap(
 	{
 		UE_LOG(LogTemp, Display, TEXT("Hit to Enemy"));
 		//ダメージ与える処理
-		Cast<AEnemyBase>(OtherActor)->OnDamage(m_damage, knockBackvector,m_bSneakKill);
+		Cast<IDamageable>(OtherActor)->OnDamage(m_damage, knockBackvector,m_bSneakKill);
 	}
 	if (OtherActor->ActorHasTag(TEXT("Player")))
 	{
