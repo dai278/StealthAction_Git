@@ -46,10 +46,10 @@ APlayerCharacter::APlayerCharacter()
 	, m_cameraPitchLimit(FVector2D(-80.f, 80.f))
 	, m_cameraStatus(ECameraStatus::ThirdPerson)
 	, m_cameraRotateSpeed(3.f)
-	, m_WalkSpeed(600.f)
-	, m_DashSpeed(1200.f)
-	, m_CrouchSpeed(300.f)
-	, m_JumpVector(1400.f)
+	, m_WalkSpeed(300.f)
+	, m_DashSpeed(600.f)
+	, m_CrouchSpeed(100.f)
+	, m_JumpVector(1000.f)
 	, m_bCameraSwitching(false)
 	, m_status(EPlayerStatus::Idle)
 	, m_bCanControl(true)
@@ -106,8 +106,11 @@ APlayerCharacter::APlayerCharacter()
 	m_pHitActors.Reset();
 
 	//カメラの視点変更時初期位置
-	m_cameraInitPos[(int)ECameraStatus::ThirdPerson] = { 0.f,0.f,0.f,800.f };
-	m_cameraInitPos[(int)ECameraStatus::TopDownView] = { 0.f ,-80.f,0.f,2000.f };
+	m_cameraInitPos[(int)ECameraStatus::ThirdPerson] = { FRotator{ 0.f,0.f,0.f},90.f,400.f };
+	m_cameraInitPos[(int)ECameraStatus::TopDownView] = { FRotator{ 0.f,0.f,0.f},150.f,400.f };
+	m_cameraInitPos[(int)ECameraStatus::InShadow] = { FRotator{ 0.f,0.f,0.f},80.f,100.f };
+	m_cameraInitPos[(int)ECameraStatus::Crouch] = { FRotator{ 0.f,0.f,0.f},100.f,250.f };
+
 
 	//カプセルの初期値を記録
 	m_Capsule = GetCapsuleComponent();
@@ -123,7 +126,7 @@ APlayerCharacter::APlayerCharacter()
 		m_pSpringArm->SocketOffset = FVector(0.f, 50.f, 60.f);	//肩越し視点設定
 		m_pSpringArm->bUsePawnControlRotation = true;			//カメラ回転
 		m_pSpringArm->CameraLagSpeed = 8.f;
-		m_pSpringArm->bDoCollisionTest = false;                 // 壁自動回避しない
+		m_pSpringArm->bDoCollisionTest = true;                 // 壁自動回避しない
 	}
 
 
@@ -165,6 +168,9 @@ void APlayerCharacter::BeginPlay()
 		m_Capsule->SetCapsuleSize(m_capsuleRadius, m_capsuleHeight);
 		m_bUsingMesh = true;
 	}
+
+	m_pSpringArm->SetRelativeRotation(m_cameraInitPos[(int)ECameraStatus::ThirdPerson].rotator);
+	m_pCamera->FieldOfView = m_cameraInitPos[(int)ECameraStatus::ThirdPerson].fieldOfView;
 
 	//PlayerCotrollerからEnhancedInputSubSystemを取得
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
@@ -612,7 +618,7 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 	//Yaw
 	NewRotation.Yaw = FMath::FInterpTo(
 		NewRotation.Yaw,
-		m_cameraInitPos[(int)m_cameraStatus].yaw,
+		m_cameraInitPos[(int)m_cameraStatus].rotator.Yaw,
 		_deltaTime,
 		5.f
 	);
@@ -620,7 +626,7 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 	//Pitch
 	NewRotation.Pitch = FMath::FInterpTo(
 		NewRotation.Pitch,
-		m_cameraInitPos[(int)m_cameraStatus].pitch,
+		m_cameraInitPos[(int)m_cameraStatus].rotator.Pitch,
 		_deltaTime,
 		5.f
 	);
@@ -628,29 +634,44 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 	//Roll
 	NewRotation.Roll = FMath::FInterpTo(
 		NewRotation.Roll,
-		m_cameraInitPos[(int)m_cameraStatus].roll,
+		m_cameraInitPos[(int)m_cameraStatus].rotator.Roll,
 		_deltaTime,
 		5.f
 	);
 
 	m_pSpringArm->SetRelativeRotation(NewRotation);
 
+	//視野角
+	float newFieldOfView= m_pCamera->FieldOfView;
+	newFieldOfView = FMath::FInterpTo(
+		newFieldOfView,
+		m_cameraInitPos[(int)m_cameraStatus].fieldOfView,
+		_deltaTime,
+		5.f
+	);
+	m_pCamera->FieldOfView = newFieldOfView;
+
+
+
 	//一定距離以下になれば目標地点と同じ座標にする
 	//目標地点との差
 	const float distanceSpringArm = m_pSpringArm->TargetArmLength - m_cameraInitPos[(int)m_cameraStatus].springArmLength;
-	const float distanceYaw = abs(NewRotation.Yaw) - abs(m_cameraInitPos[(int)m_cameraStatus].yaw);
-	const float distancePitch = abs(NewRotation.Pitch) - abs(m_cameraInitPos[(int)m_cameraStatus].pitch);
+	const float distanceYaw = abs(NewRotation.Yaw) - abs(m_cameraInitPos[(int)m_cameraStatus].rotator.Yaw);
+	const float distancePitch = abs(NewRotation.Pitch) - abs(m_cameraInitPos[(int)m_cameraStatus].rotator.Pitch);
+	const float distanceFieldOfView = abs(newFieldOfView) - abs(m_cameraInitPos[(int)m_cameraStatus].fieldOfView);
+
 	//
 	if (
 		abs(distanceSpringArm) < 1.f &&
 		abs(distanceYaw) < 1.f &&
-		abs(distancePitch) < 1.f
+		abs(distancePitch) < 1.f&&
+		abs(distanceFieldOfView)<1.f
 		)
 	{
 		m_pSpringArm->TargetArmLength = m_cameraInitPos[(int)m_cameraStatus].springArmLength;
 
-		NewRotation.Yaw = m_cameraInitPos[(int)m_cameraStatus].yaw;
-		NewRotation.Pitch = m_cameraInitPos[(int)m_cameraStatus].pitch;
+		NewRotation.Yaw = m_cameraInitPos[(int)m_cameraStatus].rotator.Yaw;
+		NewRotation.Pitch = m_cameraInitPos[(int)m_cameraStatus].rotator.Pitch;
 		m_pSpringArm->SetRelativeRotation(NewRotation);
 
 		//視点切り替え中フラグをfalseに
@@ -700,6 +721,10 @@ void APlayerCharacter::OnDamage(const int& _damage, const FVector& _knockBackVel
 	m_bCanControl = false;
 	//ダメージ
 	m_playerInfo.hp -= _damage;
+	
+	//影状態なら解除
+	CancellationShadow(EPlayerStatus::Damage);
+
 	//Hpが0になったら死亡
 	if (m_playerInfo.hp<=0)
 	{
@@ -713,6 +738,7 @@ void APlayerCharacter::OnDamage(const int& _damage, const FVector& _knockBackVel
 
 		return;
 	}
+
 	/*生きていれば*/
 	//無敵時間開始
 	m_bInvincible = true;
@@ -1099,4 +1125,15 @@ void APlayerCharacter::TransformationToShadow()
 
 	m_bUsingMesh = true;
 	
+}
+
+//影状態解除
+void APlayerCharacter::CancellationShadow(const EPlayerStatus& _status)
+{
+	if (m_status != EPlayerStatus::InShadow) { return; }
+	GetMesh()->SetSkeletalMesh(m_defaultMesh);
+	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight);
+	m_bUsingMesh = false;
+	m_status = _status;
+	m_timer = 0.f;
 }

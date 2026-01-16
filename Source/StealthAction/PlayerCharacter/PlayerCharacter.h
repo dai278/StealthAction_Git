@@ -42,6 +42,8 @@ enum class ECameraStatus : uint8
 {
 	ThirdPerson      UMETA(DisplayName = "Third Person"),//三人称
 	TopDownView      UMETA(DisplayName = "Top Down View"),//俯瞰
+	InShadow		UMETA(DisplayName = "InShadow"),//影
+	Crouch			UMETA(DisplayName = "Crouch"),//しゃがみ
 	Num			 UMETA(DisplayName = "Num")//数計測用、UMETA(DisplayName = "Num")が必要かわからないけど書かないバグりそうな気がしたから書いてます
 };
 
@@ -69,11 +71,9 @@ class STEALTHACTION_API APlayerCharacter : public ACharacter
 	//カメラ視点設定構造体
 	struct FCameraViewSetting
 	{
-		float yaw;
-		float pitch;
-		float roll;
-		float springArmLength;
-
+		FRotator rotator;//回転
+		float fieldOfView;//視野角
+		float springArmLength;//長さ
 	};
 
 	GENERATED_BODY()
@@ -165,6 +165,8 @@ private:
 	void TransformationShadowToIdle(const bool _bLightHit = false);
 	//影状態へ変化
 	void TransformationToShadow();
+	//影状態解除処理
+	void CancellationShadow(const EPlayerStatus& _status);
 
 	//足元座標の取得
 	FVector GetFeetLocation()const;
