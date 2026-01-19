@@ -6,6 +6,8 @@
 #include "Interact/Interact.h"
 #include "LightSwitch.generated.h"
 
+class UBoxComponent;
+
 /**
  * 
  */
@@ -28,9 +30,15 @@ public:
 public:
 	//派生先でインタラクトを上書き
 	virtual void Interact();
-
 	
 public:
 	UPROPERTY(EditAnywhere, Category = "Light")
 	int32 m_lightIndex;
+
+	UPROPERTY(EditAnywhere, Category = "Collision")
+	UBoxComponent* m_pCollision;
+
+	UPROPERTY(VisibleAnywhere, Category = "Shadow/Mesh")
+	UStaticMeshComponent* m_pMesh;        	//メッシュコンポネント
+
 };

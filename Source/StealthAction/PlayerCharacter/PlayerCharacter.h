@@ -29,6 +29,7 @@ class UEnemyManager;//エネミーの基底クラスにする日髙変更
 class AEnemyBase;
 class UExtendedSpotLightManager;//拡張スポットライトマネージャーの前方宣言
 class USwordAttackComponent;//ソード攻撃コンポーネントの前方宣言
+class AInteract;
 
 
 //パラメーター更新が起きた時のイベントディスパッチャー宣言
@@ -379,6 +380,10 @@ private:
 	FCameraViewSetting m_cameraInitPos[(int)ECameraStatus::Num];	//各視点変更時最初の視点
 
 	TArray <AActor*> m_hitActors;//衝突対処のアドレス
+
+	//インタラクト可なオブジェクト操作範囲内か
+	bool m_bHitIntteractObject;
+	AInteract* m_hitInteractOb;
 
 	//日髙変更点
 	UEnemyManager* m_pEnemyManager;//エネミーマネージャー毎フレーム検索は重いので

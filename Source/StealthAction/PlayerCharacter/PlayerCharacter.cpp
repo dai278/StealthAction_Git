@@ -30,6 +30,7 @@
 #include "GameInstance/PlayDataInfo.h"
 #include "GameInstance/PlayDataGameInstanceSubsystem.h"
 #include "Checkpoint/CheckpointManager.h"
+#include "Interact/Interact.h"
 
 
 
@@ -1044,7 +1045,7 @@ void APlayerCharacter::OnBeginOverlap(
 {
 	UE_LOG(LogTemp, Display, TEXT("unnti"));
 
-	if (OtherActor) {
+	if (!OtherActor) { return; }
 		//影オブジェクトと衝突したか
 		if(OtherComp->ComponentHasTag(TEXT("Shadow"))==true)
 		{
@@ -1052,7 +1053,14 @@ void APlayerCharacter::OnBeginOverlap(
 			m_hitActors.Add(OtherActor);
 			m_bOnShadow = true;
 		}
+
+	//インタラクト可能オブジェクトに触れた時
+	if (OtherActor->ActorHasTag(TEXT("Interact")))
+	{
+		m_bHitIntteractObject = false;
+		m_hitInteractOb = (AInteract*)OtherActor;
 	}
+
 }
 
 //-------------------------------------------------
@@ -1065,10 +1073,9 @@ void APlayerCharacter::OnEndOverlap(
 	int32 OtherBodyIndex
 )
 {
+	if (!OtherActor) { return; }
 
-	UE_LOG(LogTemp, Display, TEXT("unnti"));
-	if (OtherActor) {
-		if (OtherComp->ComponentHasTag(TEXT("Shadow")) == false)
+		if (!OtherComp->ComponentHasTag(TEXT("Shadow")))
 		{
 			return;
 		}
@@ -1077,6 +1084,12 @@ void APlayerCharacter::OnEndOverlap(
 		if (m_hitActors.Num() <= 0)
 		m_bOnShadow = false;
 
+
+	//インタラクト可能オブジェクトに触れた時
+	if (OtherActor->ActorHasTag(TEXT("Interact")))
+	{
+		m_bHitIntteractObject = false;
+		m_hitInteractOb = nullptr;
 	}
 }
 

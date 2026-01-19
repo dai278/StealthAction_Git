@@ -1,12 +1,20 @@
 #include "Interact/LightSwitch.h"
 
 #include "Light/ExtendedSpotLightManager.h"
+
+#include "Components/BoxComponent.h"
 //--------------------------
 // コンストラクタ
 //--------------------------
 ALightSwitch::ALightSwitch()
 	:m_lightIndex(-1)
 {
+	//コリジョン生成
+	m_pCollision = CreateDefaultSubobject<UBoxComponent> (TEXT("m_pCollisionBox"));
+	m_pMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("m_pMesh"));
+
+	m_pCollision->SetupAttachment(RootComponent);
+	m_pMesh->SetupAttachment(RootComponent);
 }
 
 //--------------------------

@@ -54,8 +54,7 @@ UShadowComponent::UShadowComponent()
 		m_pCollisionBox->SetBoxExtent(FVector{ 40.f,40.f,40.f });
 		//オーバラップイベントを発生させるか
 		m_pCollisionBox->SetGenerateOverlapEvents(true);
-	}
-	
+	}	
 }
 
 //------------------------------------------
