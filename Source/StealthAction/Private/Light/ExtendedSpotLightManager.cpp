@@ -23,7 +23,7 @@ void UExtendedSpotLightManager::OnWorldBeginPlay(UWorld&)
 void UExtendedSpotLightManager::AddLight(AExtendedSpotLight* _pLight)
 {
 
-	if (_pLight->GetIndex() == -1) { 
+	if (!_pLight->IsShadowDrawLight()) { 
 		//-1‚È‚ç“Gƒ‰ƒCƒg”z—ñ‚É’Ç‰Á
 			m_pEnemyLights.Add(_pLight);
 		return; 
@@ -137,7 +137,20 @@ void UExtendedSpotLightManager::SwitchTurnLight(const int32& _index)
 		{
 			if (p->GetIndex() == _index)
 			{
+				p->SwitchTurn();
 			}
 		}
 	}
+
+	for (AExtendedSpotLight* p : m_pLights)
+	{
+		if (p)
+		{
+			if (p->GetIndex() == _index)
+			{
+				p->SwitchTurn();
+			}
+		}
+	}
+
 }

@@ -39,5 +39,6 @@ protected:
 	//“G‚Ìƒ‰ƒCƒg
 	TArray <AExtendedSpotLight*> m_pEnemyLights;
 
+
 	
 };

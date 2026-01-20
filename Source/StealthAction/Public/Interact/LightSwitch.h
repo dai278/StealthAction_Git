@@ -32,7 +32,7 @@ public:
 	virtual void Interact();
 	
 public:
-	UPROPERTY(EditAnywhere, Category = "Light")
+	UPROPERTY(EditAnywhere, Category = "Index")
 	int32 m_lightIndex;
 
 	UPROPERTY(EditAnywhere, Category = "Collision")

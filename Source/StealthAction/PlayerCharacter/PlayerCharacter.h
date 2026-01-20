@@ -194,6 +194,7 @@ protected:
 	void Enhanced_Attack(const FInputActionValue& Value);			//攻撃
 	void Enhanced_InShadow(const FInputActionValue& Value);			//影潜り
 	void Enhanced_changeWeapon(const FInputActionValue& Value);		//武器変更
+	void Enhanced_Interact(const FInputActionValue& Value);			//インタラクト
 
 	void Enhanced_CameraPitch(const FInputActionValue& Value);		//カメラピッチ
 	void Enhanced_CameraYaw(const FInputActionValue& Value);		//カメラヨー
@@ -252,6 +253,10 @@ protected:
 	//影潜り
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* m_inShadowIA;
+
+	//インタラクト
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* m_interactIA;
 
 public:
 	//影状態か？

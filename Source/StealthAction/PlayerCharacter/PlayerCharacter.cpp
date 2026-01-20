@@ -299,6 +299,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInput->BindAction(m_changeWeaponIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_changeWeapon);
 	//影潜り
 	EnhancedInput->BindAction(m_inShadowIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_InShadow);
+	//インタラクト
+	EnhancedInput->BindAction(m_interactIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_Interact);
 
 	//カメラPitch
 	EnhancedInput->BindAction(m_cameraPitchIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_CameraPitch);
@@ -946,6 +948,19 @@ void APlayerCharacter::Enhanced_InShadow(const FInputActionValue& Value)
 }
 
 //------------------------------------------------------
+//インタラクト
+//------------------------------------------------------
+void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
+{
+	//インタラクト可能オブジェクトに触れていなければ何もしない
+	if (!m_bHitIntteractObject) { return; }
+	if (m_hitInteractOb)
+	{
+		m_hitInteractOb->Interact();
+	}
+}
+
+//------------------------------------------------------
 //武器変更
 //------------------------------------------------------
 void APlayerCharacter::Enhanced_changeWeapon(const FInputActionValue& Value)
@@ -1057,7 +1072,7 @@ void APlayerCharacter::OnBeginOverlap(
 	//インタラクト可能オブジェクトに触れた時
 	if (OtherActor->ActorHasTag(TEXT("Interact")))
 	{
-		m_bHitIntteractObject = false;
+		m_bHitIntteractObject = true;
 		m_hitInteractOb = (AInteract*)OtherActor;
 	}
 

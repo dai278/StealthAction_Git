@@ -57,6 +57,9 @@ public:
 	//ライトとの衝突チェック
 	bool IsHit(const FVector& _pos)const;
 
+	//影を落とすライトか
+	bool IsShadowDrawLight()const { return m_isShadowDrawLight; }
+
 protected:
 	
 	UPROPERTY(VisibleAnywhere)
@@ -96,6 +99,11 @@ private:
 	//点滅の更新処理
 	void UpdateBlink(const float& _deltaTime);
 protected:
+	UPROPERTY(EditAnywhere, Category = "Light")
+	bool m_isShadowDrawLight; //影を描画するライトか
+
+
+
 	UPROPERTY(EditAnywhere, Category = "Rotate")
 	bool m_bAutomaticRotateYaw;//Yaw方向に自動回転するか
 
