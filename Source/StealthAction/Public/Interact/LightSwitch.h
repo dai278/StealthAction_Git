@@ -6,7 +6,6 @@
 #include "Interact/Interact.h"
 #include "LightSwitch.generated.h"
 
-class UBoxComponent;
 
 /**
  * 
@@ -35,10 +34,5 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Index")
 	int32 m_lightIndex;
 
-	UPROPERTY(EditAnywhere, Category = "Collision")
-	UBoxComponent* m_pCollision;
-
-	UPROPERTY(VisibleAnywhere, Category = "Shadow/Mesh")
-	UStaticMeshComponent* m_pMesh;        	//メッシュコンポネント
 
 };

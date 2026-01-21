@@ -1088,17 +1088,16 @@ void APlayerCharacter::OnEndOverlap(
 	int32 OtherBodyIndex
 )
 {
+	UE_LOG(LogTemp, Display, TEXT("end Hit"));
 	if (!OtherActor) { return; }
 
-		if (!OtherComp->ComponentHasTag(TEXT("Shadow")))
-		{
-			return;
-		}
+	if (OtherComp->ComponentHasTag(TEXT("Shadow")))
+	{
 		//衝突対象を追加
 		m_hitActors.Remove(OtherActor);
 		if (m_hitActors.Num() <= 0)
-		m_bOnShadow = false;
-
+			m_bOnShadow = false;
+	}
 
 	//インタラクト可能オブジェクトに触れた時
 	if (OtherActor->ActorHasTag(TEXT("Interact")))

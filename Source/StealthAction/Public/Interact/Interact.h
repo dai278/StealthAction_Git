@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "Interact.generated.h"
 
+class UBoxComponent;
+
+
 UCLASS()
 class STEALTHACTION_API AInteract : public AActor
 {
@@ -25,5 +28,13 @@ public:
 public:
 	//派生先でインタラクトを上書き
 	virtual void Interact() {};
+
+protected:
+	UPROPERTY(EditAnywhere, Category = "Collision")
+	UBoxComponent* m_pCollision;
+
+	UPROPERTY(VisibleAnywhere, Category = "Shadow/Mesh")
+	UStaticMeshComponent* m_pMesh;        	//メッシュコンポネント
+
 
 };

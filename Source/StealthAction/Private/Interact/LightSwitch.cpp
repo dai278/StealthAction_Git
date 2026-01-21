@@ -9,23 +9,6 @@
 ALightSwitch::ALightSwitch()
 	:m_lightIndex(-1)
 {
-	//コリジョン生成
-	m_pCollision = CreateDefaultSubobject<UBoxComponent> (TEXT("m_pCollisionBox"));
-	m_pMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("m_pMesh"));
-
-	//if (m_pCollision && m_pMesh)
-	//{
-
-	//	//メッシュをルートコンポーネントに設定
-	//	m_pMesh->SetupAttachment(GetRootComponent());
-	//	m_pCollision->SetupAttachment(m_pMesh);
-
-	//	m_pMesh->SetRelativeLocation(FVector::ZeroVector);
-	//	m_pMesh->SetRelativeRotation(FRotator::ZeroRotator);
-
-	//	m_pCollision->SetRelativeLocation(FVector::ZeroVector);
-	//	m_pCollision->SetRelativeRotation(FRotator::ZeroRotator);
-	//}
 }
 
 //--------------------------
@@ -34,6 +17,7 @@ ALightSwitch::ALightSwitch()
 void ALightSwitch::BeginPlay()
 {
 	Super::BeginPlay();
+
 }
 
 //--------------------------
