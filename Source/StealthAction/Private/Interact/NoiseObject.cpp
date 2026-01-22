@@ -3,6 +3,7 @@
 
 #include "Interact/NoiseObject.h"
 #include "Noise/NoiseManager.h"
+#include "Interact/NoiseObjectMng.h"
 
 //----------------------------------------------------------
 //コンストラクタ
@@ -29,8 +30,15 @@ void ANoiseObject::BeginPlay()
 {
 	Super::BeginPlay();
 
+	
 	m_pNoiseManager = GetWorld()->GetSubsystem<UNoiseManager>();
+	
 
+	UNoiseObjectMng* noiseObjMng = GetWorld()->GetSubsystem<UNoiseObjectMng>();
+	if (noiseObjMng)
+	{
+		noiseObjMng->RegisterNoiseObject(this);
+	}
 }
 
 //----------------------------------------------------------

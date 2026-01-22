@@ -29,12 +29,17 @@ public:
 	//派生先でインタラクトを上書き
 	virtual void Interact(AActor* _interactOwner) {};
 
+public:
+	//インデックス取得
+	virtual int32 GetIndex()const { return m_index; }
 protected:
 	UPROPERTY(EditAnywhere, Category = "Collision")
-	UBoxComponent* m_pCollision;
+	UBoxComponent* m_pCollision;			//コリジョンコンポネント
 
 	UPROPERTY(VisibleAnywhere, Category = "Shadow/Mesh")
 	UStaticMeshComponent* m_pMesh;        	//メッシュコンポネント
 
+	UPROPERTY(EditAnywhere, Category = "Interact")
+	int32 m_index; 							//インタラクト識別用インデックス
 
 };

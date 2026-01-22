@@ -31,8 +31,6 @@ public:
 	virtual void Interact(AActor* _interactOwner)override;
 	
 public:
-	UPROPERTY(EditAnywhere, Category = "Index")
-	int32 m_lightIndex;
 
 
 };

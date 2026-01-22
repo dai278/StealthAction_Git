@@ -3,11 +3,11 @@
 #include "Light/ExtendedSpotLightManager.h"
 
 #include "Components/BoxComponent.h"
+
 //--------------------------
 // コンストラクタ
 //--------------------------
 ALightSwitch::ALightSwitch()
-	:m_lightIndex(-1)
 {
 }
 
@@ -33,10 +33,10 @@ void ALightSwitch::Tick(float DeltaTime)
 //--------------------------
 void ALightSwitch::Interact(AActor* _interactOwner)
 {
-	if (m_lightIndex == -1) { return; }
+	if (m_index == -1) { return; }
 	UExtendedSpotLightManager* lightMng = GetWorld()->GetSubsystem<UExtendedSpotLightManager>();
 	if (lightMng)
 	{
-		lightMng->SwitchTurnLight(m_lightIndex);
+		lightMng->SwitchTurnLight(m_index);
 	}
 }
