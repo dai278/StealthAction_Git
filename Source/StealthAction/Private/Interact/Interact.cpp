@@ -12,12 +12,12 @@ AInteract::AInteract()
 
 	//ルートコンポーネント生成
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
-	//コリジョンコンポーネント生成
-	m_pCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("Collision"));
-	m_pCollision->SetupAttachment(RootComponent);
 	//メッシュコンポーネント生成
 	m_pMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	m_pMesh->SetupAttachment(RootComponent);
+	//コリジョンコンポーネント生成
+	m_pCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("Collision"));
+	m_pCollision->SetupAttachment(RootComponent);
 
 	Tags.Add(TEXT("Interact"));
 
