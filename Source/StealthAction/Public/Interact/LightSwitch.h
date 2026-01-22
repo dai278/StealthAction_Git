@@ -28,7 +28,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 public:
 	//派生先でインタラクトを上書き
-	virtual void Interact();
+	virtual void Interact(AActor* _interactOwner)override;
 	
 public:
 	UPROPERTY(EditAnywhere, Category = "Index")

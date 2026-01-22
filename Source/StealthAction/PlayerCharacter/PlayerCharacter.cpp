@@ -956,7 +956,7 @@ void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 	if (!m_bHitIntteractObject) { return; }
 	if (m_hitInteractOb)
 	{
-		m_hitInteractOb->Interact();
+		m_hitInteractOb->Interact((AActor*)this);
 	}
 }
 

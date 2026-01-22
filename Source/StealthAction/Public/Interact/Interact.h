@@ -27,7 +27,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 public:
 	//派生先でインタラクトを上書き
-	virtual void Interact() {};
+	virtual void Interact(AActor* _interactOwner) {};
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Collision")

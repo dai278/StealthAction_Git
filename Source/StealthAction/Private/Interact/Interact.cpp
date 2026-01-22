@@ -19,6 +19,8 @@ AInteract::AInteract()
 	m_pMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	m_pMesh->SetupAttachment(RootComponent);
 
+	Tags.Add(TEXT("Interact"));
+
 
 }
 

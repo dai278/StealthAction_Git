@@ -31,7 +31,7 @@ void ALightSwitch::Tick(float DeltaTime)
 //--------------------------
 // インタラクト処理
 //--------------------------
-void ALightSwitch::Interact()
+void ALightSwitch::Interact(AActor* _interactOwner)
 {
 	if (m_lightIndex == -1) { return; }
 	UExtendedSpotLightManager* lightMng = GetWorld()->GetSubsystem<UExtendedSpotLightManager>();
