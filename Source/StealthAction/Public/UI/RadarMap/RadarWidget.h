@@ -22,7 +22,7 @@ public:
 
 	// ===== レーダー設定 =====
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Radar")
-	float RadarRadius = 80.f;
+	float RadarRadius = 175.f;		//サイズの変更　RadarRadius*2
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Radar")
 	float RadarRange = 1500.f;

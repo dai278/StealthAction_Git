@@ -1151,7 +1151,7 @@ void APlayerCharacter::TransformationToShadow()
 	SetActorLocation(newLocation);
 
 	m_bUsingMesh = true;
-	
+
 }
 
 //‰eó‘Ô‰ğœ

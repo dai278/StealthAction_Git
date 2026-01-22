@@ -78,7 +78,7 @@ int32 URadarWidget::NativePaint(
 	// 敵表示
 	//===============================
 	const float PlayerYaw = PlayerPawn->GetActorRotation().Yaw;
-	const FVector2D RadarCenter = AllottedGeometry.GetLocalSize() * 0.5f;
+	const FVector2D RadarCenter = AllottedGeometry.GetLocalSize() * 0.5f + FVector2D(115.f, -90.f);  //表示位置の調整
 
 	TArray<AActor*> Enemies;
 	UGameplayStatics::GetAllActorsOfClass(
@@ -95,8 +95,18 @@ int32 URadarWidget::NativePaint(
 		Delta.Z = 0.f;
 
 		// プレイヤー向き基準に回転
-		FRotator Rot(0.f, -PlayerYaw + 270.f, 0.f);
-		FVector Rotated = Rot.RotateVector(Delta);
+		//FRotator Rot(0.f, -PlayerYaw + 90.f, 0.f);
+		//FVector Rotated = Rot.RotateVector(Delta);
+
+		// プレイヤー回転に関係なく固定表示
+		//FVector Rotated = Delta;
+
+		// 90度回転させて初期向きをプレイヤー前方に合わせる
+		const float InitialOffsetYaw = 270.f; // 初期回転オフセット
+		FRotator RotOffset(0.f, InitialOffsetYaw, 0.f);
+		FVector Rotated = RotOffset.RotateVector(Delta);
+
+
 
 		float Distance = Rotated.Size();
 		if (Distance > RadarRange) continue;
@@ -104,6 +114,14 @@ int32 URadarWidget::NativePaint(
 		FVector2D RadarPos;
 		RadarPos.X = (Rotated.Y / RadarRange) * RadarRadius;
 		RadarPos.Y = (-Rotated.X / RadarRange) * RadarRadius;
+
+		//追加
+		// ★ 円形レーダー外は描画しない
+		if (RadarPos.Size() > RadarRadius)
+		{
+			continue;
+		}
+
 
 		FVector2D DrawPos = RadarCenter + RadarPos;
 
@@ -152,10 +170,18 @@ int32 URadarWidget::NativePaint(
 			return RadarCenter + Rotated;
 		};
 
+	//const float Size = 12.f;
+	//FVector2D P0 = RadarCenter + FVector2D(0, -Size);
+	//FVector2D P1 = RadarCenter + FVector2D(-Size * 0.7f, Size);
+	//FVector2D P2 = RadarCenter + FVector2D(Size * 0.7f, Size);
+
 	const float Size = 12.f;
-	FVector2D P0 = RadarCenter + FVector2D(0, -Size);
+
+	//上向き△になるようにYを反転
+	FVector2D P0 = RadarCenter + FVector2D(0.f, -Size);
 	FVector2D P1 = RadarCenter + FVector2D(-Size * 0.7f, Size);
 	FVector2D P2 = RadarCenter + FVector2D(Size * 0.7f, Size);
+
 
 	P0 = RotatePoint(P0, AngleDeg);
 	P1 = RotatePoint(P1, AngleDeg);
