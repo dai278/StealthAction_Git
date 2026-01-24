@@ -10,6 +10,9 @@
 class URadarWidget;
 class UHUDWidget;
 class APlayerCharacter;
+class UShadowEffect;
+
+enum class EPlayerStatus : uint8;
 
 UCLASS(Blueprintable, BlueprintType)
 class STEALTHACTION_API AMyPlayerController : public APlayerController
@@ -22,6 +25,7 @@ protected:
 
 	//毎フレーム更新
     virtual void Tick(float DeltaSeconds) override;
+
 
 protected:
 
@@ -43,6 +47,14 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<URadarWidget> RadarWidgetClass;
+
+	//=============================
+	//影UI
+	//=============================
+	UPROPERTY()
+	UShadowEffect* m_pShadowEffect;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UShadowEffect> ShadowEffect;
 
 	// ============================
 	// プレイヤー参照

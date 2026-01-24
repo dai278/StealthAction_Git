@@ -2,12 +2,16 @@
 
 
 #include "StealthAction/PlayerCharacter/Controller/MyPlayerController.h"
+#include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 
 #include "UI/RadarMap/RadarWidget.h"
 #include "UI/HUD/HUDWidget.h"
 
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 #include "Blueprint/UserWidget.h"
+
+#include "Shadow/ShadowEffect.h"
+
 
 
 void AMyPlayerController::BeginPlay()
@@ -23,6 +27,7 @@ void AMyPlayerController::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter not found"));
 	}
+
 
 	//============================
 	// HUDWidget を生成
@@ -40,6 +45,14 @@ void AMyPlayerController::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("HUDWidgetClass is not set"));
 	}
 
+	if (ShadowEffect) {
+		//影エフェクト生成
+		m_pShadowEffect = CreateWidget<UShadowEffect>(this, ShadowEffect);
+		m_pShadowEffect->AddToViewport();
+		m_pShadowEffect->SetVisibility(ESlateVisibility::Hidden);
+		UE_LOG(LogTemp, Display, TEXT("seisei"));
+
+	}
 	//============================
 	// レーダーUI生成（既存処理）
 	//============================
@@ -62,6 +75,8 @@ void AMyPlayerController::BeginPlay()
     // 画面に追加
     RadarWidget->AddToViewport();
 
+
+
     UE_LOG(LogTemp, Warning, TEXT("RadarWidget created and added to viewport"));
 }
 
@@ -69,5 +84,5 @@ void AMyPlayerController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 
-}
 
+}

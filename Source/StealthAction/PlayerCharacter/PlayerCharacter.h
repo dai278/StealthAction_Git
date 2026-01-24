@@ -32,10 +32,6 @@ class USwordAttackComponent;//ソード攻撃コンポーネントの前方宣言
 class AInteract;
 
 
-//パラメーター更新が起きた時のイベントディスパッチャー宣言
-//(BPとやり取りあり、引数なし）
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateParamEventDispatcher);
-
 
 //プレイヤーのカメラ視点状態
 //enum classはクラス外に書かないといけないらしいし、この書き方が良いらしい
@@ -67,6 +63,14 @@ enum class EPlayerStatus :uint8
 	Dead         UMETA(DisplayName = "Dead"),
 	InShadow     UMETA(DisplayName = "InShadow"),
 };
+
+
+//パラメーター更新が起きた時のイベントディスパッチャー宣言
+//(BPとやり取りあり、引数なし）
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateParamEventDispatcher);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerConditionMet, EPlayerStatus, ConditionId);
+
 
 UCLASS()
 class STEALTHACTION_API APlayerCharacter : public ACharacter,public IDamageable
@@ -119,6 +123,8 @@ public:
 	UFUNCTION()
 	FPlayerInfo GetPlayerInfo();
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnPlayerConditionMet OnPlayerConditionMet;
 
 	//ダメージ処理
 	void OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakKill)override;
@@ -159,7 +165,7 @@ private:
 	void UpdateInvincibleTime(float _deltaTime);
 
 	//影状態の更新処理
-	void UpdateShadow();
+	void UpdateShadow(float _deltaTime);
 
 	//ジャンプ状態の更新処理
 	void UpdateJump(float _deltaTime);
@@ -266,10 +272,15 @@ public:
 	virtual void Landed(const FHitResult& Hit) override;
 
 	//影潜り時間取得
-	float GetShadowTimer() const { return m_timer; }
+	float GetShadowTimer() const { return m_shadowTimer; }
 
 	//最大影潜り時間取得
 	float GetMaxShadowTime() const { return m_maxShadowTime; }
+
+	private:
+	//状態変更処理
+	void ChangePlayerStatus(const EPlayerStatus& _newStatus);
+
 
 private:
 
@@ -329,7 +340,7 @@ private:
 	float m_maxShadowTime;
 
 	UPROPERTY(EditAnywhere, Category = "Sahdow")
-	float m_timer;
+	float m_shadowTimer;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float m_attackRange;

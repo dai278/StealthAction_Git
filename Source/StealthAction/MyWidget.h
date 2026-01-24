@@ -14,4 +14,7 @@ class STEALTHACTION_API UMyWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+	//コンストラクタ
+	UMyWidget(const FObjectInitializer& ObjectInitializer);
+
 };

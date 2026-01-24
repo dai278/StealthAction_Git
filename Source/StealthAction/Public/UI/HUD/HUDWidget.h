@@ -16,6 +16,7 @@ class STEALTHACTION_API UHUDWidget : public UUserWidget
 	GENERATED_BODY()
 
 protected:
+
 	// Radar（BP側でバインド）
 	UPROPERTY(meta = (BindWidget))
 	URadarWidget* RadarWidget;
@@ -27,6 +28,9 @@ protected:
 	//影滞在時間UI(BP側でバインド)
 	UPROPERTY(meta = (BindWidget))
 	UShadowTimeWidget* ShadowTimeWidget;
+
+
+
 
 public:
 	// PlayerController から呼ばれる更新関数

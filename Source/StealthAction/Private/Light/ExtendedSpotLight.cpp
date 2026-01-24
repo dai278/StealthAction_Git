@@ -225,7 +225,14 @@ bool AExtendedSpotLight::IsHit(const FVector& _pos)const
 		Params
 	);
 
-	if (bHit && Hit.Location != _pos) { return false; }
+	if (bHit)
+	{
+		// 途中で遮られたらアウト（少しマージン）
+		if (Hit.Distance < distance - 100.0f)
+		{
+			return false;
+		}
+	}
 
 	return true;
 

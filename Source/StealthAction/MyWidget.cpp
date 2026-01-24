@@ -3,3 +3,10 @@
 
 #include "MyWidget.h"
 
+//コンストラクタ
+UMyWidget::UMyWidget(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer)
+{
+
+}
+
