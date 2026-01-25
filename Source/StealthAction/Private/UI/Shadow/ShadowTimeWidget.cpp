@@ -36,13 +36,10 @@ void UShadowTimeWidget::UpdateShadowTime()
 		return;
 	}
 
-	if (!PlayerCharacter->IsInShadow())
-	{
-		ShadowTimeBar->SetPercent(0.0f);
-		return;
-	}
-
+	//Œ»Ý‚Ì‰e‘ØÝŽžŠÔ‚ðŽæ“¾
 	const float Current = PlayerCharacter->GetShadowTimer();
+
+	//Å‘å‰e‘ØÝŽžŠÔ‚ðŽæ“¾
 	const float Max = PlayerCharacter->GetMaxShadowTime();
 
 	if (Max <= 0.f)
