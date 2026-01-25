@@ -1439,7 +1439,6 @@ void AEnemyBase::CaseCaution(float _deltaTime)
 		m_cautionCheck = false;		//注意終了
 		m_cautionPriorityCheck = false;
 		m_visionCheck = false;
-		m_discoveryTime = 0;
 	}
 }
 
@@ -1618,7 +1617,6 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 		m_battleCheck = false;		//戦闘終了
 		m_visionCheck = false;
 		m_battleFalseTime = 0;
-		m_discoveryTime = 0;		//発見時間リセット
 	}
 }
 
