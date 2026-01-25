@@ -541,12 +541,6 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 		return;
 	}
 
-	UE_LOG(LogTemp, Display, TEXT("Shadow: OnShadow=%d FeetZ=%.1f CapHalf=%.1f LocZ=%.1f"),
-		m_bOnShadow,
-		GetFeetLocation().Z,
-		GetCapsuleComponent()->GetScaledCapsuleHalfHeight(),
-		GetActorLocation().Z
-	);
 
 	if (m_bUsingMesh)
 	{
@@ -559,6 +553,14 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 
 
 	m_shadowTimer += GetWorld()->GetDeltaSeconds();
+
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	if (Capsule)
+	{
+		const FName Profile = Capsule->GetCollisionProfileName();
+		UE_LOG(LogTemp, Warning, TEXT("CollisionProfile=%s"), *Profile.ToString());
+	}
+
 
 	//影状態時間が最大時間を超えたらアイドル状態に戻す
 	if (m_shadowTimer > m_maxShadowTime) {
@@ -756,8 +758,11 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 //-----------------------------------------------------
 void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakKill)
 {
+
 	//無敵時間中ならダメージを受けない
 	if (m_bInvincible) { return; }
+	
+	
 	//ダメージ処理
 	//UE_LOG(LogTemp, Log, TEXT("Player Damaged : %d"), _damage);
 	UE_LOG(LogTemp, Display, TEXT("hp："), m_playerInfo.hp);
@@ -1003,12 +1008,15 @@ void APlayerCharacter::Enhanced_InShadow(const FInputActionValue& Value)
 	//入力が無ければ何もしない
 	//if (!Value.Get<bool>()) { return; }	
 
+	if (m_status == EPlayerStatus::Damage) { return; }
+	
 	//状態が影ならデフォルトに戻す
 	if (m_status == EPlayerStatus::InShadow)
 	{
 		TransformationShadowToIdle();
 		return;
 	}
+
 
 	//足元がライトに当たっていなければ影状態へ
 	if (!m_pExtendedSpotLightManager->IsHitAllLight(GetFeetLocation())
@@ -1240,6 +1248,8 @@ void APlayerCharacter::TransformationToShadow()
 void APlayerCharacter::CancellationShadow(const EPlayerStatus& _status)
 {
 	if (m_status != EPlayerStatus::InShadow) { return; }
+
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
 	
 	GetMesh()->SetSkeletalMesh(m_defaultMesh);
 	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight);
