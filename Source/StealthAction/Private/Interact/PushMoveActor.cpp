@@ -71,7 +71,7 @@ void APushMoveActor::Tick(float DeltaTime)
 
 
 //----------------------------------------------------------
-// // インタラクトの実装
+// インタラクトの実装
 //----------------------------------------------------------
 void APushMoveActor::Interact(AActor* _interactOwner)
 {
@@ -81,7 +81,7 @@ void APushMoveActor::Interact(AActor* _interactOwner)
 	SetActorTickEnabled(true);
 	
 
-	/*角度floatに変換*/
+	//角度floatに変換
 	FVector Vec = _interactOwner->GetActorLocation()- GetActorLocation();	
 	Vec.Z = 0.f;
 	
@@ -90,7 +90,7 @@ void APushMoveActor::Interact(AActor* _interactOwner)
 	UE_LOG(LogTemp, Warning, TEXT("Vec=(%.3f,%.3f) deg=%.9f IsNaN=%d"),
 		Vec.X, Vec.Y, deg, FMath::IsNaN(deg));
 
-	/*移動方向決定90度ごとに*/
+	//移動方向決定
 	FVector moveDir = FVector::ZeroVector;
 	
 	//なぜか変数化しないとバグる

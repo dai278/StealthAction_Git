@@ -12,7 +12,7 @@
 //------------------------------------------------
 UEnemyManager::UEnemyManager()
 {
-
+	
 }
 
 //------------------------------------------------
@@ -86,6 +86,25 @@ void UEnemyManager::RegisterEnemyInfoAllToPlayData()
 	//プレイデータに記録
 	pPlayData->SetEnemyInfo(enemyInfos);
 }
+
+//------------------------------------------------
+//エネミーがプレイヤー発見しているか取得関数
+//------------------------------------------------
+bool UEnemyManager::IsAnyEnemyPlayerFound() const
+{
+	//全エネミーを確認
+	for (AEnemyBase* pEnemy : m_pAllEnemies)
+	{
+		if (!pEnemy) { continue; }
+		//プレイヤー発見しているエネミーがいればtrueを返す
+		if (pEnemy->IsPlayerFound())
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 
 //------------------------------------------------
 //一番近いエネミー取得関

@@ -34,6 +34,10 @@ public:
 	//全エネミーの情報をPlayDataに記録する
 	void RegisterEnemyInfoAllToPlayData();
 
+	//エネミーがプレイヤー発見しているか取得する関数
+	UFUNCTION(BlueprintCallable, Category = "Enemy")
+	bool IsAnyEnemyPlayerFound() const;
+
 	////エネミー全取得関数
 	//const TArray<EnemyBase*>& GetAllEnemy() const { return m_pAllEnemy_1; }
 
