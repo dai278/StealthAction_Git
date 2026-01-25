@@ -987,6 +987,7 @@ void AEnemyBase::ResetStateValues(float _deltaTime)
 	{
 		m_battleCheck = false;	//戦闘チェックOF
 		m_battleTime = 0;		//戦闘タイマーリセット
+		m_battleFalseTime = 0;
 	}
 
 	//以前のステータスが物音戦闘の場合
@@ -1588,22 +1589,18 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 	//見失った後どっちの方向に曲がったか覚えておく
 	if (!m_visionCheck)
 	{
-		if (m_battleFalseTime < _deltaTime)
+		if (m_battleFalseTime < m_battleFalseTime_Limit)
 		{
 			m_battleFalseTime += _deltaTime;
 			//影に入って見えなくなった場合
 			if (m_playerShadowCheck)
 			{
-				m_enemyPos_Forward_Miss = m_playerPos_LastSeen + (m_playerPos_LastSeen - m_enemyPos) * 100;
-				m_enemyPos_Left_Miss = m_playerPos_LastSeen - (m_playerPos_LastSeen - m_enemyPos) * 100*GetActorRightVector();
-				m_enemyPos_Right_Miss = m_playerPos_LastSeen + (m_playerPos_LastSeen - m_enemyPos) * 100* GetActorRightVector();
+				m_playerPos_Nav_LastSeen = m_playerPos_LastSeen;
 			}
 			//遮蔽物に隠れて見えなくなった場合
 			else
 			{
-				m_enemyPos_Forward_Miss = m_playerPos_LastSeen + (m_playerPos - m_playerPos_LastSeen) * 100;
-				m_enemyPos_Left_Miss = m_playerPos_LastSeen - (m_playerPos - m_playerPos_LastSeen) * 100 * GetActorRightVector();
-				m_enemyPos_Right_Miss = m_playerPos_LastSeen + (m_playerPos - m_playerPos_LastSeen) * 100 * GetActorRightVector();
+				m_playerPos_Nav_LastSeen = m_playerPos;
 			}
 		}
 	}
@@ -1706,28 +1703,49 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 	//前のステータスが戦闘だった場合
 	if (m_missTime < m_missTime_Limit1 && m_enemyCurrentState_Keeper == EEnemyStatus::Battle)
 	{
-		m_enemyPos_Direction_Miss = m_enemyPos_Forward_Miss;
-		//視点移動処理
-		UpdateViewMove(_deltaTime);
-		//移動処理
-		UpdateMove(_deltaTime);
-		FVector EnemyBaseForward_Pos = m_enemyPos + m_enemyForward * m_stopDistance_Wall;		//エネミーの正面,m_stopDistance_Wall先の座標
+		double distance_LastSeenPos  = (m_playerPos_Nav_LastSeen - m_enemyPos).Length();
 
-		FHitResult HitCollision;	//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
+		m_enemyPos_Forward_Miss = m_enemyPos + m_enemyForward * m_visionRange_Short;			//エネミーの正面の座標
+		m_enemyPos_Left_Miss = m_enemyPos - GetActorRightVector() * m_visionRange_Short;		//エネミー座標から左座標
+		m_enemyPos_Right_Miss = m_enemyPos + GetActorRightVector() * m_visionRange_Short;		//エネミー座標から右座標
 
-		//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
-		bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, EnemyBaseForward_Pos, FCollisionObjectQueryParams::AllObjects, DefaultCollisionParams);
-
-		//ヒットするオブジェクトがある場合
-		if (isHit)
+		if (distance_LastSeenPos > m_stopDistance_Nav+50)
 		{
-			AActor* hitActor = HitCollision.GetActor();
+			//移動処理
+			UpdateMove_Nav(_deltaTime);
 
-			//当たったコリジョンが壁,エネミーだった場合
-			if (hitActor->ActorHasTag("Wall") || hitActor->ActorHasTag("Enemy"))
+		}
+		else
+		{
+			//移動停止（NAV）の処理
+			m_moveStop_Nav = true;
+			UpdateMove_Nav(_deltaTime);
+
+			//視点移動処理
+			m_enemyPos_Direction_Miss = m_enemyPos_Forward_Miss;
+			UpdateViewMove(_deltaTime);
+			//移動処理
+			UpdateMove(_deltaTime);
+
+			FVector EnemyBaseForward_Pos = m_enemyPos + m_enemyForward * m_stopDistance_Wall;		//エネミーの正面,m_stopDistance_Wall先の座標
+
+			FHitResult HitCollision;	//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
+
+			//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
+			bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, EnemyBaseForward_Pos, FCollisionObjectQueryParams::AllObjects, DefaultCollisionParams);
+
+			//ヒットするオブジェクトがある場合
+			if (isHit)
 			{
-				m_missTime = 1;
+				AActor* hitActor = HitCollision.GetActor();
+
+				//当たったコリジョンが壁,エネミーだった場合
+				if (hitActor->ActorHasTag("Wall") || hitActor->ActorHasTag("Enemy"))
+				{
+					m_missTime = 1;
+				}
 			}
+
 		}
 		return;
 	}
