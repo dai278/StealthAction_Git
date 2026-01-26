@@ -69,6 +69,7 @@ AEnemyBase::AEnemyBase()
 	, m_battleTime(0.0)
 	, m_battleFalseTime(0.0)
 	, m_battleNoiseTime(0.0)
+	, m_notFoundNoiseTime(0.0)
 	, m_alertTime(0.0)
 	, m_missTime(0.0)
 	, m_returnTime(0.0)
@@ -84,6 +85,7 @@ AEnemyBase::AEnemyBase()
 	, m_battleTime_Limit(1.0)
 	, m_battleFalseTime_Limit(0.5)
 	, m_battleNoiseTime_Limit(2.0)
+	, m_notFoundNoiseTime_Limit(4.0)
 	, m_alertTime_Limit(10.0)
 	, m_missTime_Limit(1.0)
 	, m_returnTime_Limit(2.0)
@@ -995,6 +997,7 @@ void AEnemyBase::ResetStateValues(float _deltaTime)
 	{
 		m_battleNoiseCheck = false;	//物音戦闘チェックOF
 		m_battleNoiseTime = 0;		//物音戦闘タイマーリセット
+		m_notFoundNoiseTime = 0;
 	}
 
 	//以前のステータスが失踪の場合
@@ -1655,9 +1658,10 @@ void AEnemyBase::CaseBattle_Noise(float _deltaTime)
 	{
 		//移動処理
 		UpdateMove_Nav(_deltaTime);
+		m_notFoundNoiseTime += _deltaTime;
 	}
 
-	if (m_stopDistance_Noise > distance_2D)
+	if (m_stopDistance_Noise > distance_2D || m_notFoundNoiseTime > m_notFoundNoiseTime_Limit)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Battle_NoiseStop"));
 
@@ -1668,6 +1672,8 @@ void AEnemyBase::CaseBattle_Noise(float _deltaTime)
 		m_noiseCheck = false;		//聴覚中止
 		m_noise_Pos = FVector(-5000.0, -5000., -5000.);//物音座標リセット
 		m_noise_Pos_keeper = FVector(-5000.0, -5000., -5000.);//物音座標リセット
+		m_notFoundNoiseTime = 0;
+		m_battleNoiseTime = 0;
 	}
 }
 

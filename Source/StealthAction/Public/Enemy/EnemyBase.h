@@ -256,6 +256,9 @@ public:
 		double m_battleNoiseTime_Limit;			//í“¬ŠÔ§ŒÀ
 
 		UPROPERTY(EditAnywhere, Category = "Time")
+		double m_notFoundNoiseTime_Limit;			//•¨‰¹–¢”­Œ©ŠÔ§ŒÀ
+
+		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_alertTime_Limit;			//Œx‰úŠÔ§ŒÀ
 
 		UPROPERTY(EditAnywhere, Category = "Time")
@@ -282,6 +285,7 @@ public:
 		double m_battleTime;				//í“¬ŠÔ
 		double m_battleFalseTime;			//Œ©¸‚¢í“¬ŠÔ
 		double m_battleNoiseTime;			//•¨‰¹í“¬ŠÔ
+		double m_notFoundNoiseTime;			//•¨‰¹–¢”­Œ©ŠÔ
 		double m_alertTime;					//Œx‰úŠÔ
 		double m_missTime;					//¸çHŠÔ
 		double m_returnTime;				//‹AŠÒŠÔ
