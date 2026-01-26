@@ -127,7 +127,7 @@ APlayerCharacter::APlayerCharacter()
 		m_pSpringArm->SocketOffset = FVector(0.f, 50.f, 60.f);	//Œ¨‰z‚µŽ‹“_Ý’è
 		m_pSpringArm->bUsePawnControlRotation = true;			//ƒJƒƒ‰‰ñ“]
 		m_pSpringArm->CameraLagSpeed = 8.f;
-		m_pSpringArm->bDoCollisionTest = true;                 // •ÇŽ©“®‰ñ”ð‚µ‚È‚¢
+		m_pSpringArm->bDoCollisionTest = true;                 // •ÇŽ©“®‰ñ”ð
 	}
 
 
