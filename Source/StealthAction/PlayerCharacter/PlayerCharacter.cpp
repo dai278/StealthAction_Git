@@ -384,18 +384,6 @@ void APlayerCharacter::UpdateMove(const bool _bInShadow /*= false*/)
 		return;
 	}
 
-	//カメラ切り替え中は処理しない
-	if( m_bCameraSwitching)
-	{
-		return;
-	}
-	
-	/*
-	 * ------------------------------
-	 * 移動基準Yawを決定
-	 * ------------------------------
-	 * ActorRotation は使わない！！
-	 */
 	float BaseYaw = 0.f;
 
 	switch (m_cameraStatus)
@@ -434,15 +422,11 @@ void APlayerCharacter::UpdateMove(const bool _bInShadow /*= false*/)
 		return;
 	}
 
-	// ------------------------------
 	// 移動
-	// ------------------------------
 	AddMovementInput(MoveDir, 1.f);
 
-	// ------------------------------
 	// 回転（移動方向に向かせる）
 	// ※ カメラ切り替え中は回さない
-	// ------------------------------
 	if (!m_bCameraSwitching)
 	{
 		const FRotator TargetRot = MoveDir.Rotation();
@@ -453,7 +437,6 @@ void APlayerCharacter::UpdateMove(const bool _bInShadow /*= false*/)
 			GetWorld()->GetDeltaSeconds(),
 			10.f
 		);
-
 		SetActorRotation(NewRot);
 	}
 }
@@ -625,7 +608,7 @@ void APlayerCharacter::UpdateJump(float _deltaTime)
 	m_jumpTimer += _deltaTime;
 
 	FVector newVelocity = GetCharacterMovement()->Velocity;
-	const float gravity = 20000.f;
+	const float gravity = 10000.f;
 	const float maxGaravity =-1800.f;
 	newVelocity.Z -= FMath::Pow(gravity,m_jumpTimer);
 
@@ -774,6 +757,13 @@ void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakK
 	
 	//影状態なら解除
 	CancellationShadow(EPlayerStatus::Damage);
+
+	FVector& Vec = GetCharacterMovement()->Velocity;
+	if (Vec.Z > 0)
+	{
+		Vec.Z = 0.f;
+	}
+
 
 	//Hpが0になったら死亡
 	if (m_playerInfo.hp<=0)
@@ -1033,6 +1023,7 @@ void APlayerCharacter::Enhanced_InShadow(const FInputActionValue& Value)
 //------------------------------------------------------
 void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 {
+	UE_LOG(LogTemp, Display, TEXT("Input Interact"));
 	//インタラクト可能オブジェクトに触れていなければ何もしない
 	if (!m_bHitIntteractObject) { return; }
 	if (m_hitInteractOb)

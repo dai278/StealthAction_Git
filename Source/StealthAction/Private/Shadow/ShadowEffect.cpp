@@ -28,7 +28,6 @@ void UShadowEffect::NativeOnInitialized()
 	{
 		player->OnPlayerConditionMet.AddDynamic(this, &UShadowEffect::OnPlayerStatusChanged);
 		SetVisibility(ESlateVisibility::Hidden);
-
 	}
 	
 }
@@ -42,12 +41,9 @@ void UShadowEffect::OnPlayerStatusChanged(EPlayerStatus _state)
 	if (_state == EPlayerStatus::InShadow)
 	{
 		SetVisibility(ESlateVisibility::Visible);
-		UE_LOG(LogTemp, Display, TEXT("KageEfeect On"));
 	}
 	else
 	{
 		SetVisibility(ESlateVisibility::Hidden);
-		UE_LOG(LogTemp, Display, TEXT("KageEfeect OFF"));
-
 	}
 }
