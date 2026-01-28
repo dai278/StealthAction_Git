@@ -87,7 +87,7 @@ APlayerCharacter::APlayerCharacter()
 	, m_invincibleTimeLimit(3.0f)
 	, m_knockBackVelocity(FVector::ZeroVector)
 	, m_playerInfo()
-	,m_damageTime(1.f)
+	, m_damageTime(1.f)
 
 {
 	//毎フレームTickを呼ぶか決めるフラグ
@@ -228,7 +228,7 @@ void APlayerCharacter::BeginPlay()
 	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
 	UCheckpointManager* pCheckMng = GetWorld()->GetSubsystem<UCheckpointManager>();
 	if (!pPlayData) { return; }
-	if (pPlayData->IsIsContinued()&&pPlayData->GetCheckpointInfo().Index!=-1) {
+	if (pPlayData->IsIsContinued() && pPlayData->GetCheckpointInfo().Index != -1) {
 		m_playerInfo = pPlayData->GetPlayerInfo();
 		//チェックポイントを一つでも触れていれば
 		if (pCheckMng->GetCurrentCheckpointIndex() >= 0)
@@ -327,9 +327,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 //----------------------------------------------------------
 void APlayerCharacter::UpdateCamera(float _deltaTime)
 {
-	//視点切り替え中は処理しない
-	if (m_bCameraSwitching) { return; }
-
 	//カメラのステータスが俯瞰なら処理しない
 	if (m_cameraStatus == ECameraStatus::TopDownView) { return; }
 
@@ -390,7 +387,7 @@ void APlayerCharacter::UpdateMove(const bool _bInShadow /*= false*/)
 	{
 	case ECameraStatus::ThirdPerson:
 	case ECameraStatus::InShadow:
-		// TPS / 影はカメラ基準
+		// TPS  影はカメラ基準
 		BaseYaw = GetControlRotation().Yaw;
 		break;
 
@@ -426,19 +423,16 @@ void APlayerCharacter::UpdateMove(const bool _bInShadow /*= false*/)
 	AddMovementInput(MoveDir, 1.f);
 
 	// 回転（移動方向に向かせる）
-	// ※ カメラ切り替え中は回さない
-	if (!m_bCameraSwitching)
-	{
-		const FRotator TargetRot = MoveDir.Rotation();
+	const FRotator TargetRot = MoveDir.Rotation();
 
-		const FRotator NewRot = FMath::RInterpTo(
-			GetActorRotation(),
-			TargetRot,
-			GetWorld()->GetDeltaSeconds(),
-			10.f
-		);
-		SetActorRotation(NewRot);
-	}
+	const FRotator NewRot = FMath::RInterpTo(
+		GetActorRotation(),
+		TargetRot,
+		GetWorld()->GetDeltaSeconds(),
+		10.f
+	);
+	SetActorRotation(NewRot);
+
 
 	//音発生
 	if (!m_bIsCrouch || !m_bJumping)
@@ -540,7 +534,7 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 	{
 
 		GetMesh()->SetSkeletalMesh(m_isShadowMesh);
-	
+
 		m_bUsingMesh = false;
 		//UE_LOG(LogTemp, Log, TEXT("Mesh Chaged Shadow !!"));
 	}
@@ -571,14 +565,14 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 	}
 
 	//敵の入っていた場合メインのライトではなく敵ライトだけと判定
-	if(m_pExtendedSpotLightManager->IsHitEnemyLight(GetFeetLocation())&&m_bOnShadow)
+	if (m_pExtendedSpotLightManager->IsHitEnemyLight(GetFeetLocation()) && m_bOnShadow)
 	{
-		TransformationShadowToIdle(true);		
+		TransformationShadowToIdle(true);
 		UE_LOG(LogTemp, Display, TEXT("LightHit"));
 
 		return;
 	}
-	
+
 }
 
 
@@ -588,7 +582,7 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 void APlayerCharacter::UpdateCheckEnemyDetection()
 {
 	if (!m_pEnemyManager) { return; }
-	 m_pNearestEnemy = m_pEnemyManager->GetNearestEnemy(GetActorLocation(), m_attackRange);
+	m_pNearestEnemy = m_pEnemyManager->GetNearestEnemy(GetActorLocation(), m_attackRange);
 	if (!m_pNearestEnemy) { return; }
 	if (!m_pNearestEnemy->IsPlayerFound()) { return; }
 	//ここでUIの呼び出し
@@ -620,8 +614,8 @@ void APlayerCharacter::UpdateJump(float _deltaTime)
 
 	FVector newVelocity = GetCharacterMovement()->Velocity;
 	const float gravity = 10000.f;
-	const float maxGaravity =-1800.f;
-	newVelocity.Z -= FMath::Pow(gravity,m_jumpTimer);
+	const float maxGaravity = -1800.f;
+	newVelocity.Z -= FMath::Pow(gravity, m_jumpTimer);
 
 	if (newVelocity.Z < maxGaravity)
 	{
@@ -651,37 +645,8 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 	);
 	m_pSpringArm->TargetArmLength = NewLength;
 
-	//現在の角度取得
-	FRotator NewRotation = m_pSpringArm->GetRelativeRotation();
-
-	//Yaw
-	NewRotation.Yaw = FMath::FInterpTo(
-		NewRotation.Yaw,
-		m_cameraInitPos[(int)m_cameraStatus].rotator.Yaw,
-		_deltaTime,
-		5.f
-	);
-
-	//Pitch
-	NewRotation.Pitch = FMath::FInterpTo(
-		NewRotation.Pitch,
-		m_cameraInitPos[(int)m_cameraStatus].rotator.Pitch,
-		_deltaTime,
-		5.f
-	);
-
-	//Roll
-	NewRotation.Roll = FMath::FInterpTo(
-		NewRotation.Roll,
-		m_cameraInitPos[(int)m_cameraStatus].rotator.Roll,
-		_deltaTime,
-		5.f
-	);
-
-	m_pSpringArm->SetRelativeRotation(NewRotation);
-
 	//視野角
-	float newFieldOfView= m_pCamera->FieldOfView;
+	float newFieldOfView = m_pCamera->FieldOfView;
 	newFieldOfView = FMath::FInterpTo(
 		newFieldOfView,
 		m_cameraInitPos[(int)m_cameraStatus].fieldOfView,
@@ -695,26 +660,19 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 	//一定距離以下になれば目標地点と同じ座標にする
 	//目標地点との差
 	const float distanceSpringArm = m_pSpringArm->TargetArmLength - m_cameraInitPos[(int)m_cameraStatus].springArmLength;
-	const float distanceYaw = abs(NewRotation.Yaw) - abs(m_cameraInitPos[(int)m_cameraStatus].rotator.Yaw);
-	const float distancePitch = abs(NewRotation.Pitch) - abs(m_cameraInitPos[(int)m_cameraStatus].rotator.Pitch);
 	const float distanceFieldOfView = abs(newFieldOfView) - abs(m_cameraInitPos[(int)m_cameraStatus].fieldOfView);
 
 	//
 	if (
 		(abs(distanceSpringArm) < 1.f
-		&& abs(distanceYaw) < 1.f 
-		&& abs(distancePitch) < 1.f 
-		&& abs(distanceFieldOfView) < 1.f
+			&& abs(distanceFieldOfView) < 1.f
 			)
 		|| m_status == EPlayerStatus::Dead
 		)
 	{
 		m_pSpringArm->TargetArmLength = m_cameraInitPos[(int)m_cameraStatus].springArmLength;
 
-		NewRotation.Yaw = m_cameraInitPos[(int)m_cameraStatus].rotator.Yaw;
-		NewRotation.Pitch = m_cameraInitPos[(int)m_cameraStatus].rotator.Pitch;
-		m_pSpringArm->SetRelativeRotation(NewRotation);
-
+		m_pCamera->FieldOfView = m_cameraInitPos[(int)m_cameraStatus].fieldOfView;
 		//視点切り替え中フラグをfalseに
 		m_bCameraSwitching = false;
 	}
@@ -755,8 +713,8 @@ void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakK
 
 	//無敵時間中ならダメージを受けない
 	if (m_bInvincible) { return; }
-	
-	
+
+
 	//ダメージ処理
 	//UE_LOG(LogTemp, Log, TEXT("Player Damaged : %d"), _damage);
 	UE_LOG(LogTemp, Display, TEXT("hp："), m_playerInfo.hp);
@@ -765,7 +723,7 @@ void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakK
 	m_bCanControl = false;
 	//ダメージ
 	m_playerInfo.hp -= Damage;
-	
+
 	//影状態なら解除
 	CancellationShadow(EPlayerStatus::Damage);
 
@@ -777,7 +735,7 @@ void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakK
 
 
 	//Hpが0になったら死亡
-	if (m_playerInfo.hp<=0)
+	if (m_playerInfo.hp <= 0)
 	{
 		m_bCanControl = false;
 		m_playerInfo.bIsGetKeyItem = 0;
@@ -803,7 +761,7 @@ void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakK
 
 	LaunchCharacter(m_knockBackVelocity, true, false);
 
-	UE_LOG(LogTemp, Display, TEXT("hp："),m_playerInfo.hp);
+	UE_LOG(LogTemp, Display, TEXT("hp："), m_playerInfo.hp);
 }
 
 
@@ -873,10 +831,8 @@ void APlayerCharacter::Enhanced_Move(const FInputActionValue& Value)
 //------------------------------------------------------
 void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
 {
-	//しゃがみ中ならダッシュはできない
-	if (m_bIsCrouch || m_status == EPlayerStatus::InShadow) { return; }
-
-	const bool flag = Value.Get<bool>();
+	bool flag = Value.Get<bool>();
+	if (m_bIsCrouch || m_status == EPlayerStatus::InShadow) { flag = false; }
 
 	//移動速度をflagで切り替える
 	GetCharacterMovement()->MaxWalkSpeed = flag ? m_DashSpeed : m_WalkSpeed;
@@ -904,7 +860,7 @@ void APlayerCharacter::Enhanced_MoveCrouch(const FInputActionValue& Value)
 		GetCharacterMovement()->MaxWalkSpeed = m_CrouchSpeed;
 		m_bIsCrouch = true;
 		m_cameraStatus = ECameraStatus::Crouch;
-		m_bCameraSwitching=true;
+		m_bCameraSwitching = true;
 	}
 	else
 	{
@@ -961,21 +917,21 @@ void APlayerCharacter::Enhanced_Attack(const FInputActionValue& Value)
 
 	m_bCanControl = false;
 	ChangePlayerStatus(EPlayerStatus::Attack);
-	m_bCanAttack=true;
+	m_bCanAttack = true;
 	//一番近くの敵がプイレイヤーを見つけていればスニークキルするか判定
 	//nullなら敵がいない
-	if (m_pNearestEnemy) 
-	{ 
+	if (m_pNearestEnemy)
+	{
 		//みつかっていればスニークキル失敗
-		if(m_pNearestEnemy->IsPlayerFound()) { 
-			m_bSneakKill=false; 
+		if (m_pNearestEnemy->IsPlayerFound()) {
+			m_bSneakKill = false;
 		}
 		else
 		{
 			//敵までのベクトル
-			FVector toEnemyVector = FVector{m_pNearestEnemy->GetActorLocation()- GetActorLocation() }.GetSafeNormal();
+			FVector toEnemyVector = FVector{ m_pNearestEnemy->GetActorLocation() - GetActorLocation() }.GetSafeNormal();
 			//プレイヤーの正面ベクトル
-			FVector forwardVector =  GetMesh()->GetRightVector();     // = Y軸
+			FVector forwardVector = GetMesh()->GetRightVector();     // = Y軸
 
 			//ベクトルの差を-1~1の範囲で取得
 			//1に近いほど正面同士
@@ -1010,7 +966,7 @@ void APlayerCharacter::Enhanced_InShadow(const FInputActionValue& Value)
 	//if (!Value.Get<bool>()) { return; }	
 
 	if (m_status == EPlayerStatus::Damage) { return; }
-	
+
 	//状態が影ならデフォルトに戻す
 	if (m_status == EPlayerStatus::InShadow)
 	{
@@ -1021,10 +977,10 @@ void APlayerCharacter::Enhanced_InShadow(const FInputActionValue& Value)
 
 	//足元がライトに当たっていなければ影状態へ
 	if (!m_pExtendedSpotLightManager->IsHitAllLight(GetFeetLocation())
-		||(m_bOnShadow
-		&&!m_pExtendedSpotLightManager->IsHitEnemyLight(GetFeetLocation()))) 
+		|| (m_bOnShadow
+			&& !m_pExtendedSpotLightManager->IsHitEnemyLight(GetFeetLocation())))
 	{
-	
+
 		TransformationToShadow();
 	}
 }
@@ -1144,13 +1100,13 @@ void APlayerCharacter::OnBeginOverlap(
 	UE_LOG(LogTemp, Display, TEXT("unnti"));
 
 	if (!OtherActor) { return; }
-		//影オブジェクトと衝突したか
-		if(OtherComp->ComponentHasTag(TEXT("Shadow"))==true)
-		{
-			//衝突対象を追加
-			m_hitActors.Add(OtherActor);
-			m_bOnShadow = true;
-		}
+	//影オブジェクトと衝突したか
+	if (OtherComp->ComponentHasTag(TEXT("Shadow")) == true)
+	{
+		//衝突対象を追加
+		m_hitActors.Add(OtherActor);
+		m_bOnShadow = true;
+	}
 
 	//インタラクト可能オブジェクトに触れた時
 	if (OtherActor->ActorHasTag(TEXT("Interact")))
@@ -1222,7 +1178,7 @@ void APlayerCharacter::TransformationShadowToIdle(const bool _bLightHit/*=false*
 		GetMesh()->SetSkeletalMesh(m_defaultMesh);
 		m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight);
 		m_bUsingMesh = false;
-		ChangePlayerStatus( EPlayerStatus::Idle);
+		ChangePlayerStatus(EPlayerStatus::Idle);
 	}
 }
 
@@ -1236,7 +1192,7 @@ void APlayerCharacter::TransformationToShadow()
 	ChangePlayerStatus(EPlayerStatus::InShadow);
 	FVector newLocation = GetActorLocation();
 	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight / 3.f);
-	newLocation.Z -= m_capsuleHeight / 3.f-10.f;
+	newLocation.Z -= m_capsuleHeight / 3.f - 10.f;
 	SetActorLocation(newLocation);
 
 	m_cameraStatus = ECameraStatus::InShadow;
@@ -1252,10 +1208,10 @@ void APlayerCharacter::CancellationShadow(const EPlayerStatus& _status)
 	if (m_status != EPlayerStatus::InShadow) { return; }
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
-	
+
 	GetMesh()->SetSkeletalMesh(m_defaultMesh);
 	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight);
 	m_bUsingMesh = false;
-	ChangePlayerStatus( _status);
-	
+	ChangePlayerStatus(_status);
+
 }

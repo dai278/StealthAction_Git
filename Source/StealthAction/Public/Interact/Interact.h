@@ -39,6 +39,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Shadow/Mesh")
 	UStaticMeshComponent* m_pMesh;        	//メッシュコンポネント
 
+	UBoxComponent* m_bodyCollision;//壁判定用コリジョン
+
 	UPROPERTY(EditAnywhere, Category = "Interact")
 	int32 m_index; 							//インタラクト識別用インデックス
 

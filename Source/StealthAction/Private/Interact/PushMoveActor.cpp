@@ -61,7 +61,7 @@ void APushMoveActor::Tick(float DeltaTime)
 		//ˆÚ“®Š®—¹”»’è
 		if (m_moveProgress >= m_moveDistance)
 		{
-			SetActorLocation(m_targetLocation);
+			SetActorLocation(m_targetLocation, true, &hit);
 			m_bIsMoving = false;
 			m_moveProgress = 0.f;
 			SetActorTickEnabled(false);
