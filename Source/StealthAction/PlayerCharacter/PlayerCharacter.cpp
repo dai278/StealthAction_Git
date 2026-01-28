@@ -439,6 +439,17 @@ void APlayerCharacter::UpdateMove(const bool _bInShadow /*= false*/)
 		);
 		SetActorRotation(NewRot);
 	}
+
+	//音発生
+	if (!m_bIsCrouch || !m_bJumping)
+	{
+		//デバック用
+		UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
+		if (manager)
+		{
+			manager->MakeNoise(1, GetActorLocation());
+		}
+	}
 }
 
 
@@ -875,7 +886,7 @@ void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
 	UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
 	if (manager)
 	{
-		manager->MakeNoise(3, GetActorLocation());
+		manager->MakeNoise(2, GetActorLocation());
 	}
 }
 
