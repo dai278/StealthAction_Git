@@ -30,6 +30,7 @@ public:
 	virtual void UpdateSearch(float _deltaTime) override;
 	//í“¬ˆ—
 	virtual void CaseBattle(float _deltaTime) override;
+
 private:
 
 	//Œ©‚Â‚©‚é”ÍˆÍ

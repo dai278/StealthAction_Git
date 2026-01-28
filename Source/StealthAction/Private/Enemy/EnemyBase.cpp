@@ -478,6 +478,10 @@ void AEnemyBase::StartStateValues(float _deltaTime)
 
 	m_deltaTime = _deltaTime;
 	m_allTime += _deltaTime;
+
+	//プレイヤーが影に入っているか？
+	m_playerShadowCheck = m_pPlayerChara->IsInShadow();
+
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -550,9 +554,6 @@ void AEnemyBase::UpdateVisiblity(float _deltaTime)
 		return;
 	}
 
-	//プレイヤーが影に入っているか？
-	m_playerShadowCheck = m_pPlayerChara->IsInShadow();
-
 	//影に入っている場合
 	if (m_playerShadowCheck)
 	{
@@ -609,15 +610,11 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 		return;
 	}
 
-	//視界処理をする場合
-	if (IsUseVisiblity)
-	{
 		if (m_battleCheck)
 		{
 			m_noiseCheck = false;		//物音チェックOF
 			return;
 		}
-	}
 
 	double distance = (m_noise_Pos - m_enemyPos).Length();			//物音との距離を測る(Vectorの長さ）
 	double distance_keeper = (m_noise_Pos_keeper - m_enemyPos).Length();			//以前の物音との距離を測る(Vectorの長さ）

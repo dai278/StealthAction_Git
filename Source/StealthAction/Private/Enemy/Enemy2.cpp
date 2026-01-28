@@ -16,10 +16,11 @@
 //コンストラクタ
 //------------------------------------------------------------------------------------------------------------
 AEnemy2::AEnemy2()
-	: m_foundDistance(300.)
+	: m_foundDistance(100.)
 {
 	//視界判定を使わなくする
 	IsUseVisiblity = false;
+	m_discoveryTime_Limit = 1.0;
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -35,6 +36,12 @@ void AEnemy2::BeginPlay()
 //------------------------------------------------------------------------------------------------------------
 void AEnemy2::UpdateHearing(float _deltaTime)
 {
+
+	if (m_battleCheck)
+	{
+		m_noiseCheck = false;		//物音チェックOF
+		return;
+	}
 
 	double distance = (m_noise_Pos - m_enemyPos).Length();			//物音との距離を測る(Vectorの長さ）
 	double distance_keeper = (m_noise_Pos_keeper - m_enemyPos).Length();			//以前の物音との距離を測る(Vectorの長さ）
@@ -70,7 +77,7 @@ void AEnemy2::UpdateHearing(float _deltaTime)
 		if (m_hearingTime < m_hearingTime_Limit)
 		{
 			//以前の物音が今の物音より小さい場合
-			if (m_noiseVolume_keeper <= m_noiseVolume)
+			if (m_noiseVolume_keeper <= m_noiseVolume || m_noiseLevel >=6)
 			{
 				m_noiseVolume_keeper = m_noiseVolume;
 
@@ -178,17 +185,13 @@ void AEnemy2::UpdateSearch(float _deltaTime)
 {
 	double distance = (m_playerPos - m_enemyPos).Length();			//プレイヤーとの距離を測る(Vectorの長さ）
 
-	if (m_battleCheck)
+	if (m_battleCheck|| distance < m_foundDistance)
 	{
 		m_enemyCurrentState = EEnemyStatus::Battle;
 	}
 	else if (m_noiseCheck)
 	{
 		if ((m_noiseLevel == 4 || m_noiseLevel == 5) && distance < m_hearingRange_Short && m_isCallOnNoise_Fleam == true)
-		{
-			m_enemyCurrentState = EEnemyStatus::Battle;
-		}
-		else if (distance < m_foundDistance)
 		{
 			m_enemyCurrentState = EEnemyStatus::Battle;
 		}
@@ -245,8 +248,10 @@ void AEnemy2::CaseBattle(float _deltaTime)
 		UpdateMove_Nav(_deltaTime);
 
 	}
+
 	//移動する位置、視点の指定
 	m_playerPos_LastSeen = m_playerPos;
+
 
 	m_battleTime += _deltaTime;
 
@@ -263,11 +268,9 @@ void AEnemy2::CaseBattle(float _deltaTime)
 	}
 	else
 	{
-
 		//プレイヤーの一定距離に近づくまで追いかける
 		if (m_stopDistance_Player < distance)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("BattleYES"));
 
 			//移動処理
 			UpdateMove_Nav(_deltaTime);
@@ -289,10 +292,9 @@ void AEnemy2::CaseBattle(float _deltaTime)
 	{
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
-		m_visionLevel = 6;			//見失うに移行
+		m_noiseLevel = 6;			//見失うに移行
 		m_battleCheck = false;		//戦闘終了
 		m_battleTime = 0;
 		m_discoveryTime = 0;
 	}
-
 }
