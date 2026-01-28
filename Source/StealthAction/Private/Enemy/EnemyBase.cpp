@@ -69,6 +69,7 @@ AEnemyBase::AEnemyBase()
 	, m_battleTime(0.0)
 	, m_battleFalseTime(0.0)
 	, m_battleNoiseTime(0.0)
+	, m_notFoundTime(0.0)
 	, m_notFoundNoiseTime(0.0)
 	, m_alertTime(0.0)
 	, m_missTime(0.0)
@@ -85,6 +86,7 @@ AEnemyBase::AEnemyBase()
 	, m_battleTime_Limit(1.0)
 	, m_battleFalseTime_Limit(0.5)
 	, m_battleNoiseTime_Limit(2.0)
+	, m_notFoundTime_Limit(8.0)
 	, m_notFoundNoiseTime_Limit(4.0)
 	, m_alertTime_Limit(10.0)
 	, m_missTime_Limit(1.0)
@@ -997,7 +999,6 @@ void AEnemyBase::ResetStateValues(float _deltaTime)
 	{
 		m_battleNoiseCheck = false;	//物音戦闘チェックOF
 		m_battleNoiseTime = 0;		//物音戦闘タイマーリセット
-		m_notFoundNoiseTime = 0;
 	}
 
 	//以前のステータスが失踪の場合
@@ -1025,10 +1026,16 @@ void AEnemyBase::ResetStateValues(float _deltaTime)
 		m_discoveryTime = 0;
 	}
 
+	if (m_visionCheck)
+	{
+		m_notFoundTime = 0;
+	}
+
 	if (!m_noiseCheck)
 	{
 		m_noise_Pos = FVector(-5000., -5000., -5000.);		//物音座標リセット
 		m_noise_Pos_keeper = FVector(-5000., -5000., -5000.);//物音座標リセット
+		m_notFoundNoiseTime = 0;
 	}
 }
 
@@ -1432,9 +1439,12 @@ void AEnemyBase::CaseCaution(float _deltaTime)
 		UpdateMove_Nav(_deltaTime);
 
 	}
-
+	if (!m_visionCheck)
+	{
+		m_notFoundTime+=_deltaTime;
+	}
 	//もしプレイヤーがいた位置に近づいた場合
-	if (m_visionCheck == false && m_stopDistance_2D >= distance_2D)
+	if ((m_visionCheck == false && m_stopDistance_2D >= distance_2D)|| m_notFoundTime> m_notFoundTime_Limit)
 	{
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
@@ -1442,6 +1452,7 @@ void AEnemyBase::CaseCaution(float _deltaTime)
 		m_cautionCheck = false;		//注意終了
 		m_cautionPriorityCheck = false;
 		m_visionCheck = false;
+		m_notFoundTime = 0;
 	}
 }
 
@@ -1479,10 +1490,11 @@ void AEnemyBase::CaseCaution_Noise(float _deltaTime)
 	{
 		//移動処理
 		UpdateMove_Nav(_deltaTime);
+		m_notFoundNoiseTime += _deltaTime;
 	}
 
 	//物音に近づいた場合
-	if (distance_2D < m_stopDistance_Noise)
+	if (distance_2D < m_stopDistance_Noise || m_notFoundNoiseTime>m_notFoundNoiseTime_Limit)
 	{
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
@@ -1492,6 +1504,8 @@ void AEnemyBase::CaseCaution_Noise(float _deltaTime)
 		m_cautionNoiseCheck = false;
 		m_noise_Pos = FVector(-5000.0, -5000., -5000.);//物音座標リセット
 		m_noise_Pos_keeper = FVector(-5000.0, -5000., -5000.);//物音座標リセット
+		m_notFoundNoiseTime = 0;
+
 	}
 }
 
@@ -1591,6 +1605,7 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 	//見失った後どっちの方向に曲がったか覚えておく
 	if (!m_visionCheck)
 	{
+		m_notFoundTime += _deltaTime;
 		if (m_battleFalseTime < m_battleFalseTime_Limit)
 		{
 			m_battleFalseTime += _deltaTime;
@@ -1612,7 +1627,7 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 	}
 
 	//もしプレイヤーがいた位置に近づいた場合
-	if (m_visionCheck == false && m_stopDistance_Player >= distance_2D)
+	if ((m_visionCheck == false && m_stopDistance_Player >= distance_2D) || m_notFoundTime > m_notFoundTime_Limit)
 	{
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
@@ -1620,6 +1635,7 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 		m_battleCheck = false;		//戦闘終了
 		m_visionCheck = false;
 		m_battleFalseTime = 0;
+		m_notFoundTime = 0;
 	}
 }
 
