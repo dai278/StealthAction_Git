@@ -84,11 +84,12 @@ public:
 	UFUNCTION()
 	void TurnOff();//消す
 
-	UFUNCTION()
+	UFUNCTION()//ライトのオンオフ逆転
 	void SwitchTurn();
 
 	UFUNCTION()
 	bool IsCanItBeTurned() { return m_canItBeTurned; }
+	void OnRotateTargetAngleStop();
 
 private:
 	//Yaw回転の更新処理
@@ -102,8 +103,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Light")
 	bool m_isShadowDrawLight; //影を描画するライトか
 
-
-
 	UPROPERTY(EditAnywhere, Category = "Rotate")
 	bool m_bAutomaticRotateYaw;//Yaw方向に自動回転するか
 
@@ -111,8 +110,10 @@ protected:
 	float m_automaticRotateYawSpeed;//Yaw方向回転スピード
 
 	UPROPERTY(EditAnywhere, Category = "Rotate")
-	bool m_bRotateTurn;                  //回転中ターンするか
+	bool m_bRotateTurn;                  //回転中ターンするか　オフなら回り続ける
 
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	bool m_bRotateTargetAngleStop;//一定角度で止まるか
 	
 	UPROPERTY(EditAnywhere, Category = "Rotate")
 	float m_minTurnRotate; //ターンする角度

@@ -29,6 +29,7 @@ AExtendedSpotLight::AExtendedSpotLight()
 	, m_canItBeTurned(false)
 	, m_bIsOn(true)
 	, m_blinkTimer(0.f)
+	, m_bRotateTargetAngleStop(false)
 {
 
 	//毎フレーム更新処理を行うか.
@@ -276,23 +277,41 @@ void AExtendedSpotLight::SwitchTurn()
 	}
 }
 
+
+//------------------------------------------------------
+//最大値最小値までの回転
+//------------------------------------------------------
+void AExtendedSpotLight::OnRotateTargetAngleStop()
+{
+	if (m_bRotateTargetAngleStop) { return; }
+
+	//現在の回転
+	FRotator  currentRot = GetActorRotation();
+	m_bRotateTargetAngleStop = true;
+	if (m_minTurnRotate == currentRot.Pitch||m_minTurnRotate==currentRot.Yaw)
+	{
+		m_turnDir = 1.f;
+	}
+	else if (m_maxTurnRotate == currentRot.Pitch || m_maxTurnRotate == currentRot.Yaw)
+	{
+		m_turnDir = -1.f;
+	}
+	else
+	{
+		m_turnDir = 1.f;
+	}
+}
+
 //-----------------------------------------------------
 //自動YAw回転の更新処理
 //-----------------------------------------------------
 void AExtendedSpotLight::UpdateYawRotate(const float& _deltaTime)
 {
-	if (!m_bAutomaticRotateYaw) { return; }
+	if (!m_bAutomaticRotateYaw&&!m_bRotateTargetAngleStop) { return; }
 
 	FRotator newRotator = GetActorRotation();
-	
+
 	//ターンしないのであれば
-	if (!m_bRotateTurn)
-	{
-		//回転
-		newRotator.Yaw += m_automaticRotateYawSpeed * _deltaTime * m_turnDir;
-		SetActorRotation(newRotator);
-		return;
-	}
 	
 	//現在の回転量が最大値最小値の範囲内でなければ処理しない
 	if (newRotator.Yaw< m_minTurnRotate )
@@ -303,22 +322,41 @@ void AExtendedSpotLight::UpdateYawRotate(const float& _deltaTime)
 	{
 		m_turnDir = -1;
 	}
+	
 	//回転
 	newRotator.Yaw += m_automaticRotateYawSpeed * _deltaTime*m_turnDir;
-		//最大値を超えたら
-		if (newRotator.Yaw > m_maxTurnRotate)
+	if (!m_bRotateTurn) {
+		SetActorRotation(newRotator);
+		return;
+	}
+	//最大値を超えたか
+	bool isOver=false;
+	//最大値を超えたら
+	if (newRotator.Yaw > m_maxTurnRotate)
+	{
+		newRotator.Yaw = m_maxTurnRotate;
+		isOver = true;
+	}
+	//最小値未満になったら
+	else if (newRotator.Yaw < m_minTurnRotate)
+	{
+		newRotator.Yaw = m_minTurnRotate;
+		isOver = true;
+	}
+	
+	//超えた際の処理
+	if (isOver)
+	{
+		if (m_bRotateTargetAngleStop)
 		{
-			newRotator.Yaw = m_maxTurnRotate;
-			//向きを反転
-			m_turnDir *= -1;
+			m_bRotateTargetAngleStop = false;
 		}
-		//最小値未満になったら
-		else if (newRotator.Yaw < m_minTurnRotate)
+
+		if (m_bAutomaticRotateYaw)
 		{
-			newRotator.Yaw = m_minTurnRotate;
-			//向き反転
-			m_turnDir *= -1;
+			m_turnDir *= -1.f;
 		}
+	}
 
 	SetActorRotation(newRotator);
 }

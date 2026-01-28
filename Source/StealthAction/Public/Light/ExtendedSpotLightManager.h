@@ -33,6 +33,8 @@ public:
 	bool IsHitShadowDrawLight(const FVector& _pos)const;
 	
 	void SwitchTurnLight(const int32& _index);
+
+	void OnRotateTargetAngleStop(const int32& _index);
 protected:
 	//ƒŒƒxƒ‹ã‚Ìƒ‰ƒCƒg‚ğŠÇ—‚·‚é
 	TArray <AExtendedSpotLight*> m_pLights;

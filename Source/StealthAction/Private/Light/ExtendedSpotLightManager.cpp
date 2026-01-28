@@ -154,3 +154,29 @@ void UExtendedSpotLightManager::SwitchTurnLight(const int32& _index)
 	}
 
 }
+
+
+void UExtendedSpotLightManager::OnRotateTargetAngleStop(const int32& _index)
+{
+	for (AExtendedSpotLight* p : m_pEnemyLights)
+	{
+		if (p)
+		{
+			if (p->GetIndex() == _index)
+			{
+				p->OnRotateTargetAngleStop();
+			}
+		}
+	}
+
+	for (AExtendedSpotLight* p : m_pLights)
+	{
+		if (p)
+		{
+			if (p->GetIndex() == _index)
+			{
+				p->OnRotateTargetAngleStop();
+			}
+		}
+	}
+}
