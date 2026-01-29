@@ -128,6 +128,7 @@ AEnemyBase::AEnemyBase()
 	, m_playerPos(0., 0., 0.)
 	, m_playerPos_LastSeen(0., 0., 0.)
 	, m_playerPos_Nav_LastSeen(0., 0., 0.)
+	, m_BattlePos_Nav(0., 0., 0.)
 	, m_noise_Pos_keeper(-5000., -5000., -5000.)
 	, m_noiseVolume(0)
 	, m_noiseVolume_keeper(0)
@@ -139,6 +140,8 @@ AEnemyBase::AEnemyBase()
 	, m_enemyPos_Return(0., 0., 0.)
 	, m_enemyDirection_Return(0., 0., 0.)
 	, m_playerShadowCheck(false)
+	, m_battleShadowCheck(false)
+	, m_battleNotShadowCheck(false)
 	, m_enemyCurrentState(EEnemyStatus::Patrol)
 	, m_enemyCurrentState_Check(EEnemyStatus::Empty)
 	, m_enemyCurrentState_Keeper(EEnemyStatus::Empty)
@@ -610,11 +613,11 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 		return;
 	}
 
-		if (m_battleCheck)
-		{
-			m_noiseCheck = false;		//物音チェックOF
-			return;
-		}
+	if (m_battleCheck)
+	{
+		m_noiseCheck = false;		//物音チェックOF
+		return;
+	}
 
 	double distance = (m_noise_Pos - m_enemyPos).Length();			//物音との距離を測る(Vectorの長さ）
 	double distance_keeper = (m_noise_Pos_keeper - m_enemyPos).Length();			//以前の物音との距離を測る(Vectorの長さ）
@@ -838,7 +841,7 @@ void AEnemyBase::UpdateSearch(float _deltaTime)
 			m_enemyCurrentState = EEnemyStatus::Battle;
 		}
 		//失踪の場合
-		else if (m_visionLevel == 6 || m_visionLevel == 7 )
+		else if (m_visionLevel == 6 || m_visionLevel == 7)
 		{
 			m_enemyCurrentState = EEnemyStatus::Miss;
 		}
@@ -872,7 +875,7 @@ void AEnemyBase::UpdateSearch(float _deltaTime)
 			m_enemyCurrentState = EEnemyStatus::Miss;
 		}
 		//帰還の場合
-		else if ( m_noiseLevel == 8 || m_noiseLevel == 9)
+		else if (m_noiseLevel == 8 || m_noiseLevel == 9)
 		{
 			m_enemyCurrentState = EEnemyStatus::Return;
 		}
@@ -989,6 +992,8 @@ void AEnemyBase::ResetStateValues(float _deltaTime)
 		m_battleCheck = false;	//戦闘チェックOF
 		m_battleTime = 0;		//戦闘タイマーリセット
 		m_battleFalseTime = 0;
+		m_battleShadowCheck = false;
+		m_battleNotShadowCheck = false;
 	}
 
 	//以前のステータスが物音戦闘の場合
@@ -1337,7 +1342,7 @@ void AEnemyBase::CaseDoubt(float _deltaTime)
 	}
 
 	//もし視界外に出た場合
-	if (m_visionCheck == false&& m_enemyCurrentState_Keeper != EEnemyStatus::Patrol)
+	if (m_visionCheck == false && m_enemyCurrentState_Keeper != EEnemyStatus::Patrol)
 	{
 		m_visionLevel = 8;		//帰還に移行
 		m_doubtTime = 0;			//疑念時間リセット
@@ -1438,10 +1443,10 @@ void AEnemyBase::CaseCaution(float _deltaTime)
 	}
 	if (!m_visionCheck)
 	{
-		m_notFoundTime+=_deltaTime;
+		m_notFoundTime += _deltaTime;
 	}
 	//もしプレイヤーがいた位置に近づいた場合
-	if ((m_visionCheck == false && m_stopDistance_2D >= distance_2D)|| m_notFoundTime> m_notFoundTime_Limit)
+	if ((m_visionCheck == false && m_stopDistance_2D >= distance_2D) || m_notFoundTime > m_notFoundTime_Limit)
 	{
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
@@ -1536,6 +1541,40 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 
 	double distance = (m_playerPos_LastSeen - m_enemyPos).Length();	//最後に見たプレイヤーとの距離を測る(Vectorの長さ）
 
+
+	//見失った後どっちの方向に曲がったか覚えておく
+	if (!m_visionCheck)
+	{
+		m_notFoundTime += _deltaTime;
+		if (m_battleFalseTime < m_battleFalseTime_Limit)
+		{
+			m_battleFalseTime += _deltaTime;
+			//影に入って見えなくなった場合
+			if ((m_playerShadowCheck || m_battleShadowCheck) && !m_battleNotShadowCheck)
+			{
+				m_playerPos_Nav_LastSeen = m_playerPos_LastSeen;
+				m_BattlePos_Nav = m_playerPos_LastSeen;
+				m_battleShadowCheck = true;
+			}
+			//遮蔽物に隠れて見えなくなった場合
+			else
+			{
+				m_battleNotShadowCheck = true;
+				m_playerPos_Nav_LastSeen = m_playerPos;
+				m_BattlePos_Nav = m_playerPos;
+			}
+		}
+	}
+	else
+	{
+		m_battleShadowCheck = false;
+		m_battleNotShadowCheck = false;
+
+		m_battleFalseTime = 0;
+		m_BattlePos_Nav = m_playerPos_LastSeen;
+		m_playerPos_Nav_LastSeen = m_playerPos_LastSeen;
+	}
+
 	if (m_discoveryTime < m_discoveryTime_Limit)
 	{
 		//視点移動処理
@@ -1550,82 +1589,65 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 			UpdateMove_Nav(_deltaTime);
 		}
 
-		//武器を持っていたら
-		if (m_pEnemy_Weapon)
+		if (m_visionCheck || m_battleShadowCheck)
 		{
-			//攻撃範囲に入ったら攻撃
-			if (m_attackDistance > distance)
+			//武器を持っていたら
+			if (m_pEnemy_Weapon)
 			{
-				FVector WeaponPos = m_pEnemy_Weapon->GetActorLocation();
-				FVector WeaponForwardVector = m_pEnemy_Weapon->GetActorForwardVector();
-				FVector WeaponForwardPos = WeaponPos + WeaponForwardVector * m_attackDistance;
-
-				FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
-
-				//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
-				bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, WeaponPos, WeaponForwardPos, FCollisionObjectQueryParams::AllObjects, BattleCollisionParams);
-
-				//ヒットするオブジェクトがある場合
-				if (isHit)
+				//攻撃範囲に入ったら攻撃
+				if (m_attackDistance > distance)
 				{
-					AActor* hitActor = HitCollision.GetActor();
+					FVector WeaponPos = m_pEnemy_Weapon->GetActorLocation();
+					FVector WeaponForwardVector = m_pEnemy_Weapon->GetActorForwardVector();
+					FVector WeaponForwardPos = WeaponPos + WeaponForwardVector * m_attackDistance;
 
-					//当たったコリジョンがプレイヤーだった場合
-					if (hitActor->ActorHasTag("Player"))
+					FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
+
+					//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
+					bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, WeaponPos, WeaponForwardPos, FCollisionObjectQueryParams::AllObjects, BattleCollisionParams);
+
+					//ヒットするオブジェクトがある場合
+					if (isHit)
 					{
-						//攻撃処理
-						UpdateAttack(_deltaTime);
-						m_moveStop_Nav = true;		//停止（Nav）
-						UpdateMove_Nav(_deltaTime);
-						//視点移動処理
-						UpdateViewMove(_deltaTime);
+						AActor* hitActor = HitCollision.GetActor();
+
+						//当たったコリジョンがプレイヤーだった場合
+						if (hitActor->ActorHasTag("Player"))
+						{
+							//攻撃処理
+							UpdateAttack(_deltaTime);
+							m_moveStop_Nav = true;		//停止（Nav）
+							UpdateMove_Nav(_deltaTime);
+							//視点移動処理
+							UpdateViewMove(_deltaTime);
+						}
 					}
 				}
 			}
-		}
-		else
-		{
-			//プレイヤーの一定距離に近くまで近づいたら
-			if (m_stopDistance_Player >= distance)
-			{
-				if (m_sword)
-				{
-					//攻撃処理
-					UpdateAttack(_deltaTime);
-				}
-
-			}
-
-		}
-	}
-
-	//見失った後どっちの方向に曲がったか覚えておく
-	if (!m_visionCheck)
-	{
-		m_notFoundTime += _deltaTime;
-		if (m_battleFalseTime < m_battleFalseTime_Limit)
-		{
-			m_battleFalseTime += _deltaTime;
-			//影に入って見えなくなった場合
-			if (m_playerShadowCheck)
-			{
-				m_playerPos_Nav_LastSeen = m_playerPos_LastSeen;
-			}
-			//遮蔽物に隠れて見えなくなった場合
 			else
 			{
-				m_playerPos_Nav_LastSeen = m_playerPos;
+				//プレイヤーの一定距離に近くまで近づいたら
+				if (m_stopDistance_Player >= distance)
+				{
+					if (m_sword)
+					{
+						//攻撃処理
+						UpdateAttack(_deltaTime);
+					}
+				}
 			}
+
 		}
 	}
-	else
-	{
-		m_battleFalseTime = 0;
-	}
+
+
+	double distance_LastSeen = (m_BattlePos_Nav - m_enemyPos).Length();	//最後に見たプレイヤーとの距離を測る(Vectorの長さ）
 
 	//もしプレイヤーがいた位置に近づいた場合
-	if ((m_visionCheck == false && m_stopDistance_Player >= distance_2D) || m_notFoundTime > m_notFoundTime_Limit)
+	if ((m_visionCheck == false && m_stopDistance_Player >= distance_LastSeen) || m_notFoundTime > m_notFoundTime_Limit)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Nooooooooooooooooooooooooo"));
+
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
 		m_visionLevel = 6;			//見失うに移行
@@ -1633,6 +1655,8 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 		m_visionCheck = false;
 		m_battleFalseTime = 0;
 		m_notFoundTime = 0;
+		m_battleShadowCheck = false;
+		m_battleNotShadowCheck = false;
 	}
 }
 
@@ -1720,19 +1744,19 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 	//前のステータスが戦闘だった場合
 	if (m_missTime < m_missTime_Limit1 && m_enemyCurrentState_Keeper == EEnemyStatus::Battle)
 	{
-		double distance_LastSeenPos  = (m_playerPos_Nav_LastSeen - m_enemyPos).Length();
+		double distance_LastSeenPos = (m_playerPos_Nav_LastSeen - m_enemyPos).Length();
 
 		m_enemyPos_Forward_Miss = m_enemyPos + m_enemyForward * m_visionRange_Short;			//エネミーの正面の座標
 		m_enemyPos_Left_Miss = m_enemyPos - GetActorRightVector() * m_visionRange_Short;		//エネミー座標から左座標
 		m_enemyPos_Right_Miss = m_enemyPos + GetActorRightVector() * m_visionRange_Short;		//エネミー座標から右座標
 
-		if (distance_LastSeenPos > m_stopDistance_Nav+50)
-		{
-			//移動処理
-			UpdateMove_Nav(_deltaTime);
+		//if (distance_LastSeenPos > m_stopDistance_Nav+50)
+		//{
+		//	//移動処理
+		//	UpdateMove_Nav(_deltaTime);
 
-		}
-		else
+		//}
+		//else
 		{
 			//移動停止（NAV）の処理
 			m_moveStop_Nav = true;
@@ -1867,7 +1891,7 @@ void AEnemyBase::CaseReturn(float _deltaTime)
 	{
 		UpdateMove_Nav(_deltaTime);
 	}
-	else 
+	else
 	{
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
@@ -1999,12 +2023,16 @@ void AEnemyBase::UpdateMove_Nav(float _deltaTime)
 
 	//移動
 	//視界の場合
-	if ( m_battleCheck || m_cautionCheck)
+	if (m_battleCheck)
+	{
+		AIMove->MoveToLocation(m_BattlePos_Nav, m_stopDistance_Nav, true, true, true, false);
+	}
+	else if (m_cautionCheck)
 	{
 		AIMove->MoveToLocation(m_playerPos_LastSeen, m_stopDistance_Nav, true, true, true, false);
 	}
 	//失踪の場合
-	if (m_missCheck)
+	else if (m_missCheck)
 	{
 		AIMove->MoveToLocation(m_playerPos_Nav_LastSeen, m_stopDistance_Nav, true, true, true, false);
 	}
@@ -2036,7 +2064,7 @@ void AEnemyBase::UpdateMove_Nav(float _deltaTime)
 //------------------------------------------------------------------------------------------------------------
 void AEnemyBase::UpdateAttack(float _deltaTime)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Attack"));
+	//UE_LOG(LogTemp, Warning, TEXT("Attack"));
 
 	//攻撃処理
 	m_attackingTime += _deltaTime;
@@ -2048,7 +2076,7 @@ void AEnemyBase::UpdateAttack(float _deltaTime)
 	}
 	else if (m_sword)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Swing"));
+		//UE_LOG(LogTemp, Warning, TEXT("Swing"));
 		m_sword->Swinging(false);
 	}
 }

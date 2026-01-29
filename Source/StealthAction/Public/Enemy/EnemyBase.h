@@ -338,6 +338,8 @@ public:
 		bool m_hearingStopper;		//聴覚判定を停止するか
 
 		bool m_playerShadowCheck;		//プレイヤーが影状態か？
+		bool m_battleShadowCheck;		//戦闘時プレイヤーが影状態か？
+		bool m_battleNotShadowCheck;		//戦闘時プレイヤーが影状態か？
 
 		bool m_deadCheck;			//死亡したか
 
@@ -357,6 +359,7 @@ public:
 		FVector m_playerPos;				//プレイヤーの座標
 		FVector m_playerPos_LastSeen;		//見えてた時のプレイヤーの座標
 		FVector m_playerPos_Nav_LastSeen;		//見えてた時のプレイヤーの座標（Nav）
+		FVector m_BattlePos_Nav;		//戦闘時の向かう座標（Nav）
 
 		//ルート関係
 		UPROPERTY(EditAnywhere, Category = "Route")

@@ -191,7 +191,7 @@ void AEnemy2::UpdateSearch(float _deltaTime)
 	}
 	else if (m_noiseCheck)
 	{
-		if ((m_noiseLevel == 4 || m_noiseLevel == 5) && distance < m_hearingRange_Short && m_isCallOnNoise_Fleam == true)
+		if ((m_noiseLevel == 4 || m_noiseLevel == 5) && distance < m_hearingRange_Short/2 && m_isCallOnNoise_Fleam == true)
 		{
 			m_enemyCurrentState = EEnemyStatus::Battle;
 		}
@@ -252,14 +252,18 @@ void AEnemy2::CaseBattle(float _deltaTime)
 	//移動する位置、視点の指定
 	m_playerPos_LastSeen = m_playerPos;
 
+	m_playerPos_Nav_LastSeen = m_playerPos;
+
+	m_BattlePos_Nav = m_playerPos;
+
 
 	m_battleTime += _deltaTime;
 
 	m_discoveryTime += _deltaTime;
 
-	double distance_2D = (m_playerPos_LastSeen - m_enemyPos).Length();	//音との距離を測る(Vectorの長さ）
+	double distance_2D = (m_BattlePos_Nav - m_enemyPos).Length();	//音との距離を測る(Vectorの長さ）
 
-	double distance = (m_playerPos_LastSeen - m_enemyPos).Length();	//音との距離を測る(Vectorの長さ）
+	double distance = (m_BattlePos_Nav - m_enemyPos).Length();	//音との距離を測る(Vectorの長さ）
 
 	if (m_discoveryTime < m_discoveryTime_Limit)
 	{
