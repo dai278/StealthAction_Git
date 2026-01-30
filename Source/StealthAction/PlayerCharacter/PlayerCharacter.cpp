@@ -541,7 +541,7 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 	if (Capsule)
 	{
 		const FName Profile = Capsule->GetCollisionProfileName();
-		UE_LOG(LogTemp, Warning, TEXT("CollisionProfile=%s"), *Profile.ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("CollisionProfile=%s"), *Profile.ToString());
 	}
 
 

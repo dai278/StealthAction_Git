@@ -249,13 +249,36 @@ void AEnemy2::CaseBattle(float _deltaTime)
 
 	}
 
-	//移動する位置、視点の指定
-	m_playerPos_LastSeen = m_playerPos;
+	if (!m_playerShadowCheck)
+	{
+		if (!m_battleShadowCheck)
+		{
+			//移動する位置、視点の指定
+			m_playerPos_LastSeen = m_playerPos;
 
-	m_playerPos_Nav_LastSeen = m_playerPos;
+			m_playerPos_Nav_LastSeen = m_playerPos;
 
-	m_BattlePos_Nav = m_playerPos;
+			m_BattlePos_Nav = m_playerPos;
 
+		}
+		else if (m_battleShadowCheck  && m_isCallOnNoise_Fleam)
+		{
+			//移動する位置、視点の指定
+			m_playerPos_LastSeen = m_playerPos;
+
+			m_playerPos_Nav_LastSeen = m_playerPos;
+
+			m_BattlePos_Nav = m_playerPos;
+			m_battleShadowCheck = false;
+
+		}
+	}
+	//影に入った場合
+	else
+	{
+		m_battleShadowCheck = true;
+	}
+	
 
 	m_battleTime += _deltaTime;
 
@@ -292,7 +315,7 @@ void AEnemy2::CaseBattle(float _deltaTime)
 	}
 
 	//もし30秒以上チェイスした場合
-	if (m_battleTime > 30 || m_noiseLevel < 2)
+	if (m_battleTime > 30 || m_noiseLevel < 2 || (m_stopDistance_Player >= distance && m_battleShadowCheck))
 	{
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
@@ -300,5 +323,6 @@ void AEnemy2::CaseBattle(float _deltaTime)
 		m_battleCheck = false;		//戦闘終了
 		m_battleTime = 0;
 		m_discoveryTime = 0;
+		m_battleShadowCheck = false;
 	}
 }
