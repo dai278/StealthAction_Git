@@ -9,6 +9,18 @@
 //前方宣言
 class USpotLightComponent;
 
+UENUM(BlueprintType)
+enum class ELightStatus : uint8
+{
+	None UMETA(DisplayName = "None"),
+	AutoYawRotate      UMETA(DisplayName = "AutoYaw"),//三人称
+	AutoPitchRotate     UMETA(DisplayName = "AutoPitch"),//俯瞰
+	ManualYawRotate   UMETA(DisplayName = "ManualYaw"),//三人称
+	ManualPitchRotat   UMETA(DisplayName = "ManualPitch"),//俯瞰e
+	Blink    UMETA(DisplayName = "Blink")//点滅
+};
+
+
 UCLASS()
 class STEALTHACTION_API AExtendedSpotLight : public AActor
 {
@@ -93,10 +105,13 @@ public:
 
 private:
 	//Yaw回転の更新処理
-	void UpdateYawRotate(const float& _deltaTime);
+	void UpdateAutoYawRotate(const float& _deltaTime);
 	//Pitch回転
-	void UpdatePitchRotate(const float& _deltaTime);
+	void UpdateAutoPitchRotate(const float& _deltaTime);
 
+	//手動回転
+	void UpdateManualYawRotate(const float& _deltaTime);
+	void UpdateManualPitchRotate(const float& _deltaTime);
 	//点滅の更新処理
 	void UpdateBlink(const float& _deltaTime);
 protected:
@@ -112,8 +127,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Rotate")
 	bool m_bRotateTurn;                  //回転中ターンするか　オフなら回り続ける
 
-	UPROPERTY(EditAnywhere, Category = "Rotate")
-	bool m_bRotateTargetAngleStop;//一定角度で止まるか
+	bool m_bManualRotateing;//回転開始しているか
 	
 	UPROPERTY(EditAnywhere, Category = "Rotate")
 	float m_minTurnRotate; //ターンする角度
@@ -123,6 +137,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Rotate")
 	int32 m_turnDir;
+
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	ELightStatus m_LightStatus;//回転方向いまのところm_bRotateTargetAngleStopにのみ
 
 
 	UPROPERTY(EditAnywhere, Category = "Rotate")

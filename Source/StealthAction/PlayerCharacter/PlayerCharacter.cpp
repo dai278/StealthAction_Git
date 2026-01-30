@@ -430,7 +430,7 @@ void APlayerCharacter::UpdateMove(const bool _bInShadow /*= false*/)
 
 
 	//音発生
-	if (!m_bIsCrouch ||m_status!=EPlayerStatus::InShadow)
+	if (!m_bIsCrouch &&m_status!=EPlayerStatus::InShadow)
 	{
 		//デバック用
 		UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
