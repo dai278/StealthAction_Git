@@ -257,7 +257,13 @@ void AEnemyBase::BeginPlay()
 
 	m_enemyCurrentState = EEnemyStatus::Patrol;		//初めのステータスを巡回に設定
 
-	//旋回速度
+	// ControllerのYaw回転は使わない
+	bUseControllerRotationYaw = false;
+
+	// 移動方向に向きを合わせる
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+
+	// 旋回速度（Yaw）
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 360.f, 0.f);
 
 	//NULLチェック
