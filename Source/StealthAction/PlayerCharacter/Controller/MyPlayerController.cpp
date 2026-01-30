@@ -109,6 +109,9 @@ void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ApplyIMC(EInputModeType::Player);
+
+
 	// ============================
 	// PlayerCharacter Žæ“¾
 	// ============================
