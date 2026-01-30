@@ -178,11 +178,6 @@ void APlayerCharacter::BeginPlay()
 	//PlayerCotrollerからEnhancedInputSubSystemを取得
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-
 		//カメラピッチの制限
 		PC->PlayerCameraManager->ViewPitchMin = -60.f;
 		PC->PlayerCameraManager->ViewPitchMax = 20.f;
@@ -435,7 +430,7 @@ void APlayerCharacter::UpdateMove(const bool _bInShadow /*= false*/)
 
 
 	//音発生
-	if (!m_bIsCrouch || !m_bJumping)
+	if (!m_bIsCrouch ||m_status!=EPlayerStatus::InShadow)
 	{
 		//デバック用
 		UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
