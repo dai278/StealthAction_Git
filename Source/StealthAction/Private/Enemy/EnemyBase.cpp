@@ -54,11 +54,11 @@ AEnemyBase::AEnemyBase()
 	: m_pPlayerChara(NULL)
 	, m_visiblityAngle(0.2)
 	, m_visionLevel(0)
-	, m_visionRange_Short(500.0)
-	, m_visionRange_Normal(1200.0)
+	, m_visionRange_Short(800.0)
+	, m_visionRange_Normal(1400.0)
 	, m_visionRange_Long(2000.0)
-	, m_hearingRange_Short(500.0)
-	, m_hearingRange_Normal(1000.0)
+	, m_hearingRange_Short(600.0)
+	, m_hearingRange_Normal(1200.0)
 	, m_hearingRange_Long(1700.0)
 	, m_stopDistance_Noise(50.0) //
 	, m_patrolTime(0.0)
@@ -309,7 +309,9 @@ void AEnemyBase::BeginPlay()
 			FAttachmentTransformRules::KeepWorldTransform
 		);
 
-		m_spotLightInstance->SetActorRotation(FRotator{ -110.,0.,0. });
+		FRotator ownerRot = GetOwner()->GetActorRotation();
+		ownerRot += FRotator{ -110.,0.,0. };
+		m_spotLightInstance->SetActorRotation(ownerRot);
 		m_spotLightInstance->SetActorLocation(m_spotLightInstance->GetActorLocation() + FVector{ 0.,0.,50. });
 	}
 	//エネミーマネージャー登録
