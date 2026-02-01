@@ -183,9 +183,29 @@ private:
 	//攻撃終了コールバック
 	void OnAttackEnd();
 
+	public:
+
 	//生きているか
 	UFUNCTION(BlueprintPure, Category = "Info")
 	bool IsAlive() const { return m_playerInfo.isAlive; }
+
+	UFUNCTION(BlueprintPure, Category = "state")
+	EPlayerStatus GetPlayerStatus() const { return m_status; }
+
+	UFUNCTION(BlueprintPure, Category = "state")
+	bool IsCrouch() const { return m_bIsCrouch; }
+
+	UFUNCTION(BlueprintPure, Category = "state")
+	bool CanAttack() const { return m_bCanAttack; }
+
+	UFUNCTION(BlueprintPure, Category = "state")
+	bool IsShadow() const { return m_status == EPlayerStatus::InShadow; }
+
+	UFUNCTION(BlueprintPure, Category = "state")
+	bool IsDash() const { return m_bDash; }
+
+	UFUNCTION(BlueprintPure, Category = "state")
+	bool IsInvincible() const { return m_bInvincible; }
 
 	//HP取得
 	int32 GetPlayerHP() const { return m_playerInfo.hp; }
@@ -195,6 +215,7 @@ protected:
 	// Enhanced Input 関数
 	void Enhanced_Move(const FInputActionValue& Value);		//移動	
 	void Enhanced_MoveDash(const FInputActionValue& Value);			//ダッシュ
+
 	void Enhanced_MoveCrouch(const FInputActionValue& Value);		//しゃがみ
 	void Enhanced_MoveJump(const FInputActionValue& Value);			//ジャンプ
 	void Enhanced_Attack(const FInputActionValue& Value);			//攻撃
@@ -356,6 +377,8 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float m_attackCooldown;
+
+	bool m_bDash;
 
 	//UPROPERTY(EditAnywhere, Category = "weapon");
 	//USwordAttackComponent* m_pSword;			//ソード攻撃コンポーネント

@@ -88,6 +88,10 @@ APlayerCharacter::APlayerCharacter()
 	, m_knockBackVelocity(FVector::ZeroVector)
 	, m_playerInfo()
 	, m_damageTime(1.f)
+	, m_bDash(false)
+	, m_bSneakKill(false)
+	, m_bJumping(false)
+
 
 {
 	//毎フレームTickを呼ぶか決めるフラグ
@@ -826,20 +830,32 @@ void APlayerCharacter::Enhanced_Move(const FInputActionValue& Value)
 //------------------------------------------------------
 void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
 {
-	bool flag = Value.Get<bool>();
-	if (m_bIsCrouch || m_status == EPlayerStatus::InShadow) { flag = false; }
-
-	//移動速度をflagで切り替える
-	GetCharacterMovement()->MaxWalkSpeed = flag ? m_DashSpeed : m_WalkSpeed;
-
-
-	//デバック用
-	UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
-	if (manager)
-	{
-		manager->MakeNoise(2, GetActorLocation());
+	m_bDash = Value.Get<bool>();
+	if (m_bIsCrouch || m_status == EPlayerStatus::InShadow)
+	{ 
+		m_bDash = false; 
+		return;
 	}
+
+	if(m_bDash)
+	{
+		//ダッシュ音発生
+		UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
+		if (manager)
+		{
+			manager->MakeNoise(4, GetActorLocation());
+		}
+
+		//移動速度をflagで切り替える
+		GetCharacterMovement()->MaxWalkSpeed = m_DashSpeed;
+	}
+	else {
+		GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
+	}
+
+
 }
+
 
 //------------------------------------------------------
 //しゃがみ
@@ -851,7 +867,7 @@ void APlayerCharacter::Enhanced_MoveCrouch(const FInputActionValue& Value)
 	}
 	if (!m_bIsCrouch)
 	{
-		m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight / 2.f);
+		m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight / 1.2f);
 		GetCharacterMovement()->MaxWalkSpeed = m_CrouchSpeed;
 		m_bIsCrouch = true;
 		m_cameraStatus = ECameraStatus::Crouch;
