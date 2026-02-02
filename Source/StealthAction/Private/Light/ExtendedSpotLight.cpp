@@ -214,7 +214,9 @@ bool AExtendedSpotLight::IsHit(const FVector& _pos)const
 
 	// 距離チェック
 	if (distance > m_pSpotLight->AttenuationRadius)
+	{
 		return false;
+	}
 
 	ToPoint.Normalize();
 

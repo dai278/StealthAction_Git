@@ -73,8 +73,8 @@ APlayerCharacter::APlayerCharacter()
 	, m_capsuleRadius(0.f)
 	, m_capsuleHeight(0.f)
 	, m_bIsCrouch(false)
-	, m_maxShadowTime(5.f)
-	, m_shadowTimer(0.f)
+	, m_maxStamina(5.f)
+	, m_staminaTimer(0.f)
 	, m_attackRange(300.f)
 	, m_attackRadius(70.f)
 	, m_sneakKillDamage(10)
@@ -266,7 +266,8 @@ void APlayerCharacter::Tick(float _deltaTime)
 	UpdateShadow(_deltaTime);
 	//ジャンプ更新処理
 	UpdateJump(_deltaTime);
-
+	//スタミナ回復処理
+	StaminaRecovery(_deltaTime);
 
 	//視点変更
 	ViewpointSwitching(_deltaTime);
@@ -520,11 +521,6 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 {
 
 	if (m_status != EPlayerStatus::InShadow) {
-		if (m_shadowTimer > 0.f)
-		{
-			m_shadowTimer -= _deltaTime;
-			if (m_shadowTimer < 0.f) { return; }
-		}
 		return;
 	}
 
@@ -537,20 +533,13 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 		m_bUsingMesh = false;
 		//UE_LOG(LogTemp, Log, TEXT("Mesh Chaged Shadow !!"));
 	}
-
-
-	m_shadowTimer += GetWorld()->GetDeltaSeconds();
-
-	UCapsuleComponent* Capsule = GetCapsuleComponent();
-	if (Capsule)
-	{
-		const FName Profile = Capsule->GetCollisionProfileName();
-		//UE_LOG(LogTemp, Warning, TEXT("CollisionProfile=%s"), *Profile.ToString());
-	}
-
+	
+	//スタミナを消費
+	bool isOver = false;
+	StaminaConsumption(_deltaTime, isOver);
 
 	//影状態時間が最大時間を超えたらアイドル状態に戻す
-	if (m_shadowTimer > m_maxShadowTime) {
+	if (isOver) {
 		TransformationShadowToIdle(true);
 		return;
 	}
@@ -573,6 +562,47 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 	}
 
 }
+
+//スタミナ消費
+void APlayerCharacter::StaminaConsumption(float _deltaTime, bool& _isOver)
+{	
+	
+	//スタミナ切れ状態ならtrueを返す
+	if (m_isStaminaDepleted)
+	{
+		_isOver = true;
+		return;
+	}
+	//スタミナ消費
+	m_staminaTimer += _deltaTime;
+
+
+	if (m_staminaTimer > m_maxStamina)
+	{
+		m_staminaTimer = m_maxStamina;
+		_isOver = true;
+		m_isStaminaDepleted = true;
+	}
+}
+
+//スタミナ回復
+void APlayerCharacter::StaminaRecovery(const float& _deltaTime)
+{
+	//スタミナを消費する状態
+	if (!m_bDash && m_status != EPlayerStatus::InShadow)
+	{
+		if (m_staminaTimer > 0.f) {
+			m_staminaTimer -= _deltaTime;
+			if (m_staminaTimer < 0.f)
+			{
+				m_staminaTimer = 0.f;
+				m_isStaminaDepleted = false;
+			}
+		}
+		return;
+	}
+}
+
 
 
 //----------------------------------------------------------
@@ -836,9 +866,22 @@ void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
 		m_bDash = false; 
 		return;
 	}
+	
 
 	if(m_bDash)
 	{
+		//スタミナ消費
+		bool isOver = false;
+
+		StaminaConsumption(GetWorld()->GetDeltaSeconds(), isOver);
+		
+		//スタミナがオーバーしている場合の処理
+		if (isOver) {
+			m_bDash = false;
+			GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
+			return;
+		}
+		
 		//ダッシュ音発生
 		UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
 		if (manager)
@@ -846,7 +889,7 @@ void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
 			manager->MakeNoise(4, GetActorLocation());
 		}
 
-		//移動速度をflagで切り替える
+		//移動速度を切り替え
 		GetCharacterMovement()->MaxWalkSpeed = m_DashSpeed;
 	}
 	else {
@@ -977,6 +1020,7 @@ void APlayerCharacter::Enhanced_InShadow(const FInputActionValue& Value)
 	//if (!Value.Get<bool>()) { return; }	
 
 	if (m_status == EPlayerStatus::Damage) { return; }
+	if (m_isStaminaDepleted) { return; }
 
 	//状態が影ならデフォルトに戻す
 	if (m_status == EPlayerStatus::InShadow)

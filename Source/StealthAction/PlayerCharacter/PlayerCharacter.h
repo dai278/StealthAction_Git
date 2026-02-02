@@ -167,6 +167,12 @@ private:
 	//影状態の更新処理
 	void UpdateShadow(float _deltaTime);
 
+	//スタミナ消費
+	void StaminaConsumption(float _deltaTime,bool& _isOver);
+
+	//スタミナ回復
+	void StaminaRecovery(const float& _deltaTime);
+
 	//ジャンプ状態の更新処理
 	void UpdateJump(float _deltaTime);
 
@@ -293,10 +299,10 @@ public:
 	virtual void Landed(const FHitResult& Hit) override;
 
 	//影潜り時間取得
-	float GetShadowTimer() const { return m_shadowTimer; }
+	float GetShadowTimer() const { return m_staminaTimer; }
 
 	//最大影潜り時間取得
-	float GetMaxShadowTime() const { return m_maxShadowTime; }
+	float GetMaxShadowTime() const { return m_maxStamina; }
 
 	private:
 	//状態変更処理
@@ -358,10 +364,12 @@ private:
 	float m_capsuleHeight;							//カプセル高さ
 
 	UPROPERTY(EditAnywhere, Category = "Sahdow")
-	float m_maxShadowTime;
+	float m_maxStamina;
 
 	UPROPERTY(EditAnywhere, Category = "Sahdow")
-	float m_shadowTimer;
+	float m_staminaTimer;
+
+	bool m_isStaminaDepleted;//スタミナ切れ状態か？
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float m_attackRange;

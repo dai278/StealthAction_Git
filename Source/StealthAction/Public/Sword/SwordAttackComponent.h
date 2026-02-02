@@ -43,7 +43,6 @@ public:
 	void SetAttackTime(const float& _time);
 	//ノックバックの大きさ登録
 	void SetKnockBackValu(const float& _knockBackValu) { m_KnockBackValu = _knockBackValu; }
-
 	//ノックバックの大きさ取得
 	float GetKnockBackValu()const { return m_KnockBackValu; }
 	//ダメージ取得
