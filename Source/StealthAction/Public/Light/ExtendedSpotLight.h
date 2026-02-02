@@ -159,10 +159,17 @@ protected:
 	float m_blinkOffTime;//消えている時間
 
 	UPROPERTY(EditAnywhere, Category = "blink")
-	bool m_bIsOn;//ついているか
+	bool m_bIsOn;//ついているか	
 	
 	float m_blinkTimer;//経過時間計測用タイマー
 
 	UPROPERTY(EditAnywhere, Category = "blink")
 	bool m_canItBeTurned;//ONOFFの操作可能か
+
+	UPROPERTY(EditAnywhere, Category = "blink")
+	float m_LightOffTime;//ライトが消えている時間
+
+	float m_bLightOff;
+	float m_lightOffTimer;
+
 };

@@ -31,6 +31,9 @@ AExtendedSpotLight::AExtendedSpotLight()
 	, m_blinkTimer(0.f)
 	, m_bManualRotateing(false)
 	, m_LightStatus(ELightStatus::None)
+	, m_lightOffTimer(0.f)
+	, m_LightOffTime(5.f)
+	, m_bLightOff(false)
 {
 
 	//毎フレーム更新処理を行うか.
@@ -128,6 +131,16 @@ void AExtendedSpotLight::Tick(float DeltaTime)
 		break;
 	default:
 		break;
+	}
+
+
+	if (m_bLightOff)
+	{
+		m_lightOffTimer += DeltaTime;
+		if (m_lightOffTimer > m_LightOffTime)
+		{
+			TurnOn();
+		}
 	}
 }
 
@@ -269,6 +282,10 @@ void AExtendedSpotLight::TurnOn()
 		m_pSpotLight->SetVisibility(true);
 		m_bIsOn = true;
 		m_blinkTimer = 0.f;
+		m_lightOffTimer = 0.f;
+
+		m_bLightOff = false;
+
 	}
 }
 
@@ -281,6 +298,11 @@ void AExtendedSpotLight::TurnOff()
 		m_pSpotLight->SetVisibility(false);
 		m_bIsOn = false;
 		m_blinkTimer = 0.f;
+
+		if (m_LightStatus != ELightStatus::Blink)
+		{
+			m_bLightOff = true;
+		}
 	}
 }
 
