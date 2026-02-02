@@ -31,8 +31,6 @@ class UExtendedSpotLightManager;//拡張スポットライトマネージャーの前方宣言
 class USwordAttackComponent;//ソード攻撃コンポーネントの前方宣言
 class AInteract;
 
-
-
 //プレイヤーのカメラ視点状態
 //enum classはクラス外に書かないといけないらしいし、この書き方が良いらしい
 //暗殺シーンとかカメラ変えるかもしれないから今は2種しかないけどenumで

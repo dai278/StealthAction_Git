@@ -80,37 +80,37 @@ void AExtendedSpotLight::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-	// スポットライトの位置（ワールド座標）
-	FVector Origin = m_pSpotLight->GetComponentLocation();
+	//// スポットライトの位置（ワールド座標）
+	//FVector Origin = m_pSpotLight->GetComponentLocation();
 
-	// スポットライトの方向（ワールド座標系の前方ベクトル = 照射方向）
-	FVector Direction = m_pSpotLight->GetForwardVector();
+	//// スポットライトの方向（ワールド座標系の前方ベクトル = 照射方向）
+	//FVector Direction = m_pSpotLight->GetForwardVector();
 
-	// 照射距離（照射範囲の長さ）
-	float Length = m_pSpotLight->AttenuationRadius;
+	//// 照射距離（照射範囲の長さ）
+	//float Length = m_pSpotLight->AttenuationRadius;
 
-	// 円錐の角度（OuterConeAngle）をラジアン変換
-	float AngleWidth = FMath::DegreesToRadians(m_pSpotLight->OuterConeAngle);
-	float AngleHeight = AngleWidth; // 円錐なので同じ角度を使用
+	//// 円錐の角度（OuterConeAngle）をラジアン変換
+	//float AngleWidth = FMath::DegreesToRadians(m_pSpotLight->OuterConeAngle);
+	//float AngleHeight = AngleWidth; // 円錐なので同じ角度を使用
 
-	// 白色で描画
-	FColor ConeColor = FColor::White;
+	//// 白色で描画
+	//FColor ConeColor = FColor::White;
 
-	// DrawDebugConeの描画パラメータ
-	DrawDebugCone(
-		GetWorld(),      // ワールド
-		Origin,          // 円錐の発生点
-		Direction,       // 照射方向ベクトル
-		Length,          // 円錐の長さ(高さ)
-		AngleWidth,      // 円錐の水平半角（ラジアン）
-		AngleHeight,     // 円錐の垂直半角（ラジアン）
-		16,              // 分割数（滑らかさ）
-		ConeColor,       // 色
-		false,           // 永続描画ではない（毎フレーム描画で更新）
-		-1.f,            // ライフタイム（-1＝1フレームのみ）
-		0,               // 深度優先度
-		2.f              // 線の太さ
-	);
+	//// DrawDebugConeの描画パラメータ
+	//DrawDebugCone(
+	//	GetWorld(),      // ワールド
+	//	Origin,          // 円錐の発生点
+	//	Direction,       // 照射方向ベクトル
+	//	Length,          // 円錐の長さ(高さ)
+	//	AngleWidth,      // 円錐の水平半角（ラジアン）
+	//	AngleHeight,     // 円錐の垂直半角（ラジアン）
+	//	16,              // 分割数（滑らかさ）
+	//	ConeColor,       // 色
+	//	false,           // 永続描画ではない（毎フレーム描画で更新）
+	//	-1.f,            // ライフタイム（-1＝1フレームのみ）
+	//	0,               // 深度優先度
+	//	2.f              // 線の太さ
+	//);
 
 	switch (m_LightStatus)
 	{
