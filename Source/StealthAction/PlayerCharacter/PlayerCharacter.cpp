@@ -84,7 +84,7 @@ APlayerCharacter::APlayerCharacter()
 	, m_pExtendedSpotLightManager(nullptr)
 	, m_bInvincible(false)
 	, m_invincibleTimer(0.f)
-	, m_invincibleTimeLimit(3.0f)
+	, m_invincibleTimeLimit(5.0f)
 	, m_knockBackVelocity(FVector::ZeroVector)
 	, m_playerInfo()
 	, m_damageTime(1.f)
@@ -495,11 +495,18 @@ void APlayerCharacter::UpdateDamaged()
 {
 	if (m_status != EPlayerStatus::Damage) { return; }
 
-
+	
 	//一定時間経過したらアイドルに戻す
 	//無敵時間タイマーはダメージ処理時起動するため使用
 	if (m_invincibleTimer > m_damageTime)
 	{
+		UCapsuleComponent* Capsule = GetCapsuleComponent();
+
+		// Enemy だけ無視
+		Capsule->SetCollisionResponseToChannel(
+			ECC_GameTraceChannel2, // Enemy 用チャンネル
+			ECR_Block
+		);
 		ChangePlayerStatus(EPlayerStatus::Idle);
 		m_knockBackVelocity = FVector::ZeroVector;
 		m_bCanControl = true;
@@ -779,6 +786,14 @@ void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakK
 
 	/*生きていれば*/
 	//無敵時間開始
+	
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+
+	// Enemy だけ無視
+	Capsule->SetCollisionResponseToChannel(
+		ECC_GameTraceChannel2, // Enemy 用チャンネル
+		ECR_Ignore
+	);
 	m_bInvincible = true;
 	m_invincibleTimer = 0.f;
 	ChangePlayerStatus(EPlayerStatus::Damage);
@@ -1246,8 +1261,8 @@ void APlayerCharacter::TransformationToShadow()
 
 	ChangePlayerStatus(EPlayerStatus::InShadow);
 	FVector newLocation = GetActorLocation();
-	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight / 3.f);
-	newLocation.Z -= m_capsuleHeight / 3.f - 10.f;
+	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight / 5.f);
+	newLocation.Z -= m_capsuleHeight / 5.f;
 	SetActorLocation(newLocation);
 
 	m_cameraStatus = ECameraStatus::InShadow;

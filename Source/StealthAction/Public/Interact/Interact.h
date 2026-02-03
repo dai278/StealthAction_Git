@@ -7,41 +7,63 @@
 #include "Interact.generated.h"
 
 class UBoxComponent;
+class UWidgetComponent;
 
 
 UCLASS()
 class STEALTHACTION_API AInteract : public AActor
 {
-	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	AInteract();
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-public:
-	//派生先でインタラクトを上書き
-	virtual void Interact(AActor* _interactOwner) {};
+    GENERATED_BODY()
 
 public:
-	//インデックス取得
-	virtual int32 GetIndex()const { return m_index; }
+    // Sets default values for this actor's properties
+    AInteract();
+
 protected:
-	UPROPERTY(EditAnywhere, Category = "Collision")
-	UBoxComponent* m_pCollision;			//コリジョンコンポネント
+    // Called when the game starts or when spawned
+    virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere, Category = "Shadow/Mesh")
-	UStaticMeshComponent* m_pMesh;        	//メッシュコンポネント
+public:
+    // Called every frame
+    virtual void Tick(float DeltaTime) override;
+public:
+    //派生先でインタラクトを上書き
+    virtual void Interact(AActor* _interactOwner) {};
 
-	UBoxComponent* m_bodyCollision;//壁判定用コリジョン
+public:
+    //インデックス取得
+    virtual int32 GetIndex()const { return m_index; }
 
-	UPROPERTY(EditAnywhere, Category = "Interact")
-	int32 m_index; 							//インタラクト識別用インデックス
+protected:
+    UFUNCTION()
+    void OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
+        AActor* OtherActor,
+        UPrimitiveComponent* OtherComp,
+        int32 OtherBodyIndex,
+        bool bFromSweep,
+        const FHitResult& SweepResult) {
+    }
 
+    UFUNCTION()
+    void OnOverlapEnd(UPrimitiveComponent* OverlappedComp,
+        AActor* OtherActor,
+        UPrimitiveComponent* OtherComp,
+        int32 OtherBodyIndex) {
+    }
+
+
+protected:
+    UPROPERTY(EditAnywhere, Category = "Collision")
+    UBoxComponent* m_pCollision;			//コリジョンコンポネント
+
+    UPROPERTY(VisibleAnywhere, Category = "Shadow/Mesh")
+    UStaticMeshComponent* m_pMesh;        	//メッシュコンポネント
+
+    UBoxComponent* m_bodyCollision;//壁判定用コリジョン
+
+    UPROPERTY(EditAnywhere, Category = "Interact")
+    int32 m_index; 							//インタラクト識別用インデックス
+
+    UPROPERTY(EditAnywhere, Category = "UI")
+    UWidgetComponent* m_intractUI;
 };

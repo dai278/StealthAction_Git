@@ -3,6 +3,8 @@
 
 #include "Interact/Interact.h"
 #include "Components/BoxComponent.h"
+#include "UI/IntactUIWidget.h"
+#include "Components/WidgetComponent.h"
 
 // Sets default values
 AInteract::AInteract()
@@ -25,6 +27,16 @@ AInteract::AInteract()
 	m_bodyCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	m_bodyCollision->SetCollisionObjectType(ECC_WorldDynamic);
 	m_bodyCollision->SetCollisionResponseToAllChannels(ECR_Block);
+
+	m_intractUI=CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractWidget"));
+	if (m_intractUI)
+	{
+		m_intractUI->SetupAttachment(RootComponent);
+		m_intractUI->SetWidgetSpace(EWidgetSpace::Screen); // ‰æ–Ê‚ÉŒÅ’è‚·‚é‚È‚ç 
+		m_intractUI->SetDrawSize(FVector2D(200, 50));
+		m_intractUI->SetupAttachment(m_bodyCollision);
+	}
+
 }
 
 // Called when the game starts or when spawned
