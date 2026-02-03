@@ -882,6 +882,12 @@ void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
 		return;
 	}
 	
+	//ˆÚ“®“ü—Í‚ª‚È‚¢‚È‚çƒ_ƒbƒVƒ…‚µ‚È‚¢
+	if (m_charaMoveInput.IsNearlyZero(0.1f)) {
+		m_bDash = false;
+		GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
+		return;
+	}
 
 	if(m_bDash)
 	{
@@ -1258,7 +1264,7 @@ void APlayerCharacter::TransformationShadowToIdle(const bool _bLightHit/*=false*
 void APlayerCharacter::TransformationToShadow()
 {
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("PlayerInShadow"));
-
+	GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
 	ChangePlayerStatus(EPlayerStatus::InShadow);
 	FVector newLocation = GetActorLocation();
 	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight / 5.f);

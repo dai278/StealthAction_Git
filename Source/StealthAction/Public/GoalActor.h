@@ -13,6 +13,9 @@
 class UBoxComponent;
 class UStaticMeshComponent;
 
+class UWidgetComponent;
+
+
 UCLASS()
 class STEALTHACTION_API AGoalActor : public AActor
 {
@@ -40,6 +43,10 @@ public:
 	// 見た目（★ BP からメッシュ変更可能）
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* Mesh;
+
+	//UI
+	UPROPERTY(EditAnywhere, Category = "UI")
+	UWidgetComponent* GoalUI;
 protected:
 	// ===== オーバーラップイベント =====
 	UFUNCTION()

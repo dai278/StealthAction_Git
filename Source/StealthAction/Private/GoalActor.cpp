@@ -6,6 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/WidgetComponent.h"
 
 //コンストラクタ
 AGoalActor::AGoalActor()
@@ -44,6 +45,12 @@ AGoalActor::AGoalActor()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(RootComponent);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	GoalUI = CreateDefaultSubobject<UWidgetComponent>(TEXT("GoalUI"));
+	GoalUI->SetupAttachment(RootComponent);
+	GoalUI->SetWidgetSpace(EWidgetSpace::Screen); // 画面に固定するなら
+	GoalUI->SetDrawSize(FVector2D(40, 40));
+	
 
 	// 初期状態で非表示にする場合はここで設定
 	SetActorHiddenInGame(false);

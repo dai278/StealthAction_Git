@@ -21,6 +21,9 @@ AInteract::AInteract()
 	//コリジョンコンポーネント生成
 	m_pCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("Collision"));
 	m_pCollision->SetupAttachment(m_bodyCollision);
+	// Overlap を発生させるために必要
+	m_pCollision->SetGenerateOverlapEvents(true);
+
 
 	Tags.Add(TEXT("Interact"));
 
@@ -33,9 +36,10 @@ AInteract::AInteract()
 	{
 		m_intractUI->SetupAttachment(RootComponent);
 		m_intractUI->SetWidgetSpace(EWidgetSpace::Screen); // 画面に固定するなら 
-		m_intractUI->SetDrawSize(FVector2D(200, 50));
+		m_intractUI->SetDrawSize(FVector2D(100, 100));
 		m_intractUI->SetupAttachment(m_bodyCollision);
 	}
+
 
 }
 
@@ -43,7 +47,13 @@ AInteract::AInteract()
 void AInteract::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//UIは初期は非表示
+	m_intractUI->SetVisibility(false);
 	
+	//コリジョンのオーバーラップイベント登録
+	m_pCollision->OnComponentBeginOverlap.AddDynamic(this, &AInteract::OnOverlapBegin);
+	m_pCollision->OnComponentEndOverlap.AddDynamic(this, &AInteract::OnOverlapEnd);
 }
 
 // Called every frame
@@ -53,3 +63,22 @@ void AInteract::Tick(float DeltaTime)
 
 }
 
+
+void AInteract::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult) 
+{
+	m_intractUI->SetVisibility(true);
+}
+
+
+void AInteract::OnOverlapEnd(UPrimitiveComponent* OverlappedComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex) {
+
+	m_intractUI->SetVisibility(false);
+}
