@@ -444,5 +444,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info")
 	FPlayerInfo m_playerInfo; //プレイヤー情報構造体
 
+	bool bIsCameraForced;//カメラ強制移動中か
 
 };

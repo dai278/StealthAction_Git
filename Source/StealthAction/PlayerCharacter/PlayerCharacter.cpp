@@ -683,7 +683,7 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 
 	//Ž‹–ìŠp
 	float newFieldOfView = m_pCamera->FieldOfView;
-	newFieldOfView = FMath::FInterpTo(
+		newFieldOfView = FMath::FInterpTo(
 		newFieldOfView,
 		m_cameraInitPos[(int)m_cameraStatus].fieldOfView,
 		_deltaTime,
