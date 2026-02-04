@@ -76,6 +76,7 @@ AEnemyBase::AEnemyBase()
 	, m_returnTime(0.0)
 	, m_hearingTime(0.0)
 	, m_discoveryTime(0.0)
+	, m_attackTime(0.0)
 	, m_patrolTime_Limit(2.0)
 	, m_patrol_TurningTime_Limit(0.5f)
 	, m_patrol_TurningCheckingTime_Limit(1.5f)
@@ -94,6 +95,7 @@ AEnemyBase::AEnemyBase()
 	, m_hearingTime_Limit(2.0)
 	, m_attackingTime_Limit(0.2)
 	, m_discoveryTime_Limit(2.0)
+	, m_attackTime_Limit(5.)
 	, m_chaseSpeed_Slow(200.0f)
 	, m_chaseSpeed_Normal(300.0f)
 	, m_chaseSpeed_Fast(400.0f)
@@ -149,7 +151,6 @@ AEnemyBase::AEnemyBase()
 	, m_routeNum(0)
 	, m_routeCounter(0)
 	, m_deadCheck(false)
-	, m_allTime(0)
 	, IsUseVisiblity(true)
 	, IsUseHearing(true)
 {
@@ -488,7 +489,11 @@ void AEnemyBase::StartStateValues(float _deltaTime)
 	m_playerPos = m_pPlayerChara->GetActorLocation();		//プレイヤーの座標
 
 	m_deltaTime = _deltaTime;
-	m_allTime += _deltaTime;
+	if (m_attackTime < 10)
+	{
+		m_attackTime += _deltaTime;
+
+	}
 
 	//プレイヤーが影に入っているか？
 	m_playerShadowCheck = m_pPlayerChara->IsInShadow();
@@ -1639,8 +1644,13 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 				{
 					if (m_sword)
 					{
-						//攻撃処理
-						UpdateAttack(_deltaTime);
+						if (m_attackTime > m_attackTime_Limit)
+						{
+							//攻撃処理
+							UpdateAttack(_deltaTime);
+							
+							m_attackTime = 0;
+						}
 					}
 				}
 			}
@@ -2080,7 +2090,7 @@ void AEnemyBase::UpdateAttack(float _deltaTime)
 	//武器を持っていたら
 	if (m_pEnemy_Weapon)
 	{
-		m_pEnemy_Weapon->BulletFire(m_allTime, this);
+		m_pEnemy_Weapon->BulletFire(m_attackTime, this);
 	}
 	else if (m_sword)
 	{

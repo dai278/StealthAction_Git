@@ -277,6 +277,8 @@ public:
 		double m_attackingTime_Limit;			//攻撃時間制限
 		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_discoveryTime_Limit;			//発見時間制限
+		UPROPERTY(EditAnywhere, Category = "Time")
+		double m_attackTime_Limit;			//攻撃時間制限
 
 
 		double m_patrolTime;				//巡回時間
@@ -296,6 +298,7 @@ public:
 		double m_hearingTime;				//聴覚時間
 		double m_attackingTime;				//攻撃時間
 		double m_discoveryTime;				//発見時間
+		double m_attackTime;				//攻撃時間
 
 		//移動関連
 		UPROPERTY(EditAnywhere, Category = "Chase")
@@ -398,7 +401,6 @@ public:
 		FVector m_enemyDirection_Return;		//エネミーの元居たの向き
 
 		float m_deltaTime;
-		float m_allTime;
 
 		//Rayが無視するオブジェクト
 		FCollisionQueryParams DefaultCollisionParams;
