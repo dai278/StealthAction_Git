@@ -6,9 +6,12 @@
 //インクルード
 #include "CoreMinimal.h"			//ItemBaseクラス継承
 #include "ItemBase.h"
+#include "Camera/CameraInfo.h"
 #include "ItemKey.generated.h"
 
 class AGoalActor;
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FObtainedDynamicDelegate, int32, Value);
 
 UCLASS()
 class STEALTHACTION_API AItemKey : public AItemBase
@@ -30,4 +33,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Goal")
 	FVector GoalSpawnLocation;
+
+
 };

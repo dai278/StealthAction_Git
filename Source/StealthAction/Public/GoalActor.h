@@ -9,6 +9,8 @@
 #include "GameFramework/Actor.h"
 #include "GoalActor.generated.h"
 
+//
+
 //‘O•ûéŒ¾
 class UBoxComponent;
 class UStaticMeshComponent;

@@ -13,6 +13,7 @@
 #include "GameFramework/Character.h"
 #include "GameInstance/PlayDataInfo.h"//プレイデータ構造体が複数あるものPlayerInfoのみ使用
 #include "Damage/IDamage.h"
+#include "Camera/CameraInfo.h"
 
 #include "PlayerCharacter.generated.h"
 
@@ -73,13 +74,13 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerConditionMet, EPlayerStatus
 UCLASS()
 class STEALTHACTION_API APlayerCharacter : public ACharacter,public IDamageable
 {
-	//カメラ視点設定構造体
-	struct FCameraViewSetting
-	{
-		FRotator rotator;//回転
-		float fieldOfView;//視野角
-		float springArmLength;//長さ
-	};
+	////カメラ視点設定構造体
+	//struct FCameraViewSetting
+	//{
+	//	FRotator rotator;//回転
+	//	float fieldOfView;//視野角
+	//	float springArmLength;//長さ
+	//};
 
 	GENERATED_BODY()
 

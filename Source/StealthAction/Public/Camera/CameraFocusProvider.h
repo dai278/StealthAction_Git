@@ -24,6 +24,10 @@ struct FCameraFocusData
     // ‹­§“I‚É‰ñ“]‚³‚¹‚é‚©
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool bForceRotation = false;
+
+    //@ˆê’â~‚·‚é‚©
+    UPROPERTY(EditAnywhere,BlueprintReadWrite)
+    bool bPouse;
 };
 
 
