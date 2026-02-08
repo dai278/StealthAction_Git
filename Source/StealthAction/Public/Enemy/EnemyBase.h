@@ -298,12 +298,23 @@ public:
 		double m_attackTime;				//攻撃時間
 
 		//移動関連
-		UPROPERTY(EditAnywhere, Category = "Chase")
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chase")
 		float m_chaseSpeed_Slow;			//追跡速度(遅い)
-		UPROPERTY(EditAnywhere, Category = "Chase")
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chase")
 		float m_chaseSpeed_Normal;			//追跡速度(普通)
-		UPROPERTY(EditAnywhere, Category = "Chase")
+		UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Chase")
 		float m_chaseSpeed_Fast;			//追跡速度(早い)
+
+		UFUNCTION(BlueprintPure, Category = "Chase")
+		float GetchaseSpeed_Slow()const { return m_chaseSpeed_Slow; }
+		UFUNCTION(BlueprintPure, Category = "Chase")
+		float GetchaseSpeed_Normal()const { return m_chaseSpeed_Normal; }
+		UFUNCTION(BlueprintPure, Category = "Chase")
+		float GetchaseSpeed_Fast()const { return m_chaseSpeed_Fast; }
+
+		UFUNCTION(BlueprintPure, Category = "Chase")
+		float GetCurrentchaseSpeed()const { return m_currentChaseSpeed; }
+
 
 		UPROPERTY(EditAnywhere, Category = "Chase")
 		float m_chaseRotSpeed;		//追跡中キャラ回転速度
@@ -316,6 +327,7 @@ public:
 		UPROPERTY(EditAnywhere, Category = "Chase")
 		double m_attackDistance;	//攻撃範囲
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float m_currentChaseSpeed;			//現在の追跡速度
 
 		bool m_moveStop_Nav;		//追跡停止フラグ（Nav）
@@ -337,6 +349,12 @@ public:
 		UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool m_attackCheck;
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool m_stopCheck;
+
+		UFUNCTION(BlueprintPure, Category = "Chase")
+		bool GetStopCheck()const { return m_stopCheck; }
+
 		bool m_searchStopper;		//視界判定を停止するか
 		bool m_hearingStopper;		//聴覚判定を停止するか
 
@@ -357,6 +375,8 @@ public:
 
 		//座標関連
 		FVector m_enemyPos;				//エネミーの座標
+		FVector m_enemyPos_Keeper;		//エネミーの座標
+
 		FVector m_enemyForward;			//エネミーの正面ベクトル
 		FVector m_enemyRight;			//エネミーの右ベクトル
 		FVector m_playerPos;				//プレイヤーの座標

@@ -95,6 +95,7 @@ AEnemyBase::AEnemyBase()
 	, m_hearingTime_Limit(2.0)
 	, m_discoveryTime_Limit(2.0)
 	, m_attackTime_Limit(5.)
+	, m_currentChaseSpeed(0.)
 	, m_chaseSpeed_Slow(200.0f)
 	, m_chaseSpeed_Normal(300.0f)
 	, m_chaseSpeed_Fast(400.0f)
@@ -135,6 +136,8 @@ AEnemyBase::AEnemyBase()
 	, m_noiseVolume(0)
 	, m_noiseVolume_keeper(0)
 	, m_noiseLevel(0)
+	, m_enemyPos(0., 0., 0.)
+	, m_enemyPos_Keeper(0., 0., 0.)
 	, m_enemyPos_Forward_Miss(0., 0., 0.)
 	, m_enemyPos_Left_Miss(0., 0., 0.)
 	, m_enemyPos_Right_Miss(0., 0., 0.)
@@ -153,6 +156,7 @@ AEnemyBase::AEnemyBase()
 	, m_deadCheck(false)
 	, IsUseVisiblity(true)
 	, IsUseHearing(true)
+	, m_stopCheck(false)
 {
 	// 毎フレーム、このクラスのTick()を呼ぶかどうかを決めるフラグ
 	PrimaryActorTick.bCanEverTick = true;
@@ -383,6 +387,8 @@ void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 void AEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	UE_LOG(LogTemp, Warning, TEXT("	m_currentChaseSpeed= %d"), m_stopCheck);
 
 	// ===== 検証用：Kキーで強制死亡 =====
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
@@ -1052,6 +1058,7 @@ void AEnemyBase::ResetStateValues(float _deltaTime)
 		m_noise_Pos_keeper = FVector(-5000., -5000., -5000.);//物音座標リセット
 		m_notFoundNoiseTime = 0;
 	}
+
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -1113,6 +1120,21 @@ void AEnemyBase::UpdateStatus(float _deltaTime)
 	{
 		m_isCallOnNoise_Fleam = false;
 	}
+
+	double distance = (m_enemyPos_Keeper - m_enemyPos).Length();
+
+	if (distance <1)
+	{
+		m_stopCheck = true;
+
+	}
+	else
+	{
+		m_stopCheck = false;
+
+	}
+	m_enemyPos_Keeper = m_enemyPos;
+
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -1629,6 +1651,8 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 						{
 							//攻撃処理
 							UpdateAttack(_deltaTime);
+							m_attackTime = 0;
+
 							m_moveStop_Nav = true;		//停止（Nav）
 							UpdateMove_Nav(_deltaTime);
 							//視点移動処理
@@ -1984,12 +2008,12 @@ void AEnemyBase::UpdateViewMove(float _deltaTime)
 void AEnemyBase::UpdateMove(float _deltaTime)
 {
 	double distance = (m_playerPos - m_enemyPos).Length();			//プレイヤーとの距離を測る(Vectorの長さ）
-	if (distance > m_stopDistance_2D)
+	if (distance < m_stopDistance_2D)
 	{
-		m_currentChaseSpeed = 0;	//追跡速度の変更
-
 		return;
 	}
+
+
 	if (m_visionCheck || m_battleCheck || m_cautionCheck)
 	{
 		//移動位置決定
@@ -2040,15 +2064,15 @@ void AEnemyBase::UpdateMove_Nav(float _deltaTime)
 	}
 
 	//移動停止
-	if (m_moveStop_Nav|| distance > m_stopDistance_2D)
+	if (m_moveStop_Nav|| distance < m_stopDistance_2D)
 	{
-		m_currentChaseSpeed = 0;	//追跡速度の変更
 
 		AIMove->StopMovement();
 
 		m_moveStop_Nav = false;
 		return;
 	}
+
 
 	//移動
 	//視界の場合

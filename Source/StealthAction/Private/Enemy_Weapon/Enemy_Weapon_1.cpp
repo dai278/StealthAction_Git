@@ -55,18 +55,14 @@ void AEnemy_Weapon_1::BulletFire(float Time ,AActor* Caller)
     {
         return;
     }
-    float IntervalTime = 0.;
 
-    //DeltaTime代わり（このクラスにはDeltaTimeがないため）
-    IntervalTime = Time - m_recordTime;
-
-    m_shotTime += IntervalTime;
+    m_shotTime += Time;
 
     //弾がなくなったらいロード
     if (m_maxAmo <= m_usedAmo)
     {
         //リロード時間カウント
-        m_reloadTime += IntervalTime;
+        m_reloadTime += Time;
         //リロードが完了したら
         if (m_reloadTime > m_reloadTime_Limit)
         {
@@ -88,7 +84,4 @@ void AEnemy_Weapon_1::BulletFire(float Time ,AActor* Caller)
         //発射タイミングリセット
         m_shotTime = 0;
     }
-
-    //時間の更新
-    m_recordTime = Time;
 }
