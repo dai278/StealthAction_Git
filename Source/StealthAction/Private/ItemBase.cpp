@@ -27,6 +27,9 @@ AItemBase::AItemBase()
 
 	// Meshは当たり判定しない
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// カメラフォーカス用コンポーネント生成
+	FocusProviderComp = CreateDefaultSubobject<UCameraFocusProviderComponent>(TEXT("FocusProviderComp"));
 }
 
 //ゲームスタート時、または生成時に呼ばれる処理
@@ -59,6 +62,28 @@ void AItemBase::OnOverlapBegin(
 }
 
 void AItemBase::HandleOverlap(AActor* OtherActor)
+
 {
-	// 基本アイテムは何もしない
+}
+
+// カメラフォーカス開始処理
+void AItemBase::CameraFocusStart(AActor* OtherActor)
+{
+	if (!OtherActor || !OtherActor->ActorHasTag(TEXT("Player"))) { return; }
+	
+	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+	
+	FCameraFocusData FocusData = FocusProviderComp->GetCameraFocusData();
+	
+	if (!FocusData.FocusCamera) { return; }
+	
+	Player->StartCameraFocus(this, FocusData.BlendTime);
+}
+
+//---- カメラフォーカス用の情報を返す -----
+FCameraFocusData AItemBase::GetCameraFocusData_Implementation() const
+{
+	
+	return FocusProviderComp ? FocusProviderComp->GetCameraFocusData() : FCameraFocusData{};
+	
 }

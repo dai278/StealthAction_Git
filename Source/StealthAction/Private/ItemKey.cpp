@@ -48,6 +48,10 @@ void AItemKey::HandleOverlap(AActor* OtherActor)
 
                 UE_LOG(LogTemp, Warning, TEXT("[]Goal is now visible"));
             }
+
+			//カメラフォーカス開始
+			CameraFocusStart(OtherActor);
+            //
         }
 		else
 		{

@@ -11,7 +11,6 @@
 
 class AGoalActor;
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FObtainedDynamicDelegate, int32, Value);
 
 UCLASS()
 class STEALTHACTION_API AItemKey : public AItemBase
@@ -22,6 +21,15 @@ class STEALTHACTION_API AItemKey : public AItemBase
 public:
 	//コンストラクタ
 	AItemKey();
+
+
+	//---- カメラフォーカス用の情報を返す -----
+	FCameraFocusData GetCameraFocusData_Implementation() const
+	{
+
+		return FocusProviderComp ? FocusProviderComp->GetCameraFocusData() : FCameraFocusData{};
+
+	}
 
 protected:
 	// オーバーラップ時

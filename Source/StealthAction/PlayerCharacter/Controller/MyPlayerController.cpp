@@ -177,6 +177,13 @@ void AMyPlayerController::BeginPlay()
 	UE_LOG(LogTemp, Warning, TEXT("PlayerIMC: %s"), PlayerIMC ? TEXT("OK") : TEXT("NULL"));
 	UE_LOG(LogTemp, Warning, TEXT("MenuIMC: %s"), MenuIMC ? TEXT("OK") : TEXT("NULL"));
 
+	// ポーズ中もTick可能にする設定
+	// 自作PlayerControllerのBeginPlay等で
+	bShouldPerformFullTickWhenPaused = true;
+
+	// 念のため：PC自体もポーズ中Tick可能に
+	SetTickableWhenPaused(true);
+
 }
 
 void AMyPlayerController::Tick(float DeltaSeconds)

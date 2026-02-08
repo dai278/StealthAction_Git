@@ -30,6 +30,7 @@ class UEnemyManager;//エネミーの基底クラスにする日髙変更
 class AEnemyBase;
 class UExtendedSpotLightManager;//拡張スポットライトマネージャーの前方宣言
 class USwordAttackComponent;//ソード攻撃コンポーネントの前方宣言
+class UCameraFocusDirectorComponent;//カメラフォーカスディレクターコンポーネントの前方宣言
 class AInteract;
 
 //プレイヤーのカメラ視点状態
@@ -188,7 +189,16 @@ private:
 	//攻撃終了コールバック
 	void OnAttackEnd();
 
+	//カメラフォーカス終了処理
+	void EndCameraFocus(const float& _blendTime);
+
 	public:
+
+	//カメラフォーカス開始処理
+	UFUNCTION( Category = "Camera")
+	void StartCameraFocus(AActor* const _cameraActor, float _blendTime);
+
+
 
 	//生きているか
 	UFUNCTION(BlueprintPure, Category = "Info")
@@ -386,6 +396,13 @@ private:
 	float m_attackCooldown;
 
 	bool m_bDash;
+
+
+	//カメラフォーカス用変数
+	AActor* m_pSaveCameraActor;//フォーカス前のカメラアクター保存用
+
+	UPROPERTY(EditAnywhere, Category = "CameraFocus")
+	UCameraFocusDirectorComponent* m_pCameraFocusDirector;//カメラフォーカスディレクターコンポーネント
 
 	//UPROPERTY(EditAnywhere, Category = "weapon");
 	//USwordAttackComponent* m_pSword;			//ソード攻撃コンポーネント

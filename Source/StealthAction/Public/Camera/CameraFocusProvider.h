@@ -4,22 +4,29 @@
 #include "UObject/Interface.h"
 #include "CameraFocusProvider.generated.h"
 
+
 USTRUCT(BlueprintType)
 struct FCameraFocusData
 {
     GENERATED_BODY()
 
-    // フォーカスする位置（Actorの位置＋オフセット用）
+ 
+    // ギミックごとに置くカメラ
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FVector FocusLocationOffset = FVector::ZeroVector;
+    TObjectPtr<class ACameraActor> FocusCamera = nullptr;
 
-    // フォーカスする回転（未指定ならカメラ側で計算）
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FRotator FocusRotation = FRotator::ZeroRotator;
 
     // 補間時間
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float BlendTime = 0.5f;
+    float BlendTime = 10.f;
+
+	// 戻るときの補間時間
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float BlendOutTime = 0.3f;
+
+	// 位置を強制的に合わせるか
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bForceLocation = false;
 
     // 強制的に回転させるか
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -27,8 +34,17 @@ struct FCameraFocusData
 
     //　一時停止するか
     UPROPERTY(EditAnywhere,BlueprintReadWrite)
-    bool bPouse;
+    bool bPause=false;
+
+    //ポーズ時間
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float PauseTime = 5.f;
+
+   
 };
+
+// 動的デリゲートの宣言例
+DECLARE_DYNAMIC_DELEGATE_OneParam(FObtainedDynamicDelegate, FCameraFocusData, _cameraFocusData);
 
 
 UINTERFACE(BlueprintType)
@@ -46,4 +62,5 @@ public:
     // カメラフォーカス用の情報を返す
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Camera")
     FCameraFocusData GetCameraFocusData() const;
+
 };

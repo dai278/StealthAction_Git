@@ -31,6 +31,7 @@
 #include "GameInstance/PlayDataGameInstanceSubsystem.h"
 #include "Checkpoint/CheckpointManager.h"
 #include "Interact/Interact.h"
+#include "Camera/CameraFocusDirectorComponent.h"
 
 
 
@@ -153,6 +154,8 @@ APlayerCharacter::APlayerCharacter()
 		m_pCamera->bUsePawnControlRotation = false;
 	}
 
+	//カメラフォーカスディレクターコンポーネント生成
+	m_pCameraFocusDirector = CreateDefaultSubobject<UCameraFocusDirectorComponent>(TEXT("CameraFocusDirector"));
 }
 
 
@@ -722,6 +725,34 @@ void APlayerCharacter::OnAttackEnd()
 	m_bCanAttack = false;
 	m_bCanControl = true;
 	m_attackCount = 0.f;
+}
+
+
+//-----------------------------------------------------
+//カメラフォーカス処理
+//-----------------------------------------------------
+void APlayerCharacter::StartCameraFocus(AActor* const _cameraActor, float _blendTime)
+{
+	if (!Controller) { return; }
+	APlayerController* PC = Cast<APlayerController>(Controller);
+	if (!PC) { return; }
+
+	m_pSaveCameraActor = PC->GetViewTarget();
+	
+	bool isStat;
+	m_pCameraFocusDirector->StartFocusByProviderActor(_cameraActor,isStat);
+
+}
+
+//------------------------------------------------------
+//カメラフォーカス終了処理
+//------------------------------------------------------
+void APlayerCharacter::EndCameraFocus(const float& _blendTime)
+{
+	if (!Controller) { return; }
+	APlayerController* PC = Cast<APlayerController>(Controller);
+	if (!PC) { return; }
+	PC->SetViewTargetWithBlend(m_pSaveCameraActor, _blendTime);
 }
 
 

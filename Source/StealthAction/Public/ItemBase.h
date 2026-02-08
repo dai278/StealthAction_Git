@@ -6,6 +6,7 @@
 //インクルード
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Camera/CameraFocusProviderComponent.h"
 #include "ItemBase.generated.h"
 
 //前方宣言
@@ -13,7 +14,7 @@ class UBoxComponent;
 class UStaticMeshComponent;
 
 UCLASS()
-class STEALTHACTION_API AItemBase : public AActor
+class STEALTHACTION_API AItemBase : public AActor, public ICameraFocusProvider
 {
 	//UEのオブジェクトクラスで必ず先頭に書くマクロ
 	GENERATED_BODY()
@@ -39,10 +40,18 @@ protected:
 
 	virtual void HandleOverlap(AActor* OtherActor);
 
+	virtual void CameraFocusStart(AActor* OtherActor);
+
 protected:
 	UPROPERTY(VisibleAnywhere)
 	UBoxComponent* Collision;
 
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* Mesh;
+
+	// カメラフォーカス用コンポーネント
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<UCameraFocusProviderComponent> FocusProviderComp;
+
+	virtual FCameraFocusData GetCameraFocusData_Implementation() const override;
 };
