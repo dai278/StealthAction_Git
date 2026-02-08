@@ -440,6 +440,7 @@ private:
 	FVector2D m_charaMoveInput;						//キャラ移動入力量
 	FVector2D m_cameraRotateInput;					//カメラ回転量
 
+	UPROPERTY(EditAnywhere, Category = "Camera")
 	FCameraViewSetting m_cameraInitPos[(int)ECameraStatus::Num];	//各視点変更時最初の視点
 
 	TArray <AActor*> m_hitActors;//衝突対処のアドレス
