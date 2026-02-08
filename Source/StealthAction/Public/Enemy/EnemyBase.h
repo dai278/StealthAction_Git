@@ -274,8 +274,6 @@ public:
 		double m_hearingTime_Limit;			//’®ŠoŠÔ§ŒÀ
 
 		UPROPERTY(EditAnywhere, Category = "Time")
-		double m_attackingTime_Limit;			//UŒ‚ŠÔ§ŒÀ
-		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_discoveryTime_Limit;			//”­Œ©ŠÔ§ŒÀ
 		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_attackTime_Limit;			//UŒ‚ŠÔ§ŒÀ
@@ -296,7 +294,6 @@ public:
 		double m_missTime;					//¸çHŠÔ
 		double m_returnTime;				//‹AŠÒŠÔ
 		double m_hearingTime;				//’®ŠoŠÔ
-		double m_attackingTime;				//UŒ‚ŠÔ
 		double m_discoveryTime;				//”­Œ©ŠÔ
 		double m_attackTime;				//UŒ‚ŠÔ
 
@@ -336,6 +333,9 @@ public:
 		bool m_battleNoiseCheck;	//•¨‰¹í“¬ó‘Ô‚©
 		bool m_missCheck;			//¸çHó‘Ô‚©
 		bool m_returnCheck;			//‹AŠÒó‘Ô‚©
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool m_attackCheck;
 
 		bool m_searchStopper;		//‹ŠE”»’è‚ğ’â~‚·‚é‚©
 		bool m_hearingStopper;		//’®Šo”»’è‚ğ’â~‚·‚é‚©

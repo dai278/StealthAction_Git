@@ -93,7 +93,6 @@ AEnemyBase::AEnemyBase()
 	, m_missTime_Limit(1.0)
 	, m_returnTime_Limit(2.0)
 	, m_hearingTime_Limit(2.0)
-	, m_attackingTime_Limit(0.2)
 	, m_discoveryTime_Limit(2.0)
 	, m_attackTime_Limit(5.)
 	, m_chaseSpeed_Slow(200.0f)
@@ -120,6 +119,7 @@ AEnemyBase::AEnemyBase()
 	, m_missCheck(false)
 	, m_returnCheck(false)
 	, m_patrol_TurningCheck(false)
+	, m_attackCheck(false)
 	, m_isCallOnNoise(false)
 	, m_isCallOnNoise_Fleam(false)
 	, m_patrol_TurnDirection(0)
@@ -1983,6 +1983,13 @@ void AEnemyBase::UpdateViewMove(float _deltaTime)
 //------------------------------------------------------------------------------------------------------------
 void AEnemyBase::UpdateMove(float _deltaTime)
 {
+	double distance = (m_playerPos - m_enemyPos).Length();			//プレイヤーとの距離を測る(Vectorの長さ）
+	if (distance > m_stopDistance_2D)
+	{
+		m_currentChaseSpeed = 0;	//追跡速度の変更
+
+		return;
+	}
 	if (m_visionCheck || m_battleCheck || m_cautionCheck)
 	{
 		//移動位置決定
@@ -2025,6 +2032,7 @@ void AEnemyBase::UpdateMove(float _deltaTime)
 void AEnemyBase::UpdateMove_Nav(float _deltaTime)
 {
 	AAIController* AIMove = Cast<AAIController>(GetController());
+	double distance = (m_playerPos - m_enemyPos).Length();			//プレイヤーとの距離を測る(Vectorの長さ）
 
 	if (!AIMove)
 	{
@@ -2032,9 +2040,12 @@ void AEnemyBase::UpdateMove_Nav(float _deltaTime)
 	}
 
 	//移動停止
-	if (m_moveStop_Nav)
+	if (m_moveStop_Nav|| distance > m_stopDistance_2D)
 	{
+		m_currentChaseSpeed = 0;	//追跡速度の変更
+
 		AIMove->StopMovement();
+
 		m_moveStop_Nav = false;
 		return;
 	}
@@ -2084,9 +2095,8 @@ void AEnemyBase::UpdateAttack(float _deltaTime)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Attack"));
 
-	//攻撃処理
-	m_attackingTime += _deltaTime;
 
+	m_attackCheck = true;
 	//武器を持っていたら
 	if (m_pEnemy_Weapon)
 	{
