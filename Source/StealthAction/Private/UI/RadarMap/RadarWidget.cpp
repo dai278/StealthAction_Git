@@ -2,6 +2,8 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "Enemy/EnemyBase.h"
+#include "ItemBase.h"
+#include "GoalActor.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 
 #include "SlateCore.h"
@@ -137,6 +139,97 @@ int32 URadarWidget::NativePaint(
 			FLinearColor::Red
 		);
 	}
+
+//===============================
+// アイテム表示（緑）
+//===============================
+	TArray<AActor*> Items;
+	UGameplayStatics::GetAllActorsOfClass(
+		GetWorld(),
+		AItemBase::StaticClass(),
+		Items
+	);
+
+	for (AActor* Item : Items)
+	{
+		if (!Item) continue;
+
+		FVector Delta = Item->GetActorLocation() - PlayerLocation;
+		Delta.Z = 0.f;
+
+		const float InitialOffsetYaw = 270.f;
+		FVector Rotated = FRotator(0.f, InitialOffsetYaw, 0.f).RotateVector(Delta);
+
+		if (Rotated.Size() > RadarRange) continue;
+
+		FVector2D RadarPos;
+		RadarPos.X = (Rotated.Y / RadarRange) * RadarRadius;
+		RadarPos.Y = (-Rotated.X / RadarRange) * RadarRadius;
+
+		if (RadarPos.Size() > RadarRadius) continue;
+
+		FVector2D DrawPos = RadarCenter + RadarPos;
+
+		FSlateDrawElement::MakeBox(
+			OutDrawElements,
+			LayerId++,
+			AllottedGeometry.ToPaintGeometry(
+				DrawPos - FVector2D(4.f, 4.f),
+				FVector2D(8.f, 8.f)
+			),
+			FCoreStyle::Get().GetBrush("WhiteBrush"),
+			ESlateDrawEffect::None,
+			FLinearColor::Green
+		);
+	}
+
+
+//===============================
+// ゴール表示（黄色）
+//===============================
+	TArray<AActor*> Goals;
+	UGameplayStatics::GetAllActorsOfClass(
+		GetWorld(),
+		AGoalActor::StaticClass(),
+		Goals
+	);
+
+	for (AActor* Goal : Goals)
+	{
+		if (!Goal) continue;
+
+		// 非表示なら描かない
+		if (Goal->IsHidden()) continue;
+
+		FVector Delta = Goal->GetActorLocation() - PlayerLocation;
+		Delta.Z = 0.f;
+
+		const float InitialOffsetYaw = 270.f;
+		FVector Rotated = FRotator(0.f, InitialOffsetYaw, 0.f).RotateVector(Delta);
+
+		if (Rotated.Size() > RadarRange) continue;
+
+		FVector2D RadarPos;
+		RadarPos.X = (Rotated.Y / RadarRange) * RadarRadius;
+		RadarPos.Y = (-Rotated.X / RadarRange) * RadarRadius;
+
+		if (RadarPos.Size() > RadarRadius) continue;
+
+		FVector2D DrawPos = RadarCenter + RadarPos;
+
+		FSlateDrawElement::MakeBox(
+			OutDrawElements,
+			LayerId++,
+			AllottedGeometry.ToPaintGeometry(
+				DrawPos - FVector2D(5.f, 5.f),
+				FVector2D(10.f, 10.f)
+			),
+			FCoreStyle::Get().GetBrush("WhiteBrush"),
+			ESlateDrawEffect::None,
+			FLinearColor::Yellow
+		);
+	}
+
 
 	//===============================
 	// プレイヤー△（中央固定・移動方向に回転）
