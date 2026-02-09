@@ -388,7 +388,8 @@ void AEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UE_LOG(LogTemp, Warning, TEXT("	m_currentChaseSpeed= %d"), m_stopCheck);
+	//UE_LOG(LogTemp, Warning, TEXT("m_currentChaseSpeed= %d"), m_stopCheck);
+	 UE_LOG(LogTemp, Warning, TEXT("m_attackCheck= %d"), m_attackCheck);
 
 	// ===== 検証用：Kキーで強制死亡 =====
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
