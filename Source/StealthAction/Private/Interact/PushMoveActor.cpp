@@ -21,6 +21,7 @@ APushMoveActor::APushMoveActor()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	SetActorTickEnabled(false);
+
 }
 
 
