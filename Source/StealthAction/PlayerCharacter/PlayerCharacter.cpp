@@ -645,6 +645,27 @@ void APlayerCharacter::UpdateInvincibleTime(float _deltaTime)
 	}
 }
 
+//--------------------------------------------------------
+//インタラクトの更新処理
+//--------------------------------------------------------
+void APlayerCharacter::UpdateInteract(float _deltaTime)
+{
+	if (m_status != EPlayerStatus::Interact) { return; }
+	//現在座標からインタラクトポジションまでのベクトル
+	FVector vec = m_interactPos -GetActorLocation();
+	
+	vec = vec.GetSafeNormal();
+	vec.Z = 0;
+
+	//GetCharacterMovementComponent()->MaxWalkSpeed*=0.7f;
+
+	AddMovementInput(vec, 1.f);
+
+}
+
+
+
+
 //---------------------------------------------------------
 //ジャンプ中の更新処理
 //---------------------------------------------------------
@@ -1104,12 +1125,17 @@ void APlayerCharacter::Enhanced_InShadow(const FInputActionValue& Value)
 //------------------------------------------------------
 void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 {
+	//プレイヤーがコントロールできなければ何もしない
+	if (!m_bCanControl) { return; }
 	UE_LOG(LogTemp, Display, TEXT("Input Interact"));
 	//インタラクト可能オブジェクトに触れていなければ何もしない
 	if (!m_bHitIntteractObject) { return; }
 	if (m_hitInteractOb)
 	{
-		m_hitInteractOb->Interact((AActor*)this);
+		m_interactPos = m_hitInteractOb->GetInteractPosition();
+		m_status = EPlayerStatus::Interact;
+
+		//m_hitInteractOb->Interact((AActor*)this);
 	}
 }
 

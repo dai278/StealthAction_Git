@@ -30,6 +30,9 @@ public:
     //派生先でインタラクトを上書き
     virtual void Interact(AActor* _interactOwner) {};
 
+    //インタラクトするポジションを取得
+    virtual FVector GetInteractPosition() { return FVector::ZeroVector; }
+
 public:
     //インデックス取得
     virtual int32 GetIndex()const { return m_index; }
@@ -45,6 +48,7 @@ protected:
     
 
 
+    
 protected:
     UPROPERTY(EditAnywhere, Category = "Collision")
     UBoxComponent* m_pCollision;			//コリジョンコンポネント
@@ -59,4 +63,8 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "UI")
     UWidgetComponent* m_intractUI;
+
+    UPROPERTY(EditAnywhere, Category = "Interact")
+    TArray<FVector> InteractPos;
+
 };

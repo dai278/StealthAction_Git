@@ -62,6 +62,8 @@ enum class EPlayerStatus :uint8
 	Damage       UMETA(DisplayName = "Damage"),
 	Dead         UMETA(DisplayName = "Dead"),
 	InShadow     UMETA(DisplayName = "InShadow"),
+	Interact     UMETA(DisplayName = "Interact"),
+
 };
 
 
@@ -163,6 +165,9 @@ private:
 
 	//無敵時間の更新処理
 	void UpdateInvincibleTime(float _deltaTime);
+
+	//インタラクトの更新処理
+	void UpdateInteract(float _deltaTime);
 
 	//影状態の更新処理
 	void UpdateShadow(float _deltaTime);
@@ -450,7 +455,11 @@ private:
 
 	//インタラクト可なオブジェクト操作範囲内か
 	bool m_bHitIntteractObject;
+	//インタラクトするオブジェクト
 	AInteract* m_hitInteractOb;
+	//インタラクトのする場所
+	FVector m_interactPos;
+
 
 	//日髙変更点
 	UEnemyManager* m_pEnemyManager;//エネミーマネージャー毎フレーム検索は重いので
