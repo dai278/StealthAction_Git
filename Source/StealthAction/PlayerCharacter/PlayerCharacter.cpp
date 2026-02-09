@@ -503,13 +503,6 @@ void APlayerCharacter::UpdateDamaged()
 	//無敵時間タイマーはダメージ処理時起動するため使用
 	if (m_invincibleTimer > m_damageTime)
 	{
-		UCapsuleComponent* Capsule = GetCapsuleComponent();
-
-		// Enemy だけ無視
-		Capsule->SetCollisionResponseToChannel(
-			ECC_GameTraceChannel2, // Enemy 用チャンネル
-			ECR_Block
-		);
 		ChangePlayerStatus(EPlayerStatus::Idle);
 		m_knockBackVelocity = FVector::ZeroVector;
 		m_bCanControl = true;
@@ -639,6 +632,15 @@ void APlayerCharacter::UpdateInvincibleTime(float _deltaTime)
 	{
 		m_bInvincible = false;
 		m_invincibleTimer = 0.f;
+
+		UCapsuleComponent* Capsule = GetCapsuleComponent();
+
+		// Enemy だけ無視
+		Capsule->SetCollisionResponseToChannel(
+			ECC_GameTraceChannel2, // Enemy 用チャンネル
+			ECR_Block
+		);
+
 	}
 }
 
@@ -785,7 +787,6 @@ void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakK
 	//ダメージ処理
 	//UE_LOG(LogTemp, Log, TEXT("Player Damaged : %d"), _damage);
 	UE_LOG(LogTemp, Display, TEXT("hp："), m_playerInfo.hp);
-
 	//入力制御
 	m_bCanControl = false;
 	//ダメージ

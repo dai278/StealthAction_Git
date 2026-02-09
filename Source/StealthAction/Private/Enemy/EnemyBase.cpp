@@ -2190,6 +2190,7 @@ void AEnemyBase::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UP
 //------------------------------------------------------------------------------------------------------------
 void AEnemyBase::OnDamage(int32 Damage, FVector KnockBackValue, bool _bSneakKill)
 {
+
 	//体力減少
 	//デバック用に死亡
 	m_deadCheck = false;
