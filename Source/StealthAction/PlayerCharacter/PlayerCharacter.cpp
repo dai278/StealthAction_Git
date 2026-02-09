@@ -92,6 +92,7 @@ APlayerCharacter::APlayerCharacter()
 	, m_bDash(false)
 	, m_bSneakKill(false)
 	, m_bJumping(false)
+	, m_dashStaminaConsumptionMagnification(1.f)
 
 
 {
@@ -577,7 +578,7 @@ void APlayerCharacter::StaminaConsumption(float _deltaTime, bool& _isOver)
 		return;
 	}
 	//スタミナ消費
-	m_staminaTimer += _deltaTime;
+	m_staminaTimer += _deltaTime*(( m_bDash)? m_dashStaminaConsumptionMagnification :1 );
 
 
 	if (m_staminaTimer > m_maxStamina)
@@ -741,6 +742,7 @@ void APlayerCharacter::StartCameraFocus(AActor* const _cameraActor, float _blend
 
 	m_pSaveCameraActor = PC->GetViewTarget();
 	
+	m_bCanControl = false;
 	bool isStat;
 	m_pCameraFocusDirector->StartFocusByProviderActor(_cameraActor,isStat);
 
@@ -755,6 +757,7 @@ void APlayerCharacter::EndCameraFocus(const float& _blendTime)
 	APlayerController* PC = Cast<APlayerController>(Controller);
 	if (!PC) { return; }
 	PC->SetViewTargetWithBlend(m_pSaveCameraActor, _blendTime);
+	m_bCanControl = true;
 }
 
 
@@ -887,6 +890,7 @@ FPlayerInfo APlayerCharacter::GetPlayerInfo()
 //------------------------------------------------------
 void APlayerCharacter::Enhanced_Move(const FInputActionValue& Value)
 {
+	if (!m_bCanControl) { return; }
 	//受け取る型にキャスト？指定して代入
 	m_charaMoveInput = Value.Get<FVector2D>();
 	//スティックの問題なのか、UE側の問題なのかわからんが、入力なくても0.01位の値が入っちゃてるので補正
@@ -907,6 +911,7 @@ void APlayerCharacter::Enhanced_Move(const FInputActionValue& Value)
 //------------------------------------------------------
 void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
 {
+	if (!m_bCanControl) { return; }
 	m_bDash = Value.Get<bool>();
 	if (m_bIsCrouch || m_status == EPlayerStatus::InShadow)
 	{ 
@@ -958,6 +963,7 @@ void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
 //------------------------------------------------------
 void APlayerCharacter::Enhanced_MoveCrouch(const FInputActionValue& Value)
 {
+	if (!m_bCanControl) { return; }
 	if (m_status == EPlayerStatus::InShadow) {
 		return;
 	}

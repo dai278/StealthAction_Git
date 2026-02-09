@@ -6,6 +6,8 @@
 
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "StealthAction/PlayerCharacter/PlayerCharacter.h"
+
 // Sets default values for this component's properties
 UCameraFocusDirectorComponent::UCameraFocusDirectorComponent()
 {
@@ -44,7 +46,6 @@ void UCameraFocusDirectorComponent::StartFocusByProviderActor(AActor* ProviderAc
         return;
     }
 
-    // š‚±‚ê‚ª³‰ðFUInterface‘¤‚ÌExecute‚ðŽg‚¤
     const FCameraFocusData Data = ICameraFocusProvider::Execute_GetCameraFocusData(ProviderActor);
 
     if (!Data.FocusCamera)
@@ -124,7 +125,8 @@ void UCameraFocusDirectorComponent::RestoreInternal(bool bUnpause)
         AActor* ReturnTarget = SavedViewTarget.Get();
         if (ReturnTarget)
         {
-            PC->SetViewTargetWithBlend(ReturnTarget, SavedBlendOutTime);
+            APlayerCharacter* player =(APlayerCharacter*) PC->GetPawn();
+            player->EndCameraFocus(SavedBlendOutTime);
         }
     }
 

@@ -189,8 +189,6 @@ private:
 	//攻撃終了コールバック
 	void OnAttackEnd();
 
-	//カメラフォーカス終了処理
-	void EndCameraFocus(const float& _blendTime);
 
 	public:
 
@@ -198,6 +196,8 @@ private:
 	UFUNCTION( Category = "Camera")
 	void StartCameraFocus(AActor* const _cameraActor, float _blendTime);
 
+	//カメラフォーカス終了処理
+	void EndCameraFocus(const float& _blendTime);
 
 
 	//生きているか
@@ -351,6 +351,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Move")
 	float m_DashSpeed;								//ダッシュ移動量
 
+	UPROPERTY(EditAnywhere, Category = "Stamina")
+	float m_dashStaminaConsumptionMagnification;
+
 	UPROPERTY(EditAnywhere, Category = "Move")
 	float m_CrouchSpeed;								//しゃがみ移動量
 
@@ -372,10 +375,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Collision")
 	float m_capsuleHeight;							//カプセル高さ
 
-	UPROPERTY(EditAnywhere, Category = "Sahdow")
+	UPROPERTY(EditAnywhere, Category = "Stamina")
 	float m_maxStamina;
 
-	UPROPERTY(EditAnywhere, Category = "Sahdow")
+	UPROPERTY(EditAnywhere, Category = "Stamina")
 	float m_staminaTimer;
 
 	bool m_isStaminaDepleted;//スタミナ切れ状態か？
