@@ -63,6 +63,7 @@ enum class EPlayerStatus :uint8
 	Dead         UMETA(DisplayName = "Dead"),
 	InShadow     UMETA(DisplayName = "InShadow"),
 	Interact     UMETA(DisplayName = "Interact"),
+	InteractAnimation UMETA(DisplayName = "InteractAnimation"),
 
 };
 
@@ -226,6 +227,9 @@ private:
 
 	UFUNCTION(BlueprintPure, Category = "state")
 	bool IsInvincible() const { return m_bInvincible; }
+
+	UFUNCTION(BlueprintCallable,Category = "Animation")
+	void OnInteractAnimationEnd() {};
 
 	//HP取得
 	int32 GetPlayerHP() const { return m_playerInfo.hp; }
@@ -459,6 +463,8 @@ private:
 	AInteract* m_hitInteractOb;
 	//インタラクトのする場所
 	FVector m_interactPos;
+	//インタラクトタイマー
+	float m_interactTimer;
 
 
 	//日髙変更点

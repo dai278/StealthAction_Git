@@ -31,8 +31,7 @@ public:
     virtual void Interact(AActor* _interactOwner) {};
 
     //インタラクトするポジションを取得
-    virtual FVector GetInteractPosition() { return FVector::ZeroVector; }
-
+    virtual FVector GetInteractPosition(const AActor* _actor = nullptr);
 public:
     //インデックス取得
     virtual int32 GetIndex()const { return m_index; }

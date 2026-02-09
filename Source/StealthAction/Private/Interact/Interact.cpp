@@ -40,7 +40,7 @@ AInteract::AInteract()
 		m_intractUI->SetupAttachment(m_bodyCollision);
 	}
 
-
+	InteractPos.Add(FVector::ZeroVector);
 }
 
 // Called when the game starts or when spawned
@@ -54,6 +54,8 @@ void AInteract::BeginPlay()
 	//コリジョンのオーバーラップイベント登録
 	m_pCollision->OnComponentBeginOverlap.AddDynamic(this, &AInteract::OnOverlapBegin);
 	m_pCollision->OnComponentEndOverlap.AddDynamic(this, &AInteract::OnOverlapEnd);
+
+
 }
 
 // Called every frame
@@ -61,6 +63,19 @@ void AInteract::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+
+//-----------------------------------------------------
+//インタラクト位置取得
+//-----------------------------------------------------
+FVector AInteract::GetInteractPosition(const AActor* _actor)
+{
+	if(InteractPos.Num()>0)
+	{
+		return InteractPos[0];
+	}
+	return GetActorLocation();
 }
 
 

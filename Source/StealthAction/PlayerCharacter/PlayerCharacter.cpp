@@ -93,6 +93,7 @@ APlayerCharacter::APlayerCharacter()
 	, m_bSneakKill(false)
 	, m_bJumping(false)
 	, m_dashStaminaConsumptionMagnification(1.f)
+	, m_interactTimer(0.f)
 
 
 {
@@ -272,6 +273,8 @@ void APlayerCharacter::Tick(float _deltaTime)
 	UpdateJump(_deltaTime);
 	//スタミナ回復処理
 	StaminaRecovery(_deltaTime);
+	//インタラクト処理
+	UpdateInteract(_deltaTime);
 
 	//視点変更
 	ViewpointSwitching(_deltaTime);
@@ -650,20 +653,47 @@ void APlayerCharacter::UpdateInvincibleTime(float _deltaTime)
 //--------------------------------------------------------
 void APlayerCharacter::UpdateInteract(float _deltaTime)
 {
-	if (m_status != EPlayerStatus::Interact) { return; }
+	if (m_status != EPlayerStatus::Interact&&m_status!=EPlayerStatus::InteractAnimation) { return; }
+	
+	//インタラクトポジションに近づいたらインタラクトの処理を実行
+	if (FVector::Dist(GetActorLocation(), m_interactPos) < 50.f)
+	{
+		ChangePlayerStatus(EPlayerStatus::InteractAnimation);
+
+		m_interactTimer += _deltaTime;
+		//インタラクト時間が経過したらインタラクト実行
+		if (m_interactTimer < 2.f) {
+			return;
+		}
+		if (m_hitInteractOb)
+		{
+			m_hitInteractOb->Interact(this);
+		}
+		m_interactTimer = 0.f;
+		m_bCanControl = true;
+		ChangePlayerStatus(EPlayerStatus::Idle);
+		return;
+	}
+
+	
 	//現在座標からインタラクトポジションまでのベクトル
 	FVector vec = m_interactPos -GetActorLocation();
 	
 	vec = vec.GetSafeNormal();
 	vec.Z = 0;
+	//インタラクトポジションに向かって移動
+	AddMovementInput(vec, 0.5f);
 
-	//GetCharacterMovementComponent()->MaxWalkSpeed*=0.7f;
-
-	AddMovementInput(vec, 1.f);
-
+	//キャラの向きをインタラクトポジションに向ける
+	FRotator targetRot = (m_interactPos - GetActorLocation()).Rotation();
+	targetRot.Pitch = 0.f;
+	SetActorRotation(FMath::RInterpTo(
+		GetActorRotation(),
+		targetRot,
+		_deltaTime,
+		10.f
+	));
 }
-
-
 
 
 //---------------------------------------------------------
@@ -1134,7 +1164,7 @@ void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 	{
 		m_interactPos = m_hitInteractOb->GetInteractPosition();
 		m_status = EPlayerStatus::Interact;
-
+		m_bCanControl = false;
 		//m_hitInteractOb->Interact((AActor*)this);
 	}
 }
