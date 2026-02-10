@@ -94,7 +94,7 @@ APlayerCharacter::APlayerCharacter()
 	, m_bJumping(false)
 	, m_dashStaminaConsumptionMagnification(1.f)
 	, m_interactTimer(0.f)
-	, m_maxOffsetY(70.f)
+	, m_maxOffsetY(100.f)
 	, m_initOffsetY(30.f)
 	, m_staminaRecoveryMagnification(1.5f)
 
@@ -117,7 +117,7 @@ APlayerCharacter::APlayerCharacter()
 	m_pHitActors.Reset();
 
 	//カメラの視点変更時初期位置
-	m_cameraInitPos[(int)ECameraStatus::ThirdPerson] = { FRotator{ 0.f,0.f,0.f},70.f,300.f,FVector{} };
+	m_cameraInitPos[(int)ECameraStatus::ThirdPerson] = { FRotator{ 0.f,0.f,0.f},70.f,400.f,FVector{} };
 	m_cameraInitPos[(int)ECameraStatus::TopDownView] = { FRotator{ 0.f,0.f,0.f},90.f,1000.f,FVector{} };
 	m_cameraInitPos[(int)ECameraStatus::InShadow] = { FRotator{ 0.f,0.f,0.f},60.f,300.f ,FVector{} };
 	m_cameraInitPos[(int)ECameraStatus::Crouch] = { FRotator{ 0.f,0.f,0.f},60.f,250.f,FVector{} };
@@ -345,13 +345,13 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 	float rotateCorrection = CGameUtility::GetFpsCorrection(_deltaTime);
 
 	//X軸入力があり、移動入力がなければ
-	if (m_cameraRotateInput.X != 0 && FMath::IsNearlyZero(m_charaMoveInput.Length())) {
+	if (m_cameraRotateInput.X != 0 && GetCharacterMovement()->Velocity.Length() <= m_WalkSpeed) {
 		float moveOffsetDir = (m_cameraRotateInput.X > 0) ? -1.f : 1.f;
 
 		//現在のオフセット位置
 		float targetOffset = m_pSpringArm->SocketOffset.Y;
-
-		targetOffset += moveOffsetDir * 5.f*_deltaTime;
+		//100スピード
+		targetOffset += moveOffsetDir * 100.f*_deltaTime;
 
 		//最大値チェック
 		if (targetOffset > m_maxOffsetY)
@@ -364,26 +364,43 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 		}
 
 		m_pSpringArm->SocketOffset.Y = targetOffset;
+
+		//入力がない時間計測用タイマーリセット
+		m_OutcameraInputTimer = 0.f;
 	}
-	//入力がなければ初期位置に戻す
-	else if (!FMath::IsNearlyZero(m_cameraRotateInput.Length()))
+	//初期オフセット位置に戻す処理
+	else 
 	{
-		//現在のオフセット位置
-		float socketOffsetPosY = m_pSpringArm->SocketOffset.Y;
-		
-		//現在位置とオフセットの差
-		float socketLeght = abs(socketOffsetPosY) - abs(m_initOffsetY);
-
-		//初期位置にいなければ処理？
-		if (!FMath::IsNearlyZero(abs(socketLeght)))
+		//タイマー加算
+		m_OutcameraInputTimer +=_deltaTime;
+		//このマジックナンバーより時間たっていれば処理する
+		if (m_OutcameraInputTimer > 0.3f)
 		{
-			//中央+-がどっちか
-			float moveOffsetDir = (socketOffsetPosY > socketLeght) ? -1.f : 1.f;
 
-			//ソケット位置移動
-			socketOffsetPosY+= moveOffsetDir * 20.f * _deltaTime;
+			//現在のオフセット位置
+			float socketOffsetPosY = m_pSpringArm->SocketOffset.Y;
 
-		}	
+			//現在位置と初期オフセットの差
+			float socketLeght = socketOffsetPosY - m_initOffsetY;
+
+			//初期位置にいなければ処理？
+			if (!FMath::IsNearlyZero(abs(socketLeght)))
+			{
+				//中央+-がどっちか
+				float moveOffsetDir = (socketOffsetPosY > m_initOffsetY) ? -1.f : 1.f;
+
+				//ソケット位置移動
+				socketOffsetPosY += moveOffsetDir * 10.f * _deltaTime;
+				m_pSpringArm->SocketOffset.Y = socketOffsetPosY;
+
+				//ある程度近づいたら合わせる
+				if (abs(socketLeght) < 0.5f)
+				{
+					m_pSpringArm->SocketOffset.Y = m_initOffsetY;
+				}
+
+			}
+		}
 	}
 	AddControllerYawInput(m_cameraRotateInput.X);
 	AddControllerPitchInput(m_cameraRotateInput.Y);

@@ -461,6 +461,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	float m_maxOffsetY;	//オフセットY座標の最大値
 
+	float m_OutcameraInputTimer;
+
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	float m_initOffsetY;
 
