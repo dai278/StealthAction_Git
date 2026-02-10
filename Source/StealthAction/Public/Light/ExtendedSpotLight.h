@@ -13,10 +13,11 @@ UENUM(BlueprintType)
 enum class ELightStatus : uint8
 {
 	None UMETA(DisplayName = "None"),
-	AutoYawRotate      UMETA(DisplayName = "AutoYaw"),//三人称
-	AutoPitchRotate     UMETA(DisplayName = "AutoPitch"),//俯瞰
-	ManualYawRotate   UMETA(DisplayName = "ManualYaw"),//三人称
-	ManualPitchRotat   UMETA(DisplayName = "ManualPitch"),//俯瞰e
+	AutoYawRotate      UMETA(DisplayName = "AutoYaw"),//自動回転Yaw
+	AutoPitchRotate     UMETA(DisplayName = "AutoPitch"),//自動回転Pitch
+	AutoRollRotate  UMETA(DisplayName = "AutoRoll"),
+	ManualYawRotate   UMETA(DisplayName = "ManualYaw"),//手動回転
+	ManualPitchRotat   UMETA(DisplayName = "ManualPitch"),//手動回転
 	Blink    UMETA(DisplayName = "Blink")//点滅
 };
 
@@ -108,10 +109,13 @@ private:
 	void UpdateAutoYawRotate(const float& _deltaTime);
 	//Pitch回転
 	void UpdateAutoPitchRotate(const float& _deltaTime);
+	//Roll回転
+	void UpdateAutoRollRotate(const float& _deltaTime);
 
 	//手動回転
 	void UpdateManualYawRotate(const float& _deltaTime);
 	void UpdateManualPitchRotate(const float& _deltaTime);
+
 	//点滅の更新処理
 	void UpdateBlink(const float& _deltaTime);
 protected:
@@ -147,6 +151,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Rotate")
 	float m_automaticRotatePitchSpeed;//Yaw方向回転スピード
+
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	float m_automaticRollYawSpeed;//Yaw方向回転スピード
 
 
 	UPROPERTY(EditAnywhere, Category = "blink")

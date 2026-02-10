@@ -34,6 +34,7 @@ AExtendedSpotLight::AExtendedSpotLight()
 	, m_lightOffTimer(0.f)
 	, m_LightOffTime(5.f)
 	, m_bLightOff(false)
+	, m_automaticRollYawSpeed(30.f)
 {
 
 	//毎フレーム更新処理を行うか.
@@ -121,6 +122,9 @@ void AExtendedSpotLight::Tick(float DeltaTime)
 	case ELightStatus::AutoPitchRotate:
 		UpdateAutoPitchRotate(DeltaTime);
 		break;
+	case ELightStatus::AutoRollRotate:
+			UpdateAutoRollRotate(DeltaTime);
+			break;
 	case ELightStatus::ManualYawRotate:
 		UpdateManualYawRotate(DeltaTime);
 		break;
@@ -348,47 +352,65 @@ void AExtendedSpotLight::OnRotateTargetAngleStop()
 //-----------------------------------------------------
 void AExtendedSpotLight::UpdateAutoYawRotate(const float& _deltaTime)
 {
-	FRotator newRotator = GetActorRotation();
-	
+	//FRotator newRotator = GetActorRotation();
+	//
 	//現在の回転量が最大値最小値の範囲内でなければ範囲内へ回転
-	if (newRotator.Yaw< m_minTurnRotate )
+	//if (newRotator.Yaw< m_minTurnRotate )
+	//{
+	//	m_turnDir = 1;
+	//}
+	//else if (newRotator.Yaw > m_maxTurnRotate)
+	//{
+	//	m_turnDir = -1;
+	//}
+	//
+	//回転
+	//newRotator.Yaw += m_automaticRotateYawSpeed * _deltaTime*m_turnDir;
+	//SetActorRotation(newRotator);
+
+	//if (!m_bRotateTurn) {
+	//	return;
+	//}
+	//
+	//最大値を超えたか
+	//bool isOver=false;
+	//最大値を超えたら
+	//if (newRotator.Yaw > m_maxTurnRotate)
+	//{
+	//	newRotator.Yaw = m_maxTurnRotate;
+	//	isOver = true;
+	//}
+	//最小値未満になったら
+	//else if (newRotator.Yaw < m_minTurnRotate)
+	//{
+	//	newRotator.Yaw = m_minTurnRotate;
+	//	isOver = true;
+	//}	
+
+	//SetActorRotation(newRotator);
+	//超えた際の処理
+	//if (isOver)
+	//{
+	//		m_turnDir *= -1.f;
+	//}
+
+	FRotator Rot = GetActorRotation();
+
+	Rot.Yaw += m_automaticRotatePitchSpeed * _deltaTime * m_turnDir;
+
+	if (Rot.Yaw >= m_maxTurnRotate)
 	{
-		m_turnDir = 1;
-	}
-	else if (newRotator.Yaw > m_maxTurnRotate)
-	{
+		Rot.Yaw = m_maxTurnRotate;
 		m_turnDir = -1;
 	}
-	
-	//回転
-	newRotator.Yaw += m_automaticRotateYawSpeed * _deltaTime*m_turnDir;
-	SetActorRotation(newRotator);
+	else if (Rot.Yaw <= m_minTurnRotate)
+	{
+		Rot.Yaw = m_minTurnRotate;
+		m_turnDir = 1;
+	}
 
-	if (!m_bRotateTurn) {
-		return;
-	}
-	
-	//最大値を超えたか
-	bool isOver=false;
-	//最大値を超えたら
-	if (newRotator.Yaw > m_maxTurnRotate)
-	{
-		newRotator.Yaw = m_maxTurnRotate;
-		isOver = true;
-	}
-	//最小値未満になったら
-	else if (newRotator.Yaw < m_minTurnRotate)
-	{
-		newRotator.Yaw = m_minTurnRotate;
-		isOver = true;
-	}	
+	SetActorRotation(Rot);
 
-	SetActorRotation(newRotator);
-	//超えた際の処理
-	if (isOver)
-	{
-			m_turnDir *= -1.f;
-	}
 
 }
 
@@ -417,6 +439,33 @@ void AExtendedSpotLight::UpdateAutoPitchRotate(const float& _deltaTime)
 
 
 }
+
+
+//--------------------------------------------------
+//回転ロール
+//---------------------------------------------------
+void AExtendedSpotLight::UpdateAutoRollRotate(const float& _deltaTime)
+{
+	FRotator Rot = GetActorRotation();
+
+	Rot.Roll += m_automaticRotatePitchSpeed * _deltaTime * m_turnDir;
+
+	if (Rot.Roll >= m_maxTurnRotate)
+	{
+		Rot.Roll = m_maxTurnRotate;
+		m_turnDir = -1;
+	}
+	else if (Rot.Roll <= m_minTurnRotate)
+	{
+		Rot.Roll = m_minTurnRotate;
+		m_turnDir = 1;
+	}
+
+	SetActorRotation(Rot);
+
+}
+
+
 
 //-----------------------------------------------------
 //手動回転
@@ -510,7 +559,6 @@ void AExtendedSpotLight::UpdateManualPitchRotate(const float& _deltaTime)
 
 	SetActorRotation(newRotator);
 }
-
 
 
 //----------------------------------------------------
