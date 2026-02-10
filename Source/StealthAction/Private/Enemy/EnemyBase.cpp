@@ -393,7 +393,6 @@ void AEnemyBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	//UE_LOG(LogTemp, Warning, TEXT("m_currentChaseSpeed= %d"), m_stopCheck);
-	 UE_LOG(LogTemp, Warning, TEXT("m_attackCheck= %d"), m_attackCheck);
 
 	// ===== 検証用：Kキーで強制死亡 =====
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
@@ -682,21 +681,26 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 	if (!m_noiseCheck)
 	{
 		m_noiseLevel = 0;//物音レベルをリセット
-		m_hearingTime = 0;		//聴覚時間リセット
 		m_noiseCheck = true;		//物音チェックON
+
+		UE_LOG(LogTemp, Warning, TEXT("m_noiseCheck= %d"), m_noiseCheck);
+
 	}
 
-	m_hearingTime = _deltaTime;	//聴覚時間の更新
+	m_hearingTime += _deltaTime;	//聴覚時間の更新
 
 	//OnNoiseが呼ばれていれば更新許可
 	if (m_isCallOnNoise_Fleam)
 	{
+
 		//音の更新
 		if (m_hearingTime < m_hearingTime_Limit)
 		{
+
 			//以前の物音が今の物音より小さい場合
 			if (m_noiseVolume_keeper <= m_noiseVolume || (m_noiseLevel > 5 && m_noiseLevel != 0))
 			{
+
 				m_noiseVolume_keeper = m_noiseVolume;
 				//距離に応じて聞こえる音レベルを変更
 				if (distance < m_hearingRange_Short)
@@ -761,6 +765,8 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 		else
 		{
 			m_noiseVolume_keeper = m_noiseVolume;
+
+			UE_LOG(LogTemp, Warning, TEXT("m_noiseVolume= %d"), m_noiseVolume);
 
 			//距離に応じて聞こえる音レベルを変更
 			if (distance < m_hearingRange_Short)
