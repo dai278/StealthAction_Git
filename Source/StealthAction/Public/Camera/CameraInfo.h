@@ -17,4 +17,7 @@ struct FCameraViewSetting
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float springArmLength = 300.0f; // ’·‚³
+
+    UPROPERTY(EditAnywhere,BlueprintReadWrite)
+    FVector ofSet;
 };

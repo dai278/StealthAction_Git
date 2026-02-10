@@ -390,6 +390,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Stamina")
 	float m_staminaTimer;
 
+	UPROPERTY(EditAnywhere, Category = "Stamina")
+	float m_staminaRecoveryMagnification;
+
 	bool m_isStaminaDepleted;//スタミナ切れ状態か？
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
@@ -454,6 +457,12 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	FCameraViewSetting m_cameraInitPos[(int)ECameraStatus::Num];	//各視点変更時最初の視点
+
+	UPROPERTY(EditAnywhere, Category = "Camera")
+	float m_maxOffsetY;	//オフセットY座標の最大値
+
+	UPROPERTY(EditAnywhere, Category = "Camera")
+	float m_initOffsetY;
 
 	TArray <AActor*> m_hitActors;//衝突対処のアドレス
 

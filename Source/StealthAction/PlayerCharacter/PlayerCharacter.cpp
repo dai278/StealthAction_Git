@@ -94,6 +94,9 @@ APlayerCharacter::APlayerCharacter()
 	, m_bJumping(false)
 	, m_dashStaminaConsumptionMagnification(1.f)
 	, m_interactTimer(0.f)
+	, m_maxOffsetY(70.f)
+	, m_initOffsetY(30.f)
+	, m_staminaRecoveryMagnification(1.5f)
 
 
 {
@@ -114,10 +117,10 @@ APlayerCharacter::APlayerCharacter()
 	m_pHitActors.Reset();
 
 	//カメラの視点変更時初期位置
-	m_cameraInitPos[(int)ECameraStatus::ThirdPerson] = { FRotator{ 0.f,0.f,0.f},90.f,500.f };
-	m_cameraInitPos[(int)ECameraStatus::TopDownView] = { FRotator{ 0.f,0.f,0.f},90.f,1000.f };
-	m_cameraInitPos[(int)ECameraStatus::InShadow] = { FRotator{ 0.f,0.f,0.f},60.f,250.f };
-	m_cameraInitPos[(int)ECameraStatus::Crouch] = { FRotator{ 0.f,0.f,0.f},70.f,350.f };
+	m_cameraInitPos[(int)ECameraStatus::ThirdPerson] = { FRotator{ 0.f,0.f,0.f},70.f,300.f,FVector{} };
+	m_cameraInitPos[(int)ECameraStatus::TopDownView] = { FRotator{ 0.f,0.f,0.f},90.f,1000.f,FVector{} };
+	m_cameraInitPos[(int)ECameraStatus::InShadow] = { FRotator{ 0.f,0.f,0.f},60.f,300.f ,FVector{} };
+	m_cameraInitPos[(int)ECameraStatus::Crouch] = { FRotator{ 0.f,0.f,0.f},60.f,250.f,FVector{} };
 
 
 	//カプセルの初期値を記録
@@ -131,9 +134,10 @@ APlayerCharacter::APlayerCharacter()
 		m_pSpringArm->SetupAttachment(RootComponent);
 
 		m_pSpringArm->TargetArmLength = m_cameraInitPos[(int)ECameraStatus::ThirdPerson].springArmLength;					//カメラ距離
-		m_pSpringArm->SocketOffset = FVector(0.f, 50.f, 60.f);	//肩越し視点設定
+		m_pSpringArm->SocketOffset = FVector(0, m_maxOffsetY, 20.f);	//肩越し視点設定
 		m_pSpringArm->bUsePawnControlRotation = true;			//カメラ回転
-		m_pSpringArm->CameraLagSpeed = 8.f;
+		m_pSpringArm->bEnableCameraLag = true;
+		m_pSpringArm->CameraLagSpeed = 100.f;
 		m_pSpringArm->bDoCollisionTest = true;                 // 壁自動回避
 	}
 
@@ -340,6 +344,47 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 	//処理落ちしても一定速度でカメラが回るように補正
 	float rotateCorrection = CGameUtility::GetFpsCorrection(_deltaTime);
 
+	//X軸入力があり、移動入力がなければ
+	if (m_cameraRotateInput.X != 0 && FMath::IsNearlyZero(m_charaMoveInput.Length())) {
+		float moveOffsetDir = (m_cameraRotateInput.X > 0) ? -1.f : 1.f;
+
+		//現在のオフセット位置
+		float targetOffset = m_pSpringArm->SocketOffset.Y;
+
+		targetOffset += moveOffsetDir * 5.f*_deltaTime;
+
+		//最大値チェック
+		if (targetOffset > m_maxOffsetY)
+		{
+			targetOffset = m_maxOffsetY;
+		}
+		else if (targetOffset < -m_maxOffsetY)
+		{
+			targetOffset = -m_maxOffsetY;
+		}
+
+		m_pSpringArm->SocketOffset.Y = targetOffset;
+	}
+	//入力がなければ初期位置に戻す
+	else if (!FMath::IsNearlyZero(m_cameraRotateInput.Length()))
+	{
+		//現在のオフセット位置
+		float socketOffsetPosY = m_pSpringArm->SocketOffset.Y;
+		
+		//現在位置とオフセットの差
+		float socketLeght = abs(socketOffsetPosY) - abs(m_initOffsetY);
+
+		//初期位置にいなければ処理？
+		if (!FMath::IsNearlyZero(abs(socketLeght)))
+		{
+			//中央+-がどっちか
+			float moveOffsetDir = (socketOffsetPosY > socketLeght) ? -1.f : 1.f;
+
+			//ソケット位置移動
+			socketOffsetPosY+= moveOffsetDir * 20.f * _deltaTime;
+
+		}	
+	}
 	AddControllerYawInput(m_cameraRotateInput.X);
 	AddControllerPitchInput(m_cameraRotateInput.Y);
 }
@@ -599,7 +644,7 @@ void APlayerCharacter::StaminaRecovery(const float& _deltaTime)
 	if (!m_bDash && m_status != EPlayerStatus::InShadow)
 	{
 		if (m_staminaTimer > 0.f) {
-			m_staminaTimer -= _deltaTime;
+			m_staminaTimer -= _deltaTime* m_staminaRecoveryMagnification;
 			if (m_staminaTimer < 0.f)
 			{
 				m_staminaTimer = 0.f;
