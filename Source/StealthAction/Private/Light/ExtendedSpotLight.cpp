@@ -44,8 +44,9 @@ AExtendedSpotLight::AExtendedSpotLight()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	//メッシュの生成
 	m_pMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	m_pMesh->SetupAttachment(RootComponent);
 	//RootにSpotLightをアタッチ
-	m_pSpotLight->SetupAttachment(RootComponent);
+	m_pSpotLight->SetupAttachment(m_pMesh);
 }
 
 
@@ -58,7 +59,7 @@ void AExtendedSpotLight::BeginPlay()
 
 	//BP上で設定した毎フレーム更新するか
 	//動かすライトは毎フレーム
-	PrimaryActorTick.bCanEverTick = m_bCanEverTick;
+	//PrimaryActorTick.bCanEverTick = m_bCanEverTick;
 
 	//マネージャーに登録
 	GetWorld()->GetSubsystem<UExtendedSpotLightManager>()->AddLight(this);
@@ -361,8 +362,9 @@ void AExtendedSpotLight::UpdateAutoYawRotate(const float& _deltaTime)
 	
 	//回転
 	newRotator.Yaw += m_automaticRotateYawSpeed * _deltaTime*m_turnDir;
+	SetActorRotation(newRotator);
+
 	if (!m_bRotateTurn) {
-		SetActorRotation(newRotator);
 		return;
 	}
 	
@@ -380,13 +382,14 @@ void AExtendedSpotLight::UpdateAutoYawRotate(const float& _deltaTime)
 		newRotator.Yaw = m_minTurnRotate;
 		isOver = true;
 	}	
+
+	SetActorRotation(newRotator);
 	//超えた際の処理
 	if (isOver)
 	{
 			m_turnDir *= -1.f;
 	}
 
-	SetActorRotation(newRotator);
 }
 
 //-----------------------------------------------------
@@ -395,45 +398,24 @@ void AExtendedSpotLight::UpdateAutoYawRotate(const float& _deltaTime)
 void AExtendedSpotLight::UpdateAutoPitchRotate(const float& _deltaTime)
 {
 
-	FRotator newRotator = GetActorRotation();
+		FRotator Rot = GetActorRotation();
 
-	//回転
-	newRotator.Pitch += m_automaticRotateYawSpeed * _deltaTime * m_turnDir;
-	SetActorRotation(newRotator);
+		Rot.Pitch += m_automaticRotatePitchSpeed * _deltaTime * m_turnDir;
 
-	//現在の回転量が最大値最小値の範囲内でなければ処理しない
-	if (newRotator.Pitch < m_minTurnRotate)
-	{
-		m_turnDir = 1;
-	}
-	else if (newRotator.Pitch > m_maxTurnRotate)
-	{
-		m_turnDir = -1;
-	}
-	//回転
-	newRotator.Pitch += m_automaticRotatePitchSpeed * _deltaTime * m_turnDir;
-	//最大値を超えたか
-	bool isOver = false;
-	//最大値を超えたら
-	if (newRotator.Pitch > m_maxTurnRotate)
-	{
-		newRotator.Pitch = m_maxTurnRotate;
-		isOver = true;
-	}
-	//最小値未満になったら
-	else if (newRotator.Pitch < m_minTurnRotate)
-	{
-		newRotator.Pitch = m_minTurnRotate;
-		isOver = true;
-	}
+		if (Rot.Pitch >= m_maxTurnRotate)
+		{
+			Rot.Pitch = m_maxTurnRotate;
+			m_turnDir = -1;
+		}
+		else if (Rot.Pitch <= m_minTurnRotate)
+		{
+			Rot.Pitch = m_minTurnRotate;
+			m_turnDir = 1;
+		}
 
-	//超えた際の処理
-	if (isOver)
-	{
-			m_turnDir *= -1.f;
-	}
+		SetActorRotation(Rot);
 
-	SetActorRotation(newRotator);
+
 }
 
 //-----------------------------------------------------
