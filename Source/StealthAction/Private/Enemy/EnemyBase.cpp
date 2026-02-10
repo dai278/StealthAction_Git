@@ -52,14 +52,14 @@
 //----------------------------------------------------------
 AEnemyBase::AEnemyBase()
 	: m_pPlayerChara(NULL)
-	, m_visiblityAngle(0.2)
+	, m_visiblityAngle(0.3)
 	, m_visionLevel(0)
-	, m_visionRange_Short(800.0)
-	, m_visionRange_Normal(1400.0)
-	, m_visionRange_Long(2000.0)
-	, m_hearingRange_Short(600.0)
-	, m_hearingRange_Normal(1200.0)
-	, m_hearingRange_Long(1700.0)
+	, m_visionRange_Short(500.0)
+	, m_visionRange_Normal(1000.0)
+	, m_visionRange_Long(1500.0)
+	, m_hearingRange_Short(400.0)
+	, m_hearingRange_Normal(800.0)
+	, m_hearingRange_Long(1400.0)
 	, m_stopDistance_Noise(50.0) //
 	, m_patrolTime(0.0)
 	, m_doubtTime(0.0)
@@ -77,6 +77,7 @@ AEnemyBase::AEnemyBase()
 	, m_hearingTime(0.0)
 	, m_discoveryTime(0.0)
 	, m_attackTime(0.0)
+	, m_animationAttackTime(0.0)
 	, m_patrolTime_Limit(2.0)
 	, m_patrol_TurningTime_Limit(0.5f)
 	, m_patrol_TurningCheckingTime_Limit(1.5f)
@@ -95,6 +96,7 @@ AEnemyBase::AEnemyBase()
 	, m_hearingTime_Limit(2.0)
 	, m_discoveryTime_Limit(2.0)
 	, m_attackTime_Limit(5.)
+	, m_animationAttackTime_Limit(0.5)
 	, m_currentChaseSpeed(0.)
 	, m_chaseSpeed_Slow(200.0f)
 	, m_chaseSpeed_Normal(300.0f)
@@ -104,7 +106,8 @@ AEnemyBase::AEnemyBase()
 	, m_stopDistance_Player(150.0)
 	, m_stopDistance_2D(50.0)
 	, m_stopDistance_Nav(0.0)
-	, m_attackDistance(1500.0)
+	, m_attackDistance(200.0)
+	, m_attackDistance_Weapon(1500.0)
 	, m_patrolCancel(false)
 	, m_moveStop_Nav(false)
 	, m_visionCheck(false)
@@ -137,6 +140,7 @@ AEnemyBase::AEnemyBase()
 	, m_noiseVolume_keeper(0)
 	, m_noiseLevel(0)
 	, m_enemyPos(0., 0., 0.)
+	, m_enemyPos_Eye(0., 0., 0.)
 	, m_enemyPos_Keeper(0., 0., 0.)
 	, m_enemyPos_Forward_Miss(0., 0., 0.)
 	, m_enemyPos_Left_Miss(0., 0., 0.)
@@ -491,6 +495,7 @@ void AEnemyBase::CaseDead(float _deltaTime)
 void AEnemyBase::StartStateValues(float _deltaTime)
 {
 	m_enemyPos = GetActorLocation();								//エネミーの座標
+	m_enemyPos_Eye = GetActorLocation() + FVector(0.f,0.f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight()) - GetActorForwardVector() * (GetCapsuleComponent()->GetScaledCapsuleRadius()) ;
 	m_enemyForward = GetActorForwardVector();						//エネミーの正面ベクトル
 	m_enemyRight = GetActorRightVector();							//エネミーの右ベクトル
 	m_playerPos = m_pPlayerChara->GetActorLocation();		//プレイヤーの座標
@@ -505,6 +510,11 @@ void AEnemyBase::StartStateValues(float _deltaTime)
 	//プレイヤーが影に入っているか？
 	m_playerShadowCheck = m_pPlayerChara->IsInShadow();
 
+
+	if (m_animationAttackTime > 0 && !m_attackCheck)
+	{
+		m_animationAttackTime = 0;
+	}
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -555,8 +565,19 @@ void AEnemyBase::UpdateVisiblity(float _deltaTime)
 	FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
 
 	//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
-	bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, m_playerPos, FCollisionObjectQueryParams::AllObjects, CollisionParams);
+	bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos_Eye, m_playerPos, FCollisionObjectQueryParams::AllObjects, CollisionParams);
 
+
+	//DrawDebugLine(
+	//	GetWorld(),
+	//	m_enemyPos_Eye,          // 開始位置
+	//	m_playerPos,            // 終了位置
+	//	FColor::Red,    // 色
+	//	false,          // 永続表示するか
+	//	1.0f,           // 表示時間（秒）
+	//	0,              // Depth Priority
+	//	2.0f            // 太さ
+	//);
 	//ヒットするオブジェクトがある場合
 	if (isHit)
 	{
@@ -1014,6 +1035,7 @@ void AEnemyBase::ResetStateValues(float _deltaTime)
 		m_battleFalseTime = 0;
 		m_battleShadowCheck = false;
 		m_battleNotShadowCheck = false;
+		m_attackCheck = false;
 	}
 
 	//以前のステータスが物音戦闘の場合
@@ -1248,12 +1270,7 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 			m_patrol_TurningCheck = true;		//旋回中
 		}
 
-		//移動方向決定
-		FRotator DirectionRot = UKismetMathLibrary::FindLookAtRotation(m_enemyPos, m_enemyPos_XY_Wall[m_patrol_TurnDirection]);
-		FRotator newRot = FMath::RInterpTo(GetActorRotation(), DirectionRot, _deltaTime, m_chaseRotSpeed);
-		//旋回
-		SetActorRotation(FRotator(GetActorRotation().Pitch, newRot.Yaw, GetActorRotation().Roll));
-
+		UpdateViewMove(_deltaTime);
 		m_patrol_TurningCheckingTime += _deltaTime;	//旋回経過時間
 
 		//旋回時間が経過した場合
@@ -1578,6 +1595,7 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 	double distance = (m_playerPos_LastSeen - m_enemyPos).Length();	//最後に見たプレイヤーとの距離を測る(Vectorの長さ）
 
 
+
 	//見失った後どっちの方向に曲がったか覚えておく
 	if (!m_visionCheck)
 	{
@@ -1611,7 +1629,21 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 		m_playerPos_Nav_LastSeen = m_playerPos_LastSeen;
 	}
 
-	if (m_discoveryTime < m_discoveryTime_Limit)
+	if (m_animationAttackTime == 0)
+	{
+		m_attackCheck = false;
+	}
+
+	if (m_attackCheck)
+	{
+		if (m_animationAttackTime <= m_animationAttackTime_Limit)
+		{
+			//攻撃処理
+			UpdateAttack(_deltaTime);
+
+		}
+	}
+	else if (m_discoveryTime < m_discoveryTime_Limit)
 	{
 		//視点移動処理
 		UpdateViewMove(_deltaTime);
@@ -1624,6 +1656,11 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 			//移動処理
 			UpdateMove_Nav(_deltaTime);
 		}
+		else
+		{
+			//視点移動処理
+			UpdateViewMove(_deltaTime);
+		}
 
 		if (m_visionCheck || m_battleShadowCheck)
 		{
@@ -1631,7 +1668,7 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 			if (m_pEnemy_Weapon)
 			{
 				//攻撃範囲に入ったら攻撃
-				if (m_attackDistance > distance)
+				if (m_attackDistance_Weapon > distance)
 				{
 					FVector WeaponPos = m_pEnemy_Weapon->GetActorLocation();
 					FVector WeaponForwardVector = m_pEnemy_Weapon->GetActorForwardVector();
@@ -1652,7 +1689,6 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 						{
 							//攻撃処理
 							UpdateAttack(_deltaTime);
-							m_attackTime = 0;
 
 							m_moveStop_Nav = true;		//停止（Nav）
 							UpdateMove_Nav(_deltaTime);
@@ -1665,7 +1701,7 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 			else
 			{
 				//プレイヤーの一定距離に近くまで近づいたら
-				if (m_stopDistance_Player >= distance)
+				if (m_attackDistance >= distance)
 				{
 					if (m_sword)
 					{
@@ -1673,8 +1709,6 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 						{
 							//攻撃処理
 							UpdateAttack(_deltaTime);
-							
-							m_attackTime = 0;
 						}
 					}
 				}
@@ -1986,11 +2020,18 @@ void AEnemyBase::UpdateViewMove(float _deltaTime)
 	}
 	else if (m_patrolCheck)
 	{
-		//旋回方向決定
-		FRotator playerRot = UKismetMathLibrary::FindLookAtRotation(m_enemyPos, m_routePos);
-		FRotator newRot = FMath::RInterpTo(GetActorRotation(), playerRot, _deltaTime, m_chaseRotSpeed);
+		////旋回方向決定
+		//FRotator playerRot = UKismetMathLibrary::FindLookAtRotation(m_enemyPos, m_routePos);
+		//FRotator newRot = FMath::RInterpTo(GetActorRotation(), playerRot, _deltaTime, m_chaseRotSpeed);
+		////旋回
+		//SetActorRotation(FRotator(GetActorRotation().Pitch, newRot.Yaw, GetActorRotation().Roll));
+
+		//移動方向決定
+		FRotator DirectionRot = UKismetMathLibrary::FindLookAtRotation(m_enemyPos, m_enemyPos_XY_Wall[m_patrol_TurnDirection]);
+		FRotator newRot = FMath::RInterpTo(GetActorRotation(), DirectionRot, _deltaTime, m_chaseRotSpeed);
 		//旋回
 		SetActorRotation(FRotator(GetActorRotation().Pitch, newRot.Yaw, GetActorRotation().Roll));
+
 	}
 	else
 	{
@@ -2122,15 +2163,27 @@ void AEnemyBase::UpdateAttack(float _deltaTime)
 
 
 	m_attackCheck = true;
+
+	m_animationAttackTime += _deltaTime;
+
+	if (m_animationAttackTime > m_animationAttackTime_Limit)
+	{
+		if (m_sword)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Swing"));
+			m_sword->Swinging(false);
+			m_animationAttackTime = 0;
+			m_attackTime = 0;
+
+		}
+	}
+	
 	//武器を持っていたら
 	if (m_pEnemy_Weapon)
 	{
 		m_pEnemy_Weapon->BulletFire(m_attackTime, this);
-	}
-	else if (m_sword)
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("Swing"));
-		m_sword->Swinging(false);
+		m_attackTime = 0;
+
 	}
 }
 

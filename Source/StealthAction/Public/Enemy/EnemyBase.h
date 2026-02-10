@@ -277,6 +277,8 @@ public:
 		double m_discoveryTime_Limit;			//発見時間制限
 		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_attackTime_Limit;			//攻撃時間制限
+		UPROPERTY(EditAnywhere, Category = "Time")
+		double m_animationAttackTime_Limit;		//攻撃アニメーション時間
 
 
 		double m_patrolTime;				//巡回時間
@@ -296,6 +298,7 @@ public:
 		double m_hearingTime;				//聴覚時間
 		double m_discoveryTime;				//発見時間
 		double m_attackTime;				//攻撃時間
+		double m_animationAttackTime;		//攻撃アニメーション時間
 
 		//移動関連
 		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chase")
@@ -326,6 +329,7 @@ public:
 		double m_stopDistance_Nav;		//プレイヤーに近づける限界距離（Nav）
 		UPROPERTY(EditAnywhere, Category = "Chase")
 		double m_attackDistance;	//攻撃範囲
+		double m_attackDistance_Weapon;//攻撃範囲
 
 		UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float m_currentChaseSpeed;			//現在の追跡速度
@@ -378,6 +382,7 @@ public:
 
 		//座標関連
 		FVector m_enemyPos;				//エネミーの座標
+		FVector m_enemyPos_Eye;				//エネミーの座標
 		FVector m_enemyPos_Keeper;		//エネミーの座標
 
 		FVector m_enemyForward;			//エネミーの正面ベクトル
