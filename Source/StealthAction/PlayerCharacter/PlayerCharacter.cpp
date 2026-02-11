@@ -992,6 +992,9 @@ void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakK
 	m_bDash = false;
 	ChangePlayerStatus(EPlayerStatus::Damage);
 	m_knockBackVelocity = KnockBackVec;
+
+	GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
+
 	if (m_cameraStatus != ECameraStatus::ThirdPerson) {
 		m_bCameraSwitching = true;
 		m_cameraStatus = ECameraStatus::ThirdPerson;
