@@ -9,6 +9,7 @@
 class AEnemy_Effect_1;
 class AEnemy_Effect_2;
 class AEnemy_Effect_3;
+class AEnemy_Effect_4;
 
 UCLASS()
 class STEALTHACTION_API AEnemy_EffectManager : public AActor
@@ -22,6 +23,7 @@ public:
 	AEnemy_Effect_1* GetEffect1();
 	AEnemy_Effect_2* GetEffect2();
 	AEnemy_Effect_3* GetEffect3();
+	AEnemy_Effect_4* GetEffect4();
 
 protected:
 	// Called when the game starts or when spawned
@@ -38,12 +40,17 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Effect")
 	TSubclassOf<AEnemy_Effect_3> Effect3Class;
 
+	UPROPERTY(EditAnywhere, Category = "Effect")
+	TSubclassOf<AEnemy_Effect_4> Effect4Class;
+
 	UPROPERTY()
 	TArray<AEnemy_Effect_1*> Effect1Pool;
 	UPROPERTY()
 	TArray<AEnemy_Effect_2*> Effect2Pool;
 	UPROPERTY()
 	TArray<AEnemy_Effect_3*> Effect3Pool;
+	UPROPERTY()
+	TArray<AEnemy_Effect_4*> Effect4Pool;
 
 	UPROPERTY(EditAnywhere, Category = "Effect")
 	int m_effect1Stock;
@@ -51,5 +58,7 @@ private:
 	int m_effect2Stock;
 	UPROPERTY(EditAnywhere, Category = "Effect")
 	int m_effect3Stock;
+	UPROPERTY(EditAnywhere, Category = "Effect")
+	int m_effect4Stock;
 
 };

@@ -26,6 +26,7 @@ class AEnemy_EffectManager;
 class AEnemy_Effect_1;
 class AEnemy_Effect_2;
 class AEnemy_Effect_3;
+class AEnemy_Effect_4;
 
 //エネミーの状態
 UENUM(BlueprintType)
@@ -177,6 +178,7 @@ public:
 	AEnemy_Effect_1* Effect1_Keeper;
 	AEnemy_Effect_2* Effect2_Keeper;
 	AEnemy_Effect_3* Effect3_Keeper;
+	AEnemy_Effect_4* Effect4_Keeper;
 
 		UPROPERTY()
 		APlayerCharacter* m_pPlayerChara;	//プレイヤーキャラクターポインタ

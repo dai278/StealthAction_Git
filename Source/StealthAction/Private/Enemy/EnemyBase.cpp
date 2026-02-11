@@ -44,6 +44,7 @@
 #include "Enemy_Effect/Enemy_Effect_1.h"
 #include "Enemy_Effect/Enemy_Effect_2.h"
 #include "Enemy_Effect/Enemy_Effect_3.h"
+#include "Enemy_Effect/Enemy_Effect_4.h"
 
 
 //#include "Sound/BGMManagerBase.h
@@ -2364,6 +2365,7 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 	AEnemy_Effect_1* Effect1 = m_effectPool->GetEffect1();
 	AEnemy_Effect_2* Effect2 = m_effectPool->GetEffect2();
 	AEnemy_Effect_3* Effect3 = m_effectPool->GetEffect3();
+	AEnemy_Effect_4* Effect4 = m_effectPool->GetEffect4();
 
 	if (Effect1_Keeper)
 	{
@@ -2376,6 +2378,10 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 	if (Effect3_Keeper)
 	{
 		Effect3_Keeper->InvisibleEffect();
+	}
+	if (Effect4_Keeper)
+	{
+		Effect4_Keeper->InvisibleEffect();
 	}
 
 	if (m_battleCheck || m_battleNoiseCheck)
@@ -2399,6 +2405,16 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 		Effect2->ActivateEffect(StartPos,this);
 
 	}
+	else if(m_doubtCheck|| m_doubtNoiseCheck)
+	{
+		if (!Effect4)
+		{
+			return;
+		}
+		FVector StartPos = GetActorLocation();
+
+		Effect4->ActivateEffect(StartPos, this);
+	}
 	else
 	{
 		if (!Effect3)
@@ -2413,5 +2429,5 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 	Effect1_Keeper = Effect1;
 	Effect2_Keeper = Effect2;
 	Effect3_Keeper = Effect3;
-
+	Effect4_Keeper = Effect4;
 }
