@@ -2361,17 +2361,17 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 	AEnemy_Effect_2* Effect2 = m_effectPool->GetEffect2();
 	AEnemy_Effect_3* Effect3 = m_effectPool->GetEffect3();
 
-	if (Effect1)
+	if (Effect1_Keeper)
 	{
-		Effect1->InvisibleEffect();
+		Effect1_Keeper->InvisibleEffect();
 	}
-	if (Effect2)
+	if (Effect2_Keeper)
 	{
-		Effect2->InvisibleEffect();
+		Effect2_Keeper->InvisibleEffect();
 	}
-	if (Effect3)
+	if (Effect3_Keeper)
 	{
-		Effect3->InvisibleEffect();
+		Effect3_Keeper->InvisibleEffect();
 	}
 
 	if (m_battleCheck || m_battleNoiseCheck)
@@ -2405,4 +2405,9 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 
 		Effect3->ActivateEffect(StartPos);
 	}
+
+	Effect1_Keeper = Effect1;
+	Effect2_Keeper = Effect2;
+	Effect3_Keeper = Effect3;
+
 }

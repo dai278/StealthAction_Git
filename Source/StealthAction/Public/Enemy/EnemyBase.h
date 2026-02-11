@@ -23,6 +23,9 @@ class AEnemy_Weapon_1;
 class AExtendedSpotLight;
 class USwordAttackComponent;
 class AEnemy_EffectManager;
+class AEnemy_Effect_1;
+class AEnemy_Effect_2;
+class AEnemy_Effect_3;
 
 //エネミーの状態
 UENUM(BlueprintType)
@@ -170,6 +173,10 @@ public:
 	void OnNoiseHeard(const int& _noiseVolume, const FVector& _pos);
 
 	AEnemy_EffectManager* m_effectPool;
+
+	AEnemy_Effect_1* Effect1_Keeper;
+	AEnemy_Effect_2* Effect2_Keeper;
+	AEnemy_Effect_3* Effect3_Keeper;
 
 		UPROPERTY()
 		APlayerCharacter* m_pPlayerChara;	//プレイヤーキャラクターポインタ
