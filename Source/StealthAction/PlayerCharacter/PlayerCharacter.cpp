@@ -989,6 +989,7 @@ void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakK
 	);
 	m_bInvincible = true;
 	m_invincibleTimer = 0.f;
+	m_bDash = false;
 	ChangePlayerStatus(EPlayerStatus::Damage);
 	m_knockBackVelocity = KnockBackVec;
 	if (m_cameraStatus != ECameraStatus::ThirdPerson) {

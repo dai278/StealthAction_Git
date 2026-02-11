@@ -12,6 +12,7 @@
 //前方宣言
 class UBoxComponent;
 class UStaticMeshComponent;
+class USkeletalMeshComponent;
 
 UCLASS()
 class STEALTHACTION_API AItemBase : public AActor, public ICameraFocusProvider
@@ -48,6 +49,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* Mesh;
+
+	UPROPERTY(VisibleAnywhere)
+	USkeletalMeshComponent* SkeletalMesh;
 
 	// カメラフォーカス用コンポーネント
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")

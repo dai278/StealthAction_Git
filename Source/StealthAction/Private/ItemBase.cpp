@@ -25,6 +25,10 @@ AItemBase::AItemBase()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(RootComponent);
 
+	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	SkeletalMesh->SetupAttachment(RootComponent);
+	SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	// Mesh‚Í“–‚½‚è”»’è‚µ‚È‚¢
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
