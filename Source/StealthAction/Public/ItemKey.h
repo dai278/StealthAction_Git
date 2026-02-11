@@ -11,6 +11,9 @@
 
 class AGoalActor;
 
+//クラスのメンバ関数をキーアイテム取得時のコールバックにするときのマクロ
+#define CreateNoiseEventCallback(_func) std::bind(&_func, this)
+
 
 UCLASS()
 class STEALTHACTION_API AItemKey : public AItemBase
@@ -31,9 +34,20 @@ public:
 
 	}
 
+	//キーアイテム取得時のコールバック関数登録
+	void SetOnGetKeyItemCallback(const std::function<void()>& _callbackFunc)
+	{
+		if (_callbackFunc == nullptr) { return; }
+		m_onGetKeyItemCallback = _callbackFunc;
+	}
+
 protected:
 	// オーバーラップ時
 	virtual void HandleOverlap(AActor* OtherActor) override;
+
+	//ゲームスタート時、または生成時に呼ばれる処理
+	virtual void BeginPlay() override;
+
 
 	// ===== ゴール生成用 =====
 	UPROPERTY(EditAnywhere, Category = "Goal")
@@ -42,5 +56,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Goal")
 	FVector GoalSpawnLocation;
 
+	std::function<void()> m_onGetKeyItemCallback;
 
 };

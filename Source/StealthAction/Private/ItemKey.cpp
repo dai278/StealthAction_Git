@@ -8,10 +8,28 @@
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 #include "UI/HUD/HUDWidget.h"
 #include "Kismet/GameplayStatics.h"
+#include "KeyItemSubsystem.h"
 //コンストラクタ
 AItemKey::AItemKey()
 {
 	GoalSpawnLocation = FVector(0.f, 0.f, 0.f);
+}
+
+//ゲームスタート時、または生成時に呼ばれる処理
+void AItemKey::BeginPlay()
+{
+    Super::BeginPlay();
+    
+    // キーアイテムをワールドサブシステムに登録
+    UKeyItemSubsystem* KeyItemSubsystem = GetWorld()->GetSubsystem<UKeyItemSubsystem>();
+    if (KeyItemSubsystem)
+    {
+        KeyItemSubsystem->RegisterKeyItem(this);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("[]Failed to get KeyItemSubsystem"));
+    }
 }
 
 void AItemKey::HandleOverlap(AActor* OtherActor)
@@ -60,6 +78,9 @@ void AItemKey::HandleOverlap(AActor* OtherActor)
             {
                 PlayerCharacter->OnGetKeyItem();
             }
+
+			// キーアイテム取得コールバックの呼び出し
+			if (m_onGetKeyItemCallback) { m_onGetKeyItemCallback(); }
         }
 		else
 		{
