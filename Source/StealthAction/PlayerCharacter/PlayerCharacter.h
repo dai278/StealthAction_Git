@@ -507,7 +507,11 @@ private:
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	bool GetHasKeyItem() const { return bHasKeyItem; }
 	
+	//開始時演出用カメラ
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<class ACameraActor> m_focusMovieCamera ;
 
+	
 	public:
 		//鍵取得時の関数
 		void OnGetKeyItem();

@@ -161,6 +161,7 @@ APlayerCharacter::APlayerCharacter()
 		//カメラをスプリングアームにタッチさせる
 		m_pCamera->SetupAttachment(m_pSpringArm, USpringArmComponent::SocketName);
 		m_pCamera->bUsePawnControlRotation = false;
+
 	}
 
 	//カメラフォーカスディレクターコンポーネント生成
@@ -197,6 +198,7 @@ void APlayerCharacter::BeginPlay()
 		//カメラピッチの制限
 		PC->PlayerCameraManager->ViewPitchMin = -60.f;
 		PC->PlayerCameraManager->ViewPitchMax = 20.f;
+
 	}
 
 	UCapsuleComponent* capsel = GetCapsuleComponent();
@@ -350,6 +352,8 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 	AddControllerYawInput(m_cameraRotateInput.X);
 	AddControllerPitchInput(m_cameraRotateInput.Y);
 
+	//影潜り中はカメラオフセットを変更しない
+	if (m_cameraStatus == ECameraStatus::InShadow) { return; }
 
 	//X軸入力があり、移動入力がなければ
 	if (m_cameraRotateInput.X != 0 && GetCharacterMovement()->Velocity.Length() <= m_WalkSpeed) {
@@ -872,7 +876,7 @@ void APlayerCharacter::StartCameraFocus(AActor* const _cameraActor, float _blend
 	
 	m_bCanControl = false;
 	bool isStat;
-	m_pCameraFocusDirector->StartFocusByProviderActor(_cameraActor,isStat);
+	m_pCameraFocusDirector->StartFocusByProviderActor(_cameraActor,isStat,PC);
 
 }
 

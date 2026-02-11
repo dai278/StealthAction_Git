@@ -6,6 +6,8 @@
 
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
+
+
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 
 // Sets default values for this component's properties
@@ -25,82 +27,150 @@ void UCameraFocusDirectorComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
+
 }
 
 
 //----------------------------------------------
 // 開始処理
 //----------------------------------------------
-void UCameraFocusDirectorComponent::StartFocusByProviderActor(AActor* ProviderActor,  bool& isStart)
+void UCameraFocusDirectorComponent::StartFocusByProviderActor(AActor* ProviderActor, bool& isStart, APlayerController* _controller)
 {
-    if (!ProviderActor)
-    {
+	if (!ProviderActor)
+	{
 		isStart = false;
-        return ;
-    }
+		return;
+	}
 
-    if (!ProviderActor->GetClass()->ImplementsInterface(UCameraFocusProvider::StaticClass()))
-    {
-        isStart = false;
-        return;
-    }
-
-    const FCameraFocusData Data = ICameraFocusProvider::Execute_GetCameraFocusData(ProviderActor);
-
-    if (!Data.FocusCamera)
-    {
-        isStart = false;
-        return;
-    }
-
-    APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-    if (!PC)
-    {
+	if (!ProviderActor->GetClass()->ImplementsInterface(UCameraFocusProvider::StaticClass()))
+	{
 		isStart = false;
-        return;
-    }
-    // 多重開始の暴発防止：まず復帰（ポーズ解除含む）してから上書き
-    if (bFocusing)
-    {
-        RestoreInternal(/*bUnpause*/true);
-    }
+		return;
+	}
+
+	const FCameraFocusData Data = ICameraFocusProvider::Execute_GetCameraFocusData(ProviderActor);
+
+	if (!Data.FocusCamera)
+	{
+		isStart = false;
+		return;
+	}
+
+	//APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+  //  if (!_controller)
+  //  {
+		//isStart = false;
+  //      return;
+  //  }
+	// 多重開始の暴発防止：まず復帰（ポーズ解除含む）してから上書き
+	if (bFocusing)
+	{
+		RestoreInternal(/*bUnpause*/true);
+	}
 
 	//現在のViewTargetを保存
-    SavedViewTarget = PC->GetViewTarget();
+	SavedViewTarget = _controller->GetViewTarget();
 	// ブレンドアウト時間を保存
-    SavedBlendOutTime = Data.BlendOutTime;
+	SavedBlendOutTime = Data.BlendOutTime;
 	// ポーズするか？
-    bPausedGame = Data.bPause;
+	bPausedGame = Data.bPause;
 
-    // 切替
-    PC->SetViewTargetWithBlend((AActor*)Data.FocusCamera, Data.BlendTime);
+	// 切替
+	_controller->SetViewTargetWithBlend((AActor*)Data.FocusCamera, Data.BlendTime);
 
-    // 実時間で終了予定を決める
-    bFocusing = true;
-    EndRealTime = FPlatformTime::Seconds() + ((Data.PauseTime < 0.f) ? 0 : Data.PauseTime);
+	// 実時間で終了予定を決める
+	bFocusing = true;
+	EndRealTime = FPlatformTime::Seconds() + ((Data.PauseTime < 0.f) ? 0 : Data.PauseTime);
 
-    isStart = true;
+	isStart = true;
 
-    if (bPausedGame)
-    {
-        //ポーズ
-        UGameplayStatics::SetGamePaused(this, true);
-    }
+	if (bPausedGame)
+	{
+		//ポーズ
+		UGameplayStatics::SetGamePaused(this, true);
+	}
 
 
 }
 
+void UCameraFocusDirectorComponent::StartFocus(AActor* ProviderActor, bool& isStart, APlayerController* _controller)
+{
+
+	if (!ProviderActor)
+	{
+		isStart = false;
+		return;
+	}
+
+
+
+	FCameraFocusData Data = {
+		// ギミックごとに置くカメラ
+		Cast<ACameraActor>(ProviderActor)
+		, 3.f
+		, 0.3f
+		,true
+		,false
+		,true
+		, 5.f
+	};
+
+
+	if (!Data.FocusCamera)
+	{
+		isStart = false;
+		return;
+	}
+
+	//APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+  //  if (!_controller)
+  //  {
+		//isStart = false;
+  //      return;
+  //  }
+	// 多重開始の暴発防止：まず復帰（ポーズ解除含む）してから上書き
+	if (bFocusing)
+	{
+		RestoreInternal(/*bUnpause*/true);
+	}
+
+	//現在のViewTargetを保存
+	SavedViewTarget = _controller->GetViewTarget();
+	// ブレンドアウト時間を保存
+	SavedBlendOutTime = Data.BlendOutTime;
+	// ポーズするか？
+	bPausedGame = Data.bPause;
+
+	// 切替
+	_controller->SetViewTargetWithBlend((AActor*)Data.FocusCamera, Data.BlendTime);
+
+	// 実時間で終了予定を決める
+	bFocusing = true;
+	EndRealTime = FPlatformTime::Seconds() + ((Data.PauseTime < 0.f) ? 0 : Data.PauseTime);
+
+	isStart = true;
+
+	if (bPausedGame)
+	{
+		//ポーズ
+		UGameplayStatics::SetGamePaused(this, true);
+	}
+
+
+}
+
+
+
 void UCameraFocusDirectorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-    if (!bFocusing) return;
+	if (!bFocusing) return;
 
-    if (FPlatformTime::Seconds() >= EndRealTime)
-    {
-        RestoreInternal(/*bUnpause*/true);
-    }
+	if (FPlatformTime::Seconds() >= EndRealTime)
+	{
+		RestoreInternal(/*bUnpause*/true);
+	}
 }
 
 
@@ -109,8 +179,8 @@ void UCameraFocusDirectorComponent::TickComponent(float DeltaTime, ELevelTick Ti
 //----------------------------------------------
 void UCameraFocusDirectorComponent::ForceRestore()
 {
-    if (!bFocusing) return;
-    RestoreInternal(true);
+	if (!bFocusing) return;
+	RestoreInternal(true);
 }
 
 
@@ -119,23 +189,23 @@ void UCameraFocusDirectorComponent::ForceRestore()
 //----------------------------------------------
 void UCameraFocusDirectorComponent::RestoreInternal(bool bUnpause)
 {
-    APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-    if (PC)
-    {
-        AActor* ReturnTarget = SavedViewTarget.Get();
-        if (ReturnTarget)
-        {
-            APlayerCharacter* player =(APlayerCharacter*) PC->GetPawn();
-            player->EndCameraFocus(SavedBlendOutTime);
-        }
-    }
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	if (PC)
+	{
+		AActor* ReturnTarget = SavedViewTarget.Get();
+		if (ReturnTarget)
+		{
+			APlayerCharacter* player = (APlayerCharacter*)PC->GetPawn();
+			player->EndCameraFocus(SavedBlendOutTime);
+		}
+	}
 
-    if (bUnpause && bPausedGame)
-    {
-        UGameplayStatics::SetGamePaused(this, false);
-    }
+	if (bUnpause && bPausedGame)
+	{
+		UGameplayStatics::SetGamePaused(this, false);
+	}
 
-    bFocusing = false;
-    bPausedGame = false;
-    SavedViewTarget.Reset();
+	bFocusing = false;
+	bPausedGame = false;
+	SavedViewTarget.Reset();
 }

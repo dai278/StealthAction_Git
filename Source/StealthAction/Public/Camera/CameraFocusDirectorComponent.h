@@ -8,6 +8,8 @@
 
 #include "CameraFocusDirectorComponent.generated.h"
 
+class APlayerController;
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class STEALTHACTION_API UCameraFocusDirectorComponent : public UActorComponent
@@ -28,8 +30,11 @@ public:
 
 	
     // äJénèàóù
-    UFUNCTION(BlueprintCallable, Category = "Camera")
-    void StartFocusByProviderActor(AActor* ProviderActor,bool& isStart);
+    //UFUNCTION(BlueprintCallable, Category = "Camera")
+    void StartFocusByProviderActor(AActor* ProviderActor,bool& isStart,APlayerController* _controller);
+
+    void StartFocus(AActor* ProviderActor, bool& isStart, APlayerController* _controller);
+
 
     // èIóπèàóù
     UFUNCTION(BlueprintCallable, Category = "Camera")
