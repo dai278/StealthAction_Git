@@ -48,7 +48,7 @@
 #include "Enemy_Weapon/Enemy_Bullet/Enemy_BulletStorage_1.h"
 
 
-#include "Sound/BGMManagerBase.h
+//#include "Sound/BGMManagerBase.h
 //----------------------------------------------------------
 // コンストラクタ
 //----------------------------------------------------------
@@ -463,11 +463,11 @@ void AEnemyBase::Tick(float DeltaTime)
 	if (m_BGMManager)
 	{
 		bool bWasBattle =
-			(m_prevState == EEnemyStatus::Battle
+			(m_prevState == EEnemyStatus::Battle ||
 				m_prevState == EEnemyStatus::Battle_Noise);
 
 		bool bIsBattle =
-			(m_enemyCurrentState == EEnemyStatus::Battle
+			(m_enemyCurrentState == EEnemyStatus::Battle ||
 				m_enemyCurrentState == EEnemyStatus::Battle_Noise);
 
 		// 戦闘開始

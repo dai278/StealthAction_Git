@@ -10,6 +10,7 @@
 #include "GameFramework/Character.h"
 #include "GameInstance/PlayDataInfo.h"
 #include "Damage/IDamage.h"
+#include "Sound/BGMManagerBase.h"
 
 #include "EnemyBase.generated.h"
 
@@ -439,5 +440,17 @@ public:
 		bool IsUseVisiblity;
 		//聴覚を使うかどうか？
 		bool IsUseHearing;
+
+protected:
+
+	//=======================================
+    // BGM管理用
+    //=======================================
+
+	UPROPERTY()
+	ABGMManagerBase* m_BGMManager;
+
+	EEnemyStatus m_prevState;
+
 
 };
