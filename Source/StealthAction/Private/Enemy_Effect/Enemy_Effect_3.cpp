@@ -5,7 +5,7 @@
 #include "Components/BillboardComponent.h"
 #include "Components/SceneComponent.h"
 AEnemy_Effect_3::AEnemy_Effect_3()
-	: m_effectDeleteTime(2.)
+	: m_effectDeleteTime(3.)
 
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
