@@ -9,6 +9,8 @@
 //--------------------------
 ALightSwitch::ALightSwitch()
 {
+	InteractPos[0] = GetActorLocation();
+
 }
 
 //--------------------------
@@ -17,6 +19,7 @@ ALightSwitch::ALightSwitch()
 void ALightSwitch::BeginPlay()
 {
 	Super::BeginPlay();
+
 
 }
 

@@ -29,10 +29,24 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UShadowTimeWidget* ShadowTimeWidget;
 
+	//キーアイテムを取得しているか
+	UPROPERTY(BlueprintReadWrite, Category = "HUD", meta = (AllowPrivateAccess = "true"))
+	bool bHasKeyItem = false;
+
+	
 
 
 
 public:
+
+	// キーアイテム取得状態設定関数
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void SetHasKeyItem(bool bNewHasKeyItem) { bHasKeyItem = bNewHasKeyItem; };
+
+	// キーアイテム取得状態取得関数
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	bool GetHasKeyItem() const { return bHasKeyItem; };
+
 	// PlayerController から呼ばれる更新関数
 	void UpdateShadowTime(float Rate);
 };

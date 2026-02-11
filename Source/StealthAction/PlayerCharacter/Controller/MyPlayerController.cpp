@@ -219,6 +219,18 @@ void AMyPlayerController::SetInputMode_Menu()
 	bShowMouseCursor = true;
 }
 
+// Get HUDWidget
+UHUDWidget* AMyPlayerController::GetHUDWidget()
+{
+	return HUDWidget;
+}
+
+// Set HUDWidget
+void AMyPlayerController::SetHUDWidget(UHUDWidget* NewHUDWidget)
+{
+	HUDWidget = NewHUDWidget;
+}
+
 // ============================
 // IMC ìKópèàóù
 // ============================

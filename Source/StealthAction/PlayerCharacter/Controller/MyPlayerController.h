@@ -108,6 +108,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void SetInputMode_Menu();
 
+public:
+	UHUDWidget* GetHUDWidget();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void SetHUDWidget(UHUDWidget* NewHUDWidget) ;
+
 protected:
 	void ApplyIMC(EInputModeType NewMode);
 

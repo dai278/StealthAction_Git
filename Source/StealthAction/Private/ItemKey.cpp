@@ -4,6 +4,9 @@
 //インクルード
 #include "ItemKey.h"
 #include "GoalActor.h"
+#include "StealthAction/PlayerCharacter/Controller/MyPlayerController.h"
+#include "StealthAction/PlayerCharacter/PlayerCharacter.h"
+#include "UI/HUD/HUDWidget.h"
 #include "Kismet/GameplayStatics.h"
 //コンストラクタ
 AItemKey::AItemKey()
@@ -51,7 +54,12 @@ void AItemKey::HandleOverlap(AActor* OtherActor)
 
 			//カメラフォーカス開始
 			CameraFocusStart(OtherActor);
-            //
+
+			APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
+            if (PlayerCharacter)
+            {
+                PlayerCharacter->OnGetKeyItem();
+            }
         }
 		else
 		{

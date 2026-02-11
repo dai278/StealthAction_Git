@@ -43,6 +43,7 @@ enum class ECameraStatus : uint8
 	TopDownView      UMETA(DisplayName = "Top Down View"),//俯瞰
 	InShadow		UMETA(DisplayName = "InShadow"),//影
 	Crouch			UMETA(DisplayName = "Crouch"),//しゃがみ
+	Dash			UMETA(DisplayName = "Dash"),//ダッシュ
 	Num			 UMETA(DisplayName = "Num")//数計測用、UMETA(DisplayName = "Num")が必要かわからないけど書かないバグりそうな気がしたから書いてます
 };
 
@@ -135,6 +136,9 @@ public:
 private:
 	//カメラ更新
 	void UpdateCamera(float _deltaTime);
+
+	//カメラ手振れ補正更新処理
+	void UpdateCameraShake(float _deltaTime);
 
 	//カメラコリジョン判定処理
 	void UpdateCameraCollision();
@@ -493,5 +497,19 @@ private:
 	FPlayerInfo m_playerInfo; //プレイヤー情報構造体
 
 	bool bIsCameraForced;//カメラ強制移動中か
+
+	//キーアイテムを取得しているか
+	bool bHasKeyItem;
+
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	void SetHasKeyItem(bool bHasItem) { bHasKeyItem = bHasItem; }
+
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	bool GetHasKeyItem() const { return bHasKeyItem; }
+	
+
+	public:
+		//鍵取得時の関数
+		void OnGetKeyItem();
 
 };

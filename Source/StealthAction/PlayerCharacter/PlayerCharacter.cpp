@@ -32,6 +32,8 @@
 #include "Checkpoint/CheckpointManager.h"
 #include "Interact/Interact.h"
 #include "Camera/CameraFocusDirectorComponent.h"
+#include "UI/HUD/HUDWidget.h"
+#include "StealthAction/PlayerCharacter/Controller/MyPlayerController.h"
 
 
 
@@ -94,7 +96,7 @@ APlayerCharacter::APlayerCharacter()
 	, m_bJumping(false)
 	, m_dashStaminaConsumptionMagnification(1.f)
 	, m_interactTimer(0.f)
-	, m_maxOffsetY(100.f)
+	, m_maxOffsetY(70.f)
 	, m_initOffsetY(30.f)
 	, m_staminaRecoveryMagnification(1.5f)
 
@@ -121,6 +123,7 @@ APlayerCharacter::APlayerCharacter()
 	m_cameraInitPos[(int)ECameraStatus::TopDownView] = { FRotator{ 0.f,0.f,0.f},90.f,1000.f,FVector{} };
 	m_cameraInitPos[(int)ECameraStatus::InShadow] = { FRotator{ 0.f,0.f,0.f},60.f,300.f ,FVector{} };
 	m_cameraInitPos[(int)ECameraStatus::Crouch] = { FRotator{ 0.f,0.f,0.f},60.f,250.f,FVector{} };
+	m_cameraInitPos[(int)ECameraStatus::Dash] = { FRotator{ 0.f,0.f,0.f},90.f,200.f,FVector{} };
 
 
 	//カプセルの初期値を記録
@@ -344,6 +347,10 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 	//処理落ちしても一定速度でカメラが回るように補正
 	float rotateCorrection = CGameUtility::GetFpsCorrection(_deltaTime);
 
+	AddControllerYawInput(m_cameraRotateInput.X);
+	AddControllerPitchInput(m_cameraRotateInput.Y);
+
+
 	//X軸入力があり、移動入力がなければ
 	if (m_cameraRotateInput.X != 0 && GetCharacterMovement()->Velocity.Length() <= m_WalkSpeed) {
 		float moveOffsetDir = (m_cameraRotateInput.X > 0) ? -1.f : 1.f;
@@ -351,7 +358,7 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 		//現在のオフセット位置
 		float targetOffset = m_pSpringArm->SocketOffset.Y;
 		//100スピード
-		targetOffset += moveOffsetDir * 100.f*_deltaTime;
+		targetOffset += moveOffsetDir * 70.f*_deltaTime;
 
 		//最大値チェック
 		if (targetOffset > m_maxOffsetY)
@@ -390,7 +397,7 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 				float moveOffsetDir = (socketOffsetPosY > m_initOffsetY) ? -1.f : 1.f;
 
 				//ソケット位置移動
-				socketOffsetPosY += moveOffsetDir * 10.f * _deltaTime;
+				socketOffsetPosY += moveOffsetDir * 2.f * _deltaTime;
 				m_pSpringArm->SocketOffset.Y = socketOffsetPosY;
 
 				//ある程度近づいたら合わせる
@@ -402,8 +409,16 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 			}
 		}
 	}
-	AddControllerYawInput(m_cameraRotateInput.X);
-	AddControllerPitchInput(m_cameraRotateInput.Y);
+}
+
+
+//----------------------------------------------------------
+//手振れ補正処理
+//----------------------------------------------------------
+void APlayerCharacter::UpdateCameraShake(float _deltaTime)
+{
+	//現在のソケットオフセット
+	FVector currentSocketOffset = m_pSpringArm->SocketOffset;
 }
 
 //----------------------------------------------------------
@@ -1025,7 +1040,10 @@ void APlayerCharacter::Enhanced_Move(const FInputActionValue& Value)
 void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
 {
 	if (!m_bCanControl) { return; }
-	m_bDash = Value.Get<bool>();
+
+	bool isDash = Value.Get<bool>();
+	
+	//しゃがみ中、影状態ならダッシュしない
 	if (m_bIsCrouch || m_status == EPlayerStatus::InShadow)
 	{ 
 		m_bDash = false; 
@@ -1036,10 +1054,12 @@ void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
 	if (m_charaMoveInput.IsNearlyZero(0.1f)) {
 		m_bDash = false;
 		GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
+		m_cameraStatus = ECameraStatus::ThirdPerson;
+		m_bCameraSwitching = true;
 		return;
 	}
 
-	if(m_bDash)
+	if(isDash)
 	{
 		//スタミナ消費
 		bool isOver = false;
@@ -1050,9 +1070,21 @@ void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
 		if (isOver) {
 			m_bDash = false;
 			GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
+			m_cameraStatus = ECameraStatus::ThirdPerson;
+			m_bCameraSwitching = true;
 			return;
 		}
-		
+
+		if(!m_bDash)
+		{
+			//ダッシュに切り替わった時の処理
+			//移動速度を切り替え
+			GetCharacterMovement()->MaxWalkSpeed = m_DashSpeed;
+			m_cameraStatus = ECameraStatus::Dash;
+			m_bCameraSwitching = true;
+			m_bDash = true;
+		}
+
 		//ダッシュ音発生
 		UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
 		if (manager)
@@ -1060,11 +1092,13 @@ void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
 			manager->MakeNoise(4, GetActorLocation());
 		}
 
-		//移動速度を切り替え
-		GetCharacterMovement()->MaxWalkSpeed = m_DashSpeed;
 	}
 	else {
+		
 		GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
+		m_cameraStatus = ECameraStatus::ThirdPerson;
+		m_bCameraSwitching = true;
+		m_bDash = false;
 	}
 
 
@@ -1445,5 +1479,17 @@ void APlayerCharacter::CancellationShadow(const EPlayerStatus& _status)
 	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight);
 	m_bUsingMesh = false;
 	ChangePlayerStatus(_status);
+
+}
+
+
+//----------------------------------------------------------
+//鍵取得時の関数
+//----------------------------------------------------------
+void APlayerCharacter::OnGetKeyItem()
+{
+	AMyPlayerController* PC = Cast<AMyPlayerController>(Controller);
+	if (!PC) { return; }
+	PC->GetHUDWidget()->SetHasKeyItem(true);
 
 }
