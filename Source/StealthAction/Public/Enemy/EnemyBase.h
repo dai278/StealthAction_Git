@@ -27,6 +27,7 @@ class AEnemy_Effect_1;
 class AEnemy_Effect_2;
 class AEnemy_Effect_3;
 class AEnemy_Effect_4;
+class ALightSwitch;
 
 //エネミーの状態
 UENUM(BlueprintType)
@@ -190,6 +191,9 @@ public:
 
 		UPROPERTY()
 		TArray<AEnemy_Bullet_1*> m_pALLBullet_1;
+
+		UPROPERTY()
+		TArray<ALightSwitch*> m_pALLLightSwitch;
 
 		UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 		UShadowComponent* m_pShadow;  //影

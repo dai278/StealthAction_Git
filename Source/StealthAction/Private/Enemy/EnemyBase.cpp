@@ -45,6 +45,7 @@
 #include "Enemy_Effect/Enemy_Effect_2.h"
 #include "Enemy_Effect/Enemy_Effect_3.h"
 #include "Enemy_Effect/Enemy_Effect_4.h"
+#include "Interact/LightSwitch.h"
 
 
 //#include "Sound/BGMManagerBase.h
@@ -255,6 +256,18 @@ void AEnemyBase::BeginPlay()
 		}
 	}
 
+	TArray<AActor*> LightSwitch_Actors;
+	UGameplayStatics::GetAllActorsOfClass(this, ALightSwitch::StaticClass(), LightSwitch_Actors);
+
+	for (AActor* actor : LightSwitch_Actors)
+	{
+		ALightSwitch* LightSwitch = Cast<ALightSwitch>(actor);
+		if (LightSwitch)
+		{
+			// 自分以外の敵
+			m_pALLLightSwitch.Add(LightSwitch);
+		}
+	}
 
 
 	UCapsuleComponent* capsel = GetCapsuleComponent();
@@ -364,6 +377,10 @@ void AEnemyBase::BeginPlay()
 	{
 		DefaultCollisionParams.AddIgnoredActor(bullet);
 	}
+	for (ALightSwitch* LightSwitch : m_pALLLightSwitch)
+	{
+		DefaultCollisionParams.AddIgnoredActor(LightSwitch);
+	}
 
 	//				
 	BattleCollisionParams.AddIgnoredActor(this);
@@ -371,6 +388,10 @@ void AEnemyBase::BeginPlay()
 	for (AEnemy_Bullet_1* bullet : m_pALLBullet_1)
 	{
 		BattleCollisionParams.AddIgnoredActor(bullet);
+	}
+	for (ALightSwitch* LightSwitch : m_pALLLightSwitch)
+	{
+		BattleCollisionParams.AddIgnoredActor(LightSwitch);
 	}
 
 	m_prevState = m_enemyCurrentState;
@@ -634,6 +655,10 @@ void AEnemyBase::UpdateVisiblity(float _deltaTime)
 	for (AEnemyBase* enemy : m_pOtherEnemyBase)
 	{
 		CollisionParams.AddIgnoredActor(enemy);
+	}
+	for (ALightSwitch* LightSwitch : m_pALLLightSwitch)
+	{
+		CollisionParams.AddIgnoredActor(LightSwitch);
 	}
 
 	FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
@@ -1778,6 +1803,10 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 						for (AEnemyBase* enemy : m_pOtherEnemyBase)
 						{
 							CollisionParams.AddIgnoredActor(enemy);
+						}
+						for (ALightSwitch* LightSwitch : m_pALLLightSwitch)
+						{
+							CollisionParams.AddIgnoredActor(LightSwitch);
 						}
 
 						FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
