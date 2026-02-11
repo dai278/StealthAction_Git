@@ -324,7 +324,7 @@ void AEnemyBase::BeginPlay()
 		);
 
 		FRotator ownerRot = GetOwner()->GetActorRotation();
-		ownerRot += FRotator{ -110.,0.,0. };
+		ownerRot += FRotator{ -130.,0.,0. };
 		m_spotLightInstance->SetActorRotation(ownerRot);
 		m_spotLightInstance->SetActorLocation(m_spotLightInstance->GetActorLocation() + FVector{ 0.,0.,50. });
 	}
@@ -1251,7 +1251,7 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 
 	m_enemyPos_Return = GetActorLocation();		//帰還の位置を保持
 
-	m_enemyDirection_Return = GetActorLocation() + (GetActorForwardVector() * 100);//帰還の方向を保持
+	m_enemyDirection_Return = GetActorLocation() + (GetActorForwardVector() * 1000);//帰還の方向を保持
 
 	//移動中止
 	if (m_patrolCancel)
@@ -1936,13 +1936,6 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 		m_enemyPos_Left_Miss = m_enemyPos - GetActorRightVector() * m_visionRange_Short;		//エネミー座標から左座標
 		m_enemyPos_Right_Miss = m_enemyPos + GetActorRightVector() * m_visionRange_Short;		//エネミー座標から右座標
 
-		//if (distance_LastSeenPos > m_stopDistance_Nav+50)
-		//{
-		//	//移動処理
-		//	UpdateMove_Nav(_deltaTime);
-
-		//}
-		//else
 		{
 			//移動停止（NAV）の処理
 			m_moveStop_Nav = true;
@@ -2073,7 +2066,7 @@ void AEnemyBase::CaseReturn(float _deltaTime)
 
 	}
 
-	if (m_stopDistance_Player < distance)
+	if (m_stopDistance_2D < distance)
 	{
 		UpdateMove_Nav(_deltaTime);
 	}
