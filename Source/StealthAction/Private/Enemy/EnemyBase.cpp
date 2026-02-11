@@ -253,8 +253,6 @@ void AEnemyBase::BeginPlay()
 		}
 	}
 
-	//カプセルコンポーネントとヒットした時に呼ばれるイベント関数を登録
-	this->GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AEnemyBase::OnHit);
 
 
 	UCapsuleComponent* capsel = GetCapsuleComponent();
@@ -554,7 +552,7 @@ void AEnemyBase::CaseDead(float _deltaTime)
 void AEnemyBase::StartStateValues(float _deltaTime)
 {
 	m_enemyPos = GetActorLocation();								//エネミーの座標
-	m_enemyPos_Eye = GetActorLocation() + FVector(0.f,0.f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight()) - GetActorForwardVector() * (GetCapsuleComponent()->GetScaledCapsuleRadius()) ;
+	m_enemyPos_Eye = GetActorLocation() + FVector(0.f, 0.f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight()) - GetActorForwardVector() * (GetCapsuleComponent()->GetScaledCapsuleRadius());
 	m_enemyForward = GetActorForwardVector();						//エネミーの正面ベクトル
 	m_enemyRight = GetActorRightVector();							//エネミーの右ベクトル
 	m_playerPos = m_pPlayerChara->GetActorLocation();		//プレイヤーの座標
@@ -634,16 +632,6 @@ void AEnemyBase::UpdateVisiblity(float _deltaTime)
 	bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos_Eye, m_playerPos, FCollisionObjectQueryParams::AllObjects, CollisionParams);
 
 
-	//DrawDebugLine(
-	//	GetWorld(),
-	//	m_enemyPos_Eye,          // 開始位置
-	//	m_playerPos,            // 終了位置
-	//	FColor::Red,    // 色
-	//	false,          // 永続表示するか
-	//	1.0f,           // 表示時間（秒）
-	//	0,              // Depth Priority
-	//	2.0f            // 太さ
-	//);
 	//ヒットするオブジェクトがある場合
 	if (isHit)
 	{
@@ -764,7 +752,7 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 		{
 
 			//以前の物音が今の物音より小さい場合
-			if (m_noiseVolume_keeper <= m_noiseVolume || (m_noiseLevel > 5 ))
+			if (m_noiseVolume_keeper <= m_noiseVolume || (m_noiseLevel > 5))
 			{
 
 				m_noiseVolume_keeper = m_noiseVolume;
@@ -850,7 +838,7 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 				{
 					if (m_noiseVolume_keeper == i)
 					{
-						m_noiseLevel = i-1;//物音レベルを更新
+						m_noiseLevel = i - 1;//物音レベルを更新
 
 						if (m_noiseLevel > 5)
 						{
@@ -871,7 +859,7 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 						if (m_noiseLevel > 5)
 						{
 							m_noiseLevel = 5;
-						}  
+						}
 
 					}
 				}
@@ -879,7 +867,7 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 
 			m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
 
-
+			
 			if (m_noiseLevel >= 2)
 			{
 				m_hearingTime = 0;	//聴覚時間リセット
@@ -887,6 +875,8 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 			}
 		}
 	}
+
+	//Level１以下は巡回のため
 	if (m_noiseLevel <= 1)
 	{
 		m_noiseCheck = false;		//物音チェックOF
@@ -1219,7 +1209,7 @@ void AEnemyBase::UpdateStatus(float _deltaTime)
 
 	double distance = (m_enemyPos_Keeper - m_enemyPos).Length();
 
-	if (distance <1)
+	if (distance < 1)
 	{
 		m_stopCheck = true;
 
@@ -1505,8 +1495,11 @@ void AEnemyBase::CaseDoubt_Noise(float _deltaTime)
 
 	m_doubtNoiseTime += _deltaTime;				//疑念時間の経過
 
-	//視点移動処理
-	UpdateViewMove(_deltaTime);
+	if (m_doubtNoiseTime > m_doubtNoiseTime_Limit / 2)
+	{
+		//視点移動処理
+		UpdateViewMove(_deltaTime);
+	}
 
 	//時間が経過すると終了(聴覚の場合)
 	if (m_doubtNoiseTime > m_doubtNoiseTime_Limit && m_enemyCurrentState_Keeper != EEnemyStatus::Patrol)
@@ -1784,10 +1777,29 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 				{
 					if (m_sword)
 					{
-						if (m_attackTime > m_attackTime_Limit)
+						FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
+
+						FVector m_enemyForwardPos = m_enemyPos + m_enemyForward * m_attackDistance;
+
+						//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
+						bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, m_enemyForwardPos, FCollisionObjectQueryParams::AllObjects, BattleCollisionParams);
+
+						//ヒットするオブジェクトがある場合
+						if (isHit)
 						{
-							//攻撃処理
-							UpdateAttack(_deltaTime);
+							AActor* hitActor = HitCollision.GetActor();
+
+							//当たったコリジョンがプレイヤーだった場合
+							if (hitActor->ActorHasTag("Player"))
+							{
+
+								if (m_attackTime > m_attackTime_Limit)
+								{
+									//攻撃処理
+									UpdateAttack(_deltaTime);
+								}
+
+							}
 						}
 					}
 				}
@@ -2187,7 +2199,7 @@ void AEnemyBase::UpdateMove_Nav(float _deltaTime)
 	}
 
 	//移動停止
-	if (m_moveStop_Nav|| distance < m_stopDistance_2D)
+	if (m_moveStop_Nav || distance < m_stopDistance_2D)
 	{
 
 		AIMove->StopMovement();
@@ -2255,16 +2267,16 @@ void AEnemyBase::UpdateAttack(float _deltaTime)
 			m_sword->Swinging(false);
 			m_animationAttackTime = 0;
 			m_attackTime = 0;
-
+			m_attackCheck = false;
 		}
 	}
-	
+
 	//武器を持っていたら
 	if (m_pEnemy_Weapon)
 	{
 		m_pEnemy_Weapon->BulletFire(m_attackTime, this);
 		m_attackTime = 0;
-
+		m_attackCheck = false;
 	}
 }
 
@@ -2304,23 +2316,6 @@ void AEnemyBase::OnNoiseHeard(const int& _noiseVolume, const FVector& _pos)
 }
 
 //------------------------------------------------------------------------------------------------------------
-//衝突判定
-//------------------------------------------------------------------------------------------------------------
-void AEnemyBase::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	//オーバーラップしたのがプレイヤーの時のみ反応させたい
-	//PlayerCharaBp->Actor->Tagに設定したタグ「Player」で、プレイヤー識別する
-	if (OtherActor->ActorHasTag("Player"))
-	{
-		//プレイヤーにキャストしてアイテム獲得時のイベントを起こす
-		APlayerCharacter* pPlayer = Cast<APlayerCharacter>(OtherActor);
-		if (!pPlayer) { return; }		//NULLチェック
-
-	}
-}
-
-
-//------------------------------------------------------------------------------------------------------------
 //ダメージ処理
 //------------------------------------------------------------------------------------------------------------
 void AEnemyBase::OnDamage(int32 Damage, FVector KnockBackValue, bool _bSneakKill)
@@ -2354,7 +2349,7 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 	}
 
 
-	if (m_battleCheck|| m_battleNoiseCheck)
+	if (m_battleCheck || m_battleNoiseCheck)
 	{
 		AEnemy_Effect_1* Effect = m_effectPool->GetEffect1();
 		if (!Effect)
@@ -2367,7 +2362,7 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 
 		Effect->ActivateEffect(StartPos);
 	}
-	else if (m_cautionCheck|| m_cautionNoiseCheck)
+	else if (m_cautionCheck || m_cautionNoiseCheck)
 	{
 		AEnemy_Effect_2* Effect = m_effectPool->GetEffect2();
 		if (!Effect)

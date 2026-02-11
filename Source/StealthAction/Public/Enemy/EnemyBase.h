@@ -90,10 +90,6 @@ public:
 	//攻撃を受けたときの処理
 	void OnDamage(int32 _damage, FVector _knockBackValue, bool _bSneakKill)override;		//エネミー別
 
-	//衝突判定
-	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
 	//攻撃が終わったことを通知するコールバック関数
 	void OnAttackEnd();
 
