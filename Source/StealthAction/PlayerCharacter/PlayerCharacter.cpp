@@ -1494,6 +1494,9 @@ void APlayerCharacter::TransformationShadowToIdle(const bool _bLightHit/*=false*
 //----------------------------------------------------------
 void APlayerCharacter::TransformationToShadow()
 {
+	m_bIsCrouch = false;
+	m_bDash = false;
+
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("PlayerInShadow"));
 	GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
 	ChangePlayerStatus(EPlayerStatus::InShadow);
