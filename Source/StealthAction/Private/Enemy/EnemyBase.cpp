@@ -47,6 +47,8 @@
 #include "Enemy_Weapon/Enemy_Weapon_1.h"
 #include "Enemy_Weapon/Enemy_Bullet/Enemy_BulletStorage_1.h"
 
+
+#include "Sound/BGMManagerBase.h
 //----------------------------------------------------------
 // コンストラクタ
 //----------------------------------------------------------
@@ -93,7 +95,7 @@ AEnemyBase::AEnemyBase()
 	, m_alertTime_Limit(10.0)
 	, m_missTime_Limit(1.0)
 	, m_returnTime_Limit(2.0)
-	, m_hearingTime_Limit(2.0)
+	, m_hearingTime_Limit(6.0)
 	, m_discoveryTime_Limit(2.0)
 	, m_attackTime_Limit(5.)
 	, m_animationAttackTime_Limit(0.5)
@@ -373,6 +375,21 @@ void AEnemyBase::BeginPlay()
 		BattleCollisionParams.AddIgnoredActor(bullet);
 	}
 
+	m_prevState = m_enemyCurrentState;
+
+	//BGMManager検索
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(
+		GetWorld(),
+		ABGMManagerBase::StaticClass(),
+		FoundActors
+	);
+
+	if (FoundActors.Num() > 0)
+	{
+		m_BGMManager = Cast<ABGMManagerBase>(
+			UGameplayStatics::GetActorOfClass(GetWorld(), ABGMManagerBase::StaticClass()));
+	}
 
 }
 
@@ -438,6 +455,35 @@ void AEnemyBase::Tick(float DeltaTime)
 
 	//ステータス管理処理
 	UpdateStatus(DeltaTime);
+
+	//=======================================
+	//BGM状態監視
+	//=======================================
+
+	if (m_BGMManager)
+	{
+		bool bWasBattle =
+			(m_prevState == EEnemyStatus::Battle
+				m_prevState == EEnemyStatus::Battle_Noise);
+
+		bool bIsBattle =
+			(m_enemyCurrentState == EEnemyStatus::Battle
+				m_enemyCurrentState == EEnemyStatus::Battle_Noise);
+
+		// 戦闘開始
+		if (!bWasBattle && bIsBattle)
+		{
+			m_BGMManager->OnCombatStart();
+		}
+
+		// 戦闘終了
+		if (bWasBattle && !bIsBattle)
+		{
+			m_BGMManager->OnCombatEnd();
+		}
+	}
+
+	m_prevState = m_enemyCurrentState;
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -514,6 +560,13 @@ void AEnemyBase::StartStateValues(float _deltaTime)
 	{
 		m_animationAttackTime = 0;
 	}
+
+	if (m_hearingTime < m_hearingTime_Limit)
+	{
+		m_hearingTime += _deltaTime;	//聴覚時間の更新
+
+	}
+
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -653,11 +706,6 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 		return;
 	}
 
-	if (m_battleCheck)
-	{
-		m_noiseCheck = false;		//物音チェックOF
-		return;
-	}
 
 	double distance = (m_noise_Pos - m_enemyPos).Length();			//物音との距離を測る(Vectorの長さ）
 	double distance_keeper = (m_noise_Pos_keeper - m_enemyPos).Length();			//以前の物音との距離を測る(Vectorの長さ）
@@ -677,17 +725,21 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 		m_isCallOnNoise = false;
 	}
 
+	if (m_battleCheck)
+	{
+		m_noiseCheck = false;		//物音チェックOF
+		return;
+	}
+
 	//物音が出たはじめのみ
 	if (!m_noiseCheck)
 	{
 		m_noiseLevel = 0;//物音レベルをリセット
-		m_noiseCheck = true;		//物音チェックON
 
-		UE_LOG(LogTemp, Warning, TEXT("m_noiseCheck= %d"), m_noiseCheck);
 
 	}
 
-	m_hearingTime += _deltaTime;	//聴覚時間の更新
+	//UE_LOG(LogTemp, Warning, TEXT("m_hearingTime= %f"), m_hearingTime);
 
 	//OnNoiseが呼ばれていれば更新許可
 	if (m_isCallOnNoise_Fleam)
@@ -698,7 +750,7 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 		{
 
 			//以前の物音が今の物音より小さい場合
-			if (m_noiseVolume_keeper <= m_noiseVolume || (m_noiseLevel > 5 && m_noiseLevel != 0))
+			if (m_noiseVolume_keeper <= m_noiseVolume || (m_noiseLevel > 5 ))
 			{
 
 				m_noiseVolume_keeper = m_noiseVolume;
@@ -752,40 +804,17 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 					}
 				}
 				m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
-				m_hearingTime = 0;	//聴覚時間リセット
-			}
-			//if (m_noiseLevel > 5 && m_noiseLevel != 0)
-			//{
-			//	m_noiseLevel = m_noiseVolume;			//物音レベルを更新
-			//	m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
-			//	m_hearingTime = 0;	//聴覚時間リセット
-			//}
+				m_noiseCheck = true;		//物音チェックON
 
+			}
 		}
 		else
 		{
 			m_noiseVolume_keeper = m_noiseVolume;
 
-			UE_LOG(LogTemp, Warning, TEXT("m_noiseVolume= %d"), m_noiseVolume);
 
 			//距離に応じて聞こえる音レベルを変更
 			if (distance < m_hearingRange_Short)
-			{
-				for (int i = 2;i < 6;++i)
-				{
-					if (m_noiseVolume_keeper == i)
-					{
-						m_noiseLevel = i + 1;//物音レベルを更新
-
-						if (m_noiseLevel > 5)
-						{
-							m_noiseLevel = 5;
-						}
-
-					}
-				}
-			}
-			else if (distance < m_hearingRange_Normal)
 			{
 				for (int i = 2;i < 6;++i)
 				{
@@ -801,13 +830,13 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 					}
 				}
 			}
-			else
+			else if (distance < m_hearingRange_Normal)
 			{
 				for (int i = 2;i < 6;++i)
 				{
 					if (m_noiseVolume_keeper == i)
 					{
-						m_noiseLevel = i - 1;//物音レベルを更新
+						m_noiseLevel = i-1;//物音レベルを更新
 
 						if (m_noiseLevel > 5)
 						{
@@ -817,15 +846,39 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 					}
 				}
 			}
+			else
+			{
+				for (int i = 2;i < 6;++i)
+				{
+					if (m_noiseVolume_keeper == i)
+					{
+						m_noiseLevel = i - 2;//物音レベルを更新
+
+						if (m_noiseLevel > 5)
+						{
+							m_noiseLevel = 5;
+						}  
+
+					}
+				}
+			}
 
 			m_noise_Pos_keeper = m_noise_Pos;			//物音座標を更新
-			m_hearingTime = 0;	//聴覚時間リセット
+
+
+			if (m_noiseLevel >= 2)
+			{
+				m_hearingTime = 0;	//聴覚時間リセット
+				m_noiseCheck = true;		//物音チェックON
+			}
 		}
 	}
 	if (m_noiseLevel <= 1)
 	{
 		m_noiseCheck = false;		//物音チェックOF
 	}
+
+	//UE_LOG(LogTemp, Warning, TEXT("m_noiseLevel= %d"), m_noiseLevel);
 
 }
 
