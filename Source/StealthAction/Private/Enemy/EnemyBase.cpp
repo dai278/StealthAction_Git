@@ -907,7 +907,7 @@ void AEnemyBase::UpdateSearch(float _deltaTime)
 	//’®Šo‚ÆŽ‹ŠE‚Ì‚Ç‚¿‚ç‚ð—Dæ‚·‚é‚©
 	if (m_noiseCheck && m_visionCheck)
 	{
-		if (m_visionLevel > m_noiseLevel)
+		if (m_visionLevel >= m_noiseLevel)
 		{
 			m_noiseCheck = false;		//’®ŠoOF
 			m_noiseLevel = 0;
