@@ -2357,45 +2357,52 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 		return;
 	}
 
+	AEnemy_Effect_1* Effect1 = m_effectPool->GetEffect1();
+	AEnemy_Effect_2* Effect2 = m_effectPool->GetEffect2();
+	AEnemy_Effect_3* Effect3 = m_effectPool->GetEffect3();
+
+	if (Effect1)
+	{
+		Effect1->InvisibleEffect();
+	}
+	if (Effect2)
+	{
+		Effect2->InvisibleEffect();
+	}
+	if (Effect3)
+	{
+		Effect3->InvisibleEffect();
+	}
 
 	if (m_battleCheck || m_battleNoiseCheck)
 	{
-		AEnemy_Effect_1* Effect = m_effectPool->GetEffect1();
-		if (!Effect)
+		if (!Effect1)
 		{
 			return;
 		}
-		//UE_LOG(LogTemp, Warning, TEXT("Effect1"));
-
 		FVector StartPos = GetActorLocation();
 
-		Effect->ActivateEffect(StartPos);
+		Effect1->ActivateEffect(StartPos);
 	}
 	else if (m_cautionCheck || m_cautionNoiseCheck)
 	{
-		AEnemy_Effect_2* Effect = m_effectPool->GetEffect2();
-		if (!Effect)
+		if (!Effect2)
 		{
 			return;
 		}
-		//UE_LOG(LogTemp, Warning, TEXT("Effect2"));
-
 		FVector StartPos = GetActorLocation();
 
-		Effect->ActivateEffect(StartPos);
+		Effect2->ActivateEffect(StartPos);
 
 	}
 	else if (m_doubtCheck || m_doubtNoiseCheck)
 	{
-		AEnemy_Effect_3* Effect = m_effectPool->GetEffect3();
-		if (!Effect)
+		if (!Effect3)
 		{
 			return;
 		}
-		//UE_LOG(LogTemp, Warning, TEXT("Effect3"));
-
 		FVector StartPos = GetActorLocation();
 
-		Effect->ActivateEffect(StartPos);
+		Effect3->ActivateEffect(StartPos);
 	}
 }
