@@ -648,12 +648,14 @@ void AEnemyBase::UpdateVisiblity(float _deltaTime)
 		AActor* hitActor = HitCollision.GetActor();
 
 		//当たったコリジョンがプレイヤー以外だった場合
-		if (!hitActor->ActorHasTag("Player"))
+		if (!hitActor->ActorHasTag("Player")&& !hitActor->ActorHasTag("Interact"))
 		{
-			//探索失敗で終了
-			m_visionCheck = false;
-			return;
+				//探索失敗で終了
+				m_visionCheck = false;
+				return;
+
 		}
+
 	}
 	else
 	{
@@ -1471,16 +1473,9 @@ void AEnemyBase::CaseDoubt(float _deltaTime)
 	}
 
 	//もし視界外に出た場合
-	if (m_visionCheck == false && m_enemyCurrentState_Keeper != EEnemyStatus::Patrol)
+	if (m_visionCheck == false)
 	{
 		m_visionLevel = 8;		//帰還に移行
-		m_doubtTime = 0;			//疑念時間リセット
-		m_visionCheck = false;
-		m_doubtCheck = false;
-	}
-	else if (m_visionCheck == false)
-	{
-		m_visionLevel = 0;		//見失うに移行
 		m_doubtTime = 0;			//疑念時間リセット
 		m_visionCheck = false;
 		m_doubtCheck = false;
@@ -1514,19 +1509,10 @@ void AEnemyBase::CaseDoubt_Noise(float _deltaTime)
 	}
 
 	//時間が経過すると終了(聴覚の場合)
-	if (m_doubtNoiseTime > m_doubtNoiseTime_Limit && m_enemyCurrentState_Keeper != EEnemyStatus::Patrol)
+	if (m_doubtNoiseTime > m_doubtNoiseTime_Limit )
 	{
 		m_noiseLevel = 8;		//帰還に移行
 		m_visionLevel = 8;				//帰還に移行
-		m_doubtNoiseTime = 0;			//疑念時間リセット
-		m_noiseCheck = false;		//聴覚中止
-		m_doubtNoiseCheck = false;
-		m_noise_Pos = FVector(-5000.0, -5000., -5000.);//物音座標リセット
-		m_noise_Pos_keeper = FVector(-5000.0, -5000., -5000.);//物音座標リセット
-	}
-	else if (m_doubtNoiseTime > m_doubtNoiseTime_Limit)
-	{
-		m_noiseLevel = 0;		//巡回に移行
 		m_doubtNoiseTime = 0;			//疑念時間リセット
 		m_noiseCheck = false;		//聴覚中止
 		m_doubtNoiseCheck = false;
