@@ -39,13 +39,11 @@
 //-----------------------------------------------------------
 #include "GameFramework/PlayerController.h"
 #include "InputCoreTypes.h"
-
-
-#include "Enemy_Weapon/Enemy_Weapon_1.h"			
-
-#include "Enemy_Weapon/Enemy_Bullet/Enemy_Bullet_1.h"
-#include "Enemy_Weapon/Enemy_Weapon_1.h"
 #include "Enemy_Weapon/Enemy_Bullet/Enemy_BulletStorage_1.h"
+#include "Enemy_Effect/Enemy_EffectManager.h"
+#include "Enemy_Effect/Enemy_Effect_1.h"
+#include "Enemy_Effect/Enemy_Effect_2.h"
+#include "Enemy_Effect/Enemy_Effect_3.h"
 
 
 //#include "Sound/BGMManagerBase.h
@@ -390,6 +388,22 @@ void AEnemyBase::BeginPlay()
 		m_BGMManager = Cast<ABGMManagerBase>(
 			UGameplayStatics::GetActorOfClass(GetWorld(), ABGMManagerBase::StaticClass()));
 	}
+
+
+	//エフェクト用
+	m_effectPool = Cast<AEnemy_EffectManager>(UGameplayStatics::GetActorOfClass(this, AEnemy_EffectManager::StaticClass()));
+
+	if (m_effectPool)
+	{
+		UE_LOG(LogTemp, Error, TEXT("m_effectPool BeginPlay: BulletStorage FOUND"));
+	}
+
+	if (!m_effectPool)
+	{
+		UE_LOG(LogTemp, Error, TEXT("m_effectPool BeginPlay: BulletStorage NOT FOUND"));
+	}
+
+	Tags.AddUnique(FName("Effect"));
 
 }
 
@@ -893,7 +907,7 @@ void AEnemyBase::UpdateSearch(float _deltaTime)
 	//聴覚と視界のどちらを優先するか
 	if (m_noiseCheck && m_visionCheck)
 	{
-		if (m_visionLevel >= m_noiseLevel)
+		if (m_visionLevel > m_noiseLevel)
 		{
 			m_noiseCheck = false;		//聴覚OF
 			m_noiseLevel = 0;
@@ -1431,6 +1445,7 @@ void AEnemyBase::CaseDoubt(float _deltaTime)
 
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
+		UpdateEffect(_deltaTime);
 
 	}
 
@@ -1484,6 +1499,7 @@ void AEnemyBase::CaseDoubt_Noise(float _deltaTime)
 
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
+		UpdateEffect(_deltaTime);
 
 	}
 
@@ -1532,6 +1548,7 @@ void AEnemyBase::CaseCaution(float _deltaTime)
 
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
+		UpdateEffect(_deltaTime);
 
 	}
 
@@ -1586,6 +1603,7 @@ void AEnemyBase::CaseCaution_Noise(float _deltaTime)
 
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
+		UpdateEffect(_deltaTime);
 
 	}
 
@@ -1641,6 +1659,8 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
+
+		UpdateEffect(_deltaTime);
 
 	}
 
@@ -1813,6 +1833,8 @@ void AEnemyBase::CaseBattle_Noise(float _deltaTime)
 
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
+
+		UpdateEffect(_deltaTime);
 
 	}
 
@@ -2316,5 +2338,60 @@ void AEnemyBase::OnDamage(int32 Damage, FVector KnockBackValue, bool _bSneakKill
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Sneak Miss"));
+	}
+}
+
+//------------------------------------------------------------------------------------------------------------
+//エフェクトの処理
+//------------------------------------------------------------------------------------------------------------
+void AEnemyBase::UpdateEffect(float _deltaTime)
+{
+
+
+	if (!m_effectPool)
+	{
+		return;
+	}
+
+
+	if (m_battleCheck|| m_battleNoiseCheck)
+	{
+		AEnemy_Effect_1* Effect = m_effectPool->GetEffect1();
+		if (!Effect)
+		{
+			return;
+		}
+		//UE_LOG(LogTemp, Warning, TEXT("Effect1"));
+
+		FVector StartPos = GetActorLocation();
+
+		Effect->ActivateEffect(StartPos);
+	}
+	else if (m_cautionCheck|| m_cautionNoiseCheck)
+	{
+		AEnemy_Effect_2* Effect = m_effectPool->GetEffect2();
+		if (!Effect)
+		{
+			return;
+		}
+		//UE_LOG(LogTemp, Warning, TEXT("Effect2"));
+
+		FVector StartPos = GetActorLocation();
+
+		Effect->ActivateEffect(StartPos);
+
+	}
+	else if (m_doubtCheck || m_doubtNoiseCheck)
+	{
+		AEnemy_Effect_3* Effect = m_effectPool->GetEffect3();
+		if (!Effect)
+		{
+			return;
+		}
+		//UE_LOG(LogTemp, Warning, TEXT("Effect3"));
+
+		FVector StartPos = GetActorLocation();
+
+		Effect->ActivateEffect(StartPos);
 	}
 }

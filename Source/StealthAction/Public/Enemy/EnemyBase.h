@@ -22,6 +22,7 @@ class AEnemy_Bullet_1;
 class AEnemy_Weapon_1;
 class AExtendedSpotLight;
 class USwordAttackComponent;
+class AEnemy_EffectManager;
 
 //エネミーの状態
 UENUM(BlueprintType)
@@ -141,6 +142,9 @@ public:
 	//警戒の処理
 	void UpdateAlert(float _deltaTime);
 
+	//エフェクトの処理
+	void UpdateEffect(float _deltaTime);
+
 public:
 	//プレイヤーを見つけているかどうか
 	//確認が取れてないので仮でfalse返す
@@ -168,6 +172,8 @@ public:
 
 	UNoiseListenerComponent* noise;
 	void OnNoiseHeard(const int& _noiseVolume, const FVector& _pos);
+
+	AEnemy_EffectManager* m_effectPool;
 
 		UPROPERTY()
 		APlayerCharacter* m_pPlayerChara;	//プレイヤーキャラクターポインタ

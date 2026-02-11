@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Enemy_Effect/Enemy_Effect_1.h"
+#include "Enemy_Effect/Enemy_Effect_2.h"
 #include "Components/BillboardComponent.h"
 #include "Components/SceneComponent.h"
-AEnemy_Effect_1::AEnemy_Effect_1()
+AEnemy_Effect_2::AEnemy_Effect_2()
 	: m_effectDeleteTime(2.)
 
 {
@@ -22,10 +22,10 @@ AEnemy_Effect_1::AEnemy_Effect_1()
 
 }
 
-void AEnemy_Effect_1::ActivateEffect(const FVector& StartPos)
+void AEnemy_Effect_2::ActivateEffect(const FVector& StartPos)
 {
 
-	UE_LOG(LogTemp, Warning, TEXT("EffectActive1"));
+	UE_LOG(LogTemp, Warning, TEXT("EffectActive2"));
 
 	SetActorLocation(StartPos);
 	SetActorHiddenInGame(false);
@@ -36,10 +36,10 @@ void AEnemy_Effect_1::ActivateEffect(const FVector& StartPos)
 		Billboard->SetVisibility(true, true);
 		Billboard->SetHiddenInGame(false);
 	}
-	GetWorldTimerManager().SetTimer(DestroyTimer, this, &AEnemy_Effect_1::InvisibleEffect, m_effectDeleteTime, false);
+	GetWorldTimerManager().SetTimer(DestroyTimer, this, &AEnemy_Effect_2::InvisibleEffect, m_effectDeleteTime, false);
 }
 
-void AEnemy_Effect_1::InvisibleEffect()
+void AEnemy_Effect_2::InvisibleEffect()
 {
 	SetActorHiddenInGame(true);
 	bHidden = true;
