@@ -15,7 +15,7 @@ public:
 	// Sets default values for this actor's properties
 	AEnemy_Effect_1();
 
-	void ActivateEffect(const FVector& StartPos);
+	void ActivateEffect(const FVector& StartPos, AActor* TargetActor);
 	void InvisibleEffect();
 	bool IsHidden() const { return bHidden; }
 

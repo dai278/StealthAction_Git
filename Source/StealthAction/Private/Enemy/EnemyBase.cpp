@@ -1783,12 +1783,22 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 				{
 					if (m_sword)
 					{
+						//レイを飛ばして敵とプレイヤーの間に遮蔽物がないかを確認
+						//コリジョン判定で無視する項目を指定（今回は敵キャラクター自身（this)）
+						FCollisionQueryParams CollisionParams;
+						CollisionParams.AddIgnoredActor(this);
+						CollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
+						for (AEnemyBase* enemy : m_pOtherEnemyBase)
+						{
+							CollisionParams.AddIgnoredActor(enemy);
+						}
+
 						FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
 
 						FVector m_enemyForwardPos = m_enemyPos + m_enemyForward * m_attackDistance;
 
 						//レイを飛ばし、全てのオブジェクトに対してコリジョン判定を行う
-						bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, m_enemyForwardPos, FCollisionObjectQueryParams::AllObjects, BattleCollisionParams);
+						bool isHit = GetWorld()->LineTraceSingleByObjectType(HitCollision, m_enemyPos, m_enemyForwardPos, FCollisionObjectQueryParams::AllObjects, CollisionParams);
 
 						//ヒットするオブジェクトがある場合
 						if (isHit)
@@ -1906,6 +1916,7 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
 
+		UpdateEffect(_deltaTime);
 	}
 
 	m_missTime += _deltaTime;						//失踪している時間
@@ -2382,7 +2393,7 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 		}
 		FVector StartPos = GetActorLocation();
 
-		Effect1->ActivateEffect(StartPos);
+		Effect1->ActivateEffect(StartPos,this);
 	}
 	else if (m_cautionCheck || m_cautionNoiseCheck)
 	{
@@ -2392,10 +2403,10 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 		}
 		FVector StartPos = GetActorLocation();
 
-		Effect2->ActivateEffect(StartPos);
+		Effect2->ActivateEffect(StartPos,this);
 
 	}
-	else if (m_doubtCheck || m_doubtNoiseCheck)
+	else
 	{
 		if (!Effect3)
 		{
@@ -2403,7 +2414,7 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 		}
 		FVector StartPos = GetActorLocation();
 
-		Effect3->ActivateEffect(StartPos);
+		Effect3->ActivateEffect(StartPos,this);
 	}
 
 	Effect1_Keeper = Effect1;

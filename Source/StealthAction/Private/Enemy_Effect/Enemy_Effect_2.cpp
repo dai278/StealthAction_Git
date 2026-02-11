@@ -5,7 +5,7 @@
 #include "Components/BillboardComponent.h"
 #include "Components/SceneComponent.h"
 AEnemy_Effect_2::AEnemy_Effect_2()
-	: m_effectDeleteTime(1.)
+	: m_effectDeleteTime(2.)
 
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -22,12 +22,14 @@ AEnemy_Effect_2::AEnemy_Effect_2()
 
 }
 
-void AEnemy_Effect_2::ActivateEffect(const FVector& StartPos)
+void AEnemy_Effect_2::ActivateEffect(const FVector& StartPos, AActor* TargetActor)
 {
 
 	UE_LOG(LogTemp, Warning, TEXT("EffectActive2"));
 
 	SetActorLocation(StartPos);
+	AttachToActor(TargetActor, FAttachmentTransformRules::KeepWorldTransform);
+
 	SetActorHiddenInGame(false);
 	bHidden = false;
 
@@ -41,6 +43,7 @@ void AEnemy_Effect_2::ActivateEffect(const FVector& StartPos)
 
 void AEnemy_Effect_2::InvisibleEffect()
 {
+	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	SetActorHiddenInGame(true);
 	bHidden = true;
 	if (Billboard)
