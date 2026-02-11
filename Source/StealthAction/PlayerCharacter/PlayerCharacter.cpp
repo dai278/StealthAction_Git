@@ -34,6 +34,8 @@
 #include "Camera/CameraFocusDirectorComponent.h"
 #include "UI/HUD/HUDWidget.h"
 #include "StealthAction/PlayerCharacter/Controller/MyPlayerController.h"
+#include "Components/ChildActorComponent.h"
+
 
 
 
@@ -164,6 +166,17 @@ APlayerCharacter::APlayerCharacter()
 
 	}
 
+
+	
+	
+		m_ShadowEffectChild = CreateDefaultSubobject<UChildActorComponent>(TEXT("ShadowEffectChild"));
+		m_ShadowEffectChild->SetupAttachment(GetRootComponent()); // もしくは GetMesh()
+
+		// ここで固定でクラス指定するなら
+		// ShadowEffectChild->SetChildActorClass(AShadowEffectActor::StaticClass());
+	
+
+
 	//カメラフォーカスディレクターコンポーネント生成
 	m_pCameraFocusDirector = CreateDefaultSubobject<UCameraFocusDirectorComponent>(TEXT("CameraFocusDirector"));
 }
@@ -248,6 +261,19 @@ void APlayerCharacter::BeginPlay()
 		{
 			SetActorLocation(pCheckMng->GetCurrentCheckpointLocation());
 		}
+	}
+
+	//影エフェクトの子アクタークラス設定
+	if (m_ShadowEffectClass)
+	{
+		m_ShadowEffectChild->SetChildActorClass(m_ShadowEffectClass);
+
+
+		if (AActor* Child = m_ShadowEffectChild->GetChildActor())
+		{
+			Child->SetActorHiddenInGame(true);
+		}
+
 	}
 
 	if (Controller)
@@ -1434,6 +1460,13 @@ void APlayerCharacter::TransformationShadowToIdle(const bool _bLightHit/*=false*
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
 
+	//影エフェクト非表示
+	if (AActor* Child = m_ShadowEffectChild->GetChildActor())
+	{
+		Child->SetActorHiddenInGame(true);
+	}
+
+
 	//ライトに当たっているなら普通に戻す
 	if (!_bLightHit) {
 		GetMesh()->SetSkeletalMesh(m_defaultMesh);
@@ -1468,7 +1501,14 @@ void APlayerCharacter::TransformationToShadow()
 	m_cameraStatus = ECameraStatus::InShadow;
 	m_bCameraSwitching = true;
 
+	m_ShadowEffectChild->SetWorldLocation(GetFeetLocation());
+
 	m_bUsingMesh = true;
+	
+	if (AActor* Child = m_ShadowEffectChild->GetChildActor())
+	{
+		Child->SetActorHiddenInGame(false);
+	}
 
 }
 
@@ -1478,6 +1518,12 @@ void APlayerCharacter::CancellationShadow(const EPlayerStatus& _status)
 	if (m_status != EPlayerStatus::InShadow) { return; }
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
+
+	if (AActor* Child = m_ShadowEffectChild->GetChildActor())
+	{
+		Child->SetActorHiddenInGame(true);
+	}
+
 
 	GetMesh()->SetSkeletalMesh(m_defaultMesh);
 	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight);

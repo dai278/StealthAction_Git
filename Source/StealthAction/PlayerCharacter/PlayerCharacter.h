@@ -511,9 +511,21 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class ACameraActor> m_focusMovieCamera ;
 
+
+	// 影エフェクトのクラス（BPでも指定したいなら）
+	UPROPERTY(EditAnywhere, Category = "Shadow")
+	TSubclassOf<AActor> m_ShadowEffectClass;
+
+	// 実体（プレイヤーにぶら下がる）
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Shadow", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UChildActorComponent> m_ShadowEffectChild;
+
+
 	
 	public:
 		//鍵取得時の関数
 		void OnGetKeyItem();
+
+
 
 };
