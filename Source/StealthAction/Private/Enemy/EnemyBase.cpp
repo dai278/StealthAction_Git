@@ -88,7 +88,7 @@ AEnemyBase::AEnemyBase()
 	, m_battleTime_Limit(1.0)
 	, m_battleFalseTime_Limit(0.5)
 	, m_battleNoiseTime_Limit(2.0)
-	, m_notFoundTime_Limit(8.0)
+	, m_notFoundTime_Limit(2.0)
 	, m_notFoundNoiseTime_Limit(4.0)
 	, m_alertTime_Limit(10.0)
 	, m_missTime_Limit(1.0)
@@ -124,6 +124,7 @@ AEnemyBase::AEnemyBase()
 	, m_returnCheck(false)
 	, m_patrol_TurningCheck(false)
 	, m_attackCheck(false)
+	, m_attackAnimationCheck(false)
 	, m_isCallOnNoise(false)
 	, m_isCallOnNoise_Fleam(false)
 	, m_patrol_TurnDirection(0)
@@ -568,15 +569,23 @@ void AEnemyBase::StartStateValues(float _deltaTime)
 	m_playerShadowCheck = m_pPlayerChara->IsInShadow();
 
 
-	if (m_animationAttackTime > 0 && !m_attackCheck)
+	if (m_animationAttackTime > 0 )
 	{
-		m_animationAttackTime = 0;
+		m_animationAttackTime +=_deltaTime;
+		m_attackAnimationCheck = false;
 	}
+
 
 	if (m_hearingTime < m_hearingTime_Limit)
 	{
 		m_hearingTime += _deltaTime;	//聴覚時間の更新
 
+	}
+
+	if (m_attackCheck)
+	{
+			//攻撃処理
+			UpdateAttack(_deltaTime);
 	}
 
 }
@@ -1098,7 +1107,9 @@ void AEnemyBase::ResetStateValues(float _deltaTime)
 		m_battleFalseTime = 0;
 		m_battleShadowCheck = false;
 		m_battleNotShadowCheck = false;
+		m_animationAttackTime = 0;
 		m_attackCheck = false;
+		m_attackAnimationCheck = false;
 	}
 
 	//以前のステータスが物音戦闘の場合
@@ -1688,6 +1699,7 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 				m_battleNotShadowCheck = true;
 				m_playerPos_Nav_LastSeen = m_playerPos;
 				m_BattlePos_Nav = m_playerPos;
+				m_playerPos_LastSeen = m_playerPos;
 			}
 		}
 	}
@@ -1701,21 +1713,9 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 		m_playerPos_Nav_LastSeen = m_playerPos_LastSeen;
 	}
 
-	if (m_animationAttackTime == 0)
-	{
-		m_attackCheck = false;
-	}
+	double distance_LastSeen = (m_BattlePos_Nav - m_enemyPos).Length();	//最後に見たプレイヤーとの距離を測る(Vectorの長さ）
 
-	if (m_attackCheck)
-	{
-		if (m_animationAttackTime <= m_animationAttackTime_Limit)
-		{
-			//攻撃処理
-			UpdateAttack(_deltaTime);
-
-		}
-	}
-	else if (m_discoveryTime < m_discoveryTime_Limit)
+	if (m_discoveryTime < m_discoveryTime_Limit)
 	{
 		//視点移動処理
 		UpdateViewMove(_deltaTime);
@@ -1723,18 +1723,24 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 	else
 	{
 		//プレイヤーの一定距離に近づくまで追いかける
-		if (m_stopDistance_Player < distance)
-		{
-			//移動処理
-			UpdateMove_Nav(_deltaTime);
-		}
-		else
+		if (m_stopDistance_Player >= distance)
 		{
 			//視点移動処理
 			UpdateViewMove(_deltaTime);
+
+		}
+		else
+		{
+			//移動処理
+			UpdateMove_Nav(_deltaTime);
+
+			if (m_stopDistance_Player >= distance_LastSeen)
+			{
+				m_notFoundTime += m_notFoundTime_Limit;
+			}
 		}
 
-		if (m_visionCheck || m_battleShadowCheck)
+		if ((m_visionCheck || m_battleShadowCheck)&&!m_attackCheck)
 		{
 			//武器を持っていたら
 			if (m_pEnemy_Weapon)
@@ -1809,10 +1815,9 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 	}
 
 
-	double distance_LastSeen = (m_BattlePos_Nav - m_enemyPos).Length();	//最後に見たプレイヤーとの距離を測る(Vectorの長さ）
 
 	//もしプレイヤーがいた位置に近づいた場合
-	if ((m_visionCheck == false && m_stopDistance_Player >= distance_LastSeen) || m_notFoundTime > m_notFoundTime_Limit)
+	if (m_visionCheck == false &&  m_notFoundTime > m_notFoundTime_Limit)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Nooooooooooooooooooooooooo"));
 
@@ -2254,10 +2259,14 @@ void AEnemyBase::UpdateAttack(float _deltaTime)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Attack"));
 
+	if (m_animationAttackTime<=0)
+	{
+		m_attackAnimationCheck = true;
 
-	m_attackCheck = true;
+		m_attackCheck = true;
 
-	m_animationAttackTime += _deltaTime;
+		m_animationAttackTime += _deltaTime;
+	}
 
 	if (m_animationAttackTime > m_animationAttackTime_Limit)
 	{

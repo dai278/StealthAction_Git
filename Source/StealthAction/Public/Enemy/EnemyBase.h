@@ -356,8 +356,11 @@ public:
 		UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool m_attackCheck;
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool m_attackAnimationCheck;
+
 		UFUNCTION(BlueprintPure, Category = "Chase")
-		bool GetAttackCheck()const { return m_attackCheck; }
+		bool GetAttackCheck()const { return m_attackAnimationCheck; }
 
 		UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool m_stopCheck;
