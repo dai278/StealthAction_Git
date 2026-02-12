@@ -55,6 +55,8 @@ void AInteract::BeginPlay()
 	m_pCollision->OnComponentBeginOverlap.AddDynamic(this, &AInteract::OnOverlapBegin);
 	m_pCollision->OnComponentEndOverlap.AddDynamic(this, &AInteract::OnOverlapEnd);
 
+	//コリジョンpresetをインタラクトに
+	m_pCollision->SetCollisionProfileName(FName("Interact"));
 
 }
 

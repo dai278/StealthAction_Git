@@ -643,6 +643,8 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 	{
 
 		GetMesh()->SetSkeletalMesh(m_isShadowMesh);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetMesh()->SetGenerateOverlapEvents(false);
 
 		m_bUsingMesh = false;
 		//UE_LOG(LogTemp, Log, TEXT("Mesh Chaged Shadow !!"));
