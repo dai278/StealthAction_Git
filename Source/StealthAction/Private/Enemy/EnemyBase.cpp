@@ -2032,6 +2032,10 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 	//右方向の確認
 	else if (m_missTime < m_missTime_Limit3)
 	{
+		//Navをストップ
+		m_moveStop_Nav = true;
+		UpdateMove_Nav(_deltaTime);
+
 		//旋回方向の決定
 		m_enemyPos_Direction_Miss = m_enemyPos_Right_Miss;
 		//旋回
@@ -2042,6 +2046,10 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 	//正面方向の確認
 	else if (m_missTime < m_missTime_Limit4)
 	{
+		//Navをストップ
+		m_moveStop_Nav = true;
+		UpdateMove_Nav(_deltaTime);
+
 		//旋回方向の決定
 		m_enemyPos_Direction_Miss = m_enemyPos_Forward_Miss;
 		//旋回
@@ -2051,6 +2059,10 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 	//失踪終了
 	else
 	{
+		//Navをストップ
+		m_moveStop_Nav = true;
+		UpdateMove_Nav(_deltaTime);
+
 		m_visionLevel = 8;				//帰還に移行
 		m_noiseLevel = 8;		//帰還に移行
 		m_missTime = 0;					//見失う時間リセット
