@@ -18,6 +18,8 @@ void UMyGameInstance::Reset()
 	GameParam.bGoal = false;
 	GameParam.bGameOver = false;
 	GameParam.bGetKeyItem = false;
+
+	bSkipSchoolLogo = false;
 }
 
 // =========================
@@ -64,3 +66,17 @@ bool UMyGameInstance::GetKeyItemFlag() const
 {
 	return GameParam.bGetKeyItem;
 }
+
+// =========================
+// タイトルロゴスキップ関連
+// =========================
+void UMyGameInstance::SetSkipSchoolLogo(bool bSkip)
+{
+	bSkipSchoolLogo = bSkip;
+}
+
+bool UMyGameInstance::GetSkipSchoolLogo() const
+{
+	return bSkipSchoolLogo;
+}
+

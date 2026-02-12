@@ -66,6 +66,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GameInstance")
 	bool GetKeyItemFlag() const;
 
+	// =========================
+    // タイトルロゴスキップ関連
+    // =========================
+	UFUNCTION(BlueprintCallable, Category = "GameInstance")
+	void SetSkipSchoolLogo(bool bSkip);
+
+	UFUNCTION(BlueprintCallable, Category = "GameInstance")
+	bool GetSkipSchoolLogo() const;
+
+
 public:
 	/*
 	 * フラグが変更された時に通知されるイベント
@@ -76,4 +86,7 @@ public:
 private:
 	// ゲーム共通パラメータ
 	FGameParam GameParam;
+
+	//タイトルで学校のロゴをスキップするか
+	bool bSkipSchoolLogo;
 };
