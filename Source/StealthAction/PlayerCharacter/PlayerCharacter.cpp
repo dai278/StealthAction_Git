@@ -913,6 +913,12 @@ void APlayerCharacter::StartCameraFocus(AActor* const _cameraActor, float _blend
 	bool isStat;
 	m_pCameraFocusDirector->StartFocusByProviderActor(_cameraActor,isStat,PC);
 
+	if (m_bDash) {
+		m_bDash = false;
+		GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
+	}
+
+
 }
 
 //------------------------------------------------------
