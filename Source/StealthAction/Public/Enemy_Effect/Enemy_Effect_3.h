@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Enemy_Effect_3.generated.h"
 
+class UBillboardComponent;
+
 UCLASS()
 class STEALTHACTION_API AEnemy_Effect_3 : public AActor
 {
