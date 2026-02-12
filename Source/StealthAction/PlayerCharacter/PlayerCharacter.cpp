@@ -1571,8 +1571,8 @@ void APlayerCharacter::TransformationToShadow()
 	GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
 	ChangePlayerStatus(EPlayerStatus::InShadow);
 	FVector newLocation = GetActorLocation();
-	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight / 5.f);
-	newLocation.Z -= m_capsuleHeight / 5.f;
+	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight / 6.f);
+	newLocation.Z -= m_capsuleHeight / 6.f;
 	SetActorLocation(newLocation);
 
 	//ƒJƒƒ‰‚ğ‰e—p‚É•ÏX
