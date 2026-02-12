@@ -67,7 +67,6 @@ void APushMoveActor::Tick(float DeltaTime)
 			SetActorLocation(m_targetLocation, true, &hit);
 			m_bIsMoving = false;
 			m_moveProgress = 0.f;
-			SetActorTickEnabled(false);
 		}
 	}
 }

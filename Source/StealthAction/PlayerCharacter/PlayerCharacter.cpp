@@ -763,7 +763,7 @@ void APlayerCharacter::UpdateInteract(float _deltaTime)
 	if (m_status != EPlayerStatus::Interact&&m_status!=EPlayerStatus::InteractAnimation) { return; }
 	
 	//インタラクトポジションに近づいたらインタラクトの処理を実行
-	if (FVector::Dist(GetActorLocation(), m_interactPos) < 50.f)
+	if (FVector::Dist(GetActorLocation(), m_interactPos) < 50.f||m_interactPos==FVector::ZeroVector)
 	{
 		ChangePlayerStatus(EPlayerStatus::InteractAnimation);
 
@@ -1295,8 +1295,10 @@ void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 		m_interactPos = m_hitInteractOb->GetInteractPosition(Cast<AActor>(this));
 		if (m_interactPos == FVector::ZeroVector)
 		{
-			m_hitInteractOb->Interact((AActor*)this);
+			m_status = EPlayerStatus::InteractAnimation;
+		}
 
+		else {
 			m_status = EPlayerStatus::Interact;
 			m_bCanControl = false;
 		}
