@@ -1248,7 +1248,7 @@ void AEnemyBase::UpdateStatus(float _deltaTime)
 
 	double distance = (m_enemyPos_Keeper - m_enemyPos).Length();
 
-	if (distance < 1)
+	if (distance < 0.1)
 	{
 		m_stopCheck = true;
 
