@@ -1260,6 +1260,7 @@ void APlayerCharacter::Enhanced_InShadow(const FInputActionValue& Value)
 
 	if (m_status == EPlayerStatus::Damage) { return; }
 	if (m_isStaminaDepleted) { return; }
+	if (!m_bCanControl) { return; }
 
 	//状態が影ならデフォルトに戻す
 	if (m_status == EPlayerStatus::InShadow)
@@ -1289,12 +1290,14 @@ void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 	UE_LOG(LogTemp, Display, TEXT("Input Interact"));
 	//インタラクト可能オブジェクトに触れていなければ何もしない
 	if (!m_bHitIntteractObject) { return; }
+	if (m_status == EPlayerStatus::InShadow) {return;}
 	if (m_hitInteractOb)
 	{
 		m_interactPos = m_hitInteractOb->GetInteractPosition(Cast<AActor>(this));
 		if (m_interactPos == FVector::ZeroVector)
 		{
 			m_status = EPlayerStatus::InteractAnimation;
+			m_bCanControl = false;
 		}
 
 		else {
