@@ -2192,7 +2192,7 @@ void AEnemyBase::UpdateMove(float _deltaTime)
 		FVector TargetChase = (m_playerPos_LastSeen - m_enemyPos).GetSafeNormal();
 		FVector newPos = m_enemyPos + TargetChase * m_currentChaseSpeed * _deltaTime;
 		//プレイヤーに向かって移動
-		SetActorLocation(FVector(newPos.X, newPos.Y, GetActorLocation().Z));
+		SetActorLocation(FVector(newPos.X, newPos.Y, GetActorLocation().Z),true);
 	}
 	else if (m_missCheck)
 	{
@@ -2200,7 +2200,7 @@ void AEnemyBase::UpdateMove(float _deltaTime)
 		FVector TargetChase = (m_enemyPos_Forward_Miss - m_enemyPos).GetSafeNormal();
 		FVector newPos = m_enemyPos + TargetChase * m_currentChaseSpeed * _deltaTime;
 		//プレイヤーに向かって移動
-		SetActorLocation(FVector(newPos.X, newPos.Y, GetActorLocation().Z));
+		SetActorLocation(FVector(newPos.X, newPos.Y, GetActorLocation().Z), true);
 	}
 
 	else if (m_patrolCheck)
@@ -2209,7 +2209,7 @@ void AEnemyBase::UpdateMove(float _deltaTime)
 		FVector TargetChase = (m_routePos - m_enemyPos).GetSafeNormal();
 		FVector newPos = m_enemyPos + TargetChase * m_currentChaseSpeed * _deltaTime;
 		//プレイヤーに向かって移動
-		SetActorLocation(FVector(newPos.X, newPos.Y, GetActorLocation().Z));
+		SetActorLocation(FVector(newPos.X, newPos.Y, GetActorLocation().Z), true);
 	}
 	else
 	{
@@ -2217,7 +2217,7 @@ void AEnemyBase::UpdateMove(float _deltaTime)
 		FVector TargetChase = (m_noise_Pos_keeper - m_enemyPos).GetSafeNormal();
 		FVector newPos = m_enemyPos + TargetChase * m_currentChaseSpeed * _deltaTime;
 		//プレイヤーに向かって移動
-		SetActorLocation(FVector(newPos.X, newPos.Y, GetActorLocation().Z));
+		SetActorLocation(FVector(newPos.X, newPos.Y, GetActorLocation().Z), true);
 	}
 
 }
