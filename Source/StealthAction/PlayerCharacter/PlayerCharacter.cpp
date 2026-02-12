@@ -671,7 +671,6 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 	{
 		TransformationShadowToIdle(true);
 		UE_LOG(LogTemp, Display, TEXT("LightHit"));
-
 		return;
 	}
 
