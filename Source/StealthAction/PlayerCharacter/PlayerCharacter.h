@@ -199,8 +199,7 @@ private:
 	//攻撃終了コールバック
 	void OnAttackEnd();
 
-
-	public:
+public:
 
 	//カメラフォーカス開始処理
 	UFUNCTION( Category = "Camera")
@@ -208,7 +207,6 @@ private:
 
 	//カメラフォーカス終了処理
 	void EndCameraFocus(const float& _blendTime);
-
 
 	//生きているか
 	UFUNCTION(BlueprintPure, Category = "Info")
@@ -329,6 +327,9 @@ public:
 	private:
 	//状態変更処理
 	void ChangePlayerStatus(const EPlayerStatus& _newStatus);
+
+private:
+	bool IsUpPosWall(const FVector& _startPos)const;
 
 
 private:
@@ -522,10 +523,12 @@ private:
 
 
 	
-	public:
+public:
 		//鍵取得時の関数
-		void OnGetKeyItem();
+	void OnGetKeyItem();
 
+	//影状態、最後の壁が無い場所の記録用
+	FVector m_saveLastNotUpWallPos;
 
 
 };

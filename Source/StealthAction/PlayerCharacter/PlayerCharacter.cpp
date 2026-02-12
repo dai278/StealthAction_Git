@@ -652,6 +652,14 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 	bool isOver = false;
 	StaminaConsumption(_deltaTime, isOver);
 
+	//現在位置
+	FVector currentPos = GetActorLocation();
+	//現在位置で通常に戻ったら壁にのめり込むか
+	if (!IsUpPosWall(currentPos))
+	{
+		m_saveLastNotUpWallPos = currentPos;
+	}
+
 	//影状態時間が最大時間を超えたらアイドル状態に戻す
 	if (isOver) {
 		TransformationShadowToIdle(true);
@@ -1015,6 +1023,44 @@ void APlayerCharacter::ChangePlayerStatus(const EPlayerStatus& _newStatus)
 	OnPlayerConditionMet.Broadcast(_newStatus);
 }
 
+//-----------------------------------------------------
+// 上が壁か
+//-----------------------------------------------------
+bool APlayerCharacter::IsUpPosWall(const FVector& _startPos)const
+{
+
+
+	//サイズの半分
+	float helfHeight = m_Capsule->GetScaledCapsuleHalfHeight();
+	//現在が初期値の何分の1か
+	float heightScale = m_capsuleHeight / (helfHeight * 2.f);
+	float maxCapuselHeightHelf=m_capsuleHeight/2.f;
+
+	//スタート位置
+	FVector Start = _startPos + FVector{0,0,maxCapuselHeightHelf };
+	
+	//通常時のサイズと一緒の高さまでトレース
+	FVector End = Start;
+	//カプセルに変換
+	FCollisionShape Capsule = FCollisionShape::MakeCapsule(m_capsuleRadius*1.5f, maxCapuselHeightHelf*1.2);
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	FHitResult HitResult;
+
+	bool bHit = GetWorld()->SweepSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		FQuat::Identity,
+		ECC_Pawn,
+		Capsule,
+		Params
+	);
+
+	return bHit;
+}
 
 //-----------------------------------------------------
 //影状態か
@@ -1473,6 +1519,18 @@ void APlayerCharacter::TransformationShadowToIdle(const bool _bLightHit/*=false*
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
 
+	//上に障害物があるか？
+	//現在位置
+	FVector pos = GetActorLocation();
+	if (IsUpPosWall(pos))
+	{
+		//ある場合
+		//最後に壁がなかった位置に移動
+		SetActorLocation(m_saveLastNotUpWallPos);
+	}
+
+
+
 	//影エフェクト非表示
 	if (AActor* Child = m_ShadowEffectChild->GetChildActor())
 	{
@@ -1506,6 +1564,7 @@ void APlayerCharacter::TransformationToShadow()
 	m_bIsCrouch = false;
 	m_bDash = false;
 
+	//コリジョンサイズや位置調整
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("PlayerInShadow"));
 	GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
 	ChangePlayerStatus(EPlayerStatus::InShadow);
@@ -1514,10 +1573,15 @@ void APlayerCharacter::TransformationToShadow()
 	newLocation.Z -= m_capsuleHeight / 5.f;
 	SetActorLocation(newLocation);
 
+	//カメラを影用に変更
 	m_cameraStatus = ECameraStatus::InShadow;
 	m_bCameraSwitching = true;
 
+	//エフェクト
 	m_ShadowEffectChild->SetWorldLocation(GetFeetLocation());
+
+	//現在位置を記録
+	m_saveLastNotUpWallPos = newLocation;
 
 	m_bUsingMesh = true;
 	
@@ -1540,7 +1604,16 @@ void APlayerCharacter::CancellationShadow(const EPlayerStatus& _status)
 		Child->SetActorHiddenInGame(true);
 	}
 
-
+	//上に障害物があるか？
+	//現在位置
+	FVector pos = GetActorLocation();
+	if (IsUpPosWall(pos))
+	{
+		//ある場合
+		//最後に壁がなかった位置に移動
+		SetActorLocation(m_saveLastNotUpWallPos);
+	}
+	
 	GetMesh()->SetSkeletalMesh(m_defaultMesh);
 	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight);
 	m_bUsingMesh = false;
