@@ -1292,10 +1292,15 @@ void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 	if (!m_bHitIntteractObject) { return; }
 	if (m_hitInteractOb)
 	{
-		m_interactPos = m_hitInteractOb->GetInteractPosition();
-		m_status = EPlayerStatus::Interact;
-		m_bCanControl = false;
-		//m_hitInteractOb->Interact((AActor*)this);
+		m_interactPos = m_hitInteractOb->GetInteractPosition(Cast<AActor>(this));
+		if (m_interactPos == FVector::ZeroVector)
+		{
+			m_hitInteractOb->Interact((AActor*)this);
+
+			m_status = EPlayerStatus::Interact;
+			m_bCanControl = false;
+		}
+
 	}
 }
 

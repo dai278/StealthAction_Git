@@ -28,6 +28,10 @@ public:
 	//インタラクトの実装
 	virtual void Interact(AActor* _interactOwner) override;
 
+	//インタラクトするポジションを取得
+	virtual FVector GetInteractPosition(const AActor* _actor = nullptr)override;
+
+
 private:
 	//移動距離
 	UPROPERTY(EditAnywhere, Category = "PushMoveActor")
