@@ -711,11 +711,14 @@ void APlayerCharacter::StaminaConsumption(float _deltaTime, bool& _isOver)
 //スタミナ回復
 void APlayerCharacter::StaminaRecovery(const float& _deltaTime)
 {
+
 	//スタミナを消費する状態
 	if (!m_bDash && m_status != EPlayerStatus::InShadow)
 	{
 		if (m_staminaTimer > 0.f) {
 			m_staminaTimer -= _deltaTime* m_staminaRecoveryMagnification;
+			m_isStaminaDepleted = false;
+
 			if (m_staminaTimer < 0.f)
 			{
 				m_staminaTimer = 0.f;
@@ -1136,6 +1139,14 @@ void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
 		m_bDash = false; 
 		return;
 	}
+
+	if (m_isStaminaDepleted) { 
+		m_bDash = false;
+		GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
+		m_cameraStatus = ECameraStatus::ThirdPerson;
+		m_bCameraSwitching = true;
+		return; 
+	}
 	
 	//移動入力がないならダッシュしない
 	if (m_charaMoveInput.IsNearlyZero(0.1f)) {
@@ -1344,7 +1355,29 @@ void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 	UE_LOG(LogTemp, Display, TEXT("Input Interact"));
 	//インタラクト可能オブジェクトに触れていなければ何もしない
 	if (!m_bHitIntteractObject) { return; }
-	if (m_status == EPlayerStatus::InShadow) {return;}
+	
+	//ステータスがこれらであればreturn
+	switch (m_status)
+	{
+	case EPlayerStatus::Attack:
+		break;
+	case EPlayerStatus::Damage:
+		return;
+		break;
+	case EPlayerStatus::Dead:
+		return;
+		break;
+	case EPlayerStatus::InShadow:
+		return;
+		break;
+	case EPlayerStatus::Interact:
+		return;
+		break;
+	case EPlayerStatus::InteractAnimation:
+		return;
+		break;
+	}
+
 	if (m_hitInteractOb)
 	{
 		m_interactPos = m_hitInteractOb->GetInteractPosition(Cast<AActor>(this));

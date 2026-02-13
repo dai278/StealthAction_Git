@@ -32,6 +32,9 @@ public:
 
     //インタラクトするポジションを取得
     virtual FVector GetInteractPosition(const AActor* _actor = nullptr);
+
+    //表示非表示切り替え更新
+    virtual void UpdateVisible();
 public:
     //インデックス取得
     virtual int32 GetIndex()const { return m_index; }
@@ -41,13 +44,10 @@ protected:
     UFUNCTION()
     void OnOverlapBegin(UPrimitiveComponent* OverlappedComp,AActor* OtherActor,UPrimitiveComponent* OtherComp,int32 OtherBodyIndex,bool bFromSweep,const FHitResult& SweepResult);
     
-	//衝突終了イベント関数
-    UFUNCTION()
-    void OnOverlapEnd(UPrimitiveComponent* OverlappedComp,AActor* OtherActor,UPrimitiveComponent* OtherComp,int32 OtherBodyIndex);
-    
-
-
-    
+	////衝突終了イベント関数
+ //   UFUNCTION()
+ //   void OnOverlapEnd(UPrimitiveComponent* OverlappedComp,AActor* OtherActor,UPrimitiveComponent* OtherComp,int32 OtherBodyIndex);
+ //       
 protected:
     UPROPERTY(EditAnywhere, Category = "Collision")
     UBoxComponent* m_pCollision;			//コリジョンコンポネント
@@ -65,5 +65,11 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Interact")
     TArray<FVector> InteractPos;
+
+    //プレイヤー参照用
+    APawn* m_pPlayer;
+
+    UPROPERTY(EditAnywhere, Category = "Interact")
+    float m_visibleUILenght;
 
 };

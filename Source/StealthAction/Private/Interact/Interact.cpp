@@ -4,10 +4,13 @@
 #include "Interact/Interact.h"
 #include "Components/BoxComponent.h"
 #include "UI/IntactUIWidget.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 
 // Sets default values
 AInteract::AInteract()
+	:m_pPlayer(nullptr)
+	, m_visibleUILenght(1000.f)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -53,11 +56,12 @@ void AInteract::BeginPlay()
 	
 	//コリジョンのオーバーラップイベント登録
 	m_pCollision->OnComponentBeginOverlap.AddDynamic(this, &AInteract::OnOverlapBegin);
-	m_pCollision->OnComponentEndOverlap.AddDynamic(this, &AInteract::OnOverlapEnd);
+	//m_pCollision->OnComponentEndOverlap.AddDynamic(this, &AInteract::OnOverlapEnd);
 
 	//コリジョンpresetをインタラクトに
 	m_pCollision->SetCollisionProfileName(FName("Interact"));
 
+	m_pPlayer=Cast<APawn>( UGameplayStatics::GetPlayerCharacter(this, 0));
 }
 
 // Called every frame
@@ -65,6 +69,7 @@ void AInteract::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	UpdateVisible();
 }
 
 
@@ -81,6 +86,28 @@ FVector AInteract::GetInteractPosition(const AActor* _actor)
 }
 
 
+//-----------------------------------------------------
+//表示非表示切り替え更新処理
+//-----------------------------------------------------
+void AInteract::UpdateVisible()
+{
+	FVector vec = { GetActorLocation() - m_pPlayer->GetActorLocation()};
+	float lenght = vec.Length();
+
+	if (lenght > m_visibleUILenght)
+	{
+		m_intractUI->SetVisibility(false);
+	}
+	else
+	{
+		FHitResult bHit;
+
+		
+	}
+
+}
+
+
 void AInteract::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	AActor* OtherActor,
 	UPrimitiveComponent* OtherComp,
@@ -92,10 +119,10 @@ void AInteract::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 }
 
 
-void AInteract::OnOverlapEnd(UPrimitiveComponent* OverlappedComp,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex) {
-
-	m_intractUI->SetVisibility(false);
-}
+//void AInteract::OnOverlapEnd(UPrimitiveComponent* OverlappedComp,
+//	AActor* OtherActor,
+//	UPrimitiveComponent* OtherComp,
+//	int32 OtherBodyIndex) {
+//
+//	m_intractUI->SetVisibility(false);
+//}
