@@ -333,18 +333,18 @@ void AExtendedSpotLight::OnRotateTargetAngleStop()
 	//åªç›ÇÃâÒì]
 	FRotator  currentRot = GetActorRotation();
 
-	if (m_minTurnRotate == currentRot.Pitch||m_minTurnRotate==currentRot.Yaw)
-	{
-		m_turnDir = 1.f;
-	}
-	else if (m_maxTurnRotate == currentRot.Pitch || m_maxTurnRotate == currentRot.Yaw)
-	{
-		m_turnDir = -1.f;
-	}
-	else
-	{
-		m_turnDir = 1.f;
-	}
+	//if (m_minTurnRotate == currentRot.Pitch||m_minTurnRotate==currentRot.Yaw)
+	//{
+	//	m_turnDir = 1.f;
+	//}
+	//else if (m_maxTurnRotate == currentRot.Pitch || m_maxTurnRotate == currentRot.Yaw)
+	//{
+	//	m_turnDir = -1.f;
+	//}
+	//else
+	//{
+	//	m_turnDir = 1.f;
+	//}
 }
 
 //-----------------------------------------------------
