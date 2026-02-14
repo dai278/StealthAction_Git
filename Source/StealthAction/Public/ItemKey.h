@@ -9,6 +9,8 @@
 #include "Camera/CameraInfo.h"
 #include "ItemKey.generated.h"
 
+class UWidgetComponent;
+
 class AGoalActor;
 
 //クラスのメンバ関数をキーアイテム取得時のコールバックにするときのマクロ
@@ -57,5 +59,11 @@ protected:
 	FVector GoalSpawnLocation;
 
 	std::function<void()> m_onGetKeyItemCallback;
+
+
+	//UI
+	UPROPERTY(EditAnywhere, Category = "UI")
+	UWidgetComponent* KeyUI;
+
 
 };

@@ -1378,7 +1378,6 @@ void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 
 
 
-
 	//ステータスがこれらであればreturn
 	switch (m_status)
 	{
@@ -1467,7 +1466,7 @@ void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 
 	if (m_hitInteractOb)
 	{
-		
+		if (!m_hitInteractOb->CanInteract()) { return; }
 		
 		m_interactPos = m_hitInteractOb->GetInteractPosition(Cast<AActor>(this));
 		

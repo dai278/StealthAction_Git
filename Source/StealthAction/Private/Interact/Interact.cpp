@@ -11,6 +11,7 @@
 AInteract::AInteract()
 	:m_pPlayer(nullptr)
 	, m_visibleUILenght(1000.f)
+	, m_IsUseInteract(true)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -60,7 +61,7 @@ void AInteract::BeginPlay()
 	
 	//コリジョンのオーバーラップイベント登録
 	m_pCollision->OnComponentBeginOverlap.AddDynamic(this, &AInteract::OnOverlapBegin);
-	//m_pCollision->OnComponentEndOverlap.AddDynamic(this, &AInteract::OnOverlapEnd);
+	m_pCollision->OnComponentEndOverlap.AddDynamic(this, &AInteract::OnOverlapEnd);
 
 	//コリジョンpresetをインタラクトに
 	m_pCollision->SetCollisionProfileName(FName("Interact"));
@@ -123,10 +124,10 @@ void AInteract::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 }
 
 
-//void AInteract::OnOverlapEnd(UPrimitiveComponent* OverlappedComp,
-//	AActor* OtherActor,
-//	UPrimitiveComponent* OtherComp,
-//	int32 OtherBodyIndex) {
-//
-//	m_intractUI->SetVisibility(false);
-//}
+void AInteract::OnOverlapEnd(UPrimitiveComponent* OverlappedComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex) {
+
+	m_intractUI->SetVisibility(false);
+}

@@ -62,6 +62,8 @@ void AGoalActor::BeginPlay()
 	Super::BeginPlay();
 
 	Collision->OnComponentBeginOverlap.AddDynamic(this, &AGoalActor::OnOverlapBegin); 
+	GoalUI->SetWidgetSpace(EWidgetSpace::Screen); // ‰æ–Ê‚ÉŒÅ’è‚·‚é‚È‚ç
+
 }
 
 // ===== ƒS[ƒ‹‚ÉG‚ê‚½ =====

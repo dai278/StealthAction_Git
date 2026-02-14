@@ -8,11 +8,21 @@
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 #include "UI/HUD/HUDWidget.h"
 #include "Kismet/GameplayStatics.h"
+
+#include "Components/WidgetComponent.h"
+
 #include "KeyItemSubsystem.h"
 //コンストラクタ
 AItemKey::AItemKey()
 {
 	GoalSpawnLocation = FVector(0.f, 0.f, 0.f);
+
+    KeyUI = CreateDefaultSubobject<UWidgetComponent>(TEXT("GoalUI"));
+    KeyUI->SetupAttachment(RootComponent);
+    KeyUI->SetWidgetSpace(EWidgetSpace::Screen); // 画面に固定するなら
+    KeyUI->SetDrawSize(FVector2D(40, 40));
+
+
 }
 
 //ゲームスタート時、または生成時に呼ばれる処理
@@ -30,6 +40,9 @@ void AItemKey::BeginPlay()
     {
         UE_LOG(LogTemp, Error, TEXT("[]Failed to get KeyItemSubsystem"));
     }
+
+	// 初期状態で非表示にする場合はここで設定
+	KeyUI->SetVisibility(true);
 }
 
 void AItemKey::HandleOverlap(AActor* OtherActor)
@@ -69,6 +82,9 @@ void AItemKey::HandleOverlap(AActor* OtherActor)
 
                 UE_LOG(LogTemp, Warning, TEXT("[]Goal is now visible"));
             }
+
+			// キーアイテムUI表示
+            KeyUI->SetVisibility(false);
 
 			//カメラフォーカス開始
 			CameraFocusStart(OtherActor);

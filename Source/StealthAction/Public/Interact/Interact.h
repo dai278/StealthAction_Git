@@ -30,6 +30,9 @@ public:
     //派生先でインタラクトを上書き
     virtual void Interact(AActor* _interactOwner) {};
 
+    //インタラクト可能か？
+	virtual bool CanInteract() const { return m_IsUseInteract; }
+
     //インタラクトするポジションを取得
     virtual FVector GetInteractPosition(const AActor* _actor = nullptr);
 
@@ -47,9 +50,9 @@ protected:
     void OnOverlapBegin(UPrimitiveComponent* OverlappedComp,AActor* OtherActor,UPrimitiveComponent* OtherComp,int32 OtherBodyIndex,bool bFromSweep,const FHitResult& SweepResult);
     
 	////衝突終了イベント関数
- //   UFUNCTION()
- //   void OnOverlapEnd(UPrimitiveComponent* OverlappedComp,AActor* OtherActor,UPrimitiveComponent* OtherComp,int32 OtherBodyIndex);
- //       
+    UFUNCTION()
+    void OnOverlapEnd(UPrimitiveComponent* OverlappedComp,AActor* OtherActor,UPrimitiveComponent* OtherComp,int32 OtherBodyIndex);
+       
 protected:
     UPROPERTY(EditAnywhere, Category = "Collision")
     UBoxComponent* m_pCollision;			//コリジョンコンポネント
@@ -74,4 +77,7 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Interact")
     float m_visibleUILenght;
 
+
+	UPROPERTY(EditAnywhere, Category = "Interact")
+	bool m_IsUseInteract;
 };
