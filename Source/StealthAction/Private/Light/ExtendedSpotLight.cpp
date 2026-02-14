@@ -476,14 +476,18 @@ void AExtendedSpotLight::UpdateManualYawRotate(const float& _deltaTime)
 	if (!m_bManualRotateing) { return; }
 	FRotator newRotator = GetActorRotation();
 
-	//現在の回転量が最大値最小値の範囲内でなければ範囲内へ回転
+	//初期がの回転量が最大値最小値の範囲内でなければ範囲内へ回転
 	if (newRotator.Yaw < m_minTurnRotate)
 	{
 		m_turnDir = 1;
+		newRotator.Yaw = m_minTurnRotate;
+
 	}
 	else if (newRotator.Yaw > m_maxTurnRotate)
 	{
 		m_turnDir = -1;
+		newRotator.Yaw = m_maxTurnRotate;
+
 	}
 
 	//回転
@@ -494,12 +498,14 @@ void AExtendedSpotLight::UpdateManualYawRotate(const float& _deltaTime)
 	if (newRotator.Yaw > m_maxTurnRotate)
 	{
 		newRotator.Yaw = m_maxTurnRotate;
+		m_turnDir = -1;
 		isOver = true;
 	}
 	//最小値未満になったら
 	else if (newRotator.Yaw < m_minTurnRotate)
 	{
 		newRotator.Yaw = m_minTurnRotate;
+		m_turnDir = 1;
 		isOver = true;
 	}
 	//超えた際の処理
