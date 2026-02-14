@@ -1069,7 +1069,7 @@ bool APlayerCharacter::IsUpPosWall(const FVector& _startPos)const
 	//通常時のサイズと一緒の高さまでトレース
 	FVector End = Start;
 	//カプセルに変換
-	FCollisionShape Capsule = FCollisionShape::MakeCapsule(m_capsuleRadius * 1.5f, maxCapuselHeightHelf * 1.2);
+	FCollisionShape Capsule = FCollisionShape::MakeCapsule(m_capsuleRadius * 1.7f, maxCapuselHeightHelf * 1.4f);
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);

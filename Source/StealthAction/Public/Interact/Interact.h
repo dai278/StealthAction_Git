@@ -37,7 +37,9 @@ public:
     virtual void UpdateVisible();
 public:
     //インデックス取得
-    virtual int32 GetIndex()const { return m_index; }
+    virtual TArray<int32> GetIndexArray()const { return m_indexs; }
+    //インデックス取得
+    virtual int32 GetIndex()const { return m_indexs[0]; }
 
 protected:
 	//衝突開始イベント関数
@@ -58,7 +60,7 @@ protected:
     UBoxComponent* m_bodyCollision;//壁判定用コリジョン
 
     UPROPERTY(EditAnywhere, Category = "Interact")
-    int32 m_index; 							//インタラクト識別用インデックス
+    TArray<int32> m_indexs; 							//インタラクト識別用インデックス
 
     UPROPERTY(EditAnywhere, Category = "UI")
     UWidgetComponent* m_intractUI;

@@ -33,10 +33,15 @@ void ALightTurnSwitch::Tick(float DeltaTime)
 //--------------------------
 void ALightTurnSwitch::Interact(AActor* _interactOwner)
 {
-	if (m_index == -1) { return; }
+	
+	if (m_indexs.Num() <= 0) { return; }
 	UExtendedSpotLightManager* lightMng = GetWorld()->GetSubsystem<UExtendedSpotLightManager>();
 	if (lightMng)
 	{
-		lightMng->OnRotateTargetAngleStop(m_index);
+		for (int32 index : m_indexs)
+		{
+			lightMng->OnRotateTargetAngleStop(index);
+
+		}
 	}
 }

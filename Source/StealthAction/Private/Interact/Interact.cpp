@@ -44,6 +44,10 @@ AInteract::AInteract()
 	}
 
 	InteractPos.Add(FVector::ZeroVector);
+
+	m_indexs.Empty();
+
+	m_indexs.Add(0);
 }
 
 // Called when the game starts or when spawned
