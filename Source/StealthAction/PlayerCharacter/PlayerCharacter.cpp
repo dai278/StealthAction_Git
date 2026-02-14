@@ -319,6 +319,16 @@ void APlayerCharacter::Tick(float _deltaTime)
 	//視点変更
 	ViewpointSwitching(_deltaTime);
 
+
+	//現在位置
+	FVector currentPos = GetActorLocation();
+	//現在位置で通常に戻ったら壁にのめり込むか
+	if (!IsUpPosWall(currentPos))
+	{
+		m_saveLastNotUpWallPos = currentPos;
+	}
+
+
 }
 
 //----------------------------------------------------------
@@ -655,13 +665,6 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 		//UE_LOG(LogTemp, Log, TEXT("Mesh Chaged Shadow !!"));
 	}
 
-	//現在位置
-	FVector currentPos = GetActorLocation();
-	//現在位置で通常に戻ったら壁にのめり込むか
-	if (!IsUpPosWall(currentPos))
-	{
-		m_saveLastNotUpWallPos = currentPos;
-	}
 
 	////影状態時間が最大時間を超えたらアイドル状態に戻す
 	//if (m_isStaminaDepleted) {
@@ -796,7 +799,7 @@ void APlayerCharacter::UpdateInteract(float _deltaTime)
 
 		m_interactTimer += _deltaTime;
 		//インタラクト時間が経過したらインタラクト実行
-		if (m_interactTimer < 2.f) {
+		if (m_interactTimer < 2.5f) {
 			return;
 		}
 		if (m_hitInteractOb)
@@ -1054,8 +1057,6 @@ void APlayerCharacter::ChangePlayerStatus(const EPlayerStatus& _newStatus)
 //-----------------------------------------------------
 bool APlayerCharacter::IsUpPosWall(const FVector& _startPos)const
 {
-
-
 	//サイズの半分
 	float helfHeight = m_Capsule->GetScaledCapsuleHalfHeight();
 	//現在が初期値の何分の1か
@@ -1157,15 +1158,6 @@ void APlayerCharacter::Enhanced_OnInputDash(const FInputActionValue& Value)
 		return;
 	}
 
-	const bool bHit = m_isStaminaDepleted;
-
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1, 2.0f, FColor::Green,
-			bHit ? TEXT("bHit: true") : TEXT("bHit: false")
-		);
-	}
 
 	//スタミナ切れ
 	if (m_isStaminaDepleted) {
@@ -1245,6 +1237,16 @@ void APlayerCharacter::Enhanced_MoveCrouch(const FInputActionValue& Value)
 		m_bIsCrouch = false;
 		m_cameraStatus = ECameraStatus::ThirdPerson;
 		m_bCameraSwitching = true;
+		//上に障害物があるか？
+		//現在位置
+		FVector pos = GetActorLocation();
+		if (IsUpPosWall(pos))
+		{
+			//ある場合
+			//最後に壁がなかった位置に移動
+			SetActorLocation(m_saveLastNotUpWallPos);
+		}
+
 
 	}
 }
@@ -1374,37 +1376,115 @@ void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 	//インタラクト可能オブジェクトに触れていなければ何もしない
 	if (!m_bHitIntteractObject) { return; }
 
+
+
+
 	//ステータスがこれらであればreturn
 	switch (m_status)
 	{
-	case EPlayerStatus::Attack:
+	case EPlayerStatus::Idle:
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1, 2.0f, FColor::Green,
+				TEXT("Idel")
+			);
+		}
 		break;
-	case EPlayerStatus::Damage:
+	
+	case EPlayerStatus::Walk:
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1, 2.0f, FColor::Green,
+				TEXT("Walk")
+			);
+		}
+		break;
+	
+	case EPlayerStatus::Attack:
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1, 2.0f, FColor::Green,
+				TEXT("Attack")
+			);
+		}
+		break;
+
 		return;
 		break;
+
+	case EPlayerStatus::Damage:
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1, 2.0f, FColor::Green,
+				TEXT("Damage")
+			);
+		}
+		break;
+
+		return;
+		break;
+
 	case EPlayerStatus::Dead:
 		return;
 		break;
+
 	case EPlayerStatus::InShadow:
 		return;
 		break;
 	case EPlayerStatus::Interact:
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1, 2.0f, FColor::Green,
+				TEXT("Interact")
+			);
+		}
+		break;
+
 		return;
 		break;
 	case EPlayerStatus::InteractAnimation:
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1, 2.0f, FColor::Green,
+				TEXT("Animation")
+			);
+		}
+		break;
+
 		return;
 		break;
+
 	}
+
+
 
 	if (m_hitInteractOb)
 	{
+		
+		
 		m_interactPos = m_hitInteractOb->GetInteractPosition(Cast<AActor>(this));
+		
+		FVector vec = FVector{ m_interactPos - GetActorLocation() };
+		vec.Z = 0.f;
+
+
 		if (m_interactPos == FVector::ZeroVector)
 		{
 			m_status = EPlayerStatus::InteractAnimation;
 			m_bCanControl = false;
 		}
+		else if (vec.Length() < 10.f) {
+			m_status = EPlayerStatus::InteractAnimation;
+			m_bCanControl = false;
 
+		}
 		else {
 			m_status = EPlayerStatus::Interact;
 			m_bCanControl = false;
