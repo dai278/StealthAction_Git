@@ -34,6 +34,8 @@ void APushMoveActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	//初期位置保存
+	m_initPos = GetActorLocation();
 }
 
 //----------------------------------------------------------
@@ -134,4 +136,14 @@ void APushMoveActor::Interact(AActor* _interactOwner)
 FVector APushMoveActor::GetInteractPosition(const AActor* _actor /*= nullptr*/)
 {
 	return FVector::ZeroVector;
+}
+
+
+//移動リセット
+void APushMoveActor::ResetMove()
+{
+	m_bIsMoving = false;
+	m_moveProgress = 0.f;
+	SetActorLocation(m_initPos);
+	SetActorTickEnabled(false);
 }

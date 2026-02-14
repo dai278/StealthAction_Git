@@ -31,6 +31,8 @@ public:
 	//インタラクトするポジションを取得
 	virtual FVector GetInteractPosition(const AActor* _actor = nullptr)override;
 
+	//移動リセット
+	void ResetMove();
 
 private:
 	//移動距離
@@ -49,6 +51,9 @@ private:
 
 	//開始位置
 	FVector m_startLocation;
+
+	//初期位置
+	FVector m_initPos;
 
 	//移動進行度
 	float m_moveProgress = 0.f;
