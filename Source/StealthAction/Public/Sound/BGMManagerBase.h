@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -23,34 +23,38 @@ protected:
 	//BGM
 	//=======================================
 
-	//íBGM
 	UPROPERTY(EditAnywhere, Category = "BGM")
 	USoundCue* NormalBGM;
 
-	//í“¬BGM
 	UPROPERTY(EditAnywhere, Category = "BGM")
 	USoundCue* CombatBGM;
 
-	//AudioComponent(í)
+	UPROPERTY(EditAnywhere, Category = "BGM")
+	USoundCue* CombatStartSE;
+
 	UPROPERTY()
 	UAudioComponent* NormalAudioComp;
 
-	//AudioComponent(í“¬)
 	UPROPERTY()
 	UAudioComponent* CombatAudioComp;
+
+	UPROPERTY()
+	UAudioComponent* CombatStartSEComp;
 
 	//=======================================
 	//í“¬ŠÇ—
 	//=======================================
 
-	//í“¬’†‚Ì“G‚Ì”
 	UPROPERTY()
 	int32 CombatEnemyCount;
 
+	UFUNCTION()
+	void StartCombatBGM();
+
 public:
-	//“G‚ªí“¬‚É“ü‚Á‚½‚Æ‚«ŒÄ‚Ô
+
 	void OnCombatStart();
 
-	//“G‚ªí“¬‚ğI—¹‚µ‚½‚Æ‚«ŒÄ‚Ô
 	void OnCombatEnd();
 };
+
