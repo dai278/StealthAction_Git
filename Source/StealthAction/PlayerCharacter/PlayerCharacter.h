@@ -178,7 +178,7 @@ private:
 	void UpdateShadow(float _deltaTime);
 
 	//スタミナ消費
-	void StaminaConsumption(float _deltaTime,bool& _isOver);
+	void StaminaConsumption(float _deltaTime);
 
 	//スタミナ回復
 	void StaminaRecovery(const float& _deltaTime);
@@ -240,7 +240,9 @@ protected:
 	//---入力用---
 	// Enhanced Input 関数
 	void Enhanced_Move(const FInputActionValue& Value);		//移動	
-	void Enhanced_MoveDash(const FInputActionValue& Value);			//ダッシュ
+	void Enhanced_OnInputDash(const FInputActionValue& Value);//ダッシュ入力開始
+	void Enhanced_EndInputDash(const FInputActionValue& Value);//ダッシュ入力終了
+
 
 	void Enhanced_MoveCrouch(const FInputActionValue& Value);		//しゃがみ
 	void Enhanced_MoveJump(const FInputActionValue& Value);			//ジャンプ
@@ -330,6 +332,9 @@ public:
 
 private:
 	bool IsUpPosWall(const FVector& _startPos)const;
+
+	//ダッシュ終了処理
+	void EndDash();
 
 
 private:

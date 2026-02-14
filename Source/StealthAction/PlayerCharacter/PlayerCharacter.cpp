@@ -167,17 +167,17 @@ APlayerCharacter::APlayerCharacter()
 	}
 
 
-	
-	
-		m_ShadowEffectChild = CreateDefaultSubobject<UChildActorComponent>(TEXT("ShadowEffectChild"));
-		m_ShadowEffectChild->SetupAttachment(GetRootComponent()); // もしくは GetMesh()
-
-		// ここで固定でクラス指定するなら
-		// ShadowEffectChild->SetChildActorClass(AShadowEffectActor::StaticClass());
-	
 
 
-	//カメラフォーカスディレクターコンポーネント生成
+	m_ShadowEffectChild = CreateDefaultSubobject<UChildActorComponent>(TEXT("ShadowEffectChild"));
+	m_ShadowEffectChild->SetupAttachment(GetRootComponent()); // もしくは GetMesh()
+
+	// ここで固定でクラス指定するなら
+	// ShadowEffectChild->SetChildActorClass(AShadowEffectActor::StaticClass());
+
+
+
+//カメラフォーカスディレクターコンポーネント生成
 	m_pCameraFocusDirector = CreateDefaultSubobject<UCameraFocusDirectorComponent>(TEXT("CameraFocusDirector"));
 }
 
@@ -306,8 +306,13 @@ void APlayerCharacter::Tick(float _deltaTime)
 	UpdateShadow(_deltaTime);
 	//ジャンプ更新処理
 	UpdateJump(_deltaTime);
+
+
 	//スタミナ回復処理
 	StaminaRecovery(_deltaTime);
+	//スタミナ消費処理
+	StaminaConsumption(_deltaTime);
+
 	//インタラクト処理
 	UpdateInteract(_deltaTime);
 
@@ -330,8 +335,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	//X軸
 	EnhancedInput->BindAction(m_moveIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_Move);
-	//ダッシュ
-	EnhancedInput->BindAction(m_moveDashIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_MoveDash);
 	//しゃがみ
 	EnhancedInput->BindAction(m_moveCrouchIA, ETriggerEvent::Started, this, &APlayerCharacter::Enhanced_MoveCrouch);
 	//ジャンプ
@@ -356,7 +359,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInput->BindAction(m_cameraSwitchIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_CameraSwitch);
 
 	//ダッシュ
-	EnhancedInput->BindAction(m_moveDashIA, ETriggerEvent::Completed, this, &APlayerCharacter::Enhanced_MoveDash);
+	EnhancedInput->BindAction(m_moveDashIA, ETriggerEvent::Started, this, &APlayerCharacter::Enhanced_OnInputDash);
+	//ダッシュ
+	EnhancedInput->BindAction(m_moveDashIA, ETriggerEvent::Completed, this, &APlayerCharacter::Enhanced_EndInputDash);
 
 	//カメラPitch
 	EnhancedInput->BindAction(m_cameraPitchIA, ETriggerEvent::Completed, this, &APlayerCharacter::Enhanced_CameraPitchReleased);
@@ -388,7 +393,7 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 		//現在のオフセット位置
 		float targetOffset = m_pSpringArm->SocketOffset.Y;
 		//100スピード
-		targetOffset += moveOffsetDir * 70.f*_deltaTime;
+		targetOffset += moveOffsetDir * 70.f * _deltaTime;
 
 		//最大値チェック
 		if (targetOffset > m_maxOffsetY)
@@ -406,10 +411,10 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 		m_OutcameraInputTimer = 0.f;
 	}
 	//初期オフセット位置に戻す処理
-	else 
+	else
 	{
 		//タイマー加算
-		m_OutcameraInputTimer +=_deltaTime;
+		m_OutcameraInputTimer += _deltaTime;
 		//このマジックナンバーより時間たっていれば処理する
 		if (m_OutcameraInputTimer > 0.3f)
 		{
@@ -549,7 +554,7 @@ void APlayerCharacter::UpdateMove(const bool _bInShadow /*= false*/)
 
 
 	//音発生
-	if (!m_bIsCrouch &&m_status!=EPlayerStatus::InShadow)
+	if (!m_bIsCrouch && m_status != EPlayerStatus::InShadow)
 	{
 		//デバック用
 		UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
@@ -609,7 +614,7 @@ void APlayerCharacter::UpdateDamaged()
 {
 	if (m_status != EPlayerStatus::Damage) { return; }
 
-	
+
 	//一定時間経過したらアイドルに戻す
 	//無敵時間タイマーはダメージ処理時起動するため使用
 	if (m_invincibleTimer > m_damageTime)
@@ -649,10 +654,6 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 		m_bUsingMesh = false;
 		//UE_LOG(LogTemp, Log, TEXT("Mesh Chaged Shadow !!"));
 	}
-	
-	//スタミナを消費
-	bool isOver = false;
-	StaminaConsumption(_deltaTime, isOver);
 
 	//現在位置
 	FVector currentPos = GetActorLocation();
@@ -662,11 +663,11 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 		m_saveLastNotUpWallPos = currentPos;
 	}
 
-	//影状態時間が最大時間を超えたらアイドル状態に戻す
-	if (isOver) {
-		TransformationShadowToIdle(true);
-		return;
-	}
+	////影状態時間が最大時間を超えたらアイドル状態に戻す
+	//if (m_isStaminaDepleted) {
+	//	TransformationShadowToIdle(true);
+	//	return;
+	//}
 	bool bLightHit = m_pExtendedSpotLightManager->IsHitAllLight(GetFeetLocation());
 	//足元が光に照らされていたらアイドル状態に戻す
 	if (bLightHit)
@@ -687,25 +688,34 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 }
 
 //スタミナ消費
-void APlayerCharacter::StaminaConsumption(float _deltaTime, bool& _isOver)
-{	
-	
-	//スタミナ切れ状態ならtrueを返す
-	if (m_isStaminaDepleted)
+void APlayerCharacter::StaminaConsumption(float _deltaTime)
+{
+	//スタミナ消費する状態出なければ行わない
+	if (m_status != EPlayerStatus::InShadow && !m_bDash)
 	{
-		_isOver = true;
 		return;
 	}
-	//スタミナ消費
-	m_staminaTimer += _deltaTime*(( m_bDash)? m_dashStaminaConsumptionMagnification :1 );
 
-
-	if (m_staminaTimer > m_maxStamina)
+	//スタミナ切れ状態ならreturn
+	if (m_isStaminaDepleted)
 	{
-		m_staminaTimer = m_maxStamina;
-		_isOver = true;
-		m_isStaminaDepleted = true;
+		return;
 	}
+
+	//スタミナ消費
+	//ダッシュはスタミナ消費を多くする
+	m_staminaTimer += _deltaTime * ((m_bDash) ? m_dashStaminaConsumptionMagnification : 1);
+
+	//スタミナがマックススタミナを超えていたら
+	if (m_staminaTimer <= m_maxStamina) { return; }
+	
+	m_staminaTimer = m_maxStamina;
+	m_isStaminaDepleted = true;
+
+	if (m_status == EPlayerStatus::InShadow) { TransformationShadowToIdle(); }
+	else if (m_bDash) { EndDash(); }
+	
+
 }
 
 //スタミナ回復
@@ -716,7 +726,7 @@ void APlayerCharacter::StaminaRecovery(const float& _deltaTime)
 	if (!m_bDash && m_status != EPlayerStatus::InShadow)
 	{
 		if (m_staminaTimer > 0.f) {
-			m_staminaTimer -= _deltaTime* m_staminaRecoveryMagnification;
+			m_staminaTimer -= _deltaTime * m_staminaRecoveryMagnification;
 			m_isStaminaDepleted = false;
 
 			if (m_staminaTimer < 0.f)
@@ -772,10 +782,10 @@ void APlayerCharacter::UpdateInvincibleTime(float _deltaTime)
 //--------------------------------------------------------
 void APlayerCharacter::UpdateInteract(float _deltaTime)
 {
-	if (m_status != EPlayerStatus::Interact&&m_status!=EPlayerStatus::InteractAnimation) { return; }
-	
+	if (m_status != EPlayerStatus::Interact && m_status != EPlayerStatus::InteractAnimation) { return; }
+
 	//インタラクトポジションに近づいたらインタラクトの処理を実行
-	if (FVector::Dist(GetActorLocation(), m_interactPos) < 50.f||m_interactPos==FVector::ZeroVector)
+	if (FVector::Dist(GetActorLocation(), m_interactPos) < 50.f || m_interactPos == FVector::ZeroVector)
 	{
 		ChangePlayerStatus(EPlayerStatus::InteractAnimation);
 
@@ -794,10 +804,10 @@ void APlayerCharacter::UpdateInteract(float _deltaTime)
 		return;
 	}
 
-	
+
 	//現在座標からインタラクトポジションまでのベクトル
-	FVector vec = m_interactPos -GetActorLocation();
-	
+	FVector vec = m_interactPos - GetActorLocation();
+
 	vec = vec.GetSafeNormal();
 	vec.Z = 0;
 	//インタラクトポジションに向かって移動
@@ -859,7 +869,7 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 
 	//視野角
 	float newFieldOfView = m_pCamera->FieldOfView;
-		newFieldOfView = FMath::FInterpTo(
+	newFieldOfView = FMath::FInterpTo(
 		newFieldOfView,
 		m_cameraInitPos[(int)m_cameraStatus].fieldOfView,
 		_deltaTime,
@@ -911,10 +921,10 @@ void APlayerCharacter::StartCameraFocus(AActor* const _cameraActor, float _blend
 	if (!PC) { return; }
 
 	m_pSaveCameraActor = PC->GetViewTarget();
-	
+
 	m_bCanControl = false;
 	bool isStat;
-	m_pCameraFocusDirector->StartFocusByProviderActor(_cameraActor,isStat,PC);
+	m_pCameraFocusDirector->StartFocusByProviderActor(_cameraActor, isStat, PC);
 
 	if (m_bDash) {
 		m_bDash = false;
@@ -997,7 +1007,7 @@ void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakK
 
 	/*生きていれば*/
 	//無敵時間開始
-	
+
 	UCapsuleComponent* Capsule = GetCapsuleComponent();
 
 	// Enemy だけ無視
@@ -1045,15 +1055,15 @@ bool APlayerCharacter::IsUpPosWall(const FVector& _startPos)const
 	float helfHeight = m_Capsule->GetScaledCapsuleHalfHeight();
 	//現在が初期値の何分の1か
 	float heightScale = m_capsuleHeight / (helfHeight * 2.f);
-	float maxCapuselHeightHelf=m_capsuleHeight/2.f;
+	float maxCapuselHeightHelf = m_capsuleHeight / 2.f;
 
 	//スタート位置
-	FVector Start = _startPos + FVector{0,0,maxCapuselHeightHelf };
-	
+	FVector Start = _startPos + FVector{ 0,0,maxCapuselHeightHelf };
+
 	//通常時のサイズと一緒の高さまでトレース
 	FVector End = Start;
 	//カプセルに変換
-	FCollisionShape Capsule = FCollisionShape::MakeCapsule(m_capsuleRadius*1.5f, maxCapuselHeightHelf*1.2);
+	FCollisionShape Capsule = FCollisionShape::MakeCapsule(m_capsuleRadius * 1.5f, maxCapuselHeightHelf * 1.2);
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
@@ -1125,29 +1135,42 @@ void APlayerCharacter::Enhanced_Move(const FInputActionValue& Value)
 }
 
 //------------------------------------------------------
-//ダッシュ
+//ダッシュ入力開始処理
 //------------------------------------------------------
-void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
+void APlayerCharacter::Enhanced_OnInputDash(const FInputActionValue& Value)
 {
 	if (!m_bCanControl) { return; }
 
+	UE_LOG(LogTemp, Display, TEXT("InputDash"));
+
 	bool isDash = Value.Get<bool>();
-	
+
 	//しゃがみ中、影状態ならダッシュしない
 	if (m_bIsCrouch || m_status == EPlayerStatus::InShadow)
-	{ 
-		m_bDash = false; 
+	{
+		m_bDash = false;
 		return;
 	}
 
-	if (m_isStaminaDepleted) { 
+	const bool bHit = m_isStaminaDepleted;
+
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1, 2.0f, FColor::Green,
+			bHit ? TEXT("bHit: true") : TEXT("bHit: false")
+		);
+	}
+
+	//スタミナ切れ
+	if (m_isStaminaDepleted) {
 		m_bDash = false;
 		GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
 		m_cameraStatus = ECameraStatus::ThirdPerson;
 		m_bCameraSwitching = true;
-		return; 
+		return;
 	}
-	
+
 	//移動入力がないならダッシュしない
 	if (m_charaMoveInput.IsNearlyZero(0.1f)) {
 		m_bDash = false;
@@ -1157,50 +1180,40 @@ void APlayerCharacter::Enhanced_MoveDash(const FInputActionValue& Value)
 		return;
 	}
 
-	if(isDash)
-	{
-		//スタミナ消費
-		bool isOver = false;
-
-		StaminaConsumption(GetWorld()->GetDeltaSeconds(), isOver);
-		
-		//スタミナがオーバーしている場合の処理
-		if (isOver) {
-			m_bDash = false;
-			GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
-			m_cameraStatus = ECameraStatus::ThirdPerson;
-			m_bCameraSwitching = true;
-			return;
-		}
-
-		if(!m_bDash)
-		{
-			//ダッシュに切り替わった時の処理
-			//移動速度を切り替え
-			GetCharacterMovement()->MaxWalkSpeed = m_DashSpeed;
-			m_cameraStatus = ECameraStatus::Dash;
-			m_bCameraSwitching = true;
-			m_bDash = true;
-		}
-
-		//ダッシュ音発生
-		UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
-		if (manager)
-		{
-			manager->MakeNoise(4, GetActorLocation());
-		}
-
-	}
-	else {
-		
-		GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
-		m_cameraStatus = ECameraStatus::ThirdPerson;
-		m_bCameraSwitching = true;
-		m_bDash = false;
-	}
+	//ダッシュに切り替わった時の処理
+	//移動速度を切り替え
+	GetCharacterMovement()->MaxWalkSpeed = m_DashSpeed;
+	m_cameraStatus = ECameraStatus::Dash;
+	m_bCameraSwitching = true;
+	m_bDash = true;
 
 
 }
+
+//------------------------------------------------------
+//ダッシュ入力終了処理
+//------------------------------------------------------
+void APlayerCharacter::Enhanced_EndInputDash(const FInputActionValue& Value)
+{
+	bool isDash = Value.Get<bool>();
+
+	//現在ダッシュ中か？
+	if (!m_bDash) { return; }
+
+	const bool bHit = m_isStaminaDepleted;
+
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1, 2.0f, FColor::Green,
+			bHit ? TEXT("bHit: true") : TEXT("bHit: false")
+		);
+	}
+
+	EndDash();
+}
+
+
 
 
 //------------------------------------------------------
@@ -1355,7 +1368,7 @@ void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 	UE_LOG(LogTemp, Display, TEXT("Input Interact"));
 	//インタラクト可能オブジェクトに触れていなければ何もしない
 	if (!m_bHitIntteractObject) { return; }
-	
+
 	//ステータスがこれらであればreturn
 	switch (m_status)
 	{
@@ -1625,7 +1638,7 @@ void APlayerCharacter::TransformationToShadow()
 	m_saveLastNotUpWallPos = newLocation;
 
 	m_bUsingMesh = true;
-	
+
 	if (AActor* Child = m_ShadowEffectChild->GetChildActor())
 	{
 		Child->SetActorHiddenInGame(false);
@@ -1654,7 +1667,7 @@ void APlayerCharacter::CancellationShadow(const EPlayerStatus& _status)
 		//最後に壁がなかった位置に移動
 		SetActorLocation(m_saveLastNotUpWallPos);
 	}
-	
+
 	GetMesh()->SetSkeletalMesh(m_defaultMesh);
 	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight);
 	m_bUsingMesh = false;
@@ -1671,5 +1684,16 @@ void APlayerCharacter::OnGetKeyItem()
 	AMyPlayerController* PC = Cast<AMyPlayerController>(Controller);
 	if (!PC) { return; }
 	PC->GetHUDWidget()->SetHasKeyItem(true);
+
+}
+
+
+//ダッシュ終了処理
+void APlayerCharacter::EndDash()
+{
+	m_bDash = false;
+	GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
+	m_cameraStatus = ECameraStatus::ThirdPerson;
+	m_bCameraSwitching = true;
 
 }
