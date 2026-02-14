@@ -11,7 +11,7 @@
 APushMoveReset::APushMoveReset()
 	:AInteract()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 //--------------------------
@@ -21,6 +21,15 @@ void APushMoveReset::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+
+//--------------------------
+//Tick
+//--------------------------
+void APushMoveReset::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }
 
 //--------------------------

@@ -25,8 +25,13 @@ protected:
     virtual void BeginPlay() override;
 
 public:
+    //Tick
+	virtual void Tick(float DeltaTime) override;
+    
     //派生先でインタラクトを上書き
     virtual void Interact(AActor* _interactOwner)override;
+
+
 
 	UPROPERTY(EditAnywhere, Category = "Interact")
     TArray< TObjectPtr<APushMoveActor>> m_resetActor;
