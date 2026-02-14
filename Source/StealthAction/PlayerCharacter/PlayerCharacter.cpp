@@ -784,8 +784,13 @@ void APlayerCharacter::UpdateInteract(float _deltaTime)
 {
 	if (m_status != EPlayerStatus::Interact && m_status != EPlayerStatus::InteractAnimation) { return; }
 
+	FVector currentPos = GetActorLocation();
+	currentPos.Z = 0.f;
+	FVector interactPos = m_interactPos;
+	interactPos.Z=0.f;
+
 	//インタラクトポジションに近づいたらインタラクトの処理を実行
-	if (FVector::Dist(GetActorLocation(), m_interactPos) < 50.f || m_interactPos == FVector::ZeroVector)
+	if (FVector::Dist(currentPos, interactPos) < 50.f || m_interactPos == FVector::ZeroVector)
 	{
 		ChangePlayerStatus(EPlayerStatus::InteractAnimation);
 
