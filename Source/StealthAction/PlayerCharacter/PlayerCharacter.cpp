@@ -928,8 +928,10 @@ void APlayerCharacter::StartCameraFocus(AActor* const _cameraActor, float _blend
 	APlayerController* PC = Cast<APlayerController>(Controller);
 	if (!PC) { return; }
 
+	//カメラの切り替え前のアクターを保存
 	m_pSaveCameraActor = PC->GetViewTarget();
 
+	//カメラの切り替え
 	m_bCanControl = false;
 	bool isStat;
 	m_pCameraFocusDirector->StartFocusByProviderActor(_cameraActor, isStat, PC);
@@ -1290,49 +1292,37 @@ void APlayerCharacter::Enhanced_Attack(const FInputActionValue& Value)
 	if (m_bJumping) { return; }
 	//影状態なら攻撃できない
 	if (m_status == EPlayerStatus::InShadow) { return; }
-
-	GetCharacterMovement()->GravityScale = 0.1f;
-
-	m_bCanControl = false;
-	ChangePlayerStatus(EPlayerStatus::Attack);
-	m_bCanAttack = true;
 	//一番近くの敵がプイレイヤーを見つけていればスニークキルするか判定
 	//nullなら敵がいない
-	if (m_pNearestEnemy)
-	{
+if (!m_pNearestEnemy) { return; }
+	
+	//敵がいるなら
 		//みつかっていればスニークキル失敗
-		if (m_pNearestEnemy->IsPlayerFound()) {
-			m_bSneakKill = false;
-		}
-		else
-		{
-			//敵までのベクトル
-			FVector toEnemyVector = FVector{ m_pNearestEnemy->GetActorLocation() - GetActorLocation() }.GetSafeNormal();
-			//プレイヤーの正面ベクトル
-			FVector forwardVector = GetMesh()->GetRightVector();     // = Y軸
-
-			//ベクトルの差を-1~1の範囲で取得
-			//1に近いほど正面同士
-			const float dot = FVector::DotProduct(toEnemyVector, forwardVector);
-			const float minAngle = 0.4f;
-			if (dot > minAngle)
-			{
-				m_bSneakKill = true;
-			}
-			else
-			{
-				m_bSneakKill = false;
-			}
-		}
+	if (m_pNearestEnemy->IsPlayerFound()) {
+			return;
 	}
-
-	else
+	//敵までのベクトル
+	FVector toEnemyVector = FVector{ m_pNearestEnemy->GetActorLocation() - GetActorLocation() }.GetSafeNormal();
+	//プレイヤーの正面ベクトル
+	FVector forwardVector = GetMesh()->GetRightVector();     // = Y軸
+	//ベクトルの差を-1~1の範囲で取得
+	//1に近いほど正面同士
+	const float dot = FVector::DotProduct(toEnemyVector, forwardVector);
+	const float minAngle = 0.4f;
+	if (dot > minAngle)
 	{
-		m_bSneakKill = false;
+		m_bSneakKill = true;
+		GetCharacterMovement()->GravityScale = 0.1f;
+
+		m_bCanControl = false;
+		ChangePlayerStatus(EPlayerStatus::Attack);
+		m_bCanAttack = true;
+
+		//剣の攻撃処理
+	//------------この前に振れる状態か確認-----------------
+		m_sword->Swinging(m_bSneakKill);
+
 	}
-	//剣の攻撃処理
-//------------この前に振れる状態か確認-----------------
-	m_sword->Swinging(m_bSneakKill);
 }
 
 //------------------------------------------------------
@@ -1379,6 +1369,8 @@ void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 
 
 	//ステータスがこれらであればreturn
+	//攻撃、ダメージ、死亡、影状態、インタラクトアニメーション中はインタラクトできない
+	//デバック表示
 	switch (m_status)
 	{
 	case EPlayerStatus::Idle:
@@ -1463,7 +1455,7 @@ void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 	}
 
 
-
+	//インタラクト可能オブジェクトに触れているなら
 	if (m_hitInteractOb)
 	{
 		if (!m_hitInteractOb->CanInteract()) { return; }

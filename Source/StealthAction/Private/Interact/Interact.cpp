@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "UI/IntactUIWidget.h"
 #include "Kismet/GameplayStatics.h"
+#include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 #include "Components/WidgetComponent.h"
 
 // Sets default values
@@ -12,6 +13,7 @@ AInteract::AInteract()
 	:m_pPlayer(nullptr)
 	, m_visibleUILenght(1000.f)
 	, m_IsUseInteract(true)
+	, FocusProviderComp(nullptr)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -130,4 +132,29 @@ void AInteract::OnOverlapEnd(UPrimitiveComponent* OverlappedComp,
 	int32 OtherBodyIndex) {
 
 	m_intractUI->SetVisibility(false);
+}
+
+
+//---- カメラフォーカス用の情報を返す -----
+FCameraFocusData AInteract::GetCameraFocusData_Implementation() const
+{
+
+	return FocusProviderComp ? FocusProviderComp->GetCameraFocusData() : FCameraFocusData{};
+
+}
+
+
+//カメラフォーカス開始処理
+void AInteract::CameraFocusStart(AActor* OtherActor)
+{
+	if (!OtherActor || !OtherActor->ActorHasTag(TEXT("Player"))) { return; }
+
+	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+
+	FCameraFocusData FocusData = FocusProviderComp->GetCameraFocusData();
+
+	if (!FocusData.FocusCamera) { return; }
+
+	Player->StartCameraFocus(this, FocusData.BlendTime);
+
 }

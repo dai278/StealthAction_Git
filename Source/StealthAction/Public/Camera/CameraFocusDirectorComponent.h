@@ -43,6 +43,12 @@ public:
 private:
     void RestoreInternal(bool bUnpause);
 
+	//ŠÔ‚Å‚Ì•œ‹Aˆ—
+	void RestoreByTime();
+
+	//è“®‚Å‚Ì•œ‹Aˆ—
+	void RestoreByInput();
+
 private:
     TWeakObjectPtr<AActor> SavedViewTarget;
     bool bFocusing = false;
@@ -50,4 +56,6 @@ private:
 
     float SavedBlendOutTime = 0.3f;
     double EndRealTime = 0.0;
+
+	ERewindTriggerType m_rewindTriggerType = ERewindTriggerType::None;
 };

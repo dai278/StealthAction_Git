@@ -75,6 +75,10 @@
 		{
 			"Name": "ElectraPlayer",
 			"Enabled": true
+		},
+		{
+			"Name": "ContextualAnimation",
+			"Enabled": true
 		}
 	]
 }

@@ -27,6 +27,17 @@ public:
 public:
 	//インタラクトの実装
 	virtual void Interact(AActor* _interactOwner) override;
+	virtual void Interact(AActor* _interactOwner, bool& _isPose) override;
+
+	//上移動
+	void MoveUp(float DeltaTime);
+	//下移動
+	void MoveDown(float DeltaTime);
+	//右移動
+	void MoveRight(float DeltaTime);
+	//左移動
+	void MoveLeft(float DeltaTime);
+
 
 	//インタラクトするポジションを取得
 	virtual FVector GetInteractPosition(const AActor* _actor = nullptr)override;

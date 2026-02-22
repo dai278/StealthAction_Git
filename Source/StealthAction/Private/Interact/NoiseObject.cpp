@@ -84,6 +84,14 @@ void ANoiseObject::Interact(AActor* _interactOwner)
 	MakeNoise();
 }
 
+//インタラクトの実装（ポーズするかどうか）
+void ANoiseObject::Interact(AActor* _interactOwner, bool& _isPose)
+{
+	Interact(_interactOwner);
+	_isPose = false;
+}
+
+
 //----------------------------------------------------------
 //音を出す処理
 //----------------------------------------------------------

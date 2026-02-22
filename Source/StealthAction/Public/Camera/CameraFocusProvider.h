@@ -5,6 +5,14 @@
 #include "CameraFocusProvider.generated.h"
 
 
+UENUM(BlueprintType)
+enum class ERewindTriggerType : uint8
+{
+    None        UMETA(DisplayName = "None"),
+    Manual      UMETA(DisplayName = "Manual"),
+    TimedAuto   UMETA(DisplayName = "Timed Auto"),
+};
+
 USTRUCT(BlueprintType)
 struct FCameraFocusData
 {
@@ -40,7 +48,9 @@ struct FCameraFocusData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float PauseTime = 5.f;
 
-   
+	//巻き戻しトリガーのタイプ
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ERewindTriggerType RewindTriggerType = ERewindTriggerType::TimedAuto;
 };
 
 // 動的デリゲートの宣言例

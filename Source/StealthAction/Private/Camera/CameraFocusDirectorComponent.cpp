@@ -32,30 +32,56 @@ void UCameraFocusDirectorComponent::BeginPlay()
 
 
 //----------------------------------------------
+// 毎フレームの処理
+//	----------------------------------------------
+void UCameraFocusDirectorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!bFocusing) return;
+
+	switch (m_rewindTriggerType)
+	{
+	case ERewindTriggerType::TimedAuto:
+		RestoreByTime();
+		break;
+	case ERewindTriggerType::Manual:
+		RestoreByInput();
+		break;
+	default:
+		break;
+	}
+}
+
+
+//----------------------------------------------
 // 開始処理
 //----------------------------------------------
 void UCameraFocusDirectorComponent::StartFocusByProviderActor(AActor* ProviderActor, bool& isStart, APlayerController* _controller)
 {
+	//nullチェック
 	if (!ProviderActor)
 	{
 		isStart = false;
 		return;
 	}
 
+	//インターフェース実装チェック
 	if (!ProviderActor->GetClass()->ImplementsInterface(UCameraFocusProvider::StaticClass()))
 	{
 		isStart = false;
 		return;
 	}
 
+	// データ取得
 	const FCameraFocusData Data = ICameraFocusProvider::Execute_GetCameraFocusData(ProviderActor);
-
+	// カメラの有無チェック
 	if (!Data.FocusCamera)
 	{
 		isStart = false;
 		return;
 	}
-
+	
 	//APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
   //  if (!_controller)
   //  {
@@ -67,6 +93,9 @@ void UCameraFocusDirectorComponent::StartFocusByProviderActor(AActor* ProviderAc
 	{
 		RestoreInternal(/*bUnpause*/true);
 	}
+	
+	// 巻き戻る際のトリガータイプを保存
+	m_rewindTriggerType = Data.RewindTriggerType;
 
 	//現在のViewTargetを保存
 	SavedViewTarget = _controller->GetViewTarget();
@@ -93,6 +122,9 @@ void UCameraFocusDirectorComponent::StartFocusByProviderActor(AActor* ProviderAc
 
 }
 
+//----------------------------------------------
+// 開始処理（ProviderActorからのデータ取得なし、最低限の引数で開始する場合）
+// -----------------------------------------------
 void UCameraFocusDirectorComponent::StartFocus(AActor* ProviderActor, bool& isStart, APlayerController* _controller)
 {
 
@@ -160,20 +192,6 @@ void UCameraFocusDirectorComponent::StartFocus(AActor* ProviderActor, bool& isSt
 }
 
 
-
-void UCameraFocusDirectorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	if (!bFocusing) return;
-
-	if (FPlatformTime::Seconds() >= EndRealTime)
-	{
-		RestoreInternal(/*bUnpause*/true);
-	}
-}
-
-
 //----------------------------------------------
 // 強制復帰処理
 //----------------------------------------------
@@ -208,4 +226,28 @@ void UCameraFocusDirectorComponent::RestoreInternal(bool bUnpause)
 	bFocusing = false;
 	bPausedGame = false;
 	SavedViewTarget.Reset();
+}
+
+//----------------------------------------------
+// 時間経過で復帰する場合の処理
+//----------------------------------------------
+void UCameraFocusDirectorComponent::RestoreByTime()
+{
+	if (FPlatformTime::Seconds() >= EndRealTime)
+	{
+		RestoreInternal(/*bUnpause*/true);
+	}
+}
+
+//----------------------------------------------
+// 入力で復帰する場合の処理
+//----------------------------------------------
+void UCameraFocusDirectorComponent::RestoreByInput()
+{
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	if (!PC) return;
+	if (PC->WasInputKeyJustPressed(EKeys::E))
+	{
+		RestoreInternal(/*bUnpause*/true);
+	}
 }

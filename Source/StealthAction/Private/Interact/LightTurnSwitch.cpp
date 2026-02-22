@@ -45,3 +45,12 @@ void ALightTurnSwitch::Interact(AActor* _interactOwner)
 		}
 	}
 }
+
+//--------------------------
+// インタラクト処理（ポーズするかどうか）
+//--------------------------
+void ALightTurnSwitch::Interact(AActor* _interactOwner, bool& _isPose)
+{
+	Interact(_interactOwner);
+	_isPose = false;
+}

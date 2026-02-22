@@ -27,4 +27,6 @@ public:
 	//派生先でインタラクトを上書き
 	virtual void Interact(AActor* _interactOwner)override;
 
+	virtual void Interact(AActor* _interactOwner, bool& _isPose) override;
+
 };

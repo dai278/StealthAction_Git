@@ -131,6 +131,15 @@ void APushMoveActor::Interact(AActor* _interactOwner)
 	m_targetLocation = m_startLocation + m_moveDirection * m_moveDistance;
 }
 
+//インタラクトの実装（ポーズするかどうか）
+void APushMoveActor::Interact(AActor* _interactOwner, bool& _isPose)
+{
+	Interact(_interactOwner);
+	_isPose = false;
+}
+
+
+
 
 //インタラクトするポジションを取得
 FVector APushMoveActor::GetInteractPosition(const AActor* _actor /*= nullptr*/)

@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Camera/CameraFocusProviderComponent.h"
+
 #include "Interact.generated.h"
 
 class UBoxComponent;
@@ -11,7 +13,7 @@ class UWidgetComponent;
 
 
 UCLASS()
-class STEALTHACTION_API AInteract : public AActor
+class STEALTHACTION_API AInteract : public AActor, public ICameraFocusProvider
 {
     GENERATED_BODY()
 
@@ -29,6 +31,8 @@ public:
 public:
     //派生先でインタラクトを上書き
     virtual void Interact(AActor* _interactOwner) {};
+
+	virtual void Interact(AActor* _interactOwner, bool& _isPose) {};
 
     //インタラクト可能か？
 	virtual bool CanInteract() const { return m_IsUseInteract; }
@@ -80,4 +84,16 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Interact")
 	bool m_IsUseInteract;
+
+
+    // カメラフォーカス用コンポーネント
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+    TObjectPtr<UCameraFocusProviderComponent> FocusProviderComp;
+
+    virtual FCameraFocusData GetCameraFocusData_Implementation() const override;
+
+	//カメラフォーカス開始
+    virtual void CameraFocusStart(AActor* OtherActor);
+
+
 };

@@ -12,6 +12,7 @@ APushMoveReset::APushMoveReset()
 	:AInteract()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
 }
 
 //--------------------------

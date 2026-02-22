@@ -49,3 +49,12 @@ void ANoiseSwitch::Interact(AActor* _interactOwner)
 		noiseMng->MakeNoise(1, GetActorLocation(), m_makeNoiseObjectIndex);
 	}
 }
+
+//----------------------------------------------------------
+//インタラクト（ポーズするかどうか）
+//----------------------------------------------------------
+void ANoiseSwitch::Interact(AActor* _interactOwner, bool& _isPose)
+{
+	Interact(_interactOwner);
+	_isPose = false;
+}

@@ -26,6 +26,8 @@ public:
 
 public:
 	virtual void Interact(AActor* _interactOwner) override;
+	virtual void Interact(AActor* _interactOwner, bool& _isPose) override;
+
 
 public:
 	void MakeNoise();

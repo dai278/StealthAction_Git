@@ -27,6 +27,7 @@ public:
 	
 	//インタラクト
 	virtual void Interact(AActor* _interactOwner) override;
+	virtual void Interact(AActor* _interactOwner, bool& _isPose) override;
 
 private:
 	bool m_bIsOn;// スイッチの状態
