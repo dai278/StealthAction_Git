@@ -295,6 +295,8 @@ public:
 		double m_attackTime_Limit;			//攻撃時間制限
 		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_animationAttackTime_Limit;		//攻撃アニメーション時間
+		UPROPERTY(EditAnywhere, Category = "Time")
+		double m_deadTime_Limit;		//死亡時間
 
 
 		double m_patrolTime;				//巡回時間
@@ -315,6 +317,7 @@ public:
 		double m_discoveryTime;				//発見時間
 		double m_attackTime;				//攻撃時間
 		double m_animationAttackTime;		//攻撃アニメーション時間
+		double m_deadTime;		//死亡時間
 
 		//移動関連
 		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chase")
@@ -339,8 +342,6 @@ public:
 		float m_chaseRotSpeed;		//追跡中キャラ回転速度
 		UPROPERTY(EditAnywhere, Category = "Chase")
 		double m_stopDistance_Player;		//プレイヤーに近づける限界距離
-		UPROPERTY(EditAnywhere, Category = "Chase")
-		double m_stopDistance_2D;		//プレイヤーに近づける限界距離（2D）
 		UPROPERTY(EditAnywhere, Category = "Chase")
 		double m_stopDistance_Nav;		//プレイヤーに近づける限界距離（Nav）
 		UPROPERTY(EditAnywhere, Category = "Chase")

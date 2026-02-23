@@ -96,7 +96,7 @@
 //	, m_chaseRotSpeed(6.f)
 //	, m_hitDamage(5)
 //	, m_stopDistance_Player(150.0)
-//	, m_stopDistance_2D(50.0)
+//	, m_stopDistance_Player(50.0)
 //	, m_stopDistance_Nav(0.0)
 //	, m_attackDistance(1500.0)
 //	, m_patrolCancel(false)
@@ -1267,7 +1267,7 @@
 //		{
 //			UpdateViewMove(_deltaTime);
 //
-//			if (m_stopDistance_2D < distance_2D && m_patrolTime > m_patrolTime_Limit)
+//			if (m_stopDistance_Player < distance_2D && m_patrolTime > m_patrolTime_Limit)
 //			{
 //				UpdateMove(_deltaTime);
 //			}
@@ -1282,7 +1282,7 @@
 //		}
 //
 //		//地点についたら次の地点へ
-//		if (m_stopDistance_2D >= distance_2D)
+//		if (m_stopDistance_Player >= distance_2D)
 //		{
 //			m_patrolTime = 0;
 //			m_routeCounter += 1;
@@ -1401,7 +1401,7 @@
 //	}
 //
 //	//もしプレイヤーがいた位置に近づいた場合
-//	if (m_visionCheck == false && m_stopDistance_2D >= distance_2D)
+//	if (m_visionCheck == false && m_stopDistance_Player >= distance_2D)
 //	{
 //		m_moveStop_Nav = true;		//停止（Nav）
 //		UpdateMove_Nav(_deltaTime);

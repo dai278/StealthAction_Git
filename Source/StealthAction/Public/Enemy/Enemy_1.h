@@ -301,7 +301,7 @@
 //		UPROPERTY(EditDefaultsOnly, Category = "Chase")
 //		double m_stopDistance_Player;		//プレイヤーに近づける限界距離
 //		UPROPERTY(EditDefaultsOnly, Category = "Chase")
-//		double m_stopDistance_2D;		//プレイヤーに近づける限界距離（2D）
+//		double m_stopDistance_Player;		//プレイヤーに近づける限界距離（2D）
 //		UPROPERTY(EditDefaultsOnly, Category = "Chase")
 //		double m_stopDistance_Nav;		//プレイヤーに近づける限界距離（Nav）
 //		UPROPERTY(EditDefaultsOnly, Category = "Chase")

@@ -63,23 +63,6 @@ AEnemyBase::AEnemyBase()
 	, m_hearingRange_Normal(700.0)
 	, m_hearingRange_Long(1000.0)
 	, m_stopDistance_Noise(50.0) //
-	, m_patrolTime(0.0)
-	, m_doubtTime(0.0)
-	, m_doubtNoiseTime(0.0)
-	, m_cautionTime(0.0)
-	, m_cautionNoiseTime(0.0)
-	, m_battleTime(0.0)
-	, m_battleFalseTime(0.0)
-	, m_battleNoiseTime(0.0)
-	, m_notFoundTime(0.0)
-	, m_notFoundNoiseTime(0.0)
-	, m_alertTime(0.0)
-	, m_missTime(0.0)
-	, m_returnTime(0.0)
-	, m_hearingTime(0.0)
-	, m_discoveryTime(0.0)
-	, m_attackTime(0.0)
-	, m_animationAttackTime(0.0)
 	, m_patrolTime_Limit(2.0)
 	, m_patrol_TurningTime_Limit(0.5f)
 	, m_patrol_TurningCheckingTime_Limit(1.5f)
@@ -99,14 +82,32 @@ AEnemyBase::AEnemyBase()
 	, m_discoveryTime_Limit(2.0)
 	, m_attackTime_Limit(5.)
 	, m_animationAttackTime_Limit(0.5)
+	, m_deadTime_Limit(5.0)
+	, m_patrolTime(0.0)
+	, m_doubtTime(0.0)
+	, m_doubtNoiseTime(0.0)
+	, m_cautionTime(0.0)
+	, m_cautionNoiseTime(0.0)
+	, m_battleTime(0.0)
+	, m_battleFalseTime(0.0)
+	, m_battleNoiseTime(0.0)
+	, m_notFoundTime(0.0)
+	, m_notFoundNoiseTime(0.0)
+	, m_alertTime(0.0)
+	, m_missTime(0.0)
+	, m_returnTime(0.0)
+	, m_hearingTime(0.0)
+	, m_discoveryTime(0.0)
+	, m_attackTime(0.0)
+	, m_animationAttackTime(0.0)
+	, m_deadTime(0.0)
 	, m_currentChaseSpeed(0.)
 	, m_chaseSpeed_Slow(200.0f)
 	, m_chaseSpeed_Normal(300.0f)
 	, m_chaseSpeed_Fast(400.0f)
 	, m_chaseRotSpeed(6.f)
 	, m_hitDamage(5)
-	, m_stopDistance_Player(150.0)
-	, m_stopDistance_2D(50.0)
+	, m_stopDistance_Player(75.0)
 	, m_stopDistance_Nav(0.0)
 	, m_attackDistance(200.0)
 	, m_attackDistance_Weapon(1500.0)
@@ -566,6 +567,14 @@ void AEnemyBase::CaseDead(float _deltaTime)
 
 		// 回転しないように
 		GetCharacterMovement()->bOrientRotationToMovement = false;
+	}
+
+	m_deadTime += _deltaTime;
+
+	if (m_deadTime > m_deadTime_Limit)
+	{
+		GetMesh()->SetVisibility(false);
+		SetActorEnableCollision(false);
 	}
 }
 
@@ -1431,7 +1440,7 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 		{
 			//UpdateViewMove(_deltaTime);
 
-			if (m_stopDistance_2D < distance_2D && m_patrolTime > m_patrolTime_Limit)
+			if (m_stopDistance_Player < distance_2D && m_patrolTime > m_patrolTime_Limit)
 			{
 				UpdateMove_Nav(_deltaTime);
 			}
@@ -1446,7 +1455,7 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 		//}
 
 		//地点についたら次の地点へ
-		if (m_stopDistance_2D >= distance_2D)
+		if (m_stopDistance_Player >= distance_2D)
 		{
 			//一時停止のため
 			m_patrolTime = 0;
@@ -1591,7 +1600,7 @@ void AEnemyBase::CaseCaution(float _deltaTime)
 		m_notFoundTime += _deltaTime;
 	}
 	//もしプレイヤーがいた位置に近づいた場合
-	if ((m_visionCheck == false && m_stopDistance_2D >= distance_2D) || m_notFoundTime > m_notFoundTime_Limit)
+	if ((m_visionCheck == false && m_stopDistance_Player >= distance_2D) || m_notFoundTime > m_notFoundTime_Limit)
 	{
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
@@ -2094,7 +2103,7 @@ void AEnemyBase::CaseReturn(float _deltaTime)
 
 	}
 
-	if (m_stopDistance_2D < distance)
+	if (m_stopDistance_Player < distance)
 	{
 		UpdateMove_Nav(_deltaTime);
 	}
@@ -2180,7 +2189,7 @@ void AEnemyBase::UpdateViewMove(float _deltaTime)
 void AEnemyBase::UpdateMove(float _deltaTime)
 {
 	double distance = (m_playerPos - m_enemyPos).Length();			//プレイヤーとの距離を測る(Vectorの長さ）
-	if (distance < m_stopDistance_2D)
+	if (distance < m_stopDistance_Player)
 	{
 		return;
 	}
@@ -2236,7 +2245,7 @@ void AEnemyBase::UpdateMove_Nav(float _deltaTime)
 	}
 
 	//移動停止
-	if (m_moveStop_Nav || distance < m_stopDistance_2D)
+	if (m_moveStop_Nav || distance < m_stopDistance_Player)
 	{
 
 		AIMove->StopMovement();
