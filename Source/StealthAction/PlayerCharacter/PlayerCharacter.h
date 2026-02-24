@@ -44,6 +44,7 @@ enum class ECameraStatus : uint8
 	InShadow		UMETA(DisplayName = "InShadow"),//影
 	Crouch			UMETA(DisplayName = "Crouch"),//しゃがみ
 	Dash			UMETA(DisplayName = "Dash"),//ダッシュ
+	SneakKill		UMETA(DisplayName = "SneakKill"),//暗殺
 	Num			 UMETA(DisplayName = "Num")//数計測用、UMETA(DisplayName = "Num")が必要かわからないけど書かないバグりそうな気がしたから書いてます
 };
 
@@ -201,14 +202,15 @@ private:
 	//足元座標の取得
 	FVector GetFeetLocation()const;
 
-	//攻撃終了コールバック
-	void OnAttackEnd();
-
-	public:
-
 
 public:
 
+	//攻撃終了コールバック
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void OnAttackEnd();
+
+
+	
 	//カメラフォーカス開始処理
 	UFUNCTION( Category = "Camera")
 	void StartCameraFocus(AActor* const _cameraActor, float _blendTime);

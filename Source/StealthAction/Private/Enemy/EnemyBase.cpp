@@ -2497,4 +2497,7 @@ void AEnemyBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		enemyManager->UnregisterEnemy(this);
 	}
 
+	if (m_spotLightInstance) {
+		m_spotLightInstance->Destroy();
+	}
 }

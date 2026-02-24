@@ -126,7 +126,7 @@ APlayerCharacter::APlayerCharacter()
 	m_cameraInitPos[(int)ECameraStatus::InShadow] = { FRotator{ 0.f,0.f,0.f},60.f,300.f ,FVector{} };
 	m_cameraInitPos[(int)ECameraStatus::Crouch] = { FRotator{ 0.f,0.f,0.f},60.f,250.f,FVector{} };
 	m_cameraInitPos[(int)ECameraStatus::Dash] = { FRotator{ 0.f,0.f,0.f},90.f,200.f,FVector{} };
-
+	m_cameraInitPos[(int)ECameraStatus::SneakKill] = { FRotator{ 0.f,0.f,0.f},70.f,350.f,FVector{} };
 
 	//カプセルの初期値を記録
 	m_Capsule = GetCapsuleComponent();
@@ -241,12 +241,10 @@ void APlayerCharacter::BeginPlay()
 		m_sword->ClearCollisionObjectType();
 		//コリジョンpreset名の設定
 		m_sword->SetProfileName(FName("PlayerWeapon"));
-		//攻撃範囲の設定
-		m_sword->SetSwordAttackScale(m_attackRadius);
 		//攻撃時間の設定
 		m_sword->SetAttackTime(1.f);
 		//振り終わりのコールバック関数登録
-		m_sword->RegisterSwingEndCallback(CreateSwingEndCallback(APlayerCharacter::OnAttackEnd));
+		//m_sword->RegisterSwingEndCallback(CreateSwingEndCallback(APlayerCharacter::OnAttackEnd));
 	}
 
 	//コンテニューしていれば情報取得
@@ -865,7 +863,9 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 	if (!m_bCameraSwitching) {
 		return;
 	}
-
+	if (m_cameraStatus == ECameraStatus::SneakKill) {
+		
+	}
 	// まずは距離
 	//引数は　現在地、目標値、デルタタイム、補間スピード
 	float NewLength = FMath::FInterpTo(

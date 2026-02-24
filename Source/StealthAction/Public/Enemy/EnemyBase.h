@@ -150,7 +150,11 @@ public:
 	//プレイヤーを見つけているかどうか
 	//確認が取れてないので仮でfalse返す
 	//確認取れたらCpp側で実装予定
-	bool IsPlayerFound() const { return m_battleCheck; }
+	bool IsPlayerFound() const { 
+		//死んでたらキル出来ない様にするためtureを返す
+		if (m_enemyCurrentState == EEnemyStatus::Dead) { return true; }
+		return m_battleCheck;	
+	}
 	//エネミー情報の登録
 	void SetEnemyInfo(const FEnemyInfo& _EnemyInfo) { m_enemyInfo = _EnemyInfo; }
 	//エネミー情報の取得
