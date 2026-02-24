@@ -278,6 +278,7 @@ void APlayerCharacter::BeginPlay()
 	{
 		Controller->SetControlRotation(GetActorRotation());
 	}
+
 }
 
 //----------------------------------------------------------
@@ -326,7 +327,17 @@ void APlayerCharacter::Tick(float _deltaTime)
 		m_saveLastNotUpWallPos = currentPos;
 	}
 
+	const UCameraComponent* Cam = FindComponentByClass<UCameraComponent>();
+	if (!Cam || !GetMesh()) return;
 
+	const float D = FVector::Distance(Cam->GetComponentLocation(), GetMesh()->GetComponentLocation());
+	if (D < 150) {
+		GetMesh()->SetHiddenInGame(true, true); // true: 子も反映
+	}
+	else {
+		GetMesh()->SetHiddenInGame(false, true);
+	}
+	
 }
 
 //----------------------------------------------------------
@@ -1348,7 +1359,9 @@ void APlayerCharacter::Enhanced_Attack(const FInputActionValue& Value)
 	//ジャンプ中は攻撃できない
 	if (m_bJumping) { return; }
 	//影状態なら攻撃できない
-	if (m_status == EPlayerStatus::InShadow) { return; }
+	if (m_status == EPlayerStatus::InShadow) { 
+		TransformationShadowToIdle();
+	}
 	//一番近くの敵がプイレイヤーを見つけていればスニークキルするか判定
 	//nullなら敵がいない
 if (!m_pNearestEnemy) { return; }
@@ -1843,4 +1856,65 @@ void APlayerCharacter::EndDash()
 	m_cameraStatus = ECameraStatus::ThirdPerson;
 	m_bCameraSwitching = true;
 
+}
+
+
+//----------------------------------------------------------
+//カメラ壁回避け処理
+//----------------------------------------------------------
+void APlayerCharacter::UpdateCamerawallSiseOffset(float _deltaTime)
+{
+	if (!m_pSpringArm) return;
+
+	// スプリングアームの根元（Pivot）
+	const FVector Pivot = m_pSpringArm->GetComponentLocation();
+
+	// 「理想の後方位置」（横オフセット無し）
+	const FVector BackDir = -m_pSpringArm->GetForwardVector();
+	const FVector DesiredBase = Pivot + BackDir * m_pSpringArm->TargetArmLength;
+
+	// 左右に逃がした位置
+	const FVector Right = m_pSpringArm->GetRightVector();
+	const FVector DesiredR = DesiredBase + Right * WallAvoidSideOffset;
+	const FVector DesiredL = DesiredBase - Right * WallAvoidSideOffset;
+
+	auto TraceTo = [&](const FVector& To) -> float
+	{
+		FHitResult Hit;
+		FCollisionQueryParams Params(SCENE_QUERY_STAT(CameraWallAvoid), false, this);
+		// 自分に当たらないように（必要ならMeshもIgnore）
+		Params.AddIgnoredActor(this);
+
+		const bool bHit = GetWorld()->SweepSingleByChannel(
+			Hit,
+			Pivot,
+			To,
+			FQuat::Identity,
+			WallAvoidChannel,
+			FCollisionShape::MakeSphere(WallAvoidTraceRadius),
+			Params
+		);
+
+		// “到達できる距離”を返す（遠いほど良い）
+		return bHit ? Hit.Distance : FVector::Distance(Pivot, To);
+	};
+
+	const float DistR = TraceTo(DesiredR);
+	const float DistL = TraceTo(DesiredL);
+
+	// より遠くまで行ける＝壁に当たりにくい方へ
+	float TargetY = 0.f;
+
+	const float IdealDist = FVector::Distance(Pivot, DesiredBase);
+	const bool bWallClose = (FMath::Min(DistR, DistL) < IdealDist - 1.f); // 壁が近い判定
+
+	if (bWallClose)
+		TargetY = (DistR >= DistL) ? +WallAvoidSideOffset : -WallAvoidSideOffset;
+
+	// 滑らかに
+	CurrentSideOffsetY = FMath::FInterpTo(CurrentSideOffsetY, TargetY, _deltaTime, WallAvoidInterpSpeed);
+
+	FVector Offset = m_pSpringArm->SocketOffset;
+	Offset.Y = CurrentSideOffsetY;
+	m_pSpringArm->SocketOffset = Offset;
 }

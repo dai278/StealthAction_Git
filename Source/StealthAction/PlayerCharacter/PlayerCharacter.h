@@ -556,4 +556,22 @@ public:
 	FVector m_saveLastNotUpWallPos;
 
 
+	protected:
+		//カメラ壁回避用変数
+		UPROPERTY(EditAnywhere, Category = "Camera|WallAvoid")
+		float WallAvoidSideOffset = 35.f;   // 横に逃がす量（cm）
+
+		UPROPERTY(EditAnywhere, Category = "Camera|WallAvoid")
+		float WallAvoidInterpSpeed = 12.f;  // 追従速度
+
+		UPROPERTY(EditAnywhere, Category = "Camera|WallAvoid")
+		float WallAvoidTraceRadius = 8.f;   // スフィア半径（cm）
+
+		UPROPERTY(EditAnywhere, Category = "Camera|WallAvoid")
+		TEnumAsByte<ECollisionChannel> WallAvoidChannel = ECC_Camera;
+
+		float CurrentSideOffsetY = 0.f;
+
+		//カメラ壁回避処理
+		void UpdateCamerawallSiseOffset(float _deltaTime);
 };
