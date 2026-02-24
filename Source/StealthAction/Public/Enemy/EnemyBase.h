@@ -152,6 +152,7 @@ public:
 	//プレイヤーを見つけているかどうか
 	//確認が取れてないので仮でfalse返す
 	//確認取れたらCpp側で実装予定
+	UFUNCTION(BlueprintCallable, Category = "Enemy")
 	bool IsPlayerFound() const { 
 		//死んでたらキル出来ない様にするためtureを返す
 		if (m_enemyCurrentState == EEnemyStatus::Dead) { return true; }
