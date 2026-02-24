@@ -1,55 +1,88 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Enemy_Effect_X.cpp
 
 #include "Enemy_Effect/Enemy_Effect_1.h"
 #include "Components/BillboardComponent.h"
 #include "Components/SceneComponent.h"
+#include "TimerManager.h"
+
 AEnemy_Effect_1::AEnemy_Effect_1()
-	: m_effectDeleteTime(3.)
-
+    : m_effectDeleteTime(3.f)
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = false;
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+    RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
-	Billboard = CreateDefaultSubobject<UBillboardComponent>(TEXT("Billboard"));
-	Billboard->SetupAttachment(RootComponent);
+    Billboard = CreateDefaultSubobject<UBillboardComponent>(TEXT("Billboard"));
+    Billboard->SetupAttachment(RootComponent);
+    Billboard->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    Billboard->bIsScreenSizeScaled = true;
 
-	Billboard->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	Billboard->bIsScreenSizeScaled = true;
-
+    // 初期は必ず非表示（プール前提）
+    SetActorHiddenInGame(true);
 }
 
 void AEnemy_Effect_1::ActivateEffect(const FVector& StartPos, AActor* TargetActor)
 {
+    UE_LOG(LogTemp, Warning, TEXT("EffectActiveX"));
 
-	UE_LOG(LogTemp, Warning, TEXT("EffectActive1"));
+    // 以前のタイマーが残っていると再利用時に事故る
+    GetWorldTimerManager().ClearTimer(DestroyTimer);
 
-	SetActorLocation(StartPos);
+    // 位置
+    SetActorLocation(StartPos);
 
-	AttachToActor(TargetActor,FAttachmentTransformRules::KeepWorldTransform);
+    // Attach は安全チェック
+    if (IsValid(TargetActor))
+    {
+        AttachToActor(TargetActor, FAttachmentTransformRules::KeepWorldTransform);
+    }
+    else
+    {
+        // ターゲットなしならアタッチしない（ワールドに置くだけ）
+        DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+    }
 
-	SetActorHiddenInGame(false);
-	bHidden = false;
+    // 表示（bHiddenを触らない）
+    SetActorHiddenInGame(false);
+    if (Billboard)
+    {
+        // Actor Hiddenだけで足りるならこの2行は削っても良い
+        Billboard->SetHiddenInGame(false);
+        Billboard->SetVisibility(true, true);
+    }
 
-	if (Billboard)
-	{
-		Billboard->SetVisibility(true, true);
-		Billboard->SetHiddenInGame(false);
-	}
-	GetWorldTimerManager().SetTimer(DestroyTimer, this, &AEnemy_Effect_1::InvisibleEffect, m_effectDeleteTime, false);
+    // タイマー
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        // World無しは安全に戻す
+        InvisibleEffect();
+        return;
+    }
+
+    World->GetTimerManager().SetTimer(
+        DestroyTimer,
+        this,
+        &AEnemy_Effect_1::InvisibleEffect,
+        m_effectDeleteTime,
+        false
+    );
 }
 
 void AEnemy_Effect_1::InvisibleEffect()
 {
-	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	SetActorHiddenInGame(true);
-	bHidden = true;
-	if (Billboard)
-	{
-		Billboard->SetVisibility(false, true);
-		Billboard->SetHiddenInGame(true);
-	}
+    // 再入対策：まずタイマーを止める
+    GetWorldTimerManager().ClearTimer(DestroyTimer);
+
+    // Detach
+    DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+
+    // 非表示
+    SetActorHiddenInGame(true);
+
+    if (Billboard)
+    {
+        Billboard->SetVisibility(false, true);
+        Billboard->SetHiddenInGame(true);
+    }
 }

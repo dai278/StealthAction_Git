@@ -427,6 +427,21 @@ void AEnemyBase::BeginPlay()
 
 	Tags.AddUnique(FName("Effect"));
 
+	// BeginPlay のエフェクト取得部分だけ置換
+
+	m_effectPool = Cast<AEnemy_EffectManager>(
+		UGameplayStatics::GetActorOfClass(this, AEnemy_EffectManager::StaticClass())
+	);
+
+	if (IsValid(m_effectPool))
+	{
+		UE_LOG(LogTemp, Display, TEXT("m_effectPool: FOUND"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("m_effectPool: NOT FOUND"));
+	}
+
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -521,6 +536,9 @@ void AEnemyBase::Tick(float DeltaTime)
 	}
 
 	m_prevState = m_enemyCurrentState;
+
+	// Tick の最後の方で
+	UpdateEffect(DeltaTime);
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -579,6 +597,8 @@ void AEnemyBase::CaseDead(float _deltaTime)
 
 		//削除
 		Destroy();
+		m_deadTime = 0;
+		return;
 	}
 }
 
@@ -940,7 +960,7 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 //探索処理
 //------------------------------------------------------------------------------------------------------------
 void AEnemyBase::UpdateSearch(float _deltaTime)
-{
+ {
 	//プレイヤーキャラが見つからなければ終了
 	if (!m_pPlayerChara) { return; }
 
@@ -980,9 +1000,10 @@ void AEnemyBase::UpdateSearch(float _deltaTime)
 			m_enemyCurrentState = EEnemyStatus::Patrol;
 		}
 		//疑念
-		else if (m_visionLevel == 2)
+ 		else if (m_visionLevel == 2)
 		{
 			m_enemyCurrentState = EEnemyStatus::Doubt;
+			UE_LOG(LogTemp, Log, TEXT("のいずずずずずずずずずずずずずずずずずずずうずずずｚ"));
 		}
 		//注意
 		else if (m_visionLevel == 3)
@@ -2397,85 +2418,65 @@ void AEnemyBase::OnDamage(int32 Damage, FVector KnockBackValue, bool _bSneakKill
 //------------------------------------------------------------------------------------------------------------
 void AEnemyBase::UpdateEffect(float _deltaTime)
 {
+	if (!IsValid(m_effectPool)) return;
+	if (m_enemyCurrentState == EEnemyStatus::Dead) return;
 
-
-	if (!m_effectPool)
+	// 状態が変わってないなら何もしない（毎フレーム再取得しない）
+	if (PrevEffectState == m_enemyCurrentState)
 	{
 		return;
 	}
-	if(EEnemyStatus::Dead == m_enemyCurrentState)
-	{
-		return;
-	}
+	PrevEffectState = m_enemyCurrentState;
 
-	AEnemy_Effect_1* Effect1 = m_effectPool->GetEffect1();
-	AEnemy_Effect_2* Effect2 = m_effectPool->GetEffect2();
-	AEnemy_Effect_3* Effect3 = m_effectPool->GetEffect3();
-	AEnemy_Effect_4* Effect4 = m_effectPool->GetEffect4();
+	// いま出ているエフェクトを戻す
+	if (IsValid(CurrentStateEffect))
+	{
+		if (AEnemy_Effect_1* E1 = Cast<AEnemy_Effect_1>(CurrentStateEffect)) { E1->InvisibleEffect(); }
+		else if (AEnemy_Effect_2* E2 = Cast<AEnemy_Effect_2>(CurrentStateEffect)) { E2->InvisibleEffect(); }
+		else if (AEnemy_Effect_3* E3 = Cast<AEnemy_Effect_3>(CurrentStateEffect)) { E3->InvisibleEffect(); }
+		else if (AEnemy_Effect_4* E4 = Cast<AEnemy_Effect_4>(CurrentStateEffect)) { E4->InvisibleEffect(); }
+	}
+	CurrentStateEffect = nullptr;
 
-	if (Effect1_Keeper)
-	{
-		Effect1_Keeper->InvisibleEffect();
-	}
-	if (Effect2_Keeper)
-	{
-		Effect2_Keeper->InvisibleEffect();
-	}
-	if (Effect3_Keeper)
-	{
-		Effect3_Keeper->InvisibleEffect();
-	}
-	if (Effect4_Keeper)
-	{
-		Effect4_Keeper->InvisibleEffect();
-	}
+	const FVector StartPos = GetActorLocation();
 
+	// 必要な種類だけ取得して出す（プール枯れは nullptr で安全に無視）
 	if (m_battleCheck || m_battleNoiseCheck)
 	{
-		if (!Effect1)
+		if (AEnemy_Effect_1* Effect = m_effectPool->GetEffect1())
 		{
-			return;
+			Effect->ActivateEffect(StartPos, this);
+			CurrentStateEffect = Effect;
 		}
-		FVector StartPos = GetActorLocation();
-
-		Effect1->ActivateEffect(StartPos,this);
+		return;
 	}
-	else if (m_cautionCheck || m_cautionNoiseCheck)
+
+	if (m_cautionCheck || m_cautionNoiseCheck)
 	{
-		if (!Effect2)
+		if (AEnemy_Effect_2* Effect = m_effectPool->GetEffect2())
 		{
-			return;
+			Effect->ActivateEffect(StartPos, this);
+			CurrentStateEffect = Effect;
 		}
-		FVector StartPos = GetActorLocation();
-
-		Effect2->ActivateEffect(StartPos,this);
-
+		return;
 	}
-	else if(m_doubtCheck|| m_doubtNoiseCheck)
+
+	if (m_doubtCheck || m_doubtNoiseCheck)
 	{
-		if (!Effect4)
+		if (AEnemy_Effect_4* Effect = m_effectPool->GetEffect4())
 		{
-			return;
+			Effect->ActivateEffect(StartPos, this);
+			CurrentStateEffect = Effect;
 		}
-		FVector StartPos = GetActorLocation();
-
-		Effect4->ActivateEffect(StartPos, this);
+		return;
 	}
-	else
+
+	// それ以外（巡回など）
+	if (AEnemy_Effect_3* Effect = m_effectPool->GetEffect3())
 	{
-		if (!Effect3)
-		{
-			return;
-		}
-		FVector StartPos = GetActorLocation();
-
-		Effect3->ActivateEffect(StartPos,this);
+		Effect->ActivateEffect(StartPos, this);
+		CurrentStateEffect = Effect;
 	}
-
-	Effect1_Keeper = Effect1;
-	Effect2_Keeper = Effect2;
-	Effect3_Keeper = Effect3;
-	Effect4_Keeper = Effect4;
 }
 
 
@@ -2484,20 +2485,33 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 //------------------------------------------------------------------------------------------------------------
 void AEnemyBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	// 表示中エフェクトを戻す（任意だが安全）
+	if (IsValid(CurrentStateEffect))
+	{
+		if (AEnemy_Effect_1* E1 = Cast<AEnemy_Effect_1>(CurrentStateEffect)) { E1->InvisibleEffect(); }
+		else if (AEnemy_Effect_2* E2 = Cast<AEnemy_Effect_2>(CurrentStateEffect)) { E2->InvisibleEffect(); }
+		else if (AEnemy_Effect_3* E3 = Cast<AEnemy_Effect_3>(CurrentStateEffect)) { E3->InvisibleEffect(); }
+		else if (AEnemy_Effect_4* E4 = Cast<AEnemy_Effect_4>(CurrentStateEffect)) { E4->InvisibleEffect(); }
+	}
+	CurrentStateEffect = nullptr;
+
+	// 共有Managerは破壊しない
+	m_effectPool = nullptr;
+
 	Super::EndPlay(EndPlayReason);
-	if (m_effectPool)
+
+	// 以降、他の登録解除等は現状のままでOK（GetWorld nullの場合だけ注意）
+	if (UWorld* World = GetWorld())
 	{
-		m_effectPool->Destroy();
+		if (UEnemyManager* enemyManager = World->GetSubsystem<UEnemyManager>())
+		{
+			enemyManager->UnregisterEnemy(this);
+		}
 	}
 
-	//マネージャ―登録解除
-	UEnemyManager* enemyManager = GetWorld()->GetSubsystem<UEnemyManager>();
-	if (enemyManager)
+	if (IsValid(m_spotLightInstance))
 	{
-		enemyManager->UnregisterEnemy(this);
-	}
-
-	if (m_spotLightInstance) {
 		m_spotLightInstance->Destroy();
+		m_spotLightInstance = nullptr;
 	}
 }

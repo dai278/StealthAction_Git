@@ -180,6 +180,7 @@ public:
 	UNoiseListenerComponent* noise;
 	void OnNoiseHeard(const int& _noiseVolume, const FVector& _pos);
 
+	UPROPERTY()
 	AEnemy_EffectManager* m_effectPool;
 
 	AEnemy_Effect_1* Effect1_Keeper;
@@ -303,6 +304,14 @@ public:
 		double m_animationAttackTime_Limit;		//攻撃アニメーション時間
 		UPROPERTY(EditAnywhere, Category = "Time")
 		double m_deadTime_Limit;		//死亡時間
+
+
+		// 現在表示中のエフェクト（1個だけ管理）
+		UPROPERTY()
+		AActor* CurrentStateEffect = nullptr;
+
+		// エフェクト更新用：前回の状態
+		EEnemyStatus PrevEffectState = EEnemyStatus::Empty;
 
 
 		double m_patrolTime;				//巡回時間
