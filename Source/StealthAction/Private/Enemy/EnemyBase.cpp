@@ -225,7 +225,6 @@ void AEnemyBase::BeginPlay()
 	// 入力を有効化（検証用）
 	EnableInput(GetWorld()->GetFirstPlayerController());
 
-
 	UE_LOG(LogTemp, Warning, TEXT("AEnemyBase BeginPlay"));
 
 	//ゲーム全体び対するActorの検索処理はコストが高いため、BeingPlayで一回保存しておくだけにする
@@ -1461,33 +1460,13 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 
 		double distance_2D = FVector::Dist2D(m_routePos, m_enemyPos);	//ルート地点とエネミーのとの距離を測る(Vectorの長さ）
 
-		////少し右にずれる
-		//if (m_patrol_TurningCheck)
-		//{
-		//	m_patrol_TurningCheckingTime += _deltaTime;
-
-		//	m_routePos = m_turnRight_Pos;
-
-		//	UpdateViewMove(_deltaTime);
-		//	UpdateMove_Nav(_deltaTime);
-		//}
-		//else
 		{
-			//UpdateViewMove(_deltaTime);
-
 			if (m_stopDistance_Player < distance_2D && m_patrolTime > m_patrolTime_Limit)
 			{
 				UpdateMove_Nav(_deltaTime);
 			}
 
 		}
-
-		////一定時間たつと元の動きに戻る
-		//if (m_patrol_TurningCheckingTime > m_patrol_TurningTime_Limit)
-		//{
-		//	m_patrol_TurningCheck = false;
-		//	m_patrol_TurningCheckingTime = 0;
-		//}
 
 		//地点についたら次の地点へ
 		if (m_stopDistance_Player >= distance_2D)
@@ -2272,7 +2251,6 @@ void AEnemyBase::UpdateMove(float _deltaTime)
 void AEnemyBase::UpdateMove_Nav(float _deltaTime)
 {
 	AAIController* AIMove = Cast<AAIController>(GetController());
-	double distance = (m_playerPos - m_enemyPos).Length();			//プレイヤーとの距離を測る(Vectorの長さ）
 
 	if (!AIMove)
 	{
@@ -2280,15 +2258,13 @@ void AEnemyBase::UpdateMove_Nav(float _deltaTime)
 	}
 
 	//移動停止
-	if (m_moveStop_Nav || distance < m_stopDistance_Player)
+	if (m_moveStop_Nav)
 	{
-
 		AIMove->StopMovement();
 
 		m_moveStop_Nav = false;
 		return;
 	}
-
 
 	//移動
 	//視界の場合
@@ -2411,7 +2387,16 @@ void AEnemyBase::OnDamage(int32 Damage, FVector KnockBackValue, bool _bSneakKill
 	m_deadCheck = false;
 	m_enemyCurrentState = EEnemyStatus::Dead;
 
-	
+	// いま出ているエフェクトを戻す
+	if (IsValid(CurrentStateEffect))
+	{
+		if (AEnemy_Effect_1* E1 = Cast<AEnemy_Effect_1>(CurrentStateEffect)) { E1->InvisibleEffect(); }
+		else if (AEnemy_Effect_2* E2 = Cast<AEnemy_Effect_2>(CurrentStateEffect)) { E2->InvisibleEffect(); }
+		else if (AEnemy_Effect_3* E3 = Cast<AEnemy_Effect_3>(CurrentStateEffect)) { E3->InvisibleEffect(); }
+		else if (AEnemy_Effect_4* E4 = Cast<AEnemy_Effect_4>(CurrentStateEffect)) { E4->InvisibleEffect(); }
+	}
+	CurrentStateEffect = nullptr;
+
 
 	if (_bSneakKill)
 	{
@@ -2482,10 +2467,13 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 	}
 
 	// それ以外（巡回など）
-	if (AEnemy_Effect_3* Effect = m_effectPool->GetEffect3())
+	if (m_missCheck)
 	{
-		Effect->ActivateEffect(StartPos, this);
-		CurrentStateEffect = Effect;
+		if (AEnemy_Effect_3* Effect = m_effectPool->GetEffect3())
+		{
+			Effect->ActivateEffect(StartPos, this);
+			CurrentStateEffect = Effect;
+		}
 	}
 }
 
