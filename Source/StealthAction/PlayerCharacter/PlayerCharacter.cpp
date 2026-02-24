@@ -384,6 +384,7 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 {
 	//カメラのステータスが俯瞰なら処理しない
 	if (m_cameraStatus == ECameraStatus::TopDownView) { return; }
+	if (m_bCameraSwitching) { return; }
 
 	//処理落ちしても一定速度でカメラが回るように補正
 	float rotateCorrection = CGameUtility::GetFpsCorrection(_deltaTime);
@@ -916,11 +917,11 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 
 		m_pSpringArm->SetRelativeRotation(newRot);
 		
-		////目的回転に近づいたら合わせる
-		//if (abs(newRot.Yaw - m_cameraInitPos[(int)m_cameraStatus].rotator.Yaw) < 1.f)
-		//{
-		//	m_pSpringArm->SetRelativeRotation(m_cameraInitPos[(int)m_cameraStatus].rotator);
-		//}
+		//目的回転に近づいたら合わせる
+		if (abs(newRot.Yaw - m_cameraInitPos[(int)m_cameraStatus].rotator.Yaw) < 1.f)
+		{
+			m_pSpringArm->SetRelativeRotation(m_cameraInitPos[(int)m_cameraStatus].rotator);
+		}
 	}
 
 	//一定距離以下になれば目標地点と同じ座標にする
@@ -941,6 +942,7 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 		m_pCamera->FieldOfView = m_cameraInitPos[(int)m_cameraStatus].fieldOfView;
 		//視点切り替え中フラグをfalseに
 		m_bCameraSwitching = false;
+		m_pSpringArm->bUsePawnControlRotation = true;
 	}
 }
 
@@ -1019,6 +1021,7 @@ void APlayerCharacter::SetEventCameraChange(FCameraViewSetting _viewSetting)
 	m_cameraInitPos[(int)ECameraStatus::SneakKill] = _viewSetting;
 	m_bCameraSwitching = true;
 	m_cameraStatus = ECameraStatus::SneakKill;
+	m_pSpringArm->bUsePawnControlRotation = false;
 }
 
 //-----------------------------------------------------
