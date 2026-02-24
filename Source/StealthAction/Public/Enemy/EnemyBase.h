@@ -29,6 +29,8 @@ class AEnemy_Effect_3;
 class AEnemy_Effect_4;
 class ALightSwitch;
 
+class UWidgetComponent;
+
 //エネミーの状態
 UENUM(BlueprintType)
 enum class EEnemyStatus :uint8
@@ -488,6 +490,15 @@ protected:
 
 
 	//日髙変更点
-	bool bInContextualAnimation;	//コンテキストアニメーション中かどうか
+	bool bInContextualAnimation;	//コンテキストアニメーション中かどう
 
+	
+	UPROPERTY(EditAnywhere, Category = "UI")
+	UWidgetComponent* m_pSneakKillWidgetComponent;	//ウィジェットコンポーネント
+
+	public:
+		void SetSneakKillUI(bool _bSneakKill);
+
+		UFUNCTION(BlueprintPure, Category = "UI")
+		bool IsDead()const { return m_enemyCurrentState == EEnemyStatus::Dead; }
 };

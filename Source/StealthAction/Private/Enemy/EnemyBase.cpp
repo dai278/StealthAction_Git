@@ -34,6 +34,8 @@
 #include "EnemyManager/EnemyManager.h"
 
 #include "Sword/SwordAttackComponent.h"							//剣用
+
+#include "Components/WidgetComponent.h"							//ウィジェット用
 //-----------------------------------------------------------
 //検証用
 //-----------------------------------------------------------
@@ -202,6 +204,14 @@ AEnemyBase::AEnemyBase()
 		m_sword->SetupAttachment(GetMesh());
 		m_sword->SetRelativeLocation(FVector::ZeroVector);
 		m_sword->SetRelativeRotation(FRotator::ZeroRotator);
+	}
+
+	m_pSneakKillWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("SneakKillWidget"));
+	if (m_pSneakKillWidgetComponent)
+	{
+		m_pSneakKillWidgetComponent->SetupAttachment(GetRootComponent());
+		m_pSneakKillWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+		m_pSneakKillWidgetComponent->SetVisibility(false);
 	}
 }
 
@@ -2513,5 +2523,17 @@ void AEnemyBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		m_spotLightInstance->Destroy();
 		m_spotLightInstance = nullptr;
+	}
+}
+
+
+//------------------------------------------------------------------------------------------------------------
+//スニークキルUIの表示
+//------------------------------------------------------------------------------------------------------------
+void AEnemyBase::SetSneakKillUI(bool _bShow)
+{
+	if (m_pSneakKillWidgetComponent)
+	{
+		m_pSneakKillWidgetComponent->SetVisibility(_bShow);
 	}
 }
