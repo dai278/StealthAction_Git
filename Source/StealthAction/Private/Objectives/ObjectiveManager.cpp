@@ -1,27 +1,29 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+
 #include "Objectives/ObjectiveManager.h"
 #include "Objectives/ObjectivePoint.h"
 #include "Objectives/ObjectiveMarkerWidget.h"
+
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
+#include "TimerManager.h"
 
 AObjectiveManager::AObjectiveManager()
 {
     PrimaryActorTick.bCanEverTick = true;
+
+    CurrentObjective = nullptr;
+
+    bCanShowMarker = false;
 }
 
 void AObjectiveManager::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (Objectives.Num() > 0)
-    {
-        CurrentObjective = Objectives[0];
-        CurrentObjective->bIsActive = true;
-    }
-
+    // Widget生成
     if (MarkerWidgetClass)
     {
         MarkerWidget =
@@ -32,19 +34,26 @@ void AObjectiveManager::BeginPlay()
         if (MarkerWidget)
         {
             MarkerWidget->AddToViewport();
+
+            MarkerWidget->SetVisibility(
+                ESlateVisibility::Hidden);
         }
     }
-}
 
+    // 最初のObjective設定
+    if (Objectives.Num() > 0)
+    {
+        SetCurrentObjective(Objectives[0]);
+    }
+}
 
 void AObjectiveManager::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    UE_LOG(LogTemp, Warning, TEXT("CurrentObjective: %s"),
-        *GetNameSafe(CurrentObjective));
-
-    if (!CurrentObjective || !MarkerWidget)
+    if (!CurrentObjective ||
+        !MarkerWidget ||
+        !bCanShowMarker)
     {
         return;
     }
@@ -113,7 +122,8 @@ void AObjectiveManager::Tick(float DeltaTime)
     }
 }
 
-void AObjectiveManager::SetCurrentObjective(AObjectivePoint* NewObjective)
+void AObjectiveManager::SetCurrentObjective(
+    AObjectivePoint* NewObjective)
 {
     if (CurrentObjective)
     {
@@ -122,20 +132,49 @@ void AObjectiveManager::SetCurrentObjective(AObjectivePoint* NewObjective)
 
     CurrentObjective = NewObjective;
 
-    if (CurrentObjective)
+    if (!CurrentObjective)
     {
-        CurrentObjective->bIsActive = true;
-        if (MarkerWidget)
-        {
-            MarkerWidget->SetVisibility(ESlateVisibility::Visible);
-        }
+        HideMarker();
+        return;
     }
-    else
+
+    CurrentObjective->bIsActive = true;
+
+    HideMarker();
+
+    StartMarkerTimer();
+}
+
+void AObjectiveManager::StartMarkerTimer()
+{
+    bCanShowMarker = false;
+
+    GetWorld()->GetTimerManager().ClearTimer(
+        MarkerTimerHandle);
+
+    GetWorld()->GetTimerManager().SetTimer(
+        MarkerTimerHandle,
+        this,
+        &AObjectiveManager::ShowMarker,
+        MarkerDelayTime,
+        false);
+}
+
+void AObjectiveManager::ShowMarker()
+{
+    bCanShowMarker = true;
+}
+
+void AObjectiveManager::HideMarker()
+{
+    bCanShowMarker = false;
+
+    GetWorld()->GetTimerManager().ClearTimer(
+        MarkerTimerHandle);
+
+    if (MarkerWidget)
     {
-        // NextObjectiveがない場合はマーカーを消す
-        if (MarkerWidget)
-        {
-            MarkerWidget->SetVisibility(ESlateVisibility::Hidden);
-        }
+        MarkerWidget->SetVisibility(
+            ESlateVisibility::Hidden);
     }
 }
