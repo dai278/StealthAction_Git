@@ -121,12 +121,12 @@ APlayerCharacter::APlayerCharacter()
 	m_pHitActors.Reset();
 
 	//カメラの視点変更時初期位置
-	m_cameraInitPos[(int)ECameraStatus::ThirdPerson] = { FRotator{ 0.f,0.f,0.f},70.f,400.f,FVector{} };
-	m_cameraInitPos[(int)ECameraStatus::TopDownView] = { FRotator{ 0.f,0.f,0.f},90.f,1000.f,FVector{} };
-	m_cameraInitPos[(int)ECameraStatus::InShadow] = { FRotator{ 0.f,0.f,0.f},60.f,300.f ,FVector{} };
-	m_cameraInitPos[(int)ECameraStatus::Crouch] = { FRotator{ 0.f,0.f,0.f},60.f,250.f,FVector{} };
-	m_cameraInitPos[(int)ECameraStatus::Dash] = { FRotator{ 0.f,0.f,0.f},90.f,200.f,FVector{} };
-	m_cameraInitPos[(int)ECameraStatus::SneakKill] = { FRotator{ 0.f,0.f,0.f},70.f,350.f,FVector{} };
+	m_cameraInitPos[(int)ECameraStatus::ThirdPerson] = { FRotator{ 0.f,0.f,0.f},70.f,400.f,FVector{},5.f };
+	m_cameraInitPos[(int)ECameraStatus::TopDownView] = { FRotator{ 0.f,0.f,0.f},90.f,1000.f,FVector{} ,5.f };
+	m_cameraInitPos[(int)ECameraStatus::InShadow] = { FRotator{ 0.f,0.f,0.f},60.f,300.f ,FVector{} ,5.f };
+	m_cameraInitPos[(int)ECameraStatus::Crouch] = { FRotator{ 0.f,0.f,0.f},60.f,250.f,FVector{} ,5.f };
+	m_cameraInitPos[(int)ECameraStatus::Dash] = { FRotator{ 0.f,0.f,0.f},90.f,200.f,FVector{} ,5.f };
+	m_cameraInitPos[(int)ECameraStatus::SneakKill] = { FRotator{ 0.f,0.f,0.f},70.f,350.f,FVector{} ,5.f };
 
 	//カプセルの初期値を記録
 	m_Capsule = GetCapsuleComponent();
@@ -864,19 +864,17 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 		return;
 	}
 	//
-	if (m_cameraStatus == ECameraStatus::SneakKill) {
-		
-		return;
-	}
+
 	// まずは距離
 	//引数は　現在地、目標値、デルタタイム、補間スピード
 	float NewLength = FMath::FInterpTo(
 		m_pSpringArm->TargetArmLength,
 		m_cameraInitPos[(int)m_cameraStatus].springArmLength,
 		_deltaTime,
-		5.f
+		m_cameraInitPos[(int)m_cameraStatus].InterpSpeed
 	);
 	m_pSpringArm->TargetArmLength = NewLength;
+
 
 	//視野角
 	float newFieldOfView = m_pCamera->FieldOfView;
@@ -884,11 +882,46 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 		newFieldOfView,
 		m_cameraInitPos[(int)m_cameraStatus].fieldOfView,
 		_deltaTime,
-		5.f
+		m_cameraInitPos[(int)m_cameraStatus].InterpSpeed
 	);
 	m_pCamera->FieldOfView = newFieldOfView;
 
+	if (m_cameraStatus == ECameraStatus::SneakKill)
+	{
+		//回転
+		//Yaw
+		FRotator newRot = m_pSpringArm->GetRelativeRotation();
+		newRot.Yaw = FMath::FInterpTo(
+			newRot.Yaw,
+			m_cameraInitPos[(int)m_cameraStatus].rotator.Yaw,
+			_deltaTime,
+			m_cameraInitPos[(int)m_cameraStatus].InterpSpeed
+		);
 
+		//Pitch
+		newRot.Pitch = FMath::FInterpTo(
+			newRot.Pitch,
+			m_cameraInitPos[(int)m_cameraStatus].rotator.Pitch,
+			_deltaTime,
+			m_cameraInitPos[(int)m_cameraStatus].InterpSpeed
+		);
+
+		//Roll
+		newRot.Roll = FMath::FInterpTo(
+			newRot.Roll,
+			m_cameraInitPos[(int)m_cameraStatus].rotator.Roll,
+			_deltaTime,
+			m_cameraInitPos[(int)m_cameraStatus].InterpSpeed
+		);
+
+		m_pSpringArm->SetRelativeRotation(newRot);
+		
+		////目的回転に近づいたら合わせる
+		//if (abs(newRot.Yaw - m_cameraInitPos[(int)m_cameraStatus].rotator.Yaw) < 1.f)
+		//{
+		//	m_pSpringArm->SetRelativeRotation(m_cameraInitPos[(int)m_cameraStatus].rotator);
+		//}
+	}
 
 	//一定距離以下になれば目標地点と同じ座標にする
 	//目標地点との差
@@ -976,6 +1009,16 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 	m_jumpTimer = 0.f;
 	GetCharacterMovement()->GravityScale = 1.f;
 
+}
+
+//------------------------------------------------------
+//イベント状態のカメラフォーカス終了
+//------------------------------------------------------
+void APlayerCharacter::SetEventCameraChange(FCameraViewSetting _viewSetting)
+{
+	m_cameraInitPos[(int)ECameraStatus::SneakKill] = _viewSetting;
+	m_bCameraSwitching = true;
+	m_cameraStatus = ECameraStatus::SneakKill;
 }
 
 //-----------------------------------------------------

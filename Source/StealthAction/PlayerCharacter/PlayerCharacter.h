@@ -136,6 +136,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
 	void OnSneakKillStarted_BP();   // BPで中身を書く
 
+	// キルアニメーションのカメラ制御変更イベント
+	UFUNCTION(BlueprintCallable, Category = "Camera")
+	void SetEventCameraChange(FCameraViewSetting _viewSetting);   
+	
 	//ダメージ処理
 	void OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakKill)override;
 

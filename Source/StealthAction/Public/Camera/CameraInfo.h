@@ -20,4 +20,7 @@ struct FCameraViewSetting
 
     UPROPERTY(EditAnywhere,BlueprintReadWrite)
     FVector ofSet;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float InterpSpeed = 5.f; // ƒJƒƒ‰Ø‚è‘Ö‚¦‚ÌƒuƒŒƒ“ƒhŠÔ
 };
