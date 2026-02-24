@@ -863,8 +863,10 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 	if (!m_bCameraSwitching) {
 		return;
 	}
+	//
 	if (m_cameraStatus == ECameraStatus::SneakKill) {
 		
+		return;
 	}
 	// まずは距離
 	//引数は　現在地、目標値、デルタタイム、補間スピード
