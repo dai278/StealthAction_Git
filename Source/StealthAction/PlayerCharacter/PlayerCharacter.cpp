@@ -84,7 +84,7 @@ APlayerCharacter::APlayerCharacter()
 	, m_attackRadius(70.f)
 	, m_sneakKillDamage(10)
 	, m_NormalAttack(2)
-	, m_bCanAttack(true)
+	, m_bCanAttack(false)
 	, m_attackCooldown(0.3f)
 	, m_pExtendedSpotLightManager(nullptr)
 	, m_bInvincible(false)
@@ -121,7 +121,7 @@ APlayerCharacter::APlayerCharacter()
 	m_pHitActors.Reset();
 
 	//カメラの視点変更時初期位置
-	m_cameraInitPos[(int)ECameraStatus::ThirdPerson] = { FRotator{ 0.f,0.f,0.f},70.f,400.f,FVector{},5.f };
+	m_cameraInitPos[(int)ECameraStatus::ThirdPerson] = { FRotator{ 0.f,0.f,0.f},70.f,400.f,FVector{},1.f };
 	m_cameraInitPos[(int)ECameraStatus::TopDownView] = { FRotator{ 0.f,0.f,0.f},90.f,1000.f,FVector{} ,5.f };
 	m_cameraInitPos[(int)ECameraStatus::InShadow] = { FRotator{ 0.f,0.f,0.f},60.f,300.f ,FVector{} ,5.f };
 	m_cameraInitPos[(int)ECameraStatus::Crouch] = { FRotator{ 0.f,0.f,0.f},60.f,250.f,FVector{} ,5.f };
@@ -384,7 +384,8 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 {
 	//カメラのステータスが俯瞰なら処理しない
 	if (m_cameraStatus == ECameraStatus::TopDownView) { return; }
-	if (m_bCameraSwitching) { return; }
+	if (m_bCanAttack == true) { return; }
+	//if (m_bCameraSwitching) { return; }
 
 	//処理落ちしても一定速度でカメラが回るように補正
 	float rotateCorrection = CGameUtility::GetFpsCorrection(_deltaTime);
@@ -887,7 +888,7 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 	);
 	m_pCamera->FieldOfView = newFieldOfView;
 
-	if (m_cameraStatus == ECameraStatus::SneakKill)
+	if (m_cameraStatus == ECameraStatus::SneakKill||m_cameraStatus==ECameraStatus::ThirdPerson)
 	{
 		//回転
 		//Yaw
@@ -942,7 +943,7 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 		m_pCamera->FieldOfView = m_cameraInitPos[(int)m_cameraStatus].fieldOfView;
 		//視点切り替え中フラグをfalseに
 		m_bCameraSwitching = false;
-		m_pSpringArm->bUsePawnControlRotation = true;
+
 	}
 }
 
@@ -951,9 +952,16 @@ void APlayerCharacter::ViewpointSwitching(float _deltaTime)
 //-----------------------------------------------------
 void APlayerCharacter::OnAttackEnd()
 {
+	//攻撃終了したらアイドル状態に
 	m_bCanAttack = false;
 	m_bCanControl = true;
 	m_attackCount = 0.f;
+	//カメラ制御を戻す
+	m_pSpringArm->bUsePawnControlRotation = true;
+	//三人称視点に切り替え
+	m_cameraStatus = ECameraStatus::ThirdPerson;
+	m_bCameraSwitching = true;
+
 }
 
 
@@ -1021,7 +1029,6 @@ void APlayerCharacter::SetEventCameraChange(FCameraViewSetting _viewSetting)
 	m_cameraInitPos[(int)ECameraStatus::SneakKill] = _viewSetting;
 	m_bCameraSwitching = true;
 	m_cameraStatus = ECameraStatus::SneakKill;
-	m_pSpringArm->bUsePawnControlRotation = false;
 }
 
 //-----------------------------------------------------
@@ -1377,6 +1384,15 @@ if (!m_pNearestEnemy) { return; }
 		m_sword->Swinging(m_bSneakKill);
 		OnSneakKillStarted.Broadcast();
 		OnSneakKillStarted_BP();
+		
+		// いま見ている方向（ControlRotation）をスプリングアームに焼き付ける
+		const FRotator ControlRot = Controller ? Controller->GetControlRotation() : GetActorRotation();
+
+		// SpringArmが親から継承してる分を考慮したいなら Relativeに合わせる必要があるが、まずはこれでOK
+		m_pSpringArm->SetWorldRotation(ControlRot);
+
+		// その後に追従を切る
+		m_pSpringArm->bUsePawnControlRotation = false;
 	}
 }
 
