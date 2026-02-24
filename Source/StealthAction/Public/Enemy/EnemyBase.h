@@ -159,6 +159,8 @@ public:
 		return m_enemyInfo; 
 	}
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason)override;
+
 public:
 	//デバック用
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
@@ -471,5 +473,8 @@ protected:
 
 	EEnemyStatus m_prevState;
 
+
+	//日髙変更点
+	bool bInContextualAnimation;	//コンテキストアニメーション中かどうか
 
 };

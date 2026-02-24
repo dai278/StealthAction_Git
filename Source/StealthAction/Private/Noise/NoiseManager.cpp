@@ -38,3 +38,12 @@ void UNoiseManager::AddListener(UNoiseListenerComponent* _listener)
 	if (_listener == nullptr) { return; }
 		m_noiseListeners.Add(_listener);
 }
+
+//------------------------------
+//ƒŠƒXƒi[‚Ìíœ
+//------------------------------
+void UNoiseManager::RemoveListener(UNoiseListenerComponent* _listener)
+{
+	if (_listener == nullptr) { return; }
+	m_noiseListeners.Remove(_listener);
+}

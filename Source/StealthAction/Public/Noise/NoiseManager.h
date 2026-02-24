@@ -28,6 +28,9 @@ public:
 	//リスナーの追加
 	void AddListener(UNoiseListenerComponent* _listener);
 
+	//リスナーの削除
+	void RemoveListener(UNoiseListenerComponent* _listener);
+
 private:
 	TArray<UNoiseListenerComponent*> m_noiseListeners;
 };

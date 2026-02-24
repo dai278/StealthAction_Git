@@ -26,7 +26,6 @@ void UShadowEffect::NativeOnInitialized()
 	APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (player)
 	{
-		player->OnPlayerConditionMet.AddDynamic(this, &UShadowEffect::OnPlayerStatusChanged);
 		SetVisibility(ESlateVisibility::Hidden);
 	}
 	

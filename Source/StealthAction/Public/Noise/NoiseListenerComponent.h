@@ -38,6 +38,8 @@ public:
 	//コールバック関数の呼び出し
 	void OnNoiseHeard(const int& _noiseVolume, const FVector& _pos);
 
+	//EndPlay
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 private:
 	//コールバック関数
 	//なった瞬間

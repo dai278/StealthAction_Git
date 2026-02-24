@@ -468,6 +468,7 @@ void AEnemyBase::Tick(float DeltaTime)
 	if (m_enemyCurrentState == EEnemyStatus::Dead)
 	{
 		CaseDead(DeltaTime);
+
 		return;
 	}
 
@@ -536,9 +537,9 @@ void AEnemyBase::CaseDead(float _deltaTime)
 		m_enemyInfo.bIsDead = true;
 		m_enemyInfo.hp = 0;
 
-		// ˆÚ“®’âŽ~
-		GetCharacterMovement()->StopMovementImmediately();
-		GetCharacterMovement()->DisableMovement();
+		//// ˆÚ“®’âŽ~
+		//GetCharacterMovement()->StopMovementImmediately();
+		//GetCharacterMovement()->DisableMovement();
 
 		// NavˆÚ“®’âŽ~
 		m_moveStop_Nav = true;
@@ -566,15 +567,18 @@ void AEnemyBase::CaseDead(float _deltaTime)
 		//GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 		// ‰ñ“]‚µ‚È‚¢‚æ‚¤‚É
-		GetCharacterMovement()->bOrientRotationToMovement = false;
+		//GetCharacterMovement()->bOrientRotationToMovement = false;
 	}
 
 	m_deadTime += _deltaTime;
 
 	if (m_deadTime > m_deadTime_Limit)
 	{
-		GetMesh()->SetVisibility(false);
-		SetActorEnableCollision(false);
+		/*GetMesh()->SetVisibility(false);
+		SetActorEnableCollision(false);*/
+
+		//íœ
+		Destroy();
 	}
 }
 
@@ -2376,6 +2380,8 @@ void AEnemyBase::OnDamage(int32 Damage, FVector KnockBackValue, bool _bSneakKill
 	m_deadCheck = false;
 	m_enemyCurrentState = EEnemyStatus::Dead;
 
+	
+
 	if (_bSneakKill)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Sneak Kill"));
@@ -2394,6 +2400,10 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 
 
 	if (!m_effectPool)
+	{
+		return;
+	}
+	if(EEnemyStatus::Dead == m_enemyCurrentState)
 	{
 		return;
 	}
@@ -2466,4 +2476,25 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 	Effect2_Keeper = Effect2;
 	Effect3_Keeper = Effect3;
 	Effect4_Keeper = Effect4;
+}
+
+
+//------------------------------------------------------------------------------------------------------------
+//ƒGƒ“ƒhƒvƒŒƒC
+//------------------------------------------------------------------------------------------------------------
+void AEnemyBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	if (m_effectPool)
+	{
+		m_effectPool->Destroy();
+	}
+
+	//ƒ}ƒl[ƒWƒƒ\“o˜^‰ðœ
+	UEnemyManager* enemyManager = GetWorld()->GetSubsystem<UEnemyManager>();
+	if (enemyManager)
+	{
+		enemyManager->UnregisterEnemy(this);
+	}
+
 }

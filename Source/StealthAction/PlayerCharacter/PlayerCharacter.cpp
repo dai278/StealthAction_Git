@@ -763,6 +763,7 @@ void APlayerCharacter::UpdateCheckEnemyDetection()
 void APlayerCharacter::UpdateInvincibleTime(float _deltaTime)
 {
 	if (!m_bInvincible) { return; }
+	if (m_status == EPlayerStatus::Attack) { return; }
 	m_invincibleTimer += _deltaTime;
 	if (m_invincibleTimer > m_invincibleTimeLimit)
 	{
@@ -957,6 +958,8 @@ void APlayerCharacter::EndCameraFocus(const float& _blendTime)
 }
 
 
+
+
 //------------------------------------------------------
 // ジャンプ終了処理
 //------------------------------------------------------
@@ -1051,7 +1054,6 @@ void APlayerCharacter::ChangePlayerStatus(const EPlayerStatus& _newStatus)
 {
 	m_status = _newStatus;
 	//状態変更されたことを通知
-	OnPlayerConditionMet.Broadcast(_newStatus);
 }
 
 //-----------------------------------------------------
@@ -1312,16 +1314,21 @@ if (!m_pNearestEnemy) { return; }
 	if (dot > minAngle)
 	{
 		m_bSneakKill = true;
+		//これ何か分からんなんで入れたか忘れた
 		GetCharacterMovement()->GravityScale = 0.1f;
 
+		//コントロール不能に
 		m_bCanControl = false;
+		//攻撃状態に
 		ChangePlayerStatus(EPlayerStatus::Attack);
+		//攻撃中フラグを立てる
 		m_bCanAttack = true;
 
 		//剣の攻撃処理
 	//------------この前に振れる状態か確認-----------------
 		m_sword->Swinging(m_bSneakKill);
-
+		OnSneakKillStarted.Broadcast();
+		OnSneakKillStarted_BP();
 	}
 }
 

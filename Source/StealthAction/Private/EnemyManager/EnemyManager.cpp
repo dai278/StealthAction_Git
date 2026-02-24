@@ -58,6 +58,22 @@ void UEnemyManager::RegisterEnemy(AEnemyBase* _pEnemy)
 }
 
 //------------------------------------------------
+//エネミー削除関数
+//------------------------------------------------
+void UEnemyManager::UnregisterEnemy(AEnemyBase* _pEnemy)
+{
+	m_pAllEnemies.Remove(_pEnemy);
+	if (!_pEnemy)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Enemy->null"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("Enemy->NotNull"));
+	}
+}
+
+//------------------------------------------------
 //全エネミー情報をPlayDataに記録する
 //------------------------------------------------
 void UEnemyManager::RegisterEnemyInfoAllToPlayData()
@@ -96,6 +112,8 @@ bool UEnemyManager::IsAnyEnemyPlayerFound() const
 	for (AEnemyBase* pEnemy : m_pAllEnemies)
 	{
 		if (!pEnemy) { continue; }
+		if (!IsValid(pEnemy)) { continue; }
+
 		//プレイヤー発見しているエネミーがいればtrueを返す
 		if (pEnemy->IsPlayerFound())
 		{
@@ -109,7 +127,7 @@ bool UEnemyManager::IsAnyEnemyPlayerFound() const
 //------------------------------------------------
 //一番近いエネミー取得関
 //------------------------------------------------
-AEnemyBase* UEnemyManager::GetNearestEnemy(const FVector& _pos,  const float& _maxDistance) const
+AEnemyBase* UEnemyManager::GetNearestEnemy(const FVector& _pos,  const float& _maxDistance) 
 {
 
 	//一番近いエネミーを探す
@@ -121,6 +139,7 @@ AEnemyBase* UEnemyManager::GetNearestEnemy(const FVector& _pos,  const float& _m
 	for (AEnemyBase* pEnemy : m_pAllEnemies)
 	{
 		if (!pEnemy) { continue; }
+		if (!IsValid(pEnemy)) { continue; }
 		//エネミーと指定座標の距離を計算
 		const float distance = FVector::Dist(pEnemy->GetActorLocation(), _pos);
 		//最短距離より近く検知の最大距離より近ければ更新

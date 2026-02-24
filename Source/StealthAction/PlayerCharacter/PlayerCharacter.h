@@ -65,15 +65,12 @@ enum class EPlayerStatus :uint8
 	InShadow     UMETA(DisplayName = "InShadow"),
 	Interact     UMETA(DisplayName = "Interact"),
 	InteractAnimation UMETA(DisplayName = "InteractAnimation"),
-
 };
 
 
-//パラメーター更新が起きた時のイベントディスパッチャー宣言
-//(BPとやり取りあり、引数なし）
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateParamEventDispatcher);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerConditionMet, EPlayerStatus, ConditionId);
+//暗殺開始イベントディスパッチャー
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSneakKillStarted); // 引数なし例
 
 
 UCLASS()
@@ -90,6 +87,13 @@ class STEALTHACTION_API APlayerCharacter : public ACharacter,public IDamageable
 	GENERATED_BODY()
 
 public:
+
+	//攻撃開始コールバック
+// BP側でイベントを追加できる（Add Event / Bind）
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnSneakKillStarted OnSneakKillStarted;
+
+
 	//コンストラクタ
 	APlayerCharacter();
 
@@ -127,8 +131,9 @@ public:
 	UFUNCTION()
 	FPlayerInfo GetPlayerInfo();
 
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnPlayerConditionMet OnPlayerConditionMet;
+	// PlayerCharacter.h
+	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
+	void OnSneakKillStarted_BP();   // BPで中身を書く
 
 	//ダメージ処理
 	void OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakKill)override;
@@ -198,6 +203,9 @@ private:
 
 	//攻撃終了コールバック
 	void OnAttackEnd();
+
+	public:
+
 
 public:
 
@@ -492,8 +500,14 @@ private:
 	UEnemyManager* m_pEnemyManager;//エネミーマネージャー毎フレーム検索は重いので
 	//拡張スポットライトマネージャーのアドレス
 	UExtendedSpotLightManager* m_pExtendedSpotLightManager;
+	
+	UPROPERTY(EditAnywhere, Category = "Enemy")
 	AEnemyBase* m_pNearestEnemy;//一番近い敵のポインタ
 	
+	UFUNCTION(BlueprintCallable, Category = "Enemy")
+	AEnemyBase* GetNearestEnemy() { return m_pNearestEnemy; }
+
+
 	//デバック用
 	UNoiseListenerComponent* noise;
 	public:

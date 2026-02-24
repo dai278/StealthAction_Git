@@ -62,3 +62,17 @@ void UNoiseListenerComponent::SetCallBackFunction( const std::function<void(cons
 	m_callBackFunc = _callbackFunc;
 	
 }
+
+//----------------------------
+//EndPlay
+//----------------------------
+void UNoiseListenerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	//ノイズマネージャーから削除
+	UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
+	if (manager)
+	{
+		manager->RemoveListener(this);
+	}
+}

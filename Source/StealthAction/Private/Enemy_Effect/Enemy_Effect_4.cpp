@@ -26,8 +26,9 @@ void AEnemy_Effect_4::ActivateEffect(const FVector& StartPos, AActor* TargetActo
 {
 
 	UE_LOG(LogTemp, Warning, TEXT("EffectActive3"));
-
+	
 	SetActorLocation(StartPos);
+	
 	AttachToActor(TargetActor, FAttachmentTransformRules::KeepWorldTransform);
 
 	SetActorHiddenInGame(false);

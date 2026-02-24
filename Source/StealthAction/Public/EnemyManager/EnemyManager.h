@@ -27,9 +27,12 @@ public:
 public:
 	//エネミー登録関数
 	void RegisterEnemy(AEnemyBase* _pEnemy);
+
+	//エネミー削除関数
+	void UnregisterEnemy(AEnemyBase* _pEnemy);
 	
 	//一番近いエネミー取得関数
-	AEnemyBase* GetNearestEnemy(const FVector& _pos,const float& _maxDistance) const;
+	AEnemyBase* GetNearestEnemy(const FVector& _pos,const float& _maxDistance) ;
 	
 	//全エネミーの情報をPlayDataに記録する
 	void RegisterEnemyInfoAllToPlayData();
