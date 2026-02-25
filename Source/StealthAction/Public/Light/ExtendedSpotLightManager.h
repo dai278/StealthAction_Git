@@ -23,6 +23,8 @@ public:
 
 	//ライトの追加
 	void AddLight(AExtendedSpotLight* _pLight);
+	//削除
+	void UnRegisterLight(AExtendedSpotLight* _pLight);
 
 	//ライトの取得
 	AExtendedSpotLight* GetLight(const int32 _lightIndex);

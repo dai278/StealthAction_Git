@@ -104,6 +104,8 @@ public:
 	bool IsCanItBeTurned() { return m_canItBeTurned; }
 	void OnRotateTargetAngleStop();
 
+	//void EndPlay(const EEndPlayReason::Type EndPlayReason)override;
+
 private:
 	//Yaw‰ñ“]‚ÌXVˆ—
 	void UpdateAutoYawRotate(const float& _deltaTime);

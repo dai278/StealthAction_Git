@@ -49,6 +49,8 @@
 #include "Enemy_Effect/Enemy_Effect_4.h"
 #include "Interact/LightSwitch.h"
 
+#include "Light/ExtendedSpotLightManager.h"
+
 
 //#include "Sound/BGMManagerBase.h
 //----------------------------------------------------------
@@ -281,12 +283,13 @@ void AEnemyBase::BeginPlay()
 
 
 	UCapsuleComponent* capsel = GetCapsuleComponent();
-	//イベントを発生させるかtrue
-	capsel->SetGenerateOverlapEvents(true);
+	if (capsel) {
+		//イベントを発生させるかtrue
+		capsel->SetGenerateOverlapEvents(true);
 
-	//コリジョンプリセットをプレイヤー
-	capsel->SetCollisionProfileName(TEXT("Enemy"));
-
+		//コリジョンプリセットをプレイヤー
+		capsel->SetCollisionProfileName(TEXT("Enemy"));
+	}
 	m_enemyCurrentState = EEnemyStatus::Patrol;		//初めのステータスを巡回に設定
 
 	// ControllerのYaw回転は使わない
@@ -385,11 +388,15 @@ void AEnemyBase::BeginPlay()
 	DefaultCollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
 	for (AEnemy_Bullet_1* bullet : m_pALLBullet_1)
 	{
-		DefaultCollisionParams.AddIgnoredActor(bullet);
+		if (bullet) {
+			DefaultCollisionParams.AddIgnoredActor(bullet);
+		}
 	}
 	for (ALightSwitch* LightSwitch : m_pALLLightSwitch)
 	{
-		DefaultCollisionParams.AddIgnoredActor(LightSwitch);
+		if (LightSwitch) {
+			DefaultCollisionParams.AddIgnoredActor(LightSwitch);
+		}
 	}
 
 	//				
@@ -700,11 +707,15 @@ void AEnemyBase::UpdateVisiblity(float _deltaTime)
 	CollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
 	for (AEnemyBase* enemy : m_pOtherEnemyBase)
 	{
-		CollisionParams.AddIgnoredActor(enemy);
+		if (enemy) {
+			CollisionParams.AddIgnoredActor(enemy);
+		}
 	}
 	for (ALightSwitch* LightSwitch : m_pALLLightSwitch)
 	{
-		CollisionParams.AddIgnoredActor(LightSwitch);
+		if (LightSwitch) {
+			CollisionParams.AddIgnoredActor(LightSwitch);
+		}
 	}
 
 	FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
@@ -717,14 +728,15 @@ void AEnemyBase::UpdateVisiblity(float _deltaTime)
 	if (isHit)
 	{
 		AActor* hitActor = HitCollision.GetActor();
-
-		//当たったコリジョンがプレイヤー以外だった場合
-		if (!hitActor->ActorHasTag("Player")&& !hitActor->ActorHasTag("Interact"))
-		{
+		if (hitActor) {
+			//当たったコリジョンがプレイヤー以外だった場合
+			if (!hitActor->ActorHasTag("Player") && !hitActor->ActorHasTag("Interact"))
+			{
 				//探索失敗で終了
 				m_visionCheck = false;
 				return;
 
+			}
 		}
 
 	}
@@ -1352,13 +1364,14 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 			if (isHit)
 			{
 				AActor* hitActor = HitCollision.GetActor();
+				if (hitActor) {
+					//壁,エネミーに当たらなかった場合
+					if (!hitActor->ActorHasTag("Wall") && !hitActor->ActorHasTag("Enemy"))
+					{
+						m_routePos = EnemyBaseForward_Pos;
 
-				//壁,エネミーに当たらなかった場合
-				if (!hitActor->ActorHasTag("Wall") && !hitActor->ActorHasTag("Enemy"))
-				{
-					m_routePos = EnemyBaseForward_Pos;
-
-					UpdateMove(_deltaTime);
+						UpdateMove(_deltaTime);
+					}
 				}
 			}
 			else
@@ -1389,12 +1402,13 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 				if (isHitXY)
 				{
 					AActor* hitActor = HitCollision.GetActor();
-
-					//壁、エネミーに当たらなかった場合
-					if (!hitActor->ActorHasTag("Wall") && !hitActor->ActorHasTag("Enemy"))
-					{
-						Num[Num_1] = i;				//壁のない方向を追加
-						Num_1 += 1;					//壁のない方向の数を追加
+					if (hitActor) {
+						//壁、エネミーに当たらなかった場合
+						if (!hitActor->ActorHasTag("Wall") && !hitActor->ActorHasTag("Enemy"))
+						{
+							Num[Num_1] = i;				//壁のない方向を追加
+							Num_1 += 1;					//壁のない方向の数を追加
+						}
 					}
 				}
 				else
@@ -1453,12 +1467,13 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 		if (isHit)
 		{
 			AActor* hitActor = HitCollision.GetActor();
-
-			//エネミーに当たった場合
-			if (hitActor->ActorHasTag("Enemy"))
-			{
-				m_patrol_TurningCheck = true;
-				m_turnRight_Pos = GetActorLocation() + m_enemyForward * EnemyBaseForward_Pos + m_enemyRight * EnemyBaseForward_Pos;
+			if (hitActor) {
+				//エネミーに当たった場合
+				if (hitActor->ActorHasTag("Enemy"))
+				{
+					m_patrol_TurningCheck = true;
+					m_turnRight_Pos = GetActorLocation() + m_enemyForward * EnemyBaseForward_Pos + m_enemyRight * EnemyBaseForward_Pos;
+				}
 			}
 		}
 
@@ -1800,17 +1815,18 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 					if (isHit)
 					{
 						AActor* hitActor = HitCollision.GetActor();
+						if (hitActor) {
+							//当たったコリジョンがプレイヤーだった場合
+							if (hitActor->ActorHasTag("Player"))
+							{
+								//攻撃処理
+								UpdateAttack(_deltaTime);
 
-						//当たったコリジョンがプレイヤーだった場合
-						if (hitActor->ActorHasTag("Player"))
-						{
-							//攻撃処理
-							UpdateAttack(_deltaTime);
-
-							m_moveStop_Nav = true;		//停止（Nav）
-							UpdateMove_Nav(_deltaTime);
-							//視点移動処理
-							UpdateViewMove(_deltaTime);
+								m_moveStop_Nav = true;		//停止（Nav）
+								UpdateMove_Nav(_deltaTime);
+								//視点移動処理
+								UpdateViewMove(_deltaTime);
+							}
 						}
 					}
 				}
@@ -1829,11 +1845,15 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 						CollisionParams.AddIgnoredActor(m_pEnemy_Weapon);
 						for (AEnemyBase* enemy : m_pOtherEnemyBase)
 						{
-							CollisionParams.AddIgnoredActor(enemy);
+							if (enemy) {
+								CollisionParams.AddIgnoredActor(enemy);
+							}
 						}
 						for (ALightSwitch* LightSwitch : m_pALLLightSwitch)
 						{
-							CollisionParams.AddIgnoredActor(LightSwitch);
+							if (LightSwitch) {
+								CollisionParams.AddIgnoredActor(LightSwitch);
+							}
 						}
 
 						FHitResult HitCollision;		//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
@@ -1847,17 +1867,18 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 						if (isHit)
 						{
 							AActor* hitActor = HitCollision.GetActor();
-
-							//当たったコリジョンがプレイヤーだった場合
-							if (hitActor->ActorHasTag("Player"))
-							{
-
-								if (m_attackTime > m_attackTime_Limit)
+							if (hitActor) {
+								//当たったコリジョンがプレイヤーだった場合
+								if (hitActor->ActorHasTag("Player"))
 								{
-									//攻撃処理
-									UpdateAttack(_deltaTime);
-								}
 
+									if (m_attackTime > m_attackTime_Limit)
+									{
+										//攻撃処理
+										UpdateAttack(_deltaTime);
+									}
+
+								}
 							}
 						}
 					}
@@ -2001,11 +2022,12 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 			if (isHit)
 			{
 				AActor* hitActor = HitCollision.GetActor();
-
-				//当たったコリジョンが壁,エネミーだった場合
-				if (hitActor->ActorHasTag("Wall") || hitActor->ActorHasTag("Enemy"))
-				{
-					m_missTime = 1;
+				if (hitActor) {
+					//当たったコリジョンが壁,エネミーだった場合
+					if (hitActor->ActorHasTag("Wall") || hitActor->ActorHasTag("Enemy"))
+					{
+						m_missTime = 1;
+					}
 				}
 			}
 
@@ -2033,11 +2055,12 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 		if (isHit)
 		{
 			AActor* hitActor = HitCollision.GetActor();
-
-			//当たったコリジョンが壁,エネミーだった場合
-			if (hitActor->ActorHasTag("Wall") || hitActor->ActorHasTag("Enemy"))
-			{
-				m_missTime = 1;
+			if (hitActor) {
+				//当たったコリジョンが壁,エネミーだった場合
+				if (hitActor->ActorHasTag("Wall") || hitActor->ActorHasTag("Enemy"))
+				{
+					m_missTime = 1;
+				}
 			}
 		}
 		return;
@@ -2487,6 +2510,33 @@ void AEnemyBase::UpdateEffect(float _deltaTime)
 //------------------------------------------------------------------------------------------------------------
 void AEnemyBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	
+	// 以降、他の登録解除等は現状のままでOK（GetWorld nullの場合だけ注意）
+	if (UWorld* World = GetWorld())
+	{
+		if (UEnemyManager* enemyManager = World->GetSubsystem<UEnemyManager>())
+		{
+			if (enemyManager) {
+				enemyManager->UnregisterEnemy(this);
+				enemyManager->UnregisteredOtherEnemyBaseAll(this);
+			}
+		}
+
+
+		UExtendedSpotLightManager* lightMng = GetWorld()->GetSubsystem<UExtendedSpotLightManager>();
+		if (lightMng) {
+			lightMng->UnRegisterLight(m_spotLightInstance);
+		}
+	}
+
+	if (IsValid(m_spotLightInstance))
+	{
+
+		m_spotLightInstance->Destroy();
+		m_spotLightInstance = nullptr;
+	}
+
+
 	// 表示中エフェクトを戻す（任意だが安全）
 	if (IsValid(CurrentStateEffect))
 	{
@@ -2502,21 +2552,6 @@ void AEnemyBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	Super::EndPlay(EndPlayReason);
 
-	// 以降、他の登録解除等は現状のままでOK（GetWorld nullの場合だけ注意）
-	if (UWorld* World = GetWorld())
-	{
-		if (UEnemyManager* enemyManager = World->GetSubsystem<UEnemyManager>())
-		{
-			enemyManager->UnregisterEnemy(this);
-			enemyManager->UnregisteredOtherEnemyBaseAll(this);
-		}
-	}
-
-	if (IsValid(m_spotLightInstance))
-	{
-		m_spotLightInstance->Destroy();
-		m_spotLightInstance = nullptr;
-	}
 }
 
 

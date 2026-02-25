@@ -55,6 +55,17 @@ void UExtendedSpotLightManager::AddLight(AExtendedSpotLight* _pLight)
 	m_pLights[_pLight->GetIndex()] = _pLight;
 }
 
+
+//ライト削除
+void UExtendedSpotLightManager::UnRegisterLight(AExtendedSpotLight* _pLight)
+{
+	if (!_pLight) { return; }
+	m_pEnemyLights.Remove(_pLight);
+	m_pLights.Remove(_pLight);
+}
+
+
+
 //ライトの取得
 AExtendedSpotLight* UExtendedSpotLightManager::GetLight(const int32 _lightIndex)
 {

@@ -347,6 +347,22 @@ void AExtendedSpotLight::OnRotateTargetAngleStop()
 	//}
 }
 
+////-----------------------------------------------------
+////EndPlay
+////-----------------------------------------------------
+//void AExtendedSpotLight::EndPlay(const EEndPlayReason::Type EndPlayReason)
+//{
+//	//マネージャーに登録
+//	UExtendedSpotLightManager* mng =GetWorld()->GetSubsystem<UExtendedSpotLightManager>();
+//	if (mng)
+//	{
+//		mng->UnRegisterLight(this);
+//	}
+//}
+
+
+
+
 //-----------------------------------------------------
 //自動YAw回転の更新処理
 //-----------------------------------------------------
