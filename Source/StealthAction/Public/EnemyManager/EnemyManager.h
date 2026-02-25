@@ -31,6 +31,8 @@ public:
 	//エネミー削除関数
 	void UnregisterEnemy(AEnemyBase* _pEnemy);
 	
+	void UnregisteredOtherEnemyBaseAll(AEnemyBase* _pEnemy);
+
 	//一番近いエネミー取得関数
 	AEnemyBase* GetNearestEnemy(const FVector& _pos,const float& _maxDistance) ;
 	

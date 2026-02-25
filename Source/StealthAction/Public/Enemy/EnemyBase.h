@@ -196,6 +196,11 @@ public:
 
 		TArray<AEnemyBase*> m_pOtherEnemyBase;	//その他のエネミー_1ポインタ
 
+		void UnregisteredOtherEnemyBase(AEnemyBase* _UnregisterEnemy)
+		{
+			m_pOtherEnemyBase.Remove(_UnregisterEnemy);
+		}
+
 		UPROPERTY(EditAnywhere, Category = "Weapon")
 		AEnemy_Weapon_1* m_pEnemy_Weapon;			//銃ポインタ
 

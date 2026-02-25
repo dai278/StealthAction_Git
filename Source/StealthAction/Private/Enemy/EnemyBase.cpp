@@ -616,6 +616,10 @@ void AEnemyBase::CaseDead(float _deltaTime)
 //------------------------------------------------------------------------------------------------------------
 void AEnemyBase::StartStateValues(float _deltaTime)
 {
+	if (m_enemyCurrentState == EEnemyStatus::Dead)
+	{
+		return;
+	}
 	m_enemyPos = GetActorLocation();								//エネミーの座標
 	m_enemyPos_Eye = GetActorLocation() + FVector(0.f, 0.f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight()) - GetActorForwardVector() * (GetCapsuleComponent()->GetScaledCapsuleRadius());
 	m_enemyForward = GetActorForwardVector();						//エネミーの正面ベクトル
@@ -2504,6 +2508,7 @@ void AEnemyBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		if (UEnemyManager* enemyManager = World->GetSubsystem<UEnemyManager>())
 		{
 			enemyManager->UnregisterEnemy(this);
+			enemyManager->UnregisteredOtherEnemyBaseAll(this);
 		}
 	}
 

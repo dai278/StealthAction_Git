@@ -73,6 +73,23 @@ void UEnemyManager::UnregisterEnemy(AEnemyBase* _pEnemy)
 	}
 }
 
+//-----------------------------------------------
+//エネミーが個人が持っているエネミーのアドレス登録解除
+//--------------------------------------------------
+void UEnemyManager::UnregisteredOtherEnemyBaseAll(AEnemyBase* _pEnemy)
+{
+	//全エネミーを確認
+	for (AEnemyBase* pEnemy : m_pAllEnemies)
+	{
+		if (!pEnemy) { continue; }
+		if (!IsValid(pEnemy)) { continue; }
+
+		//エネミーが個人が持っているエネミーのアドレス登録解除
+		pEnemy->UnregisteredOtherEnemyBase(_pEnemy);	
+	}
+}
+
+
 //------------------------------------------------
 //全エネミー情報をPlayDataに記録する
 //------------------------------------------------
