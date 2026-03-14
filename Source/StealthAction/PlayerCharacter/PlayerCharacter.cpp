@@ -36,7 +36,7 @@
 #include "StealthAction/PlayerCharacter/Controller/MyPlayerController.h"
 #include "Components/ChildActorComponent.h"
 
-
+#include "DrawDebugHelpers.h"
 
 
 
@@ -101,6 +101,8 @@ APlayerCharacter::APlayerCharacter()
 	, m_maxOffsetY(70.f)
 	, m_initOffsetY(30.f)
 	, m_staminaRecoveryMagnification(1.5f)
+	, CranchCollisionRatio(0.8f)
+	, ShadowCollisionRatio(1/6)
 
 
 {
@@ -248,7 +250,7 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	//コンテニューしていれば情報取得
-		//プレイデータの取得
+	//プレイデータの取得
 	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
 	UCheckpointManager* pCheckMng = GetWorld()->GetSubsystem<UCheckpointManager>();
 	if (!pPlayData) { return; }
@@ -318,21 +320,19 @@ void APlayerCharacter::Tick(float _deltaTime)
 	//視点変更
 	ViewpointSwitching(_deltaTime);
 
-
-	//現在位置
-	FVector currentPos = GetActorLocation();
-	//現在位置で通常に戻ったら壁にのめり込むか
-	if (!IsUpPosWall(currentPos))
+	//現在位置で通常状態に戻ったら壁にのめり込むか
+	if (!IsUpPosWall(GetFeetLocation()))
 	{
-		m_saveLastNotUpWallPos = currentPos;
+		m_saveLastNotUpWallPos = GetActorLocation();
 	}
 
+	//カメラとの距離が近すぎるときはメッシュを消す
 	const UCameraComponent* Cam = FindComponentByClass<UCameraComponent>();
 	if (!Cam || !GetMesh()) return;
 
 	const float D = FVector::Distance(Cam->GetComponentLocation(), GetMesh()->GetComponentLocation());
 	if (D < 150) {
-		GetMesh()->SetHiddenInGame(true, true); // true: 子も反映
+		GetMesh()->SetHiddenInGame(true, true); 
 	}
 	else {
 		GetMesh()->SetHiddenInGame(false, true);
@@ -408,6 +408,8 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 	if (m_cameraStatus == ECameraStatus::InShadow) { return; }
 
 	//X軸入力があり、移動入力がなければ
+	//カメラオフセットを移動させ、左右どちらの肩越し視点に対応できるようにし
+	//角の先を見やすくする
 	if (m_cameraRotateInput.X != 0 && GetCharacterMovement()->Velocity.Length() <= m_WalkSpeed) {
 		float moveOffsetDir = (m_cameraRotateInput.X > 0) ? -1.f : 1.f;
 
@@ -431,6 +433,7 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 		//入力がない時間計測用タイマーリセット
 		m_OutcameraInputTimer = 0.f;
 	}
+	
 	//初期オフセット位置に戻す処理
 	else
 	{
@@ -1131,15 +1134,17 @@ bool APlayerCharacter::IsUpPosWall(const FVector& _startPos)const
 	float helfHeight = m_Capsule->GetScaledCapsuleHalfHeight();
 	//現在が初期値の何分の1か
 	float heightScale = m_capsuleHeight / (helfHeight * 2.f);
-	float maxCapuselHeightHelf = m_capsuleHeight / 2.f;
+	float maxCapuselHeightHelf = m_capsuleHeight ;
 
 	//スタート位置
 	FVector Start = _startPos + FVector{ 0,0,maxCapuselHeightHelf };
 
 	//通常時のサイズと一緒の高さまでトレース
 	FVector End = Start;
+	
 	//カプセルに変換
-	FCollisionShape Capsule = FCollisionShape::MakeCapsule(m_capsuleRadius * 1.7f, maxCapuselHeightHelf * 1.4f);
+	FCollisionShape Capsule = FCollisionShape::MakeCapsule(m_capsuleRadius , maxCapuselHeightHelf);
+	
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
@@ -1289,34 +1294,38 @@ void APlayerCharacter::Enhanced_EndInputDash(const FInputActionValue& Value)
 void APlayerCharacter::Enhanced_MoveCrouch(const FInputActionValue& Value)
 {
 	if (!m_bCanControl) { return; }
+	//影状態ならしゃがまない
 	if (m_status == EPlayerStatus::InShadow) {
 		return;
 	}
+	//しゃがみ中でなければ
 	if (!m_bIsCrouch)
 	{
-		m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight / 1.2f);
+		//しゃがむ
+		m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight * CranchCollisionRatio);
 		GetCharacterMovement()->MaxWalkSpeed = m_CrouchSpeed;
 		m_bIsCrouch = true;
 		m_cameraStatus = ECameraStatus::Crouch;
 		m_bCameraSwitching = true;
 	}
+	//しゃがみ中なら
 	else
 	{
-		m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight);
-		GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
-		m_bIsCrouch = false;
-		m_cameraStatus = ECameraStatus::ThirdPerson;
-		m_bCameraSwitching = true;
 		//上に障害物があるか？
 		//現在位置
-		FVector pos = GetActorLocation();
-		if (IsUpPosWall(pos))
+
+		if (IsUpPosWall(GetFeetLocation()))
 		{
 			//ある場合
 			//最後に壁がなかった位置に移動
 			SetActorLocation(m_saveLastNotUpWallPos);
 		}
 
+		m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight);
+		GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
+		m_bIsCrouch = false;
+		m_cameraStatus = ECameraStatus::ThirdPerson;
+		m_bCameraSwitching = true;
 
 	}
 }
@@ -1735,8 +1744,7 @@ void APlayerCharacter::TransformationShadowToIdle(const bool _bLightHit/*=false*
 
 	//上に障害物があるか？
 	//現在位置
-	FVector pos = GetActorLocation();
-	if (IsUpPosWall(pos))
+	if (IsUpPosWall(GetFeetLocation()))
 	{
 		//ある場合
 		//最後に壁がなかった位置に移動
@@ -1783,7 +1791,7 @@ void APlayerCharacter::TransformationToShadow()
 	GetCharacterMovement()->MaxWalkSpeed = m_WalkSpeed;
 	ChangePlayerStatus(EPlayerStatus::InShadow);
 	FVector newLocation = GetActorLocation();
-	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight / 6.f);
+	m_Capsule->SetCapsuleHalfHeight(m_capsuleHeight /6.f);
 	newLocation.Z -= m_capsuleHeight / 6.f;
 	SetActorLocation(newLocation);
 
@@ -1820,8 +1828,7 @@ void APlayerCharacter::CancellationShadow(const EPlayerStatus& _status)
 
 	//上に障害物があるか？
 	//現在位置
-	FVector pos = GetActorLocation();
-	if (IsUpPosWall(pos))
+	if (IsUpPosWall(GetFeetLocation()))
 	{
 		//ある場合
 		//最後に壁がなかった位置に移動
