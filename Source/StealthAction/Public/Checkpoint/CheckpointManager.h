@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include <functional>
 #include "Subsystems/WorldSubsystem.h"
 #include "CheckpointManager.generated.h"
 

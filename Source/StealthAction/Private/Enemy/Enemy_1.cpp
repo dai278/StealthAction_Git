@@ -1776,7 +1776,7 @@
 //		m_returnTime = 0;					//帰還時間リセット
 //		m_returnCheck = false;	//帰還終了
 //		//
-//		UE_LOG(LogTemp, Warning, TEXT("ReturnOK"));
+//		//UE_LOG(LogTemp, Warning, TEXT("ReturnOK"));
 //
 //	}
 //}

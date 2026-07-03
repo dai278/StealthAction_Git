@@ -35,7 +35,7 @@ void UCheckpointManager::OnWorldBeginPlay(UWorld&)
 	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
 	if (!pPlayData)
 	{
-		UE_LOG(LogTemp, Display, TEXT("UPlayDataGameInstanceSubsystem Genereted Miss"));
+		//UE_LOG(LogTemp, Display, TEXT("UPlayDataGameInstanceSubsystem Genereted Miss"));
 		return;
 	}
 	FCheckpointInfo info= pPlayData->GetCheckpointInfo();
@@ -77,7 +77,7 @@ void UCheckpointManager::AddCheckpoint(ACheckpoint* _checkpoint)
 				return;
 			}
 
-			UE_LOG(LogTemp, Display, TEXT("LightのIndexがかぶっています"), i);
+			//UE_LOG(LogTemp, Display, TEXT("LightのIndexがかぶっています"), i);
 			return;
 		}
 
@@ -132,15 +132,15 @@ void UCheckpointManager::SetCurrentCheckpointIndex(const int32& _index)
 	//インデックスが0未満か配列外、現在のチェックポイントより小さいなら設定しない
 	if (_index < 0 || _index <m_currentCheckpointIndex)
 	{
-		UE_LOG(LogTemp, Display, TEXT("SetCurrentCheckpointIndex,Miss"));
+		//UE_LOG(LogTemp, Display, TEXT("SetCurrentCheckpointIndex,Miss"));
 		return;
 	}
 	if(_index < m_currentCheckpointIndex)
 	{
-		UE_LOG(LogTemp, Display, TEXT("SetCurrentCheckpointIndex,Miss"));
+		//UE_LOG(LogTemp, Display, TEXT("SetCurrentCheckpointIndex,Miss"));
 		return;
 	}
-	UE_LOG(LogTemp, Display, TEXT("index："),_index);
+	//UE_LOG(LogTemp, Display, TEXT("index："),_index);
 	//　不正な値でなければインデックスを設定
 	m_currentCheckpointIndex = _index;
 
@@ -148,7 +148,7 @@ void UCheckpointManager::SetCurrentCheckpointIndex(const int32& _index)
 	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
 	if (!pPlayData)
 	{
-		UE_LOG(LogTemp, Display, TEXT("UPlayDataGameInstanceSubsystem Genereted Miss"));
+		//UE_LOG(LogTemp, Display, TEXT("UPlayDataGameInstanceSubsystem Genereted Miss"));
 		return;
 	}
 
@@ -170,7 +170,7 @@ int32 UCheckpointManager::GetCurrentCheckpointIndex() const
 //-----------------------------------------------------------
 void UCheckpointManager::OnOverlapCheckpoint()
 {
-	UE_LOG(LogTemp, Display, TEXT("OnOverlapCheckpoint"));
+	//UE_LOG(LogTemp, Display, TEXT("OnOverlapCheckpoint"));
 	int32 num = m_OnOverlapCheckpointFunctions.Num();
 	for (std::function<void()>& func : m_OnOverlapCheckpointFunctions)
 	{

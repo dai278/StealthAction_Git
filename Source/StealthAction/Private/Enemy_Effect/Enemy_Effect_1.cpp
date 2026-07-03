@@ -23,7 +23,7 @@ AEnemy_Effect_1::AEnemy_Effect_1()
 
 void AEnemy_Effect_1::ActivateEffect(const FVector& StartPos, AActor* TargetActor)
 {
-    UE_LOG(LogTemp, Warning, TEXT("EffectActiveX"));
+    //UE_LOG(LogTemp, Warning, TEXT("EffectActiveX"));
 
     // 以前のタイマーが残っていると再利用時に事故る
     GetWorldTimerManager().ClearTimer(DestroyTimer);

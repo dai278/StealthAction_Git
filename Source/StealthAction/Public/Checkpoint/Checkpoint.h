@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include <functional>
 #include "GameFramework/Actor.h"
 #include "GameInstance/PlayDataInfo.h"
 #include "Checkpoint.generated.h"

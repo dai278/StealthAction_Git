@@ -5,6 +5,7 @@
 
 //インクルード
 #include "CoreMinimal.h"			//ItemBaseクラス継承
+#include <functional>
 #include "ItemBase.h"
 #include "Camera/CameraInfo.h"
 #include "ItemKey.generated.h"
@@ -14,7 +15,7 @@ class UWidgetComponent;
 class AGoalActor;
 
 //クラスのメンバ関数をキーアイテム取得時のコールバックにするときのマクロ
-#define CreateNoiseEventCallback(_func) std::bind(&_func, this)
+#define CreateItemKeyNoiseCallback(_func) std::bind(&_func, this)
 
 
 UCLASS()

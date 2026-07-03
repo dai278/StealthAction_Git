@@ -49,11 +49,11 @@ void UEnemyManager::RegisterEnemy(AEnemyBase* _pEnemy)
 	m_pAllEnemies.Add(_pEnemy);
 	if (!_pEnemy)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Enemy->null"));
+		//UE_LOG(LogTemp, Display, TEXT("Enemy->null"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Display, TEXT("Enemy->NotNull"));
+		//UE_LOG(LogTemp, Display, TEXT("Enemy->NotNull"));
 	}
 }
 
@@ -65,11 +65,11 @@ void UEnemyManager::UnregisterEnemy(AEnemyBase* _pEnemy)
 	m_pAllEnemies.Remove(_pEnemy);
 	if (!_pEnemy)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Enemy->null"));
+		//UE_LOG(LogTemp, Display, TEXT("Enemy->null"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Display, TEXT("Enemy->NotNull"));
+		//UE_LOG(LogTemp, Display, TEXT("Enemy->NotNull"));
 	}
 }
 
@@ -106,7 +106,7 @@ void UEnemyManager::RegisterEnemyInfoAllToPlayData()
 	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
 	if (!pPlayData)
 	{
-		UE_LOG(LogTemp, Display, TEXT("UPlayDataGameInstanceSubsystem Genereted Miss"));
+		//UE_LOG(LogTemp, Display, TEXT("UPlayDataGameInstanceSubsystem Genereted Miss"));
 		return;
 	}
 
@@ -189,7 +189,7 @@ void UEnemyManager::SetEnemyInfoAll()
 	TArray<FEnemyInfo> info = pPlayData->GetAllEnemyInfo();
 	int32 infoNum = info.Num();
 	if (num != infoNum) { return; }
-	UE_LOG(LogTemp, Warning, TEXT(""), num);
+	//UE_LOG(LogTemp, Warning, TEXT(""), num);
 
 	//インデックスが同じエネミーに情報設定
 	for (int i = 0;i < m_pAllEnemies.Num();++i)
@@ -198,7 +198,7 @@ void UEnemyManager::SetEnemyInfoAll()
 		{
 			if (m_pAllEnemies[i]->GetEnemyInfo().index == info[n].index)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Before: i=%d Num=%d"), i, m_pAllEnemies.Num());
+				//UE_LOG(LogTemp, Warning, TEXT("Before: i=%d Num=%d"), i, m_pAllEnemies.Num());
 				//情報設定
 				m_pAllEnemies[i]->SetEnemyInfo(info[n]);
 				//死んでる敵は死んだ位置にリスポーン
@@ -206,7 +206,7 @@ void UEnemyManager::SetEnemyInfoAll()
 				if (m_pAllEnemies[i]->GetEnemyInfo().bIsDead) {
 					m_pAllEnemies[i]->SetActorLocation(info[n].location);
 				}
-				UE_LOG(LogTemp, Warning, TEXT("After : i=%d Num=%d"), i, m_pAllEnemies.Num());
+				//UE_LOG(LogTemp, Warning, TEXT("After : i=%d Num=%d"), i, m_pAllEnemies.Num());
 				break;
 			}
 		}

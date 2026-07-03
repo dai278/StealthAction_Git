@@ -21,14 +21,14 @@ void AEnemy_EffectManager::BeginPlay()
 	UWorld* World = GetWorld();
 	if (!World)
 	{
-		UE_LOG(LogTemp, Error, TEXT("AEnemy_EffectManager::BeginPlay World is null"));
+		//UE_LOG(LogTemp, Error, TEXT("AEnemy_EffectManager::BeginPlay World is null"));
 		return;
 	}
 
-	if (!Effect1Class) UE_LOG(LogTemp, Warning, TEXT("Effect1Class is null (skip prewarm)"));
-	if (!Effect2Class) UE_LOG(LogTemp, Warning, TEXT("Effect2Class is null (skip prewarm)"));
-	if (!Effect3Class) UE_LOG(LogTemp, Warning, TEXT("Effect3Class is null (skip prewarm)"));
-	if (!Effect4Class) UE_LOG(LogTemp, Warning, TEXT("Effect4Class is null (skip prewarm)"));
+	if (!Effect1Class) //UE_LOG(LogTemp, Warning, TEXT("Effect1Class is null (skip prewarm)"));
+	if (!Effect2Class) //UE_LOG(LogTemp, Warning, TEXT("Effect2Class is null (skip prewarm)"));
+	if (!Effect3Class) //UE_LOG(LogTemp, Warning, TEXT("Effect3Class is null (skip prewarm)"));
+	if (!Effect4Class) //UE_LOG(LogTemp, Warning, TEXT("Effect4Class is null (skip prewarm)"));
 
 	PrewarmPoolTyped<AEnemy_Effect_1>(Effect1Class, m_effect1Stock, Effect1Pool);
 	PrewarmPoolTyped<AEnemy_Effect_2>(Effect2Class, m_effect2Stock, Effect2Pool);

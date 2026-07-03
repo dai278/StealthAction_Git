@@ -87,7 +87,7 @@ void ACheckpoint::OnBeginOverlap(
 )
 {
 
-	UE_LOG(LogTemp, Display, TEXT("checkpointHit"));
+	//UE_LOG(LogTemp, Display, TEXT("checkpointHit"));
 	//オーバーラップしたアクターがプレイヤーなら
 	//チェックポイントマネージャーに現在のチェックポイントを設定する
 	//(プレイヤー判定はActorのタグで行う)

@@ -118,7 +118,7 @@ void AMyPlayerController::BeginPlay()
 	PlayerCharacter = Cast<APlayerCharacter>(GetPawn());
 	if (!PlayerCharacter)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter not found"));
+		//UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter not found"));
 	}
 
 	// ============================
@@ -174,8 +174,8 @@ void AMyPlayerController::BeginPlay()
 		SetInputMode_Player();
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("PlayerIMC: %s"), PlayerIMC ? TEXT("OK") : TEXT("NULL"));
-	UE_LOG(LogTemp, Warning, TEXT("MenuIMC: %s"), MenuIMC ? TEXT("OK") : TEXT("NULL"));
+	//UE_LOG(LogTemp, Warning, TEXT("PlayerIMC: %s"), PlayerIMC ? TEXT("OK") : TEXT("NULL"));
+	//UE_LOG(LogTemp, Warning, TEXT("MenuIMC: %s"), MenuIMC ? TEXT("OK") : TEXT("NULL"));
 
 	// ポーズ中もTick可能にする設定
 	// 自作PlayerControllerのBeginPlay等で
@@ -236,7 +236,7 @@ void AMyPlayerController::SetHUDWidget(UHUDWidget* NewHUDWidget)
 // ============================
 void AMyPlayerController::ApplyIMC(EInputModeType NewMode)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ApplyIMC: %d"), (int32)NewMode);
+	//UE_LOG(LogTemp, Warning, TEXT("ApplyIMC: %d"), (int32)NewMode);
 
 	if (CurrentInputMode == NewMode) return;
 

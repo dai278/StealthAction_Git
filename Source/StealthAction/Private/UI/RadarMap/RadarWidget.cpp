@@ -23,7 +23,7 @@ URadarWidget::URadarWidget(const FObjectInitializer& ObjectInitializer)
 void URadarWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	UE_LOG(LogTemp, Warning, TEXT("RadarWidget NativeConstruct"));
+	//UE_LOG(LogTemp, Warning, TEXT("RadarWidget NativeConstruct"));
 }
 
 //===============================

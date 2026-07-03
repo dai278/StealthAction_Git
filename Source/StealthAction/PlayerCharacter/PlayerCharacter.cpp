@@ -689,7 +689,7 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 	//足元が光に照らされていたらアイドル状態に戻す
 	if (bLightHit)
 	{
-		UE_LOG(LogTemp, Display, TEXT("LightHit"));
+		//UE_LOG(LogTemp, Display, TEXT("LightHit"));
 		TransformationShadowToIdle(true);
 		return;
 	}
@@ -698,7 +698,7 @@ void APlayerCharacter::UpdateShadow(float _deltaTime)
 	if (m_pExtendedSpotLightManager->IsHitEnemyLight(GetFeetLocation()) && m_bOnShadow)
 	{
 		TransformationShadowToIdle(true);
-		UE_LOG(LogTemp, Display, TEXT("LightHit"));
+		//UE_LOG(LogTemp, Display, TEXT("LightHit"));
 		return;
 	}
 
@@ -1027,7 +1027,7 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 
 	// 着地時の処理
-	UE_LOG(LogTemp, Warning, TEXT("Player has landed!"));
+	//UE_LOG(LogTemp, Warning, TEXT("Player has landed!"));
 
 	m_bJumping = false;
 	m_jumpTimer = 0.f;
@@ -1057,7 +1057,7 @@ void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakK
 
 	//ダメージ処理
 	//UE_LOG(LogTemp, Log, TEXT("Player Damaged : %d"), _damage);
-	UE_LOG(LogTemp, Display, TEXT("hp："), m_playerInfo.hp);
+	//UE_LOG(LogTemp, Display, TEXT("hp："), m_playerInfo.hp);
 	//入力制御
 	m_bCanControl = false;
 	//ダメージ
@@ -1112,7 +1112,7 @@ void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakK
 
 	LaunchCharacter(m_knockBackVelocity, true, false);
 
-	UE_LOG(LogTemp, Display, TEXT("hp："), m_playerInfo.hp);
+	//UE_LOG(LogTemp, Display, TEXT("hp："), m_playerInfo.hp);
 }
 
 
@@ -1222,7 +1222,7 @@ void APlayerCharacter::Enhanced_OnInputDash(const FInputActionValue& Value)
 {
 	if (!m_bCanControl) { return; }
 
-	UE_LOG(LogTemp, Display, TEXT("InputDash"));
+	//UE_LOG(LogTemp, Display, TEXT("InputDash"));
 
 	bool isDash = Value.Get<bool>();
 
@@ -1455,7 +1455,7 @@ void APlayerCharacter::Enhanced_Interact(const FInputActionValue& Value)
 {
 	//プレイヤーがコントロールできなければ何もしない
 	if (!m_bCanControl) { return; }
-	UE_LOG(LogTemp, Display, TEXT("Input Interact"));
+	//UE_LOG(LogTemp, Display, TEXT("Input Interact"));
 	//インタラクト可能オブジェクトに触れていなければ何もしない
 	if (!m_bHitIntteractObject) { return; }
 
@@ -1641,7 +1641,7 @@ void APlayerCharacter::Enhanced_CameraSwitch(const FInputActionValue& Value)
 	m_cameraStatus = (m_cameraStatus == ECameraStatus::ThirdPerson) ? ECameraStatus::TopDownView : ECameraStatus::ThirdPerson;
 
 	if (m_bCameraSwitching) {
-		UE_LOG(LogTemp, Display, TEXT("trueeeeeeeeeeeeeeeeeeeeeeeeeee"));
+		//UE_LOG(LogTemp, Display, TEXT("trueeeeeeeeeeeeeeeeeeeeeeeeeee"));
 	}
 }
 
@@ -1675,7 +1675,7 @@ void APlayerCharacter::OnBeginOverlap(
 	const FHitResult& SweepResult
 )
 {
-	UE_LOG(LogTemp, Display, TEXT("unnti"));
+	//UE_LOG(LogTemp, Display, TEXT("unnti"));
 
 	if (!OtherActor) { return; }
 	//影オブジェクトと衝突したか
@@ -1705,7 +1705,7 @@ void APlayerCharacter::OnEndOverlap(
 	int32 OtherBodyIndex
 )
 {
-	UE_LOG(LogTemp, Display, TEXT("end Hit"));
+	//UE_LOG(LogTemp, Display, TEXT("end Hit"));
 	if (!OtherActor) { return; }
 
 	if (OtherComp->ComponentHasTag(TEXT("Shadow")))

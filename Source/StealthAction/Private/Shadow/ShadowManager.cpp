@@ -76,7 +76,7 @@ void UShadowManager::AddShadowComponent(UShadowComponent* _pShadowComponent)
 	//lightIndexが-1（BP上で未設定なら処理しない
 	if (_pShadowComponent->GetLightIndex() == -1)
 	{
-		UE_LOG(LogTemp, Display, TEXT("ライトIndexが設定されていません：ShadowManager:AddShadowComponent"));
+		//UE_LOG(LogTemp, Display, TEXT("ライトIndexが設定されていません：ShadowManager:AddShadowComponent"));
 		return;
 	}
 

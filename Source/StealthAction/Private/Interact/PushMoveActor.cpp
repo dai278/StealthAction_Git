@@ -91,8 +91,8 @@ void APushMoveActor::Interact(AActor* _interactOwner)
 	
 	float deg = FMath::Fmod(FMath::RadiansToDegrees(FMath::Atan2(Vec.Y, Vec.X)) + 360.0f, 360.0f);
 
-	UE_LOG(LogTemp, Warning, TEXT("Vec=(%.3f,%.3f) deg=%.9f IsNaN=%d"),
-		Vec.X, Vec.Y, deg, FMath::IsNaN(deg));
+	//UE_LOG(LogTemp, Warning, TEXT("Vec=(%.3f,%.3f) deg=%.9f IsNaN=%d"),
+		//Vec.X, Vec.Y, deg, FMath::IsNaN(deg));
 
 	//移動方向決定
 	FVector moveDir = FVector::ZeroVector;
@@ -101,26 +101,26 @@ void APushMoveActor::Interact(AActor* _interactOwner)
 	const bool bA = (deg >= 0.f && deg < 45.f);
 	const bool bB = (deg >= 315.f && deg < 360.f);
 
-	UE_LOG(LogTemp, Warning, TEXT("deg=%.9f  bA=%d bB=%d"), deg, bA, bB);
+	//UE_LOG(LogTemp, Warning, TEXT("deg=%.9f  bA=%d bB=%d"), deg, bA, bB);
 
 	if (bA || bB)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BRANCH: FIRST IF"));
+		//UE_LOG(LogTemp, Warning, TEXT("BRANCH: FIRST IF"));
 		moveDir = FVector(-1.f, 0.f, 0.f);
 	}
 	else if (deg >= 45.f && deg < 135.f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BRANCH: 90-180"));
+		//UE_LOG(LogTemp, Warning, TEXT("BRANCH: 90-180"));
 		moveDir = FVector(0.f, -1.f, 0.f);
 	}
 	else if (deg >= 135.f && deg < 225.f) // ←ここは後述の通り修正して
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BRANCH: 180-270"));
+		//UE_LOG(LogTemp, Warning, TEXT("BRANCH: 180-270"));
 		moveDir = FVector(1.f, 0.f, 0.f);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BRANCH: ELSE"));
+		//UE_LOG(LogTemp, Warning, TEXT("BRANCH: ELSE"));
 		moveDir = FVector(0.f, 1.f, 0.f); // デバッグ用：見分けるため
 	}
 	

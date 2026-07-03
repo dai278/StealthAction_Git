@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include <functional>
 #include "Components/ActorComponent.h"
 #include "NoiseListenerComponent.generated.h"
 

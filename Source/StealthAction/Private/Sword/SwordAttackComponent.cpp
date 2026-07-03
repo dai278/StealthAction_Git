@@ -25,7 +25,7 @@ USwordAttackComponent::USwordAttackComponent()
 	//コリジョン生成
 	m_swordCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SwordCollision"));
 	if (!m_swordCollision) {
-		UE_LOG(LogTemp, Display, TEXT("剣コリジョン生成失敗"));
+		////UE_LOG(LogTemp, Display, TEXT("剣コリジョン生成失敗"));
 	}
 	else
 	{
@@ -50,7 +50,7 @@ void USwordAttackComponent::BeginPlay()
 	m_swordCollision->SetGenerateOverlapEvents(false);
 
 	//debug
-	UE_LOG(LogTemp, Warning, TEXT("SwordCollision Registered=%d"), m_swordCollision->IsRegistered());
+	//UE_LOG(LogTemp, Warning, TEXT("SwordCollision Registered=%d"), m_swordCollision->IsRegistered());
 }
 
 // OnRegister
@@ -76,7 +76,7 @@ void USwordAttackComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 	FName name= m_swordCollision->GetCollisionProfileName();
 
-	UE_LOG(LogTemp, Display, TEXT(""),name);
+	//UE_LOG(LogTemp, Display, TEXT(""),name);
 
 	//時間計測
 	m_timer += DeltaTime;
@@ -154,7 +154,7 @@ void USwordAttackComponent::Swinging(const bool& _bSneakKill)
 		//すでに振っているなら無視
 		return;
 	}
-	UE_LOG(LogTemp, Display, TEXT("KenHutta"));
+	//UE_LOG(LogTemp, Display, TEXT("KenHutta"));
 	SetComponentTickEnabled(true);
 	m_bIsSwinging = true;
 	m_timer = 0.0f;
@@ -210,7 +210,7 @@ void USwordAttackComponent::OnSwordBeginOverlap(
 {
 	if (!OtherActor || OtherActor == GetOwner()) return;
 
-	UE_LOG(LogTemp, Display, TEXT("NanikaniHit"));
+	//UE_LOG(LogTemp, Display, TEXT("NanikaniHit"));
 
 	//ノックバック
 	FVector knockBackvector = OtherActor->GetActorLocation()-GetOwner()->GetActorLocation() ;
@@ -219,7 +219,7 @@ void USwordAttackComponent::OnSwordBeginOverlap(
 	knockBackvector *= m_KnockBackValu;
 
 	
-	UE_LOG(LogTemp, Display, TEXT("Hit to Enemy"));
+	//UE_LOG(LogTemp, Display, TEXT("Hit to Enemy"));
 	//ダメージ与える処理
 	Cast<IDamageable>(OtherActor)->OnDamage(m_damage, knockBackvector,m_bSneakKill);
 

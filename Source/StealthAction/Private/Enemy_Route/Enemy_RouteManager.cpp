@@ -50,7 +50,7 @@ TArray<AActor*> UEnemy_RouteManager::AddRoute(int _routeNum, bool _randomRouteCh
 		//ルートの決定
 		if (_routeNum == Enemy_PatrolRoute->m_route_Num)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("UEnemy_RouteManager%d"), Enemy_PatrolRoute->m_route_Num);
+			//UE_LOG(LogTemp, Warning, TEXT("UEnemy_RouteManager%d"), Enemy_PatrolRoute->m_route_Num);
 
 			Index += 1;
 			Enemy_Route.SetNum(Index);	//要素数のセット

@@ -15,7 +15,7 @@ void UShadowTimeWidget::NativeConstruct()
 
 	if (!PlayerCharacter)
 	{
-		UE_LOG(LogTemp, Error, TEXT("ShadowTimeWidget: PlayerCharacter not found"));
+		//UE_LOG(LogTemp, Error, TEXT("ShadowTimeWidget: PlayerCharacter not found"));
 	}
 }
 

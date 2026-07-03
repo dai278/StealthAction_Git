@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include <functional>
 #include "Components/SceneComponent.h"  
 #include "SwordAttackComponent.generated.h"
 

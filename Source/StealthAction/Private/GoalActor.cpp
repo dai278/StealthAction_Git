@@ -80,7 +80,7 @@ void AGoalActor::OnOverlapBegin(
 
 	if (OtherActor->ActorHasTag(TEXT("Player")))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GAME CLEAR"));
+		//UE_LOG(LogTemp, Warning, TEXT("GAME CLEAR"));
 		// クリア用レベルへ遷移
 		UGameplayStatics::OpenLevel(this, FName("GameClear")); // レベル名を設定
 	}

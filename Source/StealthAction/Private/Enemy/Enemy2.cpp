@@ -237,7 +237,7 @@ void AEnemy2::CaseBattle(float _deltaTime)
 	//ŒÄ‚Ñn‚ß1‰ñ‚Ì‚İ
 	if (!m_battleCheck)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Battle"));
+		//UE_LOG(LogTemp, Warning, TEXT("Battle"));
 
 		m_battleCheck = true;//í“¬’†
 		m_alertCheck = true;	//Œx‰úó‘ÔON

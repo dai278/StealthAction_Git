@@ -60,7 +60,7 @@ void AEnemy_Bullet_1::ActivateBullet(const FVector& StartPos, const FVector& Dir
 
     if (!Movement)
     {
-        UE_LOG(LogTemp, Error, TEXT("ActivateBullet: Movement is NULL"));
+        //UE_LOG(LogTemp, Error, TEXT("ActivateBullet: Movement is NULL"));
         return;
     }
     GetWorldTimerManager().ClearTimer(LifeTimer);
