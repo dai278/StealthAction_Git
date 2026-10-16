@@ -20,7 +20,11 @@ void UStateMachine::Initialize(AActor* _inOwner)
 	//TsubClassのほうに登録されたステートを登録
 	for (TSubclassOf<UStateBase> stateClass : m_stateClasses)
 	{
-		if (!stateClass) { continue; }
+		if (!stateClass || stateClass->HasAnyClassFlags(CLASS_Abstract))
+		{
+			UE_LOG(LogTemp, Error, TEXT("%s: State Classes contains an empty or abstract class."), *GetName());
+			continue;
+		}
 		UStateBase* registerState = NewObject<UStateBase>(this, stateClass);
 		if(registerState)
 		{

@@ -3,7 +3,7 @@
 // XV“ú@@@@ @F11/19@
 //----------------------------------------------------------
 
-//BP‚Åg‚¦‚é‚©‚Í“úûü‚Ì“Æ’f‚Æ•ÎŒ©‚ÅŒˆ‚ß‚é‚Ì‚ÅŒã‚Å•K—v‚É‰‚¶‚Ä•ÏX‚µ‚Ä—Ç‚µ
+//BP‚Åg‚¦‚é‚©‚Í“úîà‚Ì“Æ’f‚Æ•ÎŒ©‚ÅŒˆ‚ß‚é‚Ì‚ÅŒã‚Å•K—v‚É‰‚¶‚Ä•ÏX‚µ‚Ä—Ç‚µ
 //ƒJƒƒ‰‚Æ•½sˆÚ“®‚ÌÅ’áŒÀ‚­‚ç‚¢‚µ‚©‘‚«‚Ü‚¹‚ñ
 
 
@@ -14,6 +14,7 @@
 #include "GameInstance/PlayDataInfo.h"//ƒvƒŒƒCƒf[ƒ^\‘¢‘Ì‚ª•¡”‚ ‚é‚à‚ÌPlayerInfo‚Ì‚İg—p
 #include "Damage/IDamage.h"
 #include "Camera/CameraInfo.h"
+#include "State/Player/PlayerStatus.h"
 
 #include "PlayerCharacter.generated.h"
 
@@ -26,12 +27,20 @@ class UInputAction;
 struct FInputActionValue;  
 class UPrimitiveComponent;
 class UNoiseListenerComponent;
-class UEnemyManager;//ƒGƒlƒ~[‚ÌŠî’êƒNƒ‰ƒX‚É‚·‚é“úûü•ÏX
+class UEnemyManager;//ƒGƒlƒ~[‚ÌŠî’êƒNƒ‰ƒX‚É‚·‚é“úîà•ÏX
 class AEnemyBase;
 class UExtendedSpotLightManager;//Šg’£ƒXƒ|ƒbƒgƒ‰ƒCƒgƒ}ƒl[ƒWƒƒ[‚Ì‘O•ûéŒ¾
 class USwordAttackComponent;//ƒ\[ƒhUŒ‚ƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì‘O•ûéŒ¾
 class UCameraFocusDirectorComponent;//ƒJƒƒ‰ƒtƒH[ƒJƒXƒfƒBƒŒƒNƒ^[ƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì‘O•ûéŒ¾
 class AInteract;
+class UPlayerStateMachine;
+class UPlayerLocomotionState;
+class UPlayerAttackState;
+class UPlayerDamageState;
+class UPlayerShadowState;
+class UPlayerDeadState;
+class UPlayerInteractState;
+class UPlayerInteractAnimationState;
 
 //ƒvƒŒƒCƒ„[‚ÌƒJƒƒ‰‹“_ó‘Ô
 //enum class‚ÍƒNƒ‰ƒXŠO‚É‘‚©‚È‚¢‚Æ‚¢‚¯‚È‚¢‚ç‚µ‚¢‚µA‚±‚Ì‘‚«•û‚ª—Ç‚¢‚ç‚µ‚¢
@@ -52,21 +61,7 @@ enum class ECameraStatus : uint8
 //v‚¢‚Â‚¢‚½‚Ì‚©‚¢‚½
 //‚¢‚ç‚È‚¢‚È‚çÁ‚µ‚Ä•K—v‚È‚ç‘‚â‚µ‚Ä
 //enum‚ÅŠÇ—‚µ‚È‚­‚Ä‚à‚¢‚¢‚¯‚Ç‰eó‘Ô‚É‚à‚Å‚«‚é‚æ‚¤‚ÈİŒv‚É‚µ‚Æ‚¢‚Ä
-UENUM(BlueprintType)
-enum class EPlayerStatus :uint8
-{
-	Idle         UMETA(DisplayName = "Idle"),
-	Walk         UMETA(DisplayName = "Walk"),
-	Dash         UMETA(DisplayName = "Dash"),
-	Jump         UMETA(DisplayName = "Jump"),
-	Crouch       UMETA(DisplayName = "Crouch"),
-	Attack       UMETA(DisplayName = "Attack"),
-	Damage       UMETA(DisplayName = "Damage"),
-	Dead         UMETA(DisplayName = "Dead"),
-	InShadow     UMETA(DisplayName = "InShadow"),
-	Interact     UMETA(DisplayName = "Interact"),
-	InteractAnimation UMETA(DisplayName = "InteractAnimation"),
-};
+
 
 
 
@@ -87,6 +82,15 @@ class STEALTHACTION_API APlayerCharacter : public ACharacter,public IDamageable
 
 	GENERATED_BODY()
 
+	friend class UPlayerStateMachine;
+	friend class UPlayerLocomotionState;
+	friend class UPlayerAttackState;
+	friend class UPlayerDamageState;
+	friend class UPlayerShadowState;
+	friend class UPlayerDeadState;
+	friend class UPlayerInteractState;
+	friend class UPlayerInteractAnimationState;
+
 public:
 
 	//UŒ‚ŠJnƒR[ƒ‹ƒoƒbƒN
@@ -101,6 +105,7 @@ public:
 protected:
 	//ƒQ[ƒ€ƒXƒ^[ƒg–”‚Í¶¬ŒÄ‚Î‚ê‚é‰Šú‰»ˆ—
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
 	// XV
@@ -160,23 +165,8 @@ private:
 	void UpdateCheckEnemyDetection();
 
 private:
-	//ƒAƒCƒhƒ‹ó‘Ô‚ÌXVˆ—
-	void UpdateIdle();
-
 	//•à‚«ó‘Ô‚ÌXVˆ—
 	void UpdateMove(const bool _bInShadow=false);
-
-	//‚µ‚á‚ª‚İó‘Ô‚ÌXVˆ—
-	void UpdateCrouch();
-
-	//UŒ‚ó‘Ô‚ÌXVˆ—
-	void UpdateAttack();
-
-	//ƒ_ƒ[ƒWó‘Ô‚ÌXVˆ—
-	void UpdateDamaged();
-
-	//‚â‚ç‚êó‘Ô‚ÌXVˆ—
-	void UpdateDead(float _deltaTime);
 
 	//–³“GŠÔ‚ÌXVˆ—
 	void UpdateInvincibleTime(float _deltaTime);
@@ -227,7 +217,10 @@ public:
 	bool IsAlive() const { return m_playerInfo.isAlive; }
 
 	UFUNCTION(BlueprintPure, Category = "state")
-	EPlayerStatus GetPlayerStatus() const { return m_status; }
+	EPlayerStatus GetPlayerStatus() const;
+
+	UFUNCTION(BlueprintPure, Category = "state")
+	UPlayerStateMachine* GetPlayerStateMachine() const;
 
 	UFUNCTION(BlueprintPure, Category = "state")
 	bool IsCrouch() const { return m_bIsCrouch; }
@@ -236,7 +229,7 @@ public:
 	bool CanAttack() const { return m_bCanAttack; }
 
 	UFUNCTION(BlueprintPure, Category = "state")
-	bool IsShadow() const { return m_status == EPlayerStatus::InShadow; }
+	bool IsShadow() const { return GetPlayerStatus() == EPlayerStatus::InShadow; }
 
 	UFUNCTION(BlueprintPure, Category = "state")
 	bool IsDash() const { return m_bDash; }
@@ -254,6 +247,7 @@ protected:
 	//---“ü—Í—p---
 	// Enhanced Input ŠÖ”
 	void Enhanced_Move(const FInputActionValue& Value);		//ˆÚ“®	
+	void Enhanced_EndMove(const FInputActionValue& Value);
 	void Enhanced_OnInputDash(const FInputActionValue& Value);//ƒ_ƒbƒVƒ…“ü—ÍŠJn
 	void Enhanced_EndInputDash(const FInputActionValue& Value);//ƒ_ƒbƒVƒ…“ü—ÍI—¹
 
@@ -342,7 +336,11 @@ public:
 
 	private:
 	//ó‘Ô•ÏXˆ—
-	void ChangePlayerStatus(const EPlayerStatus& _newStatus);
+	bool ChangePlayerStatus(const EPlayerStatus& _newStatus);
+	void RefreshLocomotionState();
+	void FinishAttackState();
+	void EnterShadowState();
+	void ExitShadowState();
 
 private:
 	bool IsUpPosWall(const FVector& _startPos)const;
@@ -352,6 +350,12 @@ private:
 
 
 private:
+
+	UPROPERTY(EditDefaultsOnly, Category = "State Machine", meta = (DisplayName = "Player State Machine Class"))
+	TSubclassOf<UPlayerStateMachine> m_stateMachineClass;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UPlayerStateMachine> m_stateMachine;
 
 	//BlueprintRedOnly‚Éw’è‚µ‚Ä‚¢‚é‚½‚ßƒuƒ‹[ƒvƒŠƒ“ƒg‚ÅŒ©‚ê‚é‚ªA•ÒW‚Í‚Å‚«‚È‚¢i•Ï”•ÛŒìj
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -375,8 +379,8 @@ private:
 	UPROPERTY()
 	UMaterialParameterCollection* m_pMPC;			//ƒ}ƒeƒŠƒAƒ‹ƒpƒ‰ƒ[ƒ^ƒRƒŒƒNƒVƒ‡ƒ“
 
-	UPROPERTY(EditAnywhere, Category = "Status")
-	EPlayerStatus m_status;							//ƒvƒŒƒCƒ„[ó‘Ô
+	UPROPERTY(EditDefaultsOnly, Category = "Status", meta = (DisplayName = "Initial Player Status"))
+	EPlayerStatus m_status; // Initial status only; runtime state lives in m_stateMachine.
 
 	UPROPERTY(EditAnywhere, Category = "Move")
 	float m_WalkSpeed;								//•à‚«ˆÚ“®—Ê
@@ -499,10 +503,11 @@ private:
 	//ƒCƒ“ƒ^ƒ‰ƒNƒg‚Ì‚·‚éêŠ
 	FVector m_interactPos;
 	//ƒCƒ“ƒ^ƒ‰ƒNƒgƒ^ƒCƒ}[
+	bool m_bInteractionExecuted = false;
 	float m_interactTimer;
 
 
-	//“úûü•ÏX“_
+	//“úîà•ÏX“_
 	UEnemyManager* m_pEnemyManager;//ƒGƒlƒ~[ƒ}ƒl[ƒWƒƒ[–ˆƒtƒŒ[ƒ€ŒŸõ‚Íd‚¢‚Ì‚Å
 	//Šg’£ƒXƒ|ƒbƒgƒ‰ƒCƒgƒ}ƒl[ƒWƒƒ[‚ÌƒAƒhƒŒƒX
 	UExtendedSpotLightManager* m_pExtendedSpotLightManager;

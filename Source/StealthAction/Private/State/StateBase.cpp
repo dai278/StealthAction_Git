@@ -31,7 +31,7 @@ bool UStateBase::HasTag(FName _tag)
 //========================================================
 UStateBase* UStateBase::GetNextStateClassInstance()
 {
-	if (IsValid(m_pStateMachine)) { return nullptr; }
+	if (!IsValid(m_pStateMachine)) { return nullptr; }
 	if (!m_nextStateClass) { return nullptr; }
 
 	return m_pStateMachine->GetStateBySubClass(m_nextStateClass);

@@ -80,7 +80,7 @@ public:
 	UStateBase* GetStateBySubClass(TSubclassOf<UStateBase> TargetClass);
 
 	//現在ステート取得
-	UStateBase* GetCurrentState() { return m_currentState; }
+	UStateBase* GetCurrentState() const { return m_currentState; }
 
 	//ステートチェンジ
 	bool ChangeState(UStateBase* _newState);
@@ -93,7 +93,7 @@ public:
 	//強制ステート変更
 	bool ForceChangeState(UStateBase* _newState);
 
-	void Stop();
+	virtual void Stop();
 
 	void Reset(UStateBase* _initialState);
 
@@ -102,12 +102,15 @@ public:
 
 	void Start();
 
+protected:
+	const TArray<TObjectPtr<UStateBase>>& GetRegisteredStates() const { return m_states; }
+
 private:
 
 	UPROPERTY()
 	TArray<TObjectPtr<UStateBase>> m_states;	   //登録ステート
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly, Category = "State Machine", meta = (DisplayName = "State Classes", AllowAbstract = "false"))
 	TArray<TSubclassOf<UStateBase>> m_stateClasses; //登録するステートクラスズ
 
 	UPROPERTY()
