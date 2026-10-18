@@ -7,6 +7,14 @@
 
 `GetPlayerStatus()` は現在のステートを参照します。既存の `EPlayerStatus` の名前・順序と、プレイヤーの BP 向け取得関数は維持しています。以前の `m_status` は **Initial Player Status** として初期状態の指定にだけ使います。
 
+## ソースファイルの配置
+
+各ステートはクラスごとに個別の `.h` / `.cpp` に分けています。
+ヘッダーは `Source/StealthAction/Public/State/Player/`、実装は `Source/StealthAction/Private/State/Player/` にあります。
+例えば Idle は `PlayerIdleState.h` / `PlayerIdleState.cpp`、Attack は `PlayerAttackState.h` / `PlayerAttackState.cpp` です。
+移動系の共通クラスも `PlayerLocomotionState.h` / `PlayerLocomotionState.cpp` に独立しています。
+クラス名と BP 登録方式は変わりません。C++ から参照する場合は、使用するクラスのヘッダーを直接 include してください。
+
 ## エディタで必要な設定
 
 新しい C++ クラスをビルドしてから、次を設定してください。このクラウド環境には UE がないため、既存の `.uasset` の編集・BP 作成・コンパイルは行っていません。**ソース変更だけでは移行は完了せず、この BP 設定が必要です。**
