@@ -2,6 +2,7 @@
 
 
 #include "Checkpoint/Checkpoint.h"
+#include "Engine/World.h"
 #include "Components/BoxComponent.h"
 #include "Checkpoint/CheckpointManager.h"
 
@@ -41,7 +42,7 @@ void ACheckpoint::BeginPlay()
 	Super::BeginPlay();
 
 	//チェックポイントマネージャーに登録
-	UCheckpointManager* checkpointManager = GetWorld()->GetSubsystem<UCheckpointManager>();
+	UCheckpointManager* checkpointManager = (GetWorld() ? GetWorld()->GetSubsystem<UCheckpointManager>() : nullptr);
 	if (checkpointManager)
 	{
 		checkpointManager->AddCheckpoint(this);
@@ -49,10 +50,10 @@ void ACheckpoint::BeginPlay()
 
 	m_checkpointInfo.Location = GetActorLocation();
 	
-	if (m_checkpointInfo.Index == checkpointManager->GetCurrentCheckpointIndex())
+	if (IsValid(checkpointManager) && m_checkpointInfo.Index == checkpointManager->GetCurrentCheckpointIndex())
 	{
 		m_checkpointInfo.bHasCheckpoint = false;
-		m_pCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		if (IsValid(m_pCollisionBox)) { m_pCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
 
 	}
 }
@@ -93,7 +94,7 @@ void ACheckpoint::OnBeginOverlap(
 	//(プレイヤー判定はActorのタグで行う)
 	if (OtherActor && OtherActor->ActorHasTag(FName("Player")))
 	{
-		UCheckpointManager* checkpointManager = GetWorld()->GetSubsystem<UCheckpointManager>();
+		UCheckpointManager* checkpointManager = (GetWorld() ? GetWorld()->GetSubsystem<UCheckpointManager>() : nullptr);
 		if (checkpointManager)
 		{
 			checkpointManager->SetCurrentCheckpointIndex(m_checkpointInfo.Index);
@@ -109,5 +110,8 @@ void ACheckpoint::OnBeginOverlap(
 void ACheckpoint::SetHasCheckpoint(const bool _bHas)
 {
 	m_checkpointInfo.bHasCheckpoint = _bHas;
-	if (!_bHas) { m_pCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
+	if (!_bHas && IsValid(m_pCollisionBox))
+	{
+		m_pCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }

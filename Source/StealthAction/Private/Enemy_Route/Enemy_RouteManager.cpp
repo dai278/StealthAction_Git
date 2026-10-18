@@ -47,6 +47,8 @@ TArray<AActor*> UEnemy_RouteManager::AddRoute(int _routeNum, bool _randomRouteCh
 	{
 		AEnemy_PatrolRoute* Enemy_PatrolRoute = Cast<AEnemy_PatrolRoute>(m_pEnemy_PatrolRoute[i]);
 
+		if (!IsValid(Enemy_PatrolRoute)) { continue; }
+
 		//ƒ‹[ƒg‚ÌŒˆ’è
 		if (_routeNum == Enemy_PatrolRoute->m_route_Num)
 		{
@@ -70,7 +72,9 @@ TArray<AActor*> UEnemy_RouteManager::AddRoute(int _routeNum, bool _randomRouteCh
 		for (int i = 0; i < Index; ++i)
 		{
 			AEnemy_PatrolRoute* Route = Cast<AEnemy_PatrolRoute>(Enemy_Route[i]);
+			if (!IsValid(Route)) { continue; }
 			int Num = Route->m_route_ActionOrder - 1;
+			if (!m_pEnemy_PatrolRoute_Keep.IsValidIndex(Num)) { continue; }
 			//if(Num == )
 			m_pEnemy_PatrolRoute_Keep[Num] = Enemy_Route[i];
 		}

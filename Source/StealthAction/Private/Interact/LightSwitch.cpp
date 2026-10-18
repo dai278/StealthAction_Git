@@ -1,4 +1,5 @@
 #include "Interact/LightSwitch.h"
+#include "Engine/World.h"
 
 #include "Light/ExtendedSpotLightManager.h"
 
@@ -37,7 +38,7 @@ void ALightSwitch::Tick(float DeltaTime)
 void ALightSwitch::Interact(AActor* _interactOwner)
 {
 	if (m_indexs.Num()<=0) { return; }
-	UExtendedSpotLightManager* lightMng = GetWorld()->GetSubsystem<UExtendedSpotLightManager>();
+	UExtendedSpotLightManager* lightMng = (GetWorld() ? GetWorld()->GetSubsystem<UExtendedSpotLightManager>() : nullptr);
 	if (lightMng)
 	{
 		for (int32 index : m_indexs)

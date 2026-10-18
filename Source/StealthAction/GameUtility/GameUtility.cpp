@@ -12,7 +12,7 @@
 
 //タグからActorを取得
 AActor* CGameUtility::GetActorFromTag(AActor* _pOwnerActor, const FName& _tag) {
-	if (_pOwnerActor == nullptr) {
+	if (!IsValid(_pOwnerActor) || !_pOwnerActor->GetWorld()) {
 		return nullptr;
 	}
 
@@ -29,7 +29,7 @@ AActor* CGameUtility::GetActorFromTag(AActor* _pOwnerActor, const FName& _tag) {
 		{
 			AActor* pActor = Cast<AActor>(actors[i]);
 			//タグ名で判別
-			if (pActor->ActorHasTag(_tag)) {
+			if (IsValid(pActor) && pActor->ActorHasTag(_tag)) {
 				return pActor;
 			}
 		}

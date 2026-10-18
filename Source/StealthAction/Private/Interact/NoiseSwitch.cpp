@@ -2,6 +2,7 @@
 
 
 #include "Interact/NoiseSwitch.h"
+#include "Engine/World.h"
 #include "Interact/NoiseObjectMng.h"
 
 //----------------------------------------------------------
@@ -42,7 +43,7 @@ void ANoiseSwitch::Interact(AActor* _interactOwner)
 
 	m_bIsOn = true;
 	//騒音を出すオブジェクトに通知
-	UNoiseObjectMng* noiseMng = GetWorld()->GetSubsystem<UNoiseObjectMng>();
+	UNoiseObjectMng* noiseMng = (GetWorld() ? GetWorld()->GetSubsystem<UNoiseObjectMng>() : nullptr);
 
 	if (noiseMng)
 	{

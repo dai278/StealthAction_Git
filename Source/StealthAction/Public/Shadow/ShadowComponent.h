@@ -102,7 +102,7 @@ protected:
 
 	float m_length;                         //描画する長さ
 
-	const AExtendedSpotLight* m_pLight;    //参照するライトのアドレス
+	TWeakObjectPtr<const AExtendedSpotLight> m_pLight;    //参照するライトのアドレス
 
 	float m_collisionScaleZ;
 

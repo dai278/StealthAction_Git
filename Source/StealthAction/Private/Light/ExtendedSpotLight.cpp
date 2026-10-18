@@ -2,6 +2,7 @@
 
 
 #include "Light/ExtendedSpotLight.h"
+#include "Engine/World.h"
 #include "Components/SpotLightComponent.h"
 
 #include "Light/ExtendedSpotLightManager.h"
@@ -63,7 +64,14 @@ void AExtendedSpotLight::BeginPlay()
 	//PrimaryActorTick.bCanEverTick = m_bCanEverTick;
 
 	//マネージャーに登録
-	GetWorld()->GetSubsystem<UExtendedSpotLightManager>()->AddLight(this);
+	if (UWorld* World = GetWorld())
+	{
+		if (UExtendedSpotLightManager* Manager = World->GetSubsystem<UExtendedSpotLightManager>())
+		{
+			Manager->AddLight(this);
+		}
+	}
+	if (!IsValid(m_pSpotLight)) { return; }
 	//インデックスが登録されていなければ登録しない
 	if(m_lightIndex==-1){ m_pSpotLight->SetCastShadows(false); }
 	//影を出す
@@ -80,6 +88,8 @@ void AExtendedSpotLight::BeginPlay()
 void AExtendedSpotLight::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (!IsValid(m_pSpotLight)) { return; }
+
 
 
 	//// スポットライトの位置（ワールド座標）
@@ -162,6 +172,8 @@ int32 AExtendedSpotLight::GetIndex()const
 //------------------------------------------
 FVector AExtendedSpotLight::GetLightLocation()const
 {
+	if (!IsValid(m_pSpotLight)) { return GetActorLocation(); }
+
 	return m_pSpotLight->GetComponentLocation();
 }
 
@@ -170,6 +182,8 @@ FVector AExtendedSpotLight::GetLightLocation()const
 //-----------------------------------
 FVector AExtendedSpotLight::GetLightForwardVector()const
 {
+	if (!IsValid(m_pSpotLight)) { return GetActorForwardVector(); }
+
 	return m_pSpotLight->GetForwardVector();
 }
 
@@ -180,6 +194,8 @@ FVector AExtendedSpotLight::GetLightForwardVector()const
 //---------------------------------
 float AExtendedSpotLight::GetLightInnerAngle()const
 {
+	if (!IsValid(m_pSpotLight)) { return 0.f; }
+
 	return m_pSpotLight->InnerConeAngle;
 }
 
@@ -188,6 +204,8 @@ float AExtendedSpotLight::GetLightInnerAngle()const
 //----------------------------------
 float AExtendedSpotLight::GetLightOuterAngle()const
 {
+	if (!IsValid(m_pSpotLight)) { return 0.f; }
+
 	return m_pSpotLight->OuterConeAngle;
 }
 
@@ -196,6 +214,8 @@ float AExtendedSpotLight::GetLightOuterAngle()const
 //-----------------------------------
 float AExtendedSpotLight::GetLightLength()const
 {
+	if (!IsValid(m_pSpotLight)) { return 0.f; }
+
 	return m_pSpotLight->AttenuationRadius;
 }
 
@@ -204,6 +224,8 @@ float AExtendedSpotLight::GetLightLength()const
 //----------------------------------
 void AExtendedSpotLight::SetVisibility(const bool isVisibility)
 {
+	if (!IsValid(m_pSpotLight)) { return; }
+
 	m_pSpotLight->SetVisibility(isVisibility);
 }
 
@@ -221,6 +243,10 @@ bool AExtendedSpotLight::IsMove()const
 //------------------------------
 bool AExtendedSpotLight::IsHit(const FVector& _pos)const
 {
+	if (!GetWorld()) { return false; }
+
+	if (!IsValid(m_pSpotLight)) { return false; }
+
 	if (!m_bIsOn) { return false; }
 
 	FVector lightPos = m_pSpotLight->GetComponentLocation();
@@ -283,6 +309,8 @@ bool AExtendedSpotLight::IsHit(const FVector& _pos)const
 //-----------------------------------------------------
 void AExtendedSpotLight::TurnOn()
 {
+	if (!IsValid(m_pSpotLight)) { return; }
+
 	if (m_canItBeTurned) {
 		m_pSpotLight->SetVisibility(true);
 		m_bIsOn = true;
@@ -299,6 +327,8 @@ void AExtendedSpotLight::TurnOn()
 //-----------------------------------------------------
 void AExtendedSpotLight::TurnOff()
 {
+	if (!IsValid(m_pSpotLight)) { return; }
+
 	if (m_canItBeTurned) {
 		m_pSpotLight->SetVisibility(false);
 		m_bIsOn = false;

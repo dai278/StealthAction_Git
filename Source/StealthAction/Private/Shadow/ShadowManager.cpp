@@ -5,6 +5,7 @@
 
 
 #include "Shadow\ShadowManager.h"
+#include "Engine/World.h"
 #include "Shadow/ShadowComponent.h"
 #include "Light/ExtendedSpotLightManager.h"
 #include "Light//ExtendedSpotLight.h"
@@ -23,6 +24,8 @@ UShadowManager::UShadowManager()
 //----------------------------------------
 void UShadowManager::OnWorldBeginPlay(UWorld&)
 {
+	if (!GetWorld()) { return; }
+
 	//配列を空にして置く
 	for (int i = 0;i < m_shadows.Num();++i)
 	{
@@ -45,7 +48,7 @@ void UShadowManager::OnWorldBeginPlay(UWorld&)
 void UShadowManager::AllLinkLights()
 {
 	//ライトマネージャーのアドレス
-	UExtendedSpotLightManager* pLightMng = GetWorld()->GetSubsystem<UExtendedSpotLightManager>();
+	UExtendedSpotLightManager* pLightMng = (GetWorld() ? GetWorld()->GetSubsystem<UExtendedSpotLightManager>() : nullptr);
 
 	//nullチェック
 	if (!pLightMng) { return; }
@@ -56,9 +59,9 @@ void UShadowManager::AllLinkLights()
 		{
 			//ライトの取得
 			AExtendedSpotLight* light = pLightMng->GetLight(i);
-			if (light) {
+			if (IsValid(light) && m_shadows[i][n].IsValid()) {
 				//影にライトを登録
-				m_shadows[i][n]->SetLight(light);
+				m_shadows[i][n].Get()->SetLight(light);
 			}
 		}
 	}
@@ -73,8 +76,10 @@ void UShadowManager::AllLinkLights()
 //------------------------------------
 void UShadowManager::AddShadowComponent(UShadowComponent* _pShadowComponent)
 {
+	if (!IsValid(_pShadowComponent)) { return; }
+
 	//lightIndexが-1（BP上で未設定なら処理しない
-	if (_pShadowComponent->GetLightIndex() == -1)
+	if (_pShadowComponent->GetLightIndex() < 0)
 	{
 		//UE_LOG(LogTemp, Display, TEXT("ライトIndexが設定されていません：ShadowManager:AddShadowComponent"));
 		return;
@@ -97,7 +102,7 @@ void UShadowManager::AddShadowComponent(UShadowComponent* _pShadowComponent)
 		//ライトインデックスの数までTArrayを増やし
 		for (int32 i = 0;i < abs(difference);++i)
 		{
-			m_shadows.Add(TArray<UShadowComponent*>());
+			m_shadows.Add(TArray<TWeakObjectPtr<UShadowComponent>>());
 		}
 		//ライトインデックスに追加
 		m_shadows[lightIndex].Add(_pShadowComponent);

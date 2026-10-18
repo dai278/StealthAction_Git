@@ -37,5 +37,5 @@ public:
 
 private:
 	//影を管理する二重配列ライトインデックスごとに分ける
-	TArray<TArray<UShadowComponent*>> m_shadows;
+	TArray<TArray<TWeakObjectPtr<UShadowComponent>>> m_shadows;
 };

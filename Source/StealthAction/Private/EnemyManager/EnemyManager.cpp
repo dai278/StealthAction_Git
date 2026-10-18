@@ -2,6 +2,8 @@
 
 
 #include "EnemyManager/EnemyManager.h"
+#include "Engine/World.h"
+#include "Engine/GameInstance.h"
 #include "Enemy/EnemyBase.h"
 #include "GameInstance/PlayDataGameInstanceSubsystem.h"
 #include "Checkpoint/CheckpointManager.h"
@@ -20,6 +22,8 @@ UEnemyManager::UEnemyManager()
 //------------------------------------------------
 void UEnemyManager::OnWorldBeginPlay(UWorld& )
 {
+	if (!GetWorld()) { return; }
+
 	//インゲームレベルでなければ処理しない
 	FString name = UGameplayStatics::GetCurrentLevelName(this, /*bRemovePrefix=*/true);
 	if (name == "Title") { return; }
@@ -30,7 +34,7 @@ void UEnemyManager::OnWorldBeginPlay(UWorld& )
 	//エネミー配列を空に
 	m_pAllEnemies.Empty();
 	//チェックポイントマネージャ―に関数を登録
-	UCheckpointManager* pCheckMng = GetWorld()->GetSubsystem<UCheckpointManager>();
+	UCheckpointManager* pCheckMng = (GetWorld() ? GetWorld()->GetSubsystem<UCheckpointManager>() : nullptr);
 	if (pCheckMng)
 	{
 		pCheckMng->AddOnOverlapCheckpointEvent(CreateOverlapCheckpointEvent(UEnemyManager::RegisterEnemyInfoAllToPlayData));
@@ -46,7 +50,8 @@ void UEnemyManager::OnWorldBeginPlay(UWorld& )
 //------------------------------------------------
 void UEnemyManager::RegisterEnemy(AEnemyBase* _pEnemy)
 {
-	m_pAllEnemies.Add(_pEnemy);
+	if (!IsValid(_pEnemy)) { return; }
+	m_pAllEnemies.AddUnique(_pEnemy);
 	if (!_pEnemy)
 	{
 		//UE_LOG(LogTemp, Display, TEXT("Enemy->null"));
@@ -103,7 +108,7 @@ void UEnemyManager::RegisterEnemyInfoAllToPlayData()
 	if (name == "GameClear") { return; }
 
 	//プレイデータの取得
-	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
+	UPlayDataGameInstanceSubsystem* pPlayData = (GetWorld() && GetWorld()->GetGameInstance() ? GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>() : nullptr);
 	if (!pPlayData)
 	{
 		//UE_LOG(LogTemp, Display, TEXT("UPlayDataGameInstanceSubsystem Genereted Miss"));
@@ -114,7 +119,7 @@ void UEnemyManager::RegisterEnemyInfoAllToPlayData()
 	//全エネミーからenemyInfoを取得
 	for (AEnemyBase* pEnemy : m_pAllEnemies)
 	{
-		enemyInfos.Add(pEnemy->GetEnemyInfo());
+		if (IsValid(pEnemy)) { enemyInfos.Add(pEnemy->GetEnemyInfo()); }
 	}
 	//プレイデータに記録
 	pPlayData->SetEnemyInfo(enemyInfos);
@@ -178,7 +183,7 @@ AEnemyBase* UEnemyManager::GetNearestEnemy(const FVector& _pos,  const float& _m
 void UEnemyManager::SetEnemyInfoAll()
 {
 	//プレイデータの取得
-	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
+	UPlayDataGameInstanceSubsystem* pPlayData = (GetWorld() && GetWorld()->GetGameInstance() ? GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>() : nullptr);
 	if (!pPlayData) { return; }
 	if (!pPlayData->IsIsContinued()) { 
 		return;
@@ -194,6 +199,7 @@ void UEnemyManager::SetEnemyInfoAll()
 	//インデックスが同じエネミーに情報設定
 	for (int i = 0;i < m_pAllEnemies.Num();++i)
 	{
+		if (!IsValid(m_pAllEnemies[i])) { continue; }
 		for (int n = 0;n < info.Num();++n)
 		{
 			if (m_pAllEnemies[i]->GetEnemyInfo().index == info[n].index)

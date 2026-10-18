@@ -57,9 +57,11 @@ AInteract::AInteract()
 void AInteract::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!IsValid(m_pCollision)) { return; }
+
 
 	//UIは初期は非表示
-	m_intractUI->SetVisibility(false);
+	if (IsValid(m_intractUI)) { m_intractUI->SetVisibility(false); }
 	
 	//コリジョンのオーバーラップイベント登録
 	m_pCollision->OnComponentBeginOverlap.AddDynamic(this, &AInteract::OnOverlapBegin);
@@ -98,12 +100,14 @@ FVector AInteract::GetInteractPosition(const AActor* _actor)
 //-----------------------------------------------------
 void AInteract::UpdateVisible()
 {
+	if (!IsValid(m_pPlayer) || !IsValid(m_intractUI)) { return; }
+
 	FVector vec = { GetActorLocation() - m_pPlayer->GetActorLocation()};
 	float lenght = vec.Length();
 
 	if (lenght > m_visibleUILenght)
 	{
-		m_intractUI->SetVisibility(false);
+		if (IsValid(m_intractUI)) { m_intractUI->SetVisibility(false); }
 	}
 	else
 	{
@@ -122,7 +126,7 @@ void AInteract::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	bool bFromSweep,
 	const FHitResult& SweepResult) 
 {
-	m_intractUI->SetVisibility(true);
+	if (IsValid(m_intractUI)) { m_intractUI->SetVisibility(true); }
 }
 
 
@@ -131,7 +135,7 @@ void AInteract::OnOverlapEnd(UPrimitiveComponent* OverlappedComp,
 	UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex) {
 
-	m_intractUI->SetVisibility(false);
+	if (IsValid(m_intractUI)) { m_intractUI->SetVisibility(false); }
 }
 
 
@@ -139,7 +143,7 @@ void AInteract::OnOverlapEnd(UPrimitiveComponent* OverlappedComp,
 FCameraFocusData AInteract::GetCameraFocusData_Implementation() const
 {
 
-	return FocusProviderComp ? FocusProviderComp->GetCameraFocusData() : FCameraFocusData{};
+	return IsValid(FocusProviderComp) ? FocusProviderComp->GetCameraFocusData() : FCameraFocusData{};
 
 }
 
@@ -147,13 +151,14 @@ FCameraFocusData AInteract::GetCameraFocusData_Implementation() const
 //カメラフォーカス開始処理
 void AInteract::CameraFocusStart(AActor* OtherActor)
 {
-	if (!OtherActor || !OtherActor->ActorHasTag(TEXT("Player"))) { return; }
+	if (!IsValid(OtherActor) || !IsValid(OtherActor)->ActorHasTag(TEXT("Player"))) { return; }
 
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+	if (!IsValid(Player) || !IsValid(FocusProviderComp)) { return; }
 
 	FCameraFocusData FocusData = FocusProviderComp->GetCameraFocusData();
 
-	if (!FocusData.FocusCamera) { return; }
+	if (!IsValid(FocusData.FocusCamera)) { return; }
 
 	Player->StartCameraFocus(this, FocusData.BlendTime);
 

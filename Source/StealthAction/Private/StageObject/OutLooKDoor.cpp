@@ -2,6 +2,7 @@
 
 
 #include "StageObject/OutLooKDoor.h"
+#include "Engine/World.h"
 #include "KeyItemSubsystem.h"
 #include "ItemKey.h"
 
@@ -23,6 +24,8 @@ AOutLooKDoor::AOutLooKDoor()
 void AOutLooKDoor::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!GetWorld()) { return; }
+
 
 
 	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &AOutLooKDoor::OnFrastTick);
@@ -65,13 +68,20 @@ void AOutLooKDoor::CloseDoor()
 //チック1フレーム目にのみ呼ばれる処理
 void AOutLooKDoor::OnFrastTick()
 {
-	UKeyItemSubsystem* KeyItemSubsystem = GetWorld()->GetSubsystem<UKeyItemSubsystem>();
+	UKeyItemSubsystem* KeyItemSubsystem = (GetWorld() ? GetWorld()->GetSubsystem<UKeyItemSubsystem>() : nullptr);
 
 	if (KeyItemSubsystem)
 	{
 		AItemKey* key = KeyItemSubsystem->GetKeyItem();
 
-		key->SetOnGetKeyItemCallback(std::bind(&AOutLooKDoor::CloseDoor, this));
+		if (IsValid(key))
+		{
+			TWeakObjectPtr<AOutLooKDoor> WeakDoor(this);
+			key->SetOnGetKeyItemCallback([WeakDoor]()
+			{
+				if (WeakDoor.IsValid()) { WeakDoor->CloseDoor(); }
+			});
+		}
 
 		//チックしない
 		SetActorTickEnabled(false);

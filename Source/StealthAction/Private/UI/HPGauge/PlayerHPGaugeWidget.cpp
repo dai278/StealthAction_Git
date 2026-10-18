@@ -16,7 +16,7 @@ void UPlayerHPGaugeWidget::NativeConstruct()
 		UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)
 	);
 
-	if (!PlayerCharacter)
+	if (!IsValid(PlayerCharacter))
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter not found"));
 		return;
@@ -41,7 +41,7 @@ void UPlayerHPGaugeWidget::NativeTick(
 
 void UPlayerHPGaugeWidget::UpdateHP()
 {
-	if (!PlayerCharacter || !HPProgressBar || MaxHP <= 0)
+	if (!IsValid(PlayerCharacter) || !IsValid(HPProgressBar) || MaxHP <= 0)
 	{
 		return;
 	}

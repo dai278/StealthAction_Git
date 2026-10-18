@@ -17,12 +17,12 @@ void AEnemy_BulletStorage_1::BeginPlay()
     Super::BeginPlay();
 
     UWorld* World = GetWorld();
-    if (!World) return;
+    if (!World || !BulletClass) return;
 
     for (int i = 0; i < BulletStock; i++)
     {
         AEnemy_Bullet_1* Bullet = World->SpawnActor<AEnemy_Bullet_1>(BulletClass);
-        if (!Bullet) continue;
+        if (!IsValid(Bullet)) continue;
 
         Bullet->InvisibleBullet();
         BulletPool.Add(Bullet);
@@ -34,7 +34,7 @@ AEnemy_Bullet_1* AEnemy_BulletStorage_1::GetBullet()
     for (int i = 0; i < BulletPool.Num(); i++)
     {
         AEnemy_Bullet_1* Bullet = BulletPool[i];
-        if (Bullet && Bullet->bHidden)
+        if (IsValid(Bullet) && Bullet->bHidden)
         {
             return Bullet;
         }

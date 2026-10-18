@@ -55,6 +55,7 @@ public:
 
 private:
 
+	UPROPERTY(Transient)
 	TArray<ACheckpoint*> m_checkpoints;//チェックポイントの配列
 	
 	int32 m_currentCheckpointIndex;//現在のチェックポイントインデックス

@@ -2,6 +2,7 @@
 
 
 #include "Noise/NoiseEmitterComponent.h"
+#include "Engine/World.h"
 #include "Noise/NoiseManager.h"
 
 // Sets default values for this component's properties
@@ -37,7 +38,7 @@ void UNoiseEmitterComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 void UNoiseEmitterComponent::MakeNoise(const int& _volume, const FVector& _pos)
 {
 
-	UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
+	UNoiseManager* manager = (GetWorld() ? GetWorld()->GetSubsystem<UNoiseManager>() : nullptr);
 	if (!manager) { return; }
 
 	manager->MakeNoise(_volume, _pos);

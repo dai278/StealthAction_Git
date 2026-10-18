@@ -22,13 +22,17 @@ void UExtendedSpotLightManager::OnWorldBeginPlay(UWorld&)
 //-------------------------------------------
 void UExtendedSpotLightManager::AddLight(AExtendedSpotLight* _pLight)
 {
+	if (!IsValid(_pLight)) { return; }
+
 
 	if (!_pLight->IsShadowDrawLight()) { 
 		//-1なら敵ライト配列に追加
-			m_pEnemyLights.Add(_pLight);
+			m_pEnemyLights.AddUnique(_pLight);
 		return; 
 	}
 
+
+	if (_pLight->GetIndex() < 0) { return; }
 
 	//ライトを追加する要素数を特定
 	for (int i = 0;i < m_pLights.Num(); ++i)
@@ -38,7 +42,7 @@ void UExtendedSpotLightManager::AddLight(AExtendedSpotLight* _pLight)
 		if (_pLight->GetIndex() ==i)
 		{
 			//nullなら追加
-			if (m_pLights[i] == nullptr) {
+			if (!IsValid(m_pLights[i])) {
 				//TArrayにライトを追加
 				m_pLights[i]=_pLight;
 				return;
@@ -61,7 +65,10 @@ void UExtendedSpotLightManager::UnRegisterLight(AExtendedSpotLight* _pLight)
 {
 	if (!_pLight) { return; }
 	m_pEnemyLights.Remove(_pLight);
-	m_pLights.Remove(_pLight);
+	for (AExtendedSpotLight*& Light : m_pLights)
+	{
+		if (Light == _pLight) { Light = nullptr; }
+	}
 }
 
 
@@ -72,7 +79,7 @@ AExtendedSpotLight* UExtendedSpotLightManager::GetLight(const int32 _lightIndex)
 	//インデックスが有効範囲内ならそのインデックスのライトのアドレスを返す
 	if (m_pLights.Num() > _lightIndex&&_lightIndex>=0) {
 		
-		return m_pLights[_lightIndex];
+		return IsValid(m_pLights[_lightIndex]) ? m_pLights[_lightIndex] : nullptr;
 	}
 	else
 	{
@@ -90,14 +97,14 @@ bool UExtendedSpotLightManager::IsHitAllLight(const FVector& _pos)const
 {
 	for (int i = 0; i < m_pLights.Num(); ++i)
 	{
-		if (m_pLights[i]->IsHit(_pos))
+		if (IsValid(m_pLights[i]) && m_pLights[i]->IsHit(_pos))
 		{
 			return true;
 		}
 	}
 	for(int i = 0; i < m_pEnemyLights.Num(); ++i)
 	{
-		if (m_pEnemyLights[i]->IsHit(_pos))
+		if (IsValid(m_pEnemyLights[i]) && m_pEnemyLights[i]->IsHit(_pos))
 		{
 			return true;
 		}
@@ -113,7 +120,7 @@ bool UExtendedSpotLightManager::IsHitEnemyLight(const FVector& _pos)const
 {
 	for (int i = 0; i < m_pEnemyLights.Num(); ++i)
 	{
-		if (m_pEnemyLights[i] == nullptr) { return false; };
+		if (!IsValid(m_pEnemyLights[i])) { continue; }
 		
 		if (m_pEnemyLights[i]->IsHit(_pos))
 		{
@@ -130,7 +137,7 @@ bool UExtendedSpotLightManager::IsHitShadowDrawLight(const FVector& _pos)const
 {
 	for (int i = 0; i<m_pLights.Num(); ++i)
 	{
-		if (m_pLights[i]==nullptr) { continue; }
+		if (!IsValid(m_pLights[i])) { continue; }
 		if (m_pLights[i]->IsHit(_pos))
 		{
 			return true;
@@ -144,7 +151,7 @@ void UExtendedSpotLightManager::SwitchTurnLight(const int32& _index)
 {
 	for (AExtendedSpotLight* p : m_pEnemyLights)
 	{
-		if (p)
+		if (IsValid(p))
 		{
 			if (p->GetIndex() == _index)
 			{
@@ -155,7 +162,7 @@ void UExtendedSpotLightManager::SwitchTurnLight(const int32& _index)
 
 	for (AExtendedSpotLight* p : m_pLights)
 	{
-		if (p)
+		if (IsValid(p))
 		{
 			if (p->GetIndex() == _index)
 			{
@@ -171,7 +178,7 @@ void UExtendedSpotLightManager::OnRotateTargetAngleStop(const int32& _index)
 {
 	for (AExtendedSpotLight* p : m_pEnemyLights)
 	{
-		if (p)
+		if (IsValid(p))
 		{
 			if (p->GetIndex() == _index)
 			{
@@ -182,7 +189,7 @@ void UExtendedSpotLightManager::OnRotateTargetAngleStop(const int32& _index)
 
 	for (AExtendedSpotLight* p : m_pLights)
 	{
-		if (p)
+		if (IsValid(p))
 		{
 			if (p->GetIndex() == _index)
 			{

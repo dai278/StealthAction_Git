@@ -61,8 +61,12 @@ void AGoalActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Collision->OnComponentBeginOverlap.AddDynamic(this, &AGoalActor::OnOverlapBegin); 
-	GoalUI->SetWidgetSpace(EWidgetSpace::Screen); // ‰æ–Ê‚ÉŒÅ’è‚·‚é‚È‚ç
+
+	if (IsValid(Collision))
+	{
+		Collision->OnComponentBeginOverlap.AddDynamic(this, &AGoalActor::OnOverlapBegin);
+	}
+	if (IsValid(GoalUI)) { GoalUI->SetWidgetSpace(EWidgetSpace::Screen); }
 
 }
 
@@ -76,7 +80,7 @@ void AGoalActor::OnOverlapBegin(
 	const FHitResult& SweepResult
 )
 {
-	if (!OtherActor) return;
+	if (!IsValid(OtherActor)) return;
 
 	if (OtherActor->ActorHasTag(TEXT("Player")))
 	{

@@ -39,8 +39,10 @@ public:
 	void OnRotateTargetAngleStop(const int32& _index);
 protected:
 	//レベル上のライトを管理する
+	UPROPERTY(Transient)
 	TArray <AExtendedSpotLight*> m_pLights;
 	//敵のライト
+	UPROPERTY(Transient)
 	TArray <AExtendedSpotLight*> m_pEnemyLights;
 
 

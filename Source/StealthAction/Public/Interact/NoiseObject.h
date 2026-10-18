@@ -51,5 +51,6 @@ private:
 	bool m_bIsInDelay;
 
 	//音マネージャ―ポインタ
+	UPROPERTY(Transient)
 	UNoiseManager* m_pNoiseManager;
 };

@@ -34,5 +34,6 @@ public:
 	void MakeNoise(const int32& _noiseLevel, const FVector& _noiseLocation,const TArray<int32>& _index);
 
 private:
+	UPROPERTY(Transient)
 	TArray<ANoiseObject*> m_noiseObjects;
 };

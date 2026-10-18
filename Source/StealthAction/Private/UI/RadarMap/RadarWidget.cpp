@@ -61,10 +61,10 @@ int32 URadarWidget::NativePaint(
 	// プレイヤー取得
 	//===============================
 	APawn* PlayerPawn = GetOwningPlayerPawn();
-	if (!PlayerPawn) return LayerId;
+	if (!IsValid(PlayerPawn)) return LayerId;
 
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(PlayerPawn);
-	if (!PlayerCharacter) return LayerId;
+	if (!IsValid(PlayerCharacter)) return LayerId;
 
 	//===============================
 	// ★ 影潜り中はレーダー非表示
@@ -91,7 +91,7 @@ int32 URadarWidget::NativePaint(
 
 	for (AActor* Enemy : Enemies)
 	{
-		if (!Enemy) continue;
+		if (!IsValid(Enemy)) continue;
 
 		FVector Delta = Enemy->GetActorLocation() - PlayerLocation;
 		Delta.Z = 0.f;
@@ -152,7 +152,7 @@ int32 URadarWidget::NativePaint(
 
 	for (AActor* Item : Items)
 	{
-		if (!Item) continue;
+		if (!IsValid(Item)) continue;
 
 		FVector Delta = Item->GetActorLocation() - PlayerLocation;
 		Delta.Z = 0.f;
@@ -196,7 +196,7 @@ int32 URadarWidget::NativePaint(
 
 	for (AActor* Goal : Goals)
 	{
-		if (!Goal) continue;
+		if (!IsValid(Goal)) continue;
 
 		// 非表示なら描かない
 		if (Goal->IsHidden()) continue;

@@ -2,6 +2,7 @@
 
 
 #include "Objectives/ObjectiveManager.h"
+#include "Engine/World.h"
 #include "Objectives/ObjectivePoint.h"
 #include "Objectives/ObjectiveMarkerWidget.h"
 
@@ -31,7 +32,7 @@ void AObjectiveManager::BeginPlay()
                 GetWorld(),
                 MarkerWidgetClass);
 
-        if (MarkerWidget)
+        if (IsValid(MarkerWidget))
         {
             MarkerWidget->AddToViewport();
 
@@ -51,8 +52,8 @@ void AObjectiveManager::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if (!CurrentObjective ||
-        !MarkerWidget ||
+    if (!IsValid(CurrentObjective) ||
+        !IsValid(MarkerWidget) ||
         !bCanShowMarker)
     {
         return;
@@ -64,7 +65,7 @@ void AObjectiveManager::Tick(float DeltaTime)
     APawn* PlayerPawn =
         UGameplayStatics::GetPlayerPawn(this, 0);
 
-    if (!PC || !PlayerPawn)
+    if (!IsValid(PC) || !IsValid(PlayerPawn))
     {
         return;
     }
@@ -125,14 +126,14 @@ void AObjectiveManager::Tick(float DeltaTime)
 void AObjectiveManager::SetCurrentObjective(
     AObjectivePoint* NewObjective)
 {
-    if (CurrentObjective)
+    if (IsValid(CurrentObjective))
     {
         CurrentObjective->bIsActive = false;
     }
 
     CurrentObjective = NewObjective;
 
-    if (!CurrentObjective)
+    if (!IsValid(CurrentObjective))
     {
         HideMarker();
         return;
@@ -147,6 +148,8 @@ void AObjectiveManager::SetCurrentObjective(
 
 void AObjectiveManager::StartMarkerTimer()
 {
+	if (!GetWorld()) { return; }
+
     bCanShowMarker = false;
 
     GetWorld()->GetTimerManager().ClearTimer(
@@ -169,10 +172,12 @@ void AObjectiveManager::HideMarker()
 {
     bCanShowMarker = false;
 
-    GetWorld()->GetTimerManager().ClearTimer(
-        MarkerTimerHandle);
+    if (UWorld* World = GetWorld())
+    {
+        World->GetTimerManager().ClearTimer(MarkerTimerHandle);
+    }
 
-    if (MarkerWidget)
+    if (IsValid(MarkerWidget))
     {
         MarkerWidget->SetVisibility(
             ESlateVisibility::Hidden);

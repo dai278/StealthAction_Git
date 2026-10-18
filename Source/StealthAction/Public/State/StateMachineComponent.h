@@ -58,6 +58,7 @@ public:
 	{
 		for (UStateBase* state : m_states)
 		{
+			if (!IsValid(state)) { continue; }
 			if (T* casted = Cast<T>(state))
 			{
 				return casted;
@@ -71,7 +72,7 @@ public:
 	template<typename T>
 	bool IsCurrentState() const
 	{
-		return m_currentState && m_currentState->template IsA<T>();
+		return IsValid(m_currentState) && m_currentState->template IsA<T>();
 	}
 
 	//ステート取得(Tag版)
@@ -80,7 +81,7 @@ public:
 	UStateBase* GetStateBySubClass(TSubclassOf<UStateBase> TargetClass);
 
 	//現在ステート取得
-	UStateBase* GetCurrentState() const { return m_currentState; }
+	UStateBase* GetCurrentState() const { return IsValid(m_currentState) ? m_currentState.Get() : nullptr; }
 
 	//ステートチェンジ
 	bool ChangeState(UStateBase* _newState);

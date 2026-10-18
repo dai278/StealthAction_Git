@@ -63,6 +63,8 @@ void ASeeingThroughShadowActor::BeginPlay()
 void ASeeingThroughShadowActor::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+	if (!IsValid(m_pMesh)) { return; }
+
     
     if (m_timeCnt > 0) {
         // “§‰ßŽžŠÔƒJƒEƒ“ƒg‚ðã‚°‚é

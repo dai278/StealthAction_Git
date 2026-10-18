@@ -3,6 +3,7 @@
 
 //インクルード
 #include "ItemKey.h"
+#include "Engine/World.h"
 #include "GoalActor.h"
 #include "StealthAction/PlayerCharacter/Controller/MyPlayerController.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
@@ -31,7 +32,7 @@ void AItemKey::BeginPlay()
     Super::BeginPlay();
     
     // キーアイテムをワールドサブシステムに登録
-    UKeyItemSubsystem* KeyItemSubsystem = GetWorld()->GetSubsystem<UKeyItemSubsystem>();
+    UKeyItemSubsystem* KeyItemSubsystem = (GetWorld() ? GetWorld()->GetSubsystem<UKeyItemSubsystem>() : nullptr);
     if (KeyItemSubsystem)
     {
         KeyItemSubsystem->RegisterKeyItem(this);
@@ -42,12 +43,14 @@ void AItemKey::BeginPlay()
     }
 
 	// 初期状態で非表示にする場合はここで設定
-	KeyUI->SetVisibility(true);
+	if (IsValid(KeyUI)) { KeyUI->SetVisibility(true); }
 }
 
 void AItemKey::HandleOverlap(AActor* OtherActor)
 {
-	if (!OtherActor) return;
+	if (!GetWorld()) { return; }
+
+	if (!IsValid(OtherActor)) return;
 
 	//UE_LOG(LogTemp, Warning, TEXT("[]HandleOverlap called: %s"), *OtherActor->GetName());
 
@@ -84,7 +87,7 @@ void AItemKey::HandleOverlap(AActor* OtherActor)
             }
 
 			// キーアイテムUI表示
-            KeyUI->SetVisibility(false);
+            if (IsValid(KeyUI)) { KeyUI->SetVisibility(false); }
 
 			//カメラフォーカス開始
 			CameraFocusStart(OtherActor);

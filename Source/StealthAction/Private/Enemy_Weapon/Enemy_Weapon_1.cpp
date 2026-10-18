@@ -30,7 +30,7 @@ void AEnemy_Weapon_1::BeginPlay()
         //UE_LOG(LogTemp, Error, TEXT("Weapon BeginPlay: BulletStorage FOUND"));
     }
 
-    if (!m_bulletPool)
+    if (!IsValid(m_bulletPool))
     {
         //UE_LOG(LogTemp, Error, TEXT("Weapon BeginPlay: BulletStorage NOT FOUND"));
     }
@@ -46,12 +46,12 @@ void AEnemy_Weapon_1::BulletFire(float Time ,AActor* Caller)
         return;
     }
 
-    if (!m_bulletPool)
+    if (!IsValid(m_bulletPool))
     {
         return;
     }
     AEnemy_Bullet_1* Bullet = m_bulletPool->GetBullet();
-    if (!Bullet)
+    if (!IsValid(Bullet))
     {
         return;
     }

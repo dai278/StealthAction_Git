@@ -5,6 +5,7 @@
 
 
 #include "Shadow/ShadowComponent.h"
+#include "Engine/World.h"
 #include "Shadow/ShadowManager.h"
 #include "Light/ExtendedSpotLight.h"
 
@@ -92,15 +93,20 @@ void UShadowComponent::BeginPlay()
 	Super::BeginPlay();	
 
 	//影マネージャーに登録
-	GetWorld()->GetSubsystem<UShadowManager>()->AddShadowComponent(this);
+	if (UWorld* World = GetWorld())
+	{
+		if (UShadowManager* Manager = World->GetSubsystem<UShadowManager>())
+		{
+			Manager->AddShadowComponent(this);
+		}
+	}
 
 	//オーナーのZ軸スケールを取得
 	//Z軸はオーナーのスケールに依存しないようにする
 	//オーナを取得
 	AActor* owner = GetOwner();
 
-	UStaticMeshComponent* ownerMesh = owner->FindComponentByClass<UStaticMeshComponent>();
-	if (!owner) return;
+	if (!IsValid(owner)) { return; }
 
 	//メッシュコリジョンのスケール
 	FVector newScale = GetComponentScale();
@@ -156,7 +162,7 @@ void UShadowComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 void UShadowComponent::UpdateTransform()
 {
 	AActor* owner = GetOwner();
-	if (!owner || !m_pLight)
+	if (!IsValid(owner) || !m_pLight.IsValid())
 	{
 		return;
 	}

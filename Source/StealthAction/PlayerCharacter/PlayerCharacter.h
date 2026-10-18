@@ -442,6 +442,7 @@ private:
 
 
 	//ƒJƒƒ‰ƒtƒH[ƒJƒX—p•Ï”
+	UPROPERTY(Transient)
 	AActor* m_pSaveCameraActor;//ƒtƒH[ƒJƒX‘O‚ÌƒJƒƒ‰ƒAƒNƒ^[•Û‘¶—p
 
 	UPROPERTY(EditAnywhere, Category = "CameraFocus")
@@ -494,11 +495,13 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	float m_initOffsetY;
 
+	UPROPERTY(Transient)
 	TArray <AActor*> m_hitActors;//Õ“Ë‘Îˆ‚ÌƒAƒhƒŒƒX
 
 	//ƒCƒ“ƒ^ƒ‰ƒNƒg‰Â‚ÈƒIƒuƒWƒFƒNƒg‘€ì”ÍˆÍ“à‚©
 	bool m_bHitIntteractObject;
 	//ƒCƒ“ƒ^ƒ‰ƒNƒg‚·‚éƒIƒuƒWƒFƒNƒg
+	UPROPERTY(Transient)
 	AInteract* m_hitInteractOb;
 	//ƒCƒ“ƒ^ƒ‰ƒNƒg‚Ì‚·‚éêŠ
 	FVector m_interactPos;
@@ -508,8 +511,10 @@ private:
 
 
 	//“úîà•ÏX“_
+	UPROPERTY(Transient)
 	UEnemyManager* m_pEnemyManager;//ƒGƒlƒ~[ƒ}ƒl[ƒWƒƒ[–ˆƒtƒŒ[ƒ€ŒŸõ‚Íd‚¢‚Ì‚Å
 	//Šg’£ƒXƒ|ƒbƒgƒ‰ƒCƒgƒ}ƒl[ƒWƒƒ[‚ÌƒAƒhƒŒƒX
+	UPROPERTY(Transient)
 	UExtendedSpotLightManager* m_pExtendedSpotLightManager;
 	
 	UPROPERTY(EditAnywhere, Category = "Enemy")

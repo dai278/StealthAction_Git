@@ -28,7 +28,7 @@ public:
 	EPlayerStatus GetPlayerStatus() const { return PlayerStatus; }
 
 	UFUNCTION(BlueprintPure, Category = "Player State")
-	APlayerCharacter* GetPlayer() const { return Player; }
+	APlayerCharacter* GetPlayer() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Player State")
 	bool RequestPlayerState(EPlayerStatus NewStatus);

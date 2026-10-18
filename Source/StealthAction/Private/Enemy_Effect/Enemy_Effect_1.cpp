@@ -1,6 +1,7 @@
 // Enemy_Effect_X.cpp
 
 #include "Enemy_Effect/Enemy_Effect_1.h"
+#include "Engine/World.h"
 #include "Components/BillboardComponent.h"
 #include "Components/SceneComponent.h"
 #include "TimerManager.h"
@@ -26,7 +27,10 @@ void AEnemy_Effect_1::ActivateEffect(const FVector& StartPos, AActor* TargetActo
     //UE_LOG(LogTemp, Warning, TEXT("EffectActiveX"));
 
     // 以前のタイマーが残っていると再利用時に事故る
-    GetWorldTimerManager().ClearTimer(DestroyTimer);
+    if (UWorld* TimerWorld = GetWorld())
+    {
+        TimerWorld->GetTimerManager().ClearTimer(DestroyTimer);
+    }
 
     // 位置
     SetActorLocation(StartPos);
@@ -44,7 +48,7 @@ void AEnemy_Effect_1::ActivateEffect(const FVector& StartPos, AActor* TargetActo
 
     // 表示（bHiddenを触らない）
     SetActorHiddenInGame(false);
-    if (Billboard)
+    if (IsValid(Billboard))
     {
         // Actor Hiddenだけで足りるならこの2行は削っても良い
         Billboard->SetHiddenInGame(false);
@@ -72,7 +76,10 @@ void AEnemy_Effect_1::ActivateEffect(const FVector& StartPos, AActor* TargetActo
 void AEnemy_Effect_1::InvisibleEffect()
 {
     // 再入対策：まずタイマーを止める
-    GetWorldTimerManager().ClearTimer(DestroyTimer);
+    if (UWorld* TimerWorld = GetWorld())
+    {
+        TimerWorld->GetTimerManager().ClearTimer(DestroyTimer);
+    }
 
     // Detach
     DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
@@ -80,7 +87,7 @@ void AEnemy_Effect_1::InvisibleEffect()
     // 非表示
     SetActorHiddenInGame(true);
 
-    if (Billboard)
+    if (IsValid(Billboard))
     {
         Billboard->SetVisibility(false, true);
         Billboard->SetHiddenInGame(true);

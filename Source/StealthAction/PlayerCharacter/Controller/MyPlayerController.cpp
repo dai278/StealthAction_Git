@@ -108,6 +108,7 @@ AMyPlayerController::AMyPlayerController()
 void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!GetWorld()) { return; }
 
 	ApplyIMC(EInputModeType::Player);
 
@@ -222,7 +223,7 @@ void AMyPlayerController::SetInputMode_Menu()
 // Get HUDWidget
 UHUDWidget* AMyPlayerController::GetHUDWidget()
 {
-	return HUDWidget;
+	return IsValid(HUDWidget) ? HUDWidget : nullptr;
 }
 
 // Set HUDWidget
@@ -236,6 +237,8 @@ void AMyPlayerController::SetHUDWidget(UHUDWidget* NewHUDWidget)
 // ============================
 void AMyPlayerController::ApplyIMC(EInputModeType NewMode)
 {
+	if (!IsValid(GetLocalPlayer())) { return; }
+
 	//UE_LOG(LogTemp, Warning, TEXT("ApplyIMC: %d"), (int32)NewMode);
 
 	if (CurrentInputMode == NewMode) return;

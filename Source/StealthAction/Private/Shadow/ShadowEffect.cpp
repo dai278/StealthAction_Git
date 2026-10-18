@@ -23,7 +23,7 @@ void UShadowEffect::NativeOnInitialized()
 	Super::NativeOnInitialized();
 
 	//プレイヤーキャラクターの取得
-	APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	APlayerCharacter* player = Cast<APlayerCharacter>(GetOwningPlayerPawn());
 	if (player)
 	{
 		SetVisibility(ESlateVisibility::Hidden);

@@ -36,7 +36,7 @@ void ABGMManagerBase::BeginPlay()
 	// 通常BGMセット＆再生
 	//==============================
 
-	if (NormalBGM)
+	if (IsValid(NormalBGM) && IsValid(NormalAudioComp))
 	{
 		NormalAudioComp->SetSound(NormalBGM);
 		NormalAudioComp->Play();
@@ -46,7 +46,7 @@ void ABGMManagerBase::BeginPlay()
 	// 戦闘BGMセット
 	//==============================
 
-	if (CombatBGM)
+	if (IsValid(CombatBGM) && IsValid(CombatAudioComp))
 	{
 		CombatAudioComp->SetSound(CombatBGM);
 	}
@@ -55,7 +55,7 @@ void ABGMManagerBase::BeginPlay()
 	// 戦闘開始SEセット
 	//==============================
 
-	if (CombatStartSE)
+	if (IsValid(CombatStartSE) && IsValid(CombatStartSEComp))
 	{
 		CombatStartSEComp->SetSound(CombatStartSE);
 	}
@@ -74,19 +74,19 @@ void ABGMManagerBase::OnCombatStart()
 	if (CombatEnemyCount == 1)
 	{
 		//通常BGM FadeOut
-		if (NormalAudioComp && NormalAudioComp->IsPlaying())
+		if (IsValid(NormalAudioComp) && NormalAudioComp->IsPlaying())
 		{
 			NormalAudioComp->FadeOut(1.0f, 0.0f);
 		}
 
 		//びっくり音再生（単発）
-		if (CombatStartSEComp && CombatStartSE)
+		if (IsValid(CombatStartSEComp) && CombatStartSE)
 		{
 			CombatStartSEComp->Play();
 		}
 
 		//戦闘BGM再生（同時）
-		if (CombatAudioComp && CombatBGM)
+		if (IsValid(CombatAudioComp) && CombatBGM)
 		{
 			if (!CombatAudioComp->IsPlaying())
 			{
@@ -105,7 +105,7 @@ void ABGMManagerBase::OnCombatStart()
 
 void ABGMManagerBase::StartCombatBGM()
 {
-	if (CombatAudioComp && CombatBGM)
+	if (IsValid(CombatAudioComp) && CombatBGM)
 	{
 		if (!CombatAudioComp->IsPlaying())
 		{
@@ -130,13 +130,13 @@ void ABGMManagerBase::OnCombatEnd()
 		CombatEnemyCount = 0;
 
 		//CombatBGM FadeOut
-		if (CombatAudioComp && CombatAudioComp->IsPlaying())
+		if (IsValid(CombatAudioComp) && CombatAudioComp->IsPlaying())
 		{
 			CombatAudioComp->FadeOut(1.0f, 0.0f);
 		}
 
 		//通常BGM再開
-		if (NormalAudioComp && NormalBGM)
+		if (IsValid(NormalAudioComp) && NormalBGM)
 		{
 			if (!NormalAudioComp->IsPlaying())
 			{

@@ -152,45 +152,17 @@ bool UStateMachine::ChangeState(UStateBase* _newState)
 //================================================
 bool UStateMachine::RandomChangeState_Exclude(TArray<UStateBase*> _excludeStates)
 {
-	TArray<UStateBase*> states = m_states;
-	//除外する
-	states.RemoveAll(
-		[&_excludeStates](UStateBase*& state)
-		{
-			return _excludeStates.Contains(state);
-		}
-	);
-
-	//ランダムの範囲
-	int randMax = states.Num()-1;	
-	int randIndex = -1;
-
-	//チェンジステートがダメだった場合の保険で回す回数
-	int maxTryCount = 3;
-	
-	for (int i = 0;i < maxTryCount;++i)
+	TArray<UStateBase*> states;
+	for (UStateBase* State : m_states)
 	{
-		//インデックスランダムで選ぶ
-		randIndex = FMath::RandRange(0, randMax);
-		//インデックスが有効か
-		if (!states.IsValidIndex(randIndex)) 
-		{ 		
-			continue; 
-		}
-		
-		//インデックスのステートが有効か
-		if (IsValid(states[randIndex]))
-		{
-			//ステートちぇんじできたら終了
-			if (ChangeState(states[randIndex])) 
-			{
-				return true;
-			}
-		} 
-
-		//変更できなかったので乱数の最大値下げるのととステートを配列から削除
-		randMax= FMath::Clamp(randMax, 0, randMax - 1);
-		states.Remove(states[randIndex]);
+		if (IsValid(State) && !_excludeStates.Contains(State)) { states.Add(State); }
+	}
+	for (int32 Attempt = 0; Attempt < 3 && !states.IsEmpty(); ++Attempt)
+	{
+		const int32 Index = FMath::RandRange(0, states.Num() - 1);
+		UStateBase* Candidate = states[Index];
+		states.RemoveAtSwap(Index);
+		if (IsValid(Candidate) && ChangeState(Candidate)) { return true; }
 	}
 
 		

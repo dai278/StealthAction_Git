@@ -201,7 +201,7 @@ AEnemyBase::AEnemyBase()
 	//
 	m_sword = CreateDefaultSubobject<USwordAttackComponent>(TEXT("Sword"));
 
-	if (m_sword)
+	if (IsValid(m_sword))
 	{
 		m_sword->SetupAttachment(GetMesh());
 		m_sword->SetRelativeLocation(FVector::ZeroVector);
@@ -223,6 +223,8 @@ AEnemyBase::AEnemyBase()
 void AEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!GetWorld() || !IsValid(GetCharacterMovement())) { return; }
+
 
 	// 入力を有効化（検証用）
 	EnableInput(GetWorld()->GetFirstPlayerController());
@@ -302,7 +304,7 @@ void AEnemyBase::BeginPlay()
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 360.f, 0.f);
 
 	//NULLチェック
-	UEnemy_RouteManager* RouteManager = GetWorld()->GetSubsystem<UEnemy_RouteManager>();
+	UEnemy_RouteManager* RouteManager = (GetWorld() ? GetWorld()->GetSubsystem<UEnemy_RouteManager>() : nullptr);
 	if (!RouteManager)
 	{
 		//UE_LOG(LogTemp, Error, TEXT("RouteManager is NULL"));
@@ -314,12 +316,12 @@ void AEnemyBase::BeginPlay()
 	}
 
 	//ポインタを入力
-	m_pEnemy_Route = GetWorld()->GetSubsystem<UEnemy_RouteManager>()->AddRoute(m_routeNum, m_randomRoute);
+	// RouteManager was checked above; do not query and dereference it again.
 
 	//コメントアウトなおしたら治ったよ
 	//AActor* Weapon = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemy_Weapon_1::StaticClass());
 	//m_pEnemy_Weapon = Cast<AEnemy_Weapon_1>(Weapon);
-	if (m_pEnemy_Weapon)
+	if (IsValid(m_pEnemy_Weapon))
 	{
 		m_pEnemy_Weapon->SetOwner(this);
 	}
@@ -342,7 +344,7 @@ void AEnemyBase::BeginPlay()
 		);
 	}
 
-	if (m_spotLightInstance) {
+	if (IsValid(m_spotLightInstance)) {
 
 		// 敵にアタッチ（敵のルートにくっつける）
 		m_spotLightInstance->AttachToComponent(
@@ -350,13 +352,13 @@ void AEnemyBase::BeginPlay()
 			FAttachmentTransformRules::KeepWorldTransform
 		);
 
-		FRotator ownerRot = GetOwner()->GetActorRotation();
+		FRotator ownerRot = IsValid(GetOwner()) ? GetOwner()->GetActorRotation() : GetActorRotation();
 		ownerRot += FRotator{ -130.,0.,0. };
 		m_spotLightInstance->SetActorRotation(ownerRot);
 		m_spotLightInstance->SetActorLocation(m_spotLightInstance->GetActorLocation() + FVector{ 0.,0.,50. });
 	}
 	//エネミーマネージャー登録
-	UEnemyManager* enemyManager = GetWorld()->GetSubsystem<UEnemyManager>();
+	UEnemyManager* enemyManager = (GetWorld() ? GetWorld()->GetSubsystem<UEnemyManager>() : nullptr);
 	if (enemyManager)
 	{
 		enemyManager->RegisterEnemy(this);
@@ -364,7 +366,7 @@ void AEnemyBase::BeginPlay()
 
 
 	//
-	if (m_sword)
+	if (IsValid(m_sword))
 	{
 		//
 		m_sword->ClearCollisionObjectType();
@@ -431,7 +433,7 @@ void AEnemyBase::BeginPlay()
 	//エフェクト用
 	m_effectPool = Cast<AEnemy_EffectManager>(UGameplayStatics::GetActorOfClass(this, AEnemy_EffectManager::StaticClass()));
 
-	if (m_effectPool)
+	if (IsValid(m_effectPool))
 	{
 		//UE_LOG(LogTemp, Error, TEXT("m_effectPool BeginPlay: BulletStorage FOUND"));
 	}
@@ -475,12 +477,14 @@ void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 void AEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (!GetWorld() || !IsValid(GetCharacterMovement())) { return; }
+
 
 	//UE_LOG(LogTemp, Warning, TEXT("m_currentChaseSpeed= %d"), m_stopCheck);
 
 	// ===== 検証用：Kキーで強制死亡 =====
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	if (PC && PC->WasInputKeyJustPressed(EKeys::K))
+	if (IsValid(PC) && PC->WasInputKeyJustPressed(EKeys::K))
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("[[]]K Pressed"));
 		m_enemyInfo.hp = 0;
@@ -502,6 +506,12 @@ void AEnemyBase::Tick(float DeltaTime)
 
 		return;
 	}
+
+	if (!IsValid(m_pPlayerChara))
+	{
+		m_pPlayerChara = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	}
+	if (!IsValid(m_pPlayerChara) || !IsValid(GetCapsuleComponent())) { return; }
 
 	//初めの処理
 	StartStateValues(DeltaTime);
@@ -528,7 +538,7 @@ void AEnemyBase::Tick(float DeltaTime)
 	//BGM状態監視
 	//=======================================
 
-	if (m_BGMManager)
+	if (IsValid(m_BGMManager))
 	{
 		bool bWasBattle =
 			(m_prevState == EEnemyStatus::Battle ||
@@ -623,6 +633,8 @@ void AEnemyBase::CaseDead(float _deltaTime)
 //------------------------------------------------------------------------------------------------------------
 void AEnemyBase::StartStateValues(float _deltaTime)
 {
+	if (!IsValid(m_pPlayerChara) || !IsValid(GetCapsuleComponent())) { return; }
+
 	if (m_enemyCurrentState == EEnemyStatus::Dead)
 	{
 		return;
@@ -728,7 +740,7 @@ void AEnemyBase::UpdateVisiblity(float _deltaTime)
 	if (isHit)
 	{
 		AActor* hitActor = HitCollision.GetActor();
-		if (hitActor) {
+		if (IsValid(hitActor)) {
 			//当たったコリジョンがプレイヤー以外だった場合
 			if (!hitActor->ActorHasTag("Player") && !hitActor->ActorHasTag("Interact"))
 			{
@@ -1364,7 +1376,7 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 			if (isHit)
 			{
 				AActor* hitActor = HitCollision.GetActor();
-				if (hitActor) {
+				if (IsValid(hitActor)) {
 					//壁,エネミーに当たらなかった場合
 					if (!hitActor->ActorHasTag("Wall") && !hitActor->ActorHasTag("Enemy"))
 					{
@@ -1402,7 +1414,7 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 				if (isHitXY)
 				{
 					AActor* hitActor = HitCollision.GetActor();
-					if (hitActor) {
+					if (IsValid(hitActor)) {
 						//壁、エネミーに当たらなかった場合
 						if (!hitActor->ActorHasTag("Wall") && !hitActor->ActorHasTag("Enemy"))
 						{
@@ -1456,6 +1468,10 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 		m_patrolTime += _deltaTime;
 
 		//行先の設定
+		if (!m_pEnemy_Route.IsValidIndex(m_routeCounter) || !IsValid(m_pEnemy_Route[m_routeCounter]))
+		{
+			return;
+		}
 		m_routePos = m_pEnemy_Route[m_routeCounter]->GetActorLocation();
 
 		FHitResult HitCollision;	//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
@@ -1467,7 +1483,7 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 		if (isHit)
 		{
 			AActor* hitActor = HitCollision.GetActor();
-			if (hitActor) {
+			if (IsValid(hitActor)) {
 				//エネミーに当たった場合
 				if (hitActor->ActorHasTag("Enemy"))
 				{
@@ -1797,7 +1813,7 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 		if ((m_visionCheck || m_battleShadowCheck)&&!m_attackCheck)
 		{
 			//武器を持っていたら
-			if (m_pEnemy_Weapon)
+			if (IsValid(m_pEnemy_Weapon))
 			{
 				//攻撃範囲に入ったら攻撃
 				if (m_attackDistance_Weapon > distance)
@@ -1815,7 +1831,7 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 					if (isHit)
 					{
 						AActor* hitActor = HitCollision.GetActor();
-						if (hitActor) {
+						if (IsValid(hitActor)) {
 							//当たったコリジョンがプレイヤーだった場合
 							if (hitActor->ActorHasTag("Player"))
 							{
@@ -1836,7 +1852,7 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 				//プレイヤーの一定距離に近くまで近づいたら
 				if (m_attackDistance >= distance)
 				{
-					if (m_sword)
+					if (IsValid(m_sword))
 					{
 						//レイを飛ばして敵とプレイヤーの間に遮蔽物がないかを確認
 						//コリジョン判定で無視する項目を指定（今回は敵キャラクター自身（this)）
@@ -1867,7 +1883,7 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 						if (isHit)
 						{
 							AActor* hitActor = HitCollision.GetActor();
-							if (hitActor) {
+							if (IsValid(hitActor)) {
 								//当たったコリジョンがプレイヤーだった場合
 								if (hitActor->ActorHasTag("Player"))
 								{
@@ -2022,7 +2038,7 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 			if (isHit)
 			{
 				AActor* hitActor = HitCollision.GetActor();
-				if (hitActor) {
+				if (IsValid(hitActor)) {
 					//当たったコリジョンが壁,エネミーだった場合
 					if (hitActor->ActorHasTag("Wall") || hitActor->ActorHasTag("Enemy"))
 					{
@@ -2055,7 +2071,7 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 		if (isHit)
 		{
 			AActor* hitActor = HitCollision.GetActor();
-			if (hitActor) {
+			if (IsValid(hitActor)) {
 				//当たったコリジョンが壁,エネミーだった場合
 				if (hitActor->ActorHasTag("Wall") || hitActor->ActorHasTag("Enemy"))
 				{
@@ -2349,7 +2365,7 @@ void AEnemyBase::UpdateAttack(float _deltaTime)
 
 	if (m_animationAttackTime > m_animationAttackTime_Limit)
 	{
-		if (m_sword)
+		if (IsValid(m_sword))
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Swing"));
 			m_sword->Swinging(false);
@@ -2360,7 +2376,7 @@ void AEnemyBase::UpdateAttack(float _deltaTime)
 	}
 
 	//武器を持っていたら
-	if (m_pEnemy_Weapon)
+	if (IsValid(m_pEnemy_Weapon))
 	{
 		m_pEnemy_Weapon->BulletFire(m_attackTime, this);
 		m_attackTime = 0;
@@ -2523,7 +2539,7 @@ void AEnemyBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		}
 
 
-		UExtendedSpotLightManager* lightMng = GetWorld()->GetSubsystem<UExtendedSpotLightManager>();
+		UExtendedSpotLightManager* lightMng = (GetWorld() ? GetWorld()->GetSubsystem<UExtendedSpotLightManager>() : nullptr);
 		if (lightMng) {
 			lightMng->UnRegisterLight(m_spotLightInstance);
 		}

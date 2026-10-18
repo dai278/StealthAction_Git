@@ -2,6 +2,7 @@
 
 
 #include "Interact/NoiseObject.h"
+#include "Engine/World.h"
 #include "Noise/NoiseManager.h"
 #include "Interact/NoiseObjectMng.h"
 
@@ -31,10 +32,10 @@ void ANoiseObject::BeginPlay()
 	Super::BeginPlay();
 
 	
-	m_pNoiseManager = GetWorld()->GetSubsystem<UNoiseManager>();
+	m_pNoiseManager = (GetWorld() ? GetWorld()->GetSubsystem<UNoiseManager>() : nullptr);
 	
 
-	UNoiseObjectMng* noiseObjMng = GetWorld()->GetSubsystem<UNoiseObjectMng>();
+	UNoiseObjectMng* noiseObjMng = (GetWorld() ? GetWorld()->GetSubsystem<UNoiseObjectMng>() : nullptr);
 	if (noiseObjMng)
 	{
 		noiseObjMng->RegisterNoiseObject(this);
@@ -47,6 +48,8 @@ void ANoiseObject::BeginPlay()
 void ANoiseObject::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (!IsValid(m_pNoiseManager)) { return; }
+
 	
 	//î≠ê∂íxâÑéûä‘íÜ
 	if(m_bIsInDelay)
@@ -97,7 +100,7 @@ void ANoiseObject::Interact(AActor* _interactOwner, bool& _isPose)
 //----------------------------------------------------------
 void ANoiseObject::MakeNoise()
 {
-	if (!m_pNoiseManager) { return; }
+	if (!IsValid(m_pNoiseManager)) { return; }
 
 	if (m_bIsMakingNoise || m_bIsInDelay) { return; }
 

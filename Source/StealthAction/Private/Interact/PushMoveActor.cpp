@@ -79,7 +79,7 @@ void APushMoveActor::Tick(float DeltaTime)
 //----------------------------------------------------------
 void APushMoveActor::Interact(AActor* _interactOwner)
 {
-	if (!_interactOwner) { return; }
+	if (!IsValid(_interactOwner)) { return; }
 	if (m_bIsMoving) { return; }
 	m_bIsMoving = true;
 	SetActorTickEnabled(true);

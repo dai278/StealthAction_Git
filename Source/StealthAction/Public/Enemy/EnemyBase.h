@@ -194,6 +194,7 @@ public:
 		UPROPERTY()
 		APlayerCharacter* m_pPlayerChara;	//プレイヤーキャラクターポインタ
 
+		UPROPERTY(Transient)
 		TArray<AEnemyBase*> m_pOtherEnemyBase;	//その他のエネミー_1ポインタ
 
 		void UnregisteredOtherEnemyBase(AEnemyBase* _UnregisterEnemy)
@@ -443,6 +444,7 @@ public:
 		FVector m_routePos;			//ルートの座標か？
 		int m_routeCounter;			//進行中のルート番号
 
+		UPROPERTY(Transient)
 		TArray<AActor*> m_pEnemy_Route;	//エネミーのルートポインタ
 
 

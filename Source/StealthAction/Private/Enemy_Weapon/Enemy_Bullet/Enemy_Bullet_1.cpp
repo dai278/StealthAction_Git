@@ -48,6 +48,8 @@ AEnemy_Bullet_1::AEnemy_Bullet_1()
 }
 void AEnemy_Bullet_1::ActivateBullet(const FVector& StartPos, const FVector& Direction, const FVector& UpDirection, const FVector& RightDirection)
 {
+	if (!GetWorld()) { return; }
+
     FVector randomVec[5] =
     {
         {Direction},
@@ -58,7 +60,7 @@ void AEnemy_Bullet_1::ActivateBullet(const FVector& StartPos, const FVector& Dir
     };
     int32 Random = FMath::RandRange(0, 4);
 
-    if (!Movement)
+    if (!IsValid(Movement))
     {
         //UE_LOG(LogTemp, Error, TEXT("ActivateBullet: Movement is NULL"));
         return;
@@ -83,7 +85,7 @@ void AEnemy_Bullet_1::ActivateBullet(const FVector& StartPos, const FVector& Dir
 void AEnemy_Bullet_1::InvisibleBullet()
 {
 
-    if (Movement)
+    if (IsValid(Movement))
     {
         Movement->StopMovementImmediately();
 
@@ -100,7 +102,7 @@ void AEnemy_Bullet_1::InvisibleBullet()
 
 void AEnemy_Bullet_1::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    if (!OtherActor || OtherActor == this || OtherActor == GetOwner())
+    if (!IsValid(OtherActor) || OtherActor == this || OtherActor == GetOwner())
         return;
 
     if (OtherActor->ActorHasTag("Player"))

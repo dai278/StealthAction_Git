@@ -40,6 +40,8 @@ AItemBase::AItemBase()
 void AItemBase::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!IsValid(Collision)) { return; }
+
 
 	Collision->OnComponentBeginOverlap.AddDynamic(
 		this,
@@ -73,13 +75,14 @@ void AItemBase::HandleOverlap(AActor* OtherActor)
 // カメラフォーカス開始処理
 void AItemBase::CameraFocusStart(AActor* OtherActor)
 {
-	if (!OtherActor || !OtherActor->ActorHasTag(TEXT("Player"))) { return; }
+	if (!IsValid(OtherActor) || !IsValid(OtherActor)->ActorHasTag(TEXT("Player"))) { return; }
 	
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+	if (!IsValid(Player) || !IsValid(FocusProviderComp)) { return; }
 	
 	FCameraFocusData FocusData = FocusProviderComp->GetCameraFocusData();
 	
-	if (!FocusData.FocusCamera) { return; }
+	if (!IsValid(FocusData.FocusCamera)) { return; }
 	
 	Player->StartCameraFocus(this, FocusData.BlendTime);
 }
@@ -88,6 +91,6 @@ void AItemBase::CameraFocusStart(AActor* OtherActor)
 FCameraFocusData AItemBase::GetCameraFocusData_Implementation() const
 {
 	
-	return FocusProviderComp ? FocusProviderComp->GetCameraFocusData() : FCameraFocusData{};
+	return IsValid(FocusProviderComp) ? FocusProviderComp->GetCameraFocusData() : FCameraFocusData{};
 	
 }

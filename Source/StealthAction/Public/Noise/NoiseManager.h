@@ -32,5 +32,6 @@ public:
 	void RemoveListener(UNoiseListenerComponent* _listener);
 
 private:
+	UPROPERTY(Transient)
 	TArray<UNoiseListenerComponent*> m_noiseListeners;
 };

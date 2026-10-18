@@ -24,7 +24,7 @@ USwordAttackComponent::USwordAttackComponent()
 	
 	//コリジョン生成
 	m_swordCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SwordCollision"));
-	if (!m_swordCollision) {
+	if (!IsValid(m_swordCollision)) {
 		////UE_LOG(LogTemp, Display, TEXT("剣コリジョン生成失敗"));
 	}
 	else
@@ -38,6 +38,8 @@ USwordAttackComponent::USwordAttackComponent()
 void USwordAttackComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!IsValid(m_swordCollision)) { return; }
+
 
 	// 回転を親の影響
 	SetUsingAbsoluteRotation(false);
@@ -59,7 +61,7 @@ void USwordAttackComponent::OnRegister()
 	Super::OnRegister();
 
 	AActor* owner = GetOwner();
-	if (m_swordCollision)
+	if (IsValid(m_swordCollision))
 	{
 		m_swordCollision->SetupAttachment(this);
 	}
@@ -73,6 +75,8 @@ void USwordAttackComponent::OnRegister()
 void USwordAttackComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (!IsValid(m_swordCollision)) { SwingEnd(); return; }
+
 
 	FName name= m_swordCollision->GetCollisionProfileName();
 
@@ -94,7 +98,7 @@ void USwordAttackComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 //------------------------------
 void USwordAttackComponent::SetProfileName(const FName _name)
 {
-	if (!m_swordCollision) { return; }
+	if (!IsValid(m_swordCollision)) { return; }
 	m_swordCollision->SetCollisionProfileName(FName(_name));
 }
 
@@ -104,7 +108,7 @@ void USwordAttackComponent::SetProfileName(const FName _name)
 //------------------------------
 void USwordAttackComponent::ClearCollisionObjectType()
 {
-	if (!m_swordCollision) { return; }
+	if (!IsValid(m_swordCollision)) { return; }
 	m_swordCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
 }
 
@@ -114,6 +118,8 @@ void USwordAttackComponent::ClearCollisionObjectType()
 //------------------------------
 void USwordAttackComponent::SetSwordAttackScale(const float& _radius)
 {
+	if (!IsValid(m_swordCollision)) { return; }
+
 	m_swordCollision->SetSphereRadius(_radius);
 }
 
@@ -148,6 +154,7 @@ void USwordAttackComponent::Swinging(const int& _damage, const FVector& _locatio
 //------------------------------
 void USwordAttackComponent::Swinging(const bool& _bSneakKill)
 {
+	if (!IsValid(m_swordCollision)) { return; }
 	
 	if(m_bIsSwinging)
 	{
@@ -160,7 +167,7 @@ void USwordAttackComponent::Swinging(const bool& _bSneakKill)
 	m_timer = 0.0f;
 	m_bSneakKill = _bSneakKill;
 	
-	if (m_swordCollision)
+	if (IsValid(m_swordCollision))
 	{
 		m_swordCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		m_swordCollision->SetGenerateOverlapEvents(true);
@@ -184,7 +191,7 @@ void USwordAttackComponent::SwingEnd()
 	//剣を振っている状態を解除
 	m_bIsSwinging = false;
 	//コリジョン無効化
-	if (m_swordCollision)
+	if (IsValid(m_swordCollision))
 	{
 		m_swordCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		m_swordCollision->SetGenerateOverlapEvents(false);
@@ -208,12 +215,15 @@ void USwordAttackComponent::OnSwordBeginOverlap(
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	if (!OtherActor || OtherActor == GetOwner()) return;
+	AActor* Owner = GetOwner();
+	if (!IsValid(OtherActor) || !IsValid(Owner) || OtherActor == Owner) { return; }
+	IDamageable* Damageable = Cast<IDamageable>(OtherActor);
+	if (!Damageable) { return; }
 
 	//UE_LOG(LogTemp, Display, TEXT("NanikaniHit"));
 
 	//ノックバック
-	FVector knockBackvector = OtherActor->GetActorLocation()-GetOwner()->GetActorLocation() ;
+	FVector knockBackvector = OtherActor->GetActorLocation()-Owner->GetActorLocation() ;
 	knockBackvector.Z = 0.f;
 	knockBackvector = knockBackvector.GetSafeNormal();
 	knockBackvector *= m_KnockBackValu;
@@ -221,7 +231,7 @@ void USwordAttackComponent::OnSwordBeginOverlap(
 	
 	//UE_LOG(LogTemp, Display, TEXT("Hit to Enemy"));
 	//ダメージ与える処理
-	Cast<IDamageable>(OtherActor)->OnDamage(m_damage, knockBackvector,m_bSneakKill);
+	Damageable->OnDamage(m_damage, knockBackvector,m_bSneakKill);
 
 }
 

@@ -2,6 +2,7 @@
 
 
 #include "KeyItemSubsystem.h"
+#include "ItemKey.h"
 
 //ベギンプレイ
 void UKeyItemSubsystem::OnWorldBeginPlay(UWorld& InWorld)
@@ -13,7 +14,7 @@ void UKeyItemSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 //キーアイテムを登録する関数
 void UKeyItemSubsystem::RegisterKeyItem(AItemKey* _keyItem)
 {
-	keyItem = _keyItem;
+	keyItem = IsValid(_keyItem) ? _keyItem : nullptr;
 }
 
 
@@ -21,7 +22,7 @@ void UKeyItemSubsystem::RegisterKeyItem(AItemKey* _keyItem)
 //キーアイテムを取得する関数
 AItemKey* UKeyItemSubsystem::GetKeyItem()
 {
-	if (keyItem)
+	if (IsValid(keyItem))
 	{
 		return keyItem;
 	}

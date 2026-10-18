@@ -53,6 +53,7 @@ private:
 
 	//エネミー配列
 	//　m_pAllEnemies[敵のいるエリア][そのエリアの敵全員]
+	UPROPERTY(Transient)
 	TArray<AEnemyBase*> m_pAllEnemies;
 	
 };

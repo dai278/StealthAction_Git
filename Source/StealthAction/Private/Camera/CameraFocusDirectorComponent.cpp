@@ -60,7 +60,7 @@ void UCameraFocusDirectorComponent::TickComponent(float DeltaTime, ELevelTick Ti
 void UCameraFocusDirectorComponent::StartFocusByProviderActor(AActor* ProviderActor, bool& isStart, APlayerController* _controller)
 {
 	//nullチェック
-	if (!ProviderActor)
+	if (!IsValid(ProviderActor) || !IsValid(_controller))
 	{
 		isStart = false;
 		return;
@@ -76,7 +76,7 @@ void UCameraFocusDirectorComponent::StartFocusByProviderActor(AActor* ProviderAc
 	// データ取得
 	const FCameraFocusData Data = ICameraFocusProvider::Execute_GetCameraFocusData(ProviderActor);
 	// カメラの有無チェック
-	if (!Data.FocusCamera)
+	if (!IsValid(Data.FocusCamera) || !IsValid(_controller))
 	{
 		isStart = false;
 		return;
@@ -128,7 +128,7 @@ void UCameraFocusDirectorComponent::StartFocusByProviderActor(AActor* ProviderAc
 void UCameraFocusDirectorComponent::StartFocus(AActor* ProviderActor, bool& isStart, APlayerController* _controller)
 {
 
-	if (!ProviderActor)
+	if (!IsValid(ProviderActor) || !IsValid(_controller))
 	{
 		isStart = false;
 		return;
@@ -148,7 +148,7 @@ void UCameraFocusDirectorComponent::StartFocus(AActor* ProviderActor, bool& isSt
 	};
 
 
-	if (!Data.FocusCamera)
+	if (!IsValid(Data.FocusCamera) || !IsValid(_controller))
 	{
 		isStart = false;
 		return;
@@ -208,13 +208,19 @@ void UCameraFocusDirectorComponent::ForceRestore()
 void UCameraFocusDirectorComponent::RestoreInternal(bool bUnpause)
 {
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-	if (PC)
+	if (IsValid(PC))
 	{
 		AActor* ReturnTarget = SavedViewTarget.Get();
-		if (ReturnTarget)
+		if (IsValid(ReturnTarget))
 		{
-			APlayerCharacter* player = (APlayerCharacter*)PC->GetPawn();
-			player->EndCameraFocus(SavedBlendOutTime);
+			if (APlayerCharacter* Player = Cast<APlayerCharacter>(PC->GetPawn()))
+			{
+				Player->EndCameraFocus(SavedBlendOutTime);
+			}
+			else
+			{
+				PC->SetViewTargetWithBlend(ReturnTarget, SavedBlendOutTime);
+			}
 		}
 	}
 
@@ -245,7 +251,7 @@ void UCameraFocusDirectorComponent::RestoreByTime()
 void UCameraFocusDirectorComponent::RestoreByInput()
 {
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-	if (!PC) return;
+	if (!IsValid(PC)) return;
 	if (PC->WasInputKeyJustPressed(EKeys::E))
 	{
 		RestoreInternal(/*bUnpause*/true);

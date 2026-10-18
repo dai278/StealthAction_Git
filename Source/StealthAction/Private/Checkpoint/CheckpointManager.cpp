@@ -2,6 +2,8 @@
 
 
 #include "Checkpoint/CheckpointManager.h"
+#include "Engine/World.h"
+#include "Engine/GameInstance.h"
 #include "Checkpoint/Checkpoint.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameInstance/PlayDataGameInstanceSubsystem.h"
@@ -22,6 +24,8 @@ UCheckpointManager::UCheckpointManager()
 //------------------------------------------------
 void UCheckpointManager::OnWorldBeginPlay(UWorld&)
 {
+	if (!GetWorld()) { return; }
+
 	//インゲームレベルでなければ処理しない
 	FString name = UGameplayStatics::GetCurrentLevelName(this, /*bRemovePrefix=*/true);
 	if (name == "Title") { return; }
@@ -32,7 +36,7 @@ void UCheckpointManager::OnWorldBeginPlay(UWorld&)
 	m_checkpoints.Empty();
 
 	//プレイデータの取得
-	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
+	UPlayDataGameInstanceSubsystem* pPlayData = (GetWorld() && GetWorld()->GetGameInstance() ? GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>() : nullptr);
 	if (!pPlayData)
 	{
 		//UE_LOG(LogTemp, Display, TEXT("UPlayDataGameInstanceSubsystem Genereted Miss"));
@@ -52,7 +56,7 @@ void UCheckpointManager::OnWorldBeginPlay(UWorld&)
 //----------------------------------------------------------
 void UCheckpointManager::AddCheckpoint(ACheckpoint* _checkpoint)
 {
-	if (!_checkpoint)
+	if (!IsValid(_checkpoint))
 	{
 		return;
 	}
@@ -71,7 +75,7 @@ void UCheckpointManager::AddCheckpoint(ACheckpoint* _checkpoint)
 		if (_checkpoint->GetIndex() == i)
 		{
 			//nullなら追加
-			if (m_checkpoints[i] == nullptr) {
+			if (!IsValid(m_checkpoints[i])) {
 				//TArrayにライトを追加
 				m_checkpoints[i] = _checkpoint;
 				return;
@@ -98,7 +102,7 @@ ACheckpoint* UCheckpointManager::GetCheckpoint(const int32 _index) const
 	{
 		return nullptr;
 	}
-	return m_checkpoints[_index];
+	return IsValid(m_checkpoints[_index]) ? m_checkpoints[_index] : nullptr;
 }
 
 //----------------------------------------------------------
@@ -116,7 +120,7 @@ FVector UCheckpointManager::GetCurrentCheckpointLocation() const
 
 	for (ACheckpoint* check : m_checkpoints)
 	{
-		if (check->GetIndex() == m_currentCheckpointIndex)
+		if (IsValid(check) && check->GetIndex() == m_currentCheckpointIndex)
 		{
 			return check->GetActorLocation();
 		}
@@ -130,7 +134,8 @@ FVector UCheckpointManager::GetCurrentCheckpointLocation() const
 void UCheckpointManager::SetCurrentCheckpointIndex(const int32& _index)
 {
 	//インデックスが0未満か配列外、現在のチェックポイントより小さいなら設定しない
-	if (_index < 0 || _index <m_currentCheckpointIndex)
+	if (!m_checkpoints.IsValidIndex(_index) || !IsValid(m_checkpoints[_index])
+		|| _index < m_currentCheckpointIndex)
 	{
 		//UE_LOG(LogTemp, Display, TEXT("SetCurrentCheckpointIndex,Miss"));
 		return;
@@ -145,7 +150,7 @@ void UCheckpointManager::SetCurrentCheckpointIndex(const int32& _index)
 	m_currentCheckpointIndex = _index;
 
 	//	//プレイデータの取得
-	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
+	UPlayDataGameInstanceSubsystem* pPlayData = (GetWorld() && GetWorld()->GetGameInstance() ? GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>() : nullptr);
 	if (!pPlayData)
 	{
 		//UE_LOG(LogTemp, Display, TEXT("UPlayDataGameInstanceSubsystem Genereted Miss"));
@@ -184,7 +189,7 @@ void UCheckpointManager::OnOverlapCheckpoint()
 void UCheckpointManager::SetCheckPointAll()
 {
 	//プレイデータの取得
-	UPlayDataGameInstanceSubsystem* pPlayData = GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>();
+	UPlayDataGameInstanceSubsystem* pPlayData = (GetWorld() && GetWorld()->GetGameInstance() ? GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>() : nullptr);
 	if (!pPlayData) { return; }
 	if (!pPlayData->IsIsContinued()) {
 		return;
@@ -193,7 +198,7 @@ void UCheckpointManager::SetCheckPointAll()
 	for (ACheckpoint* check : m_checkpoints)
 	{
 		//現在のインデックス以下は非アクティブに
-		if (check->GetIndex() <= m_currentCheckpointIndex)
+		if (IsValid(check) && check->GetIndex() <= m_currentCheckpointIndex)
 		{
 			check->SetHasCheckpoint(false);
 		}

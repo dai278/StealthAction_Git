@@ -35,7 +35,7 @@ void AObjectivePoint::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (TriggerBox)
+    if (IsValid(TriggerBox))
     {
         TriggerBox->OnComponentBeginOverlap.AddDynamic(
             this,
@@ -54,7 +54,7 @@ void AObjectivePoint::OnOverlap(
     APawn* PlayerPawn =
         UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 
-    if (OtherActor == PlayerPawn)
+    if (IsValid(OtherActor) && IsValid(PlayerPawn) && OtherActor == PlayerPawn)
     {
         AObjectiveManager* Manager =
             Cast<AObjectiveManager>(
@@ -62,7 +62,7 @@ void AObjectivePoint::OnOverlap(
                     GetWorld(),
                     AObjectiveManager::StaticClass()));
 
-        if (Manager)
+        if (IsValid(Manager))
         {
             //UE_LOG(LogTemp, Warning, TEXT("Switching Objective"));
             Manager->SetCurrentObjective(NextObjective);
@@ -72,7 +72,7 @@ void AObjectivePoint::OnOverlap(
 
 FVector AObjectivePoint::GetWidgetWorldLocation() const
 {
-    if (WidgetLocation)
+    if (IsValid(WidgetLocation))
     {
         return WidgetLocation->GetComponentLocation();
     }

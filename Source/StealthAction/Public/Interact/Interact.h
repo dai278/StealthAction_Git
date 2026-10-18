@@ -76,6 +76,7 @@ protected:
     TArray<FVector> InteractPos;
 
     //プレイヤー参照用
+    UPROPERTY(Transient)
     APawn* m_pPlayer;
 
     UPROPERTY(EditAnywhere, Category = "Interact")

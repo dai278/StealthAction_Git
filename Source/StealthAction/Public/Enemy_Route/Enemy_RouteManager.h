@@ -25,7 +25,9 @@ protected:
 public:
 
 	//作ったルートの名前のポインタ	
+	UPROPERTY(Transient)
 	TArray<AActor*> m_pEnemy_PatrolRoute;	//エネミーのルートポインタ1
+	UPROPERTY(Transient)
 	TArray<AActor*> m_pEnemy_PatrolRoute_Keep;	//エネミーのルートポインタ1
 
 	//ルート設定

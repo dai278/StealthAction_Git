@@ -17,6 +17,7 @@ public:
 
     void BulletFire(float Time, AActor* Caller);
 
+    UPROPERTY(Transient)
     AEnemy_BulletStorage_1* m_bulletPool;
 
 

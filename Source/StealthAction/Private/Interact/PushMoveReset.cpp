@@ -40,7 +40,7 @@ void APushMoveReset::Interact(AActor* _interactOwner)
 {
 	for (TObjectPtr<APushMoveActor> actor : m_resetActor)
 	{
-		if (actor)
+		if (IsValid(actor))
 		{
 			actor->ResetMove();
 		}

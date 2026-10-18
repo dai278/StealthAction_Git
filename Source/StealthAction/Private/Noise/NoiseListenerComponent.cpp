@@ -2,6 +2,7 @@
 
 
 #include "Noise/NoiseListenerComponent.h"
+#include "Engine/World.h"
 #include "Noise//NoiseManager.h"
 
 //-----------------------------------------------------------
@@ -25,7 +26,7 @@ void UNoiseListenerComponent::BeginPlay()
 	Super::BeginPlay();
 
 	//ノイズマネージャーに登録
-	UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
+	UNoiseManager* manager = (GetWorld() ? GetWorld()->GetSubsystem<UNoiseManager>() : nullptr);
 	if (manager)
 	{
 		manager->AddListener(this);
@@ -70,7 +71,7 @@ void UNoiseListenerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	//ノイズマネージャーから削除
-	UNoiseManager* manager = GetWorld()->GetSubsystem<UNoiseManager>();
+	UNoiseManager* manager = (GetWorld() ? GetWorld()->GetSubsystem<UNoiseManager>() : nullptr);
 	if (manager)
 	{
 		manager->RemoveListener(this);

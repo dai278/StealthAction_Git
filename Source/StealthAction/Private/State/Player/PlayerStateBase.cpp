@@ -60,3 +60,8 @@ void UPlayerStateBase::OnExit_Implementation() {}
 bool UPlayerStateBase::CanEnterState_Implementation() const { return true; }
 bool UPlayerStateBase::CanExitState_Implementation() const { return true; }
 bool UPlayerStateBase::CanTransitionToStatus_Implementation(EPlayerStatus NewStatus) const { return true; }
+
+APlayerCharacter* UPlayerStateBase::GetPlayer() const
+{
+	return IsValid(Player) ? Player.Get() : nullptr;
+}

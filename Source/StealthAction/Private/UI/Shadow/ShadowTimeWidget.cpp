@@ -13,7 +13,7 @@ void UShadowTimeWidget::NativeConstruct()
 		UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)
 	);
 
-	if (!PlayerCharacter)
+	if (!IsValid(PlayerCharacter))
 	{
 		//UE_LOG(LogTemp, Error, TEXT("ShadowTimeWidget: PlayerCharacter not found"));
 	}
@@ -31,7 +31,7 @@ void UShadowTimeWidget::NativeTick(
 
 void UShadowTimeWidget::UpdateShadowTime()
 {
-	if (!PlayerCharacter || !ShadowTimeBar)
+	if (!IsValid(PlayerCharacter) || !IsValid(ShadowTimeBar))
 	{
 		return;
 	}

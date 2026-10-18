@@ -23,7 +23,7 @@ void UNoiseObjectMng::OnWorldBeginPlay(UWorld& InWorld)
 //----------------------------------------------------------
 void UNoiseObjectMng::RegisterNoiseObject(ANoiseObject* _pNoiseObject)
 {
-	if (!_pNoiseObject) { return; }
+	if (!IsValid(_pNoiseObject)) { return; }
 	m_noiseObjects.AddUnique(_pNoiseObject);
 }
 //----------------------------------------------------------
@@ -44,7 +44,7 @@ void UNoiseObjectMng::MakeNoise(const int32& _noiseLevel, const FVector& _noiseL
 	{
 		for (ANoiseObject* noiseObj : m_noiseObjects)
 		{
-			if (!noiseObj) { continue; }
+			if (!IsValid(noiseObj)) { continue; }
 			//音オブジェクトに音発生指示
 			if (noiseObj->GetIndex() == index) {
 				noiseObj->MakeNoise();
