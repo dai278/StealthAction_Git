@@ -10,4 +10,12 @@ class STEALTHACTION_API UPlayerCrouchState : public UPlayerLocomotionState
 	GENERATED_BODY()
 public:
 	UPlayerCrouchState();
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crouch", meta = (ClampMin = "0.01", ClampMax = "1.0"))
+	float CapsuleHeightRatio = 0.8f;
+
+	virtual void OnEnter_Implementation() override;
+	virtual void OnExit_Implementation() override;
+
 };

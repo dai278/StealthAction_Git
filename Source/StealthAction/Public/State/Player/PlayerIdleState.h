@@ -10,4 +10,7 @@ class STEALTHACTION_API UPlayerIdleState : public UPlayerLocomotionState
 	GENERATED_BODY()
 public:
 	UPlayerIdleState();
+
+protected:
+
 };

@@ -1,24 +1,51 @@
 #include "State/Player/PlayerInteractState.h"
+#include "State/Player/PlayerStateMachine.h"
+#include "State/Player/PlayerInteractAnimationState.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
+#include "Interact/Interact.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
-UPlayerInteractState::UPlayerInteractState() { PlayerStatus = EPlayerStatus::Interact; }
+UPlayerInteractState::UPlayerInteractState()
+{
+	PlayerStatus = EPlayerStatus::Interact;
+	bAllowManualControl = false;
+}
+
+bool UPlayerInteractState::CanEnterState_Implementation() const
+{
+	APlayerCharacter* PlayerCharacter = GetPlayer();
+	return PlayerCharacter && IsValid(PlayerCharacter->m_hitInteractOb) && PlayerCharacter->m_hitInteractOb->CanInteract();
+}
 
 void UPlayerInteractState::OnEnter_Implementation()
 {
+	if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->CancelDash(); }
 	if (APlayerCharacter* PlayerCharacter = GetPlayer())
 	{
-		if (PlayerCharacter->m_bDash) { PlayerCharacter->EndDash(); }
-		PlayerCharacter->m_bCanControl = false;
-		PlayerCharacter->m_interactTimer = 0.f;
+		InteractionTarget = PlayerCharacter->m_hitInteractOb;
+		if (InteractionTarget.IsValid()) { InteractionPosition = InteractionTarget->GetInteractPosition(PlayerCharacter); }
 	}
 }
 
 void UPlayerInteractState::OnUpdate_Implementation(float DeltaTime)
 {
-	if (APlayerCharacter* PlayerCharacter = GetPlayer()) { PlayerCharacter->UpdateInteract(DeltaTime); }
+	APlayerCharacter* PlayerCharacter = GetPlayer();
+	UPlayerStateMachine* Machine = GetPlayerMachine();
+	if (!PlayerCharacter || !Machine) { return; }
+	if (!InteractionTarget.IsValid()) { Machine->ReturnToLocomotion(); return; }
+	FVector Direction = InteractionPosition - PlayerCharacter->GetActorLocation();
+	Direction.Z = 0.f;
+	if (InteractionPosition.IsNearlyZero() || Direction.Size() <= FMath::Max(0.f, AcceptanceRadius))
+	{
+		if (UPlayerInteractAnimationState* Animation = Cast<UPlayerInteractAnimationState>(Machine->GetPlayerState(EPlayerStatus::InteractAnimation)))
+		{
+			Animation->BeginInteraction(InteractionTarget.Get());
+		}
+		else { Machine->ChangePlayerState(EPlayerStatus::InteractAnimation); }
+		return;
+	}
+	PlayerCharacter->AddMovementInput(Direction.GetSafeNormal(), FMath::Clamp(ApproachInputScale, 0.f, 1.f));
+	PlayerCharacter->SetActorRotation(FMath::RInterpTo(PlayerCharacter->GetActorRotation(), Direction.Rotation(), DeltaTime, FMath::Max(0.f, RotationInterpSpeed)));
 }
 
-void UPlayerInteractState::OnExit_Implementation()
-{
-	if (APlayerCharacter* PlayerCharacter = GetPlayer()) { PlayerCharacter->m_bCanControl = true; }
-}
+void UPlayerInteractState::OnExit_Implementation() { InteractionTarget.Reset(); }

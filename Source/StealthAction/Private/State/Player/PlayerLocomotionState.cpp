@@ -1,7 +1,13 @@
 #include "State/Player/PlayerLocomotionState.h"
-#include "StealthAction/PlayerCharacter/PlayerCharacter.h"
+#include "State/Player/PlayerStateMachine.h"
+
+UPlayerLocomotionState::UPlayerLocomotionState()
+{
+	bAllowMovementInput = true;
+	FootstepNoiseLevel = 1;
+}
 
 void UPlayerLocomotionState::OnUpdate_Implementation(float DeltaTime)
 {
-	if (APlayerCharacter* PlayerCharacter = GetPlayer()) { PlayerCharacter->RefreshLocomotionState(); }
+	if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->RefreshLocomotionState(); }
 }

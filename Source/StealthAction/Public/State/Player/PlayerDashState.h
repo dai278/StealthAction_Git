@@ -10,4 +10,10 @@ class STEALTHACTION_API UPlayerDashState : public UPlayerLocomotionState
 	GENERATED_BODY()
 public:
 	UPlayerDashState();
+
+protected:
+	virtual bool CanEnterState_Implementation() const override;
+	virtual void OnEnter_Implementation() override;
+	virtual void OnExit_Implementation() override;
+
 };

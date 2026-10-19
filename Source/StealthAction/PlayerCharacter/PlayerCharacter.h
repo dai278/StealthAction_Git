@@ -6,7 +6,6 @@
 //BP‚Åg‚¦‚é‚©‚Í“úîà‚Ì“Æ’f‚Æ•ÎŒ©‚ÅŒˆ‚ß‚é‚Ì‚ÅŒã‚Å•K—v‚É‰‚¶‚Ä•ÏX‚µ‚Ä—Ç‚µ
 //ƒJƒƒ‰‚Æ•½sˆÚ“®‚ÌÅ’áŒÀ‚­‚ç‚¢‚µ‚©‘‚«‚Ü‚¹‚ñ
 
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -27,13 +26,15 @@ class UInputAction;
 struct FInputActionValue;  
 class UPrimitiveComponent;
 class UNoiseListenerComponent;
-class UEnemyManager;//ƒGƒlƒ~[‚ÌŠî’êƒNƒ‰ƒX‚É‚·‚é“úîà•ÏX
 class AEnemyBase;
-class UExtendedSpotLightManager;//Šg’£ƒXƒ|ƒbƒgƒ‰ƒCƒgƒ}ƒl[ƒWƒƒ[‚Ì‘O•ûéŒ¾
 class USwordAttackComponent;//ƒ\[ƒhUŒ‚ƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì‘O•ûéŒ¾
 class UCameraFocusDirectorComponent;//ƒJƒƒ‰ƒtƒH[ƒJƒXƒfƒBƒŒƒNƒ^[ƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì‘O•ûéŒ¾
 class AInteract;
 class UPlayerStateMachine;
+class UPlayerStateBase;
+class UPlayerDashState;
+class UPlayerCrouchState;
+class UPlayerJumpState;
 class UPlayerLocomotionState;
 class UPlayerAttackState;
 class UPlayerDamageState;
@@ -57,17 +58,9 @@ enum class ECameraStatus : uint8
 	Num			 UMETA(DisplayName = "Num")//”Œv‘ª—pAUMETA(DisplayName = "Num")‚ª•K—v‚©‚í‚©‚ç‚È‚¢‚¯‚Ç‘‚©‚È‚¢ƒoƒO‚è‚»‚¤‚È‹C‚ª‚µ‚½‚©‚ç‘‚¢‚Ä‚Ü‚·
 };
 
-//ƒvƒŒƒCƒ„[‚Ìó‘Ô
-//v‚¢‚Â‚¢‚½‚Ì‚©‚¢‚½
-//‚¢‚ç‚È‚¢‚È‚çÁ‚µ‚Ä•K—v‚È‚ç‘‚â‚µ‚Ä
-//enum‚ÅŠÇ—‚µ‚È‚­‚Ä‚à‚¢‚¢‚¯‚Ç‰eó‘Ô‚É‚à‚Å‚«‚é‚æ‚¤‚ÈİŒv‚É‚µ‚Æ‚¢‚Ä
-
-
-
 
 //ˆÃEŠJnƒCƒxƒ“ƒgƒfƒBƒXƒpƒbƒ`ƒƒ[
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSneakKillStarted); // ˆø”‚È‚µ—á
-
 
 UCLASS()
 class STEALTHACTION_API APlayerCharacter : public ACharacter,public IDamageable
@@ -83,6 +76,10 @@ class STEALTHACTION_API APlayerCharacter : public ACharacter,public IDamageable
 	GENERATED_BODY()
 
 	friend class UPlayerStateMachine;
+	friend class UPlayerStateBase;
+	friend class UPlayerDashState;
+	friend class UPlayerCrouchState;
+	friend class UPlayerJumpState;
 	friend class UPlayerLocomotionState;
 	friend class UPlayerAttackState;
 	friend class UPlayerDamageState;
@@ -97,7 +94,6 @@ public:
 // BP‘¤‚ÅƒCƒxƒ“ƒg‚ğ’Ç‰Á‚Å‚«‚éiAdd Event / Bindj
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnSneakKillStarted OnSneakKillStarted;
-
 
 	//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
 	APlayerCharacter();
@@ -160,49 +156,18 @@ private:
 
 	//ƒJƒƒ‰‹“_Ø‚è‘Ö‚¦
 	void ViewpointSwitching(float _deltaTime);
-
-	//“G‚É‚Î‚ê‚Ä‚¢‚é‚©‚È‚Ç‚ÌQÆ—p
-	void UpdateCheckEnemyDetection();
+	const FCameraViewSetting& GetCameraViewSetting() const;
 
 private:
-	//•à‚«ó‘Ô‚ÌXVˆ—
-	void UpdateMove(const bool _bInShadow=false);
-
-	//–³“GŠÔ‚ÌXVˆ—
-	void UpdateInvincibleTime(float _deltaTime);
-
-	//ƒCƒ“ƒ^ƒ‰ƒNƒg‚ÌXVˆ—
-	void UpdateInteract(float _deltaTime);
-
-	//‰eó‘Ô‚ÌXVˆ—
-	void UpdateShadow(float _deltaTime);
-
-	//ƒXƒ^ƒ~ƒiÁ”ï
-	void StaminaConsumption(float _deltaTime);
-
-	//ƒXƒ^ƒ~ƒi‰ñ•œ
-	void StaminaRecovery(const float& _deltaTime);
-
-	//ƒWƒƒƒ“ƒvó‘Ô‚ÌXVˆ—
-	void UpdateJump(float _deltaTime);
-
-	//‰e‚©‚ç’Êíó‘Ô‚Ö•Ï‰»
-	void TransformationShadowToIdle(const bool _bLightHit = false);
-	//‰eó‘Ô‚Ö•Ï‰»
-	void TransformationToShadow();
-	//‰eó‘Ô‰ğœˆ—
-	void CancellationShadow(const EPlayerStatus& _status);
 
 	//‘«Œ³À•W‚Ìæ“¾
 	FVector GetFeetLocation()const;
-
 
 public:
 
 	//UŒ‚I—¹ƒR[ƒ‹ƒoƒbƒN
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void OnAttackEnd();
-
 
 	
 	//ƒJƒƒ‰ƒtƒH[ƒJƒXŠJnˆ—
@@ -223,22 +188,24 @@ public:
 	UPlayerStateMachine* GetPlayerStateMachine() const;
 
 	UFUNCTION(BlueprintPure, Category = "state")
-	bool IsCrouch() const { return m_bIsCrouch; }
+	bool IsCrouch() const { return GetPlayerStatus() == EPlayerStatus::Crouch; }
 
 	UFUNCTION(BlueprintPure, Category = "state")
-	bool CanAttack() const { return m_bCanAttack; }
+	bool CanAttack() const;
 
 	UFUNCTION(BlueprintPure, Category = "state")
 	bool IsShadow() const { return GetPlayerStatus() == EPlayerStatus::InShadow; }
 
 	UFUNCTION(BlueprintPure, Category = "state")
-	bool IsDash() const { return m_bDash; }
+	bool IsDash() const { return GetPlayerStatus() == EPlayerStatus::Dash; }
 
 	UFUNCTION(BlueprintPure, Category = "state")
-	bool IsInvincible() const { return m_bInvincible; }
+	bool IsInvincible() const;
 
 	UFUNCTION(BlueprintCallable,Category = "Animation")
-	void OnInteractAnimationEnd() {};
+	void OnInteractAnimationEnd();
+
+	bool CanReceivePlayerInput() const;
 
 	//HPæ“¾
 	int32 GetPlayerHP() const { return m_playerInfo.hp; }
@@ -250,7 +217,6 @@ protected:
 	void Enhanced_EndMove(const FInputActionValue& Value);
 	void Enhanced_OnInputDash(const FInputActionValue& Value);//ƒ_ƒbƒVƒ…“ü—ÍŠJn
 	void Enhanced_EndInputDash(const FInputActionValue& Value);//ƒ_ƒbƒVƒ…“ü—ÍI—¹
-
 
 	void Enhanced_MoveCrouch(const FInputActionValue& Value);		//‚µ‚á‚ª‚İ
 	void Enhanced_MoveJump(const FInputActionValue& Value);			//ƒWƒƒƒ“ƒv
@@ -266,7 +232,6 @@ protected:
 
 	void Enhanced_CameraPitchReleased(const FInputActionValue& Value);	//ƒJƒƒ‰ƒsƒbƒ`
 	void Enhanced_CameraYawReleased(const FInputActionValue& Value);	//ƒJƒƒ‰ƒˆ[
-
 
 protected:
 	// ƒfƒtƒHƒ‹ƒg‚Åg‚¤ Input Mapping Context
@@ -329,25 +294,13 @@ public:
 	virtual void Landed(const FHitResult& Hit) override;
 
 	//‰eö‚èŠÔæ“¾
-	float GetShadowTimer() const { return m_staminaTimer; }
+	float GetShadowTimer() const;
 
 	//Å‘å‰eö‚èŠÔæ“¾
-	float GetMaxShadowTime() const { return m_maxStamina; }
-
-	private:
-	//ó‘Ô•ÏXˆ—
-	bool ChangePlayerStatus(const EPlayerStatus& _newStatus);
-	void RefreshLocomotionState();
-	void FinishAttackState();
-	void EnterShadowState();
-	void ExitShadowState();
+	float GetMaxShadowTime() const;
 
 private:
 	bool IsUpPosWall(const FVector& _startPos)const;
-
-	//ƒ_ƒbƒVƒ…I—¹ˆ—
-	void EndDash();
-
 
 private:
 
@@ -379,29 +332,8 @@ private:
 	UPROPERTY()
 	UMaterialParameterCollection* m_pMPC;			//ƒ}ƒeƒŠƒAƒ‹ƒpƒ‰ƒ[ƒ^ƒRƒŒƒNƒVƒ‡ƒ“
 
-	UPROPERTY(EditDefaultsOnly, Category = "Status", meta = (DisplayName = "Initial Player Status"))
-	EPlayerStatus m_status; // Initial status only; runtime state lives in m_stateMachine.
-
-	UPROPERTY(EditAnywhere, Category = "Move")
-	float m_WalkSpeed;								//•à‚«ˆÚ“®—Ê
-
-	UPROPERTY(EditAnywhere, Category = "Move")
-	float m_DashSpeed;								//ƒ_ƒbƒVƒ…ˆÚ“®—Ê
-
-	UPROPERTY(EditAnywhere, Category = "Stamina")
-	float m_dashStaminaConsumptionMagnification;
-
-	UPROPERTY(EditAnywhere, Category = "Move")
-	float m_CrouchSpeed;								//‚µ‚á‚ª‚İˆÚ“®—Ê
-
-	UPROPERTY(EditAnywhere, Category = "Move")
-	float m_JumpVector;								//ƒWƒƒƒ“ƒv—Ê
-
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	USkeletalMesh* m_defaultMesh;					//’Êí‚ÌƒƒbƒVƒ…
-
-	UPROPERTY(EditAnywhere, Category = "Mesh")
-	USkeletalMesh* m_isShadowMesh;					//‰e‚É“ü‚Á‚Ä‚é‚ÌƒƒbƒVƒ…
 
 	UPROPERTY(EditAnywhere, Category = "Collision")
 	UCapsuleComponent* m_Capsule;						//ƒJƒvƒZƒ‹ƒRƒ“ƒ|[ƒlƒ“ƒg
@@ -411,35 +343,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Collision")
 	float m_capsuleHeight;							//ƒJƒvƒZƒ‹‚‚³
-
-	UPROPERTY(EditAnywhere, Category = "Stamina")
-	float m_maxStamina;
-
-	UPROPERTY(EditAnywhere, Category = "Stamina")
-	float m_staminaTimer;
-
-	UPROPERTY(EditAnywhere, Category = "Stamina")
-	float m_staminaRecoveryMagnification;
-
-	bool m_isStaminaDepleted;//ƒXƒ^ƒ~ƒiØ‚êó‘Ô‚©H
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	float m_attackRange;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	float m_attackRadius;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	int m_sneakKillDamage;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	int m_NormalAttack;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	float m_attackCooldown;
-
-	bool m_bDash;
-
 
 	//ƒJƒƒ‰ƒtƒH[ƒJƒX—p•Ï”
 	UPROPERTY(Transient)
@@ -454,38 +357,23 @@ private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	USwordAttackComponent* m_sword;	//ƒ\[ƒhUŒ‚ƒRƒ“ƒ|[ƒlƒ“ƒg
 
-	bool m_bInvincible;//–³“Gó‘Ô‚©
-	float m_invincibleTimer;//–³“GŠÔ
-
-	FVector m_knockBackVelocity;//ƒmƒbƒNƒoƒbƒN‘¬“x
-	float m_damageTime;//ƒ_ƒ[ƒWŠÔ
-
-	UPROPERTY(EditAnywhere, Category = "Damage")
-	float m_invincibleTimeLimit;//–³“GŠÔ§ŒÀ
-
-
-	FTimerHandle AttackCooldownHandle;
-
 	bool m_bCameraSwitching;						//ƒJƒƒ‰‹“_Ø‚è‘Ö‚¦’†‚©H
 	bool m_bCanControl;								//‘€ì‰Â”\ó‘Ô‚©
 
 	UPROPERTY(VisibleAnywhere, Category = "Sahdow")
 	bool m_bOnShadow;                               //‰e‚Ìã‚É‚¢‚é‚©
 
-	bool m_bUsingMesh;								//g‚Á‚Ä‚éƒƒbƒVƒ…‚ğŠÇ—‚·‚éƒtƒ‰ƒO
-	bool m_bIsCrouch;
-	bool m_bCanAttack;
-	bool m_bSneakKill;									//ƒXƒj[ƒNƒLƒ‹‚µ‚Ä‚¢‚é‚©
-	float m_attackCount;//UŒ‚ŠÔ
-
-	bool m_bJumping;									//ƒWƒƒƒ“ƒv’†‚©
-	float m_jumpTimer;
-
 	FVector2D m_charaMoveInput;						//ƒLƒƒƒ‰ˆÚ“®“ü—Í—Ê
 	FVector2D m_cameraRotateInput;					//ƒJƒƒ‰‰ñ“]—Ê
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
-	FCameraViewSetting m_cameraInitPos[(int)ECameraStatus::Num];	//Še‹“_•ÏXÅ‰‚Ì‹“_
+	FCameraViewSetting ThirdPersonCamera;
+
+	UPROPERTY(EditAnywhere, Category = "Camera")
+	FCameraViewSetting TopDownCamera;
+
+	UPROPERTY(Transient)
+	FCameraViewSetting EventCamera;
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	float m_maxOffsetY;	//ƒIƒtƒZƒbƒgYÀ•W‚ÌÅ‘å’l
@@ -503,26 +391,11 @@ private:
 	//ƒCƒ“ƒ^ƒ‰ƒNƒg‚·‚éƒIƒuƒWƒFƒNƒg
 	UPROPERTY(Transient)
 	AInteract* m_hitInteractOb;
-	//ƒCƒ“ƒ^ƒ‰ƒNƒg‚Ì‚·‚éêŠ
-	FVector m_interactPos;
-	//ƒCƒ“ƒ^ƒ‰ƒNƒgƒ^ƒCƒ}[
-	bool m_bInteractionExecuted = false;
-	float m_interactTimer;
 
-
-	//“úîà•ÏX“_
-	UPROPERTY(Transient)
-	UEnemyManager* m_pEnemyManager;//ƒGƒlƒ~[ƒ}ƒl[ƒWƒƒ[–ˆƒtƒŒ[ƒ€ŒŸõ‚Íd‚¢‚Ì‚Å
-	//Šg’£ƒXƒ|ƒbƒgƒ‰ƒCƒgƒ}ƒl[ƒWƒƒ[‚ÌƒAƒhƒŒƒX
-	UPROPERTY(Transient)
-	UExtendedSpotLightManager* m_pExtendedSpotLightManager;
 	
-	UPROPERTY(EditAnywhere, Category = "Enemy")
-	AEnemyBase* m_pNearestEnemy;//ˆê”Ô‹ß‚¢“G‚Ìƒ|ƒCƒ“ƒ^
 	
 	UFUNCTION(BlueprintCallable, Category = "Enemy")
-	AEnemyBase* GetNearestEnemy() { return m_pNearestEnemy; }
-
+	AEnemyBase* GetNearestEnemy();
 
 	//ƒfƒoƒbƒN—p
 	UNoiseListenerComponent* noise;
@@ -547,15 +420,11 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class ACameraActor> m_focusMovieCamera ;
 
-
 	// ‰eƒGƒtƒFƒNƒg‚ÌƒNƒ‰ƒXiBP‚Å‚àw’è‚µ‚½‚¢‚È‚çj
-	UPROPERTY(EditAnywhere, Category = "Shadow")
-	TSubclassOf<AActor> m_ShadowEffectClass;
 
 	// À‘ÌiƒvƒŒƒCƒ„[‚É‚Ô‚ç‰º‚ª‚éj
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Shadow", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UChildActorComponent> m_ShadowEffectChild;
-
 
 	
 public:
@@ -564,7 +433,6 @@ public:
 
 	//‰eó‘ÔAÅŒã‚Ì•Ç‚ª–³‚¢êŠ‚Ì‹L˜^—p
 	FVector m_saveLastNotUpWallPos;
-
 
 	protected:
 		//ƒJƒƒ‰•Ç‰ñ”ğ—p•Ï”
@@ -585,11 +453,8 @@ public:
 		//ƒJƒƒ‰•Ç‰ñ”ğˆ—
 		void UpdateCamerawallSiseOffset(float _deltaTime);
 
-
 		UPROPERTY(EditAnywhere, Category = "Cranch")
-		float CranchCollisionRatio;
 
 		UPROPERTY(EditAnywhere, Category = "Shadow")
-		float ShadowCollisionRatio;
 
 };

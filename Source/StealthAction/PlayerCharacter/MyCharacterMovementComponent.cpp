@@ -7,12 +7,5 @@
 void UMyCharacterMovementComponent::CalcVelocity(float DeltaTime, float Friction, bool bFluid, float BrakingDeceleration)
 {
 	Super::CalcVelocity(DeltaTime, Friction, bFluid, BrakingDeceleration);
-	if (IsCrouching())
-	{
-		MaxWalkSpeed = 200.0f;
-	}
-	else
-	{
-		MaxWalkSpeed = 600.0f;
-	}
+	// MaxWalkSpeed is applied by the active player state.
 }

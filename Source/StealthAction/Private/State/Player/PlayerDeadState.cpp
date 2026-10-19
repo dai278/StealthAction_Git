@@ -1,14 +1,24 @@
 #include "State/Player/PlayerDeadState.h"
+#include "State/Player/PlayerStateMachine.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
-UPlayerDeadState::UPlayerDeadState() { PlayerStatus = EPlayerStatus::Dead; }
+UPlayerDeadState::UPlayerDeadState()
+{
+	PlayerStatus = EPlayerStatus::Dead;
+	MoveSpeed = 0.f;
+	bAllowManualControl = false;
+}
 
 void UPlayerDeadState::OnEnter_Implementation()
 {
+	if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->CancelDash(); }
 	if (APlayerCharacter* PlayerCharacter = GetPlayer())
 	{
-		if (PlayerCharacter->m_bDash) { PlayerCharacter->EndDash(); }
-		PlayerCharacter->m_bCanControl = false;
 		PlayerCharacter->m_playerInfo.isAlive = false;
+		PlayerCharacter->m_playerInfo.bIsGetKeyItem = 0;
+		if (UCharacterMovementComponent* Movement = PlayerCharacter->GetCharacterMovement()) { Movement->StopMovementImmediately(); }
+		if (bOpenGameOverLevel && !GameOverLevel.IsNone() && GetWorld()) { UGameplayStatics::OpenLevel(PlayerCharacter, GameOverLevel); }
 	}
 }

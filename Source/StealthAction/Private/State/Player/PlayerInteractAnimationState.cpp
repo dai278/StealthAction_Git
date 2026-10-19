@@ -1,29 +1,59 @@
 #include "State/Player/PlayerInteractAnimationState.h"
+#include "State/Player/PlayerStateMachine.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
+#include "Interact/Interact.h"
 
-UPlayerInteractAnimationState::UPlayerInteractAnimationState() { PlayerStatus = EPlayerStatus::InteractAnimation; }
+UPlayerInteractAnimationState::UPlayerInteractAnimationState()
+{
+	PlayerStatus = EPlayerStatus::InteractAnimation;
+	MoveSpeed = 0.f;
+	bAllowManualControl = false;
+}
+
+bool UPlayerInteractAnimationState::BeginInteraction(AInteract* Target)
+{
+	InteractionTarget = Target;
+	const bool bStarted = RequestPlayerState(EPlayerStatus::InteractAnimation);
+	if (!bStarted) { InteractionTarget.Reset(); }
+	return bStarted;
+}
+
+bool UPlayerInteractAnimationState::CanEnterState_Implementation() const
+{
+	APlayerCharacter* PlayerCharacter = GetPlayer();
+	return InteractionTarget.IsValid() || (PlayerCharacter && IsValid(PlayerCharacter->m_hitInteractOb));
+}
 
 void UPlayerInteractAnimationState::OnEnter_Implementation()
 {
-	if (APlayerCharacter* PlayerCharacter = GetPlayer())
+	bInteractionExecuted = false;
+	if (!InteractionTarget.IsValid())
 	{
-		if (PlayerCharacter->m_bDash) { PlayerCharacter->EndDash(); }
-		PlayerCharacter->m_bCanControl = false;
-		PlayerCharacter->m_interactTimer = 0.f;
-		PlayerCharacter->m_bInteractionExecuted = false;
+		if (APlayerCharacter* PlayerCharacter = GetPlayer()) { InteractionTarget = PlayerCharacter->m_hitInteractOb; }
 	}
 }
 
 void UPlayerInteractAnimationState::OnUpdate_Implementation(float DeltaTime)
 {
-	if (APlayerCharacter* PlayerCharacter = GetPlayer()) { PlayerCharacter->UpdateInteract(DeltaTime); }
+	if (!InteractionTarget.IsValid())
+	{
+		if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->ReturnToLocomotion(); }
+		return;
+	}
+	if (bInteractionExecuted || (!bWaitForAnimationNotify && m_stateTimer >= FMath::Max(0.f, InteractionDuration))) { CompleteInteraction(); }
 }
 
-void UPlayerInteractAnimationState::OnExit_Implementation()
+void UPlayerInteractAnimationState::CompleteInteraction()
 {
-	if (APlayerCharacter* PlayerCharacter = GetPlayer())
+	APlayerCharacter* PlayerCharacter = GetPlayer();
+	UPlayerStateMachine* Machine = GetPlayerMachine();
+	if (!PlayerCharacter || !Machine || Machine->GetPlayerStatus() != EPlayerStatus::InteractAnimation) { return; }
+	if (!bInteractionExecuted)
 	{
-		PlayerCharacter->m_bCanControl = true;
-		PlayerCharacter->m_interactTimer = 0.f;
+		bInteractionExecuted = true;
+		if (InteractionTarget.IsValid()) { InteractionTarget->Interact(PlayerCharacter); }
 	}
+	if (IsValid(Machine) && Machine->GetPlayerStatus() == EPlayerStatus::InteractAnimation) { Machine->ReturnToLocomotion(); }
 }
+
+void UPlayerInteractAnimationState::OnExit_Implementation() { InteractionTarget.Reset(); }

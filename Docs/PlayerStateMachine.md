@@ -1,83 +1,87 @@
-# プレイヤーのステートマシーン（BP 登録方式）
+# プレイヤーのステートマシーン（BP 登録・ステート側で設定）
 
-## 構成
+## 処理の分担
 
-`APlayerCharacter` は BP で指定された `UPlayerStateMachine` の派生クラスを生成します。
-マシーンは自身の BP に設定された `State Classes` からステートを生成し、現在のステートの `Enter / Update / Exit` を実行します。C++ でステートを自動登録する処理はありません。
+- **PlayerCharacter**：入力の取得と転送、コンポーネントの生成・保持、共通カメラ、衝突・接触情報、HP などの共有データ、通知の受け渡し。
+- **PlayerStateMachine**：BP からのステート登録、遷移、入力要求、共有スタミナ残量と回復、非アクティブ時も必要なクールダウン・無敵時間の更新。
+- **各ステート**：状態別のパラメータと、開始・更新・終了処理。プレイヤーの `UpdateShadow` などを呼ぶラッパーではなく、動作そのものを各 `.cpp` で実装しています。
 
-`GetPlayerStatus()` は現在のステートを参照します。既存の `EPlayerStatus` の名前・順序と、プレイヤーの BP 向け取得関数は維持しています。以前の `m_status` は **Initial Player Status** として初期状態の指定にだけ使います。
+各クラスは `Public/State/Player/<クラス名>.h` と `Private/State/Player/<クラス名>.cpp` に分かれています。
 
-## ソースファイルの配置
+## 登録手順
 
-各ステートはクラスごとに個別の `.h` / `.cpp` に分けています。
-ヘッダーは `Source/StealthAction/Public/State/Player/`、実装は `Source/StealthAction/Private/State/Player/` にあります。
-例えば Idle は `PlayerIdleState.h` / `PlayerIdleState.cpp`、Attack は `PlayerAttackState.h` / `PlayerAttackState.cpp` です。
-移動系の共通クラスも `PlayerLocomotionState.h` / `PlayerLocomotionState.cpp` に独立しています。
-クラス名と BP 登録方式は変わりません。C++ から参照する場合は、使用するクラスのヘッダーを直接 include してください。
+1. ソースを取得して C++ をビルドします。
+2. `PlayerStateMachine` を親に `BP_PlayerStateMachine` を作成します。
+3. 下表の各 C++ ステートを親に、それぞれステート BP を作成します。
+4. マシーン BP の **Class Defaults → State Machine → State Classes** に、11個のステート BP クラスを重複なく登録します。順序は自由です。
+5. プレイヤー BP の **Class Defaults → State Machine → Player State Machine Class** にマシーン BP を指定します。
+6. マシーン BP の **Initial Status** を通常は `Idle` にします。
+7. 各 BP をコンパイルして保存します。
 
-## エディタで必要な設定
+ステート BP は表のネイティブ親クラスから派生してください。`Player Status` の値は親の設定を維持します。必要なステートの不足や重複はログにエラーを出し、不完全な設定では操作を無効にします。
 
-新しい C++ クラスをビルドしてから、次を設定してください。このクラウド環境には UE がないため、既存の `.uasset` の編集・BP 作成・コンパイルは行っていません。**ソース変更だけでは移行は完了せず、この BP 設定が必要です。**
+## 各ステート BP のパラメータ
 
-1. `PlayerStateMachine` を親に `BP_PlayerStateMachine` を作成します。
-2. 下表の C++ クラスを親に、それぞれステート BP を作成します。
-3. `BP_PlayerStateMachine` の **Class Defaults → State Machine → State Classes** に、作成した 11 個の BP クラスを登録します。オブジェクトのインスタンスではなくクラスを指定します。配列順序は問いません。
-4. 使用中のプレイヤー BP の **Class Defaults → State Machine → Player State Machine Class** に `BP_PlayerStateMachine` を指定します。
-5. プレイヤー BP の **Initial Player Status** は通常 `Idle` にします。
+すべて **ステート BP の Class Defaults** で設定します。共通項目の **Movement → Move Speed** はそのステートへの入場時に適用されます。通常の移動速度は cm/s、時間は秒です。
 
-| ステート BP の親クラス | Player Status |
+| 親クラス | 主な設定と初期値 |
 | --- | --- |
-| `PlayerIdleState` | Idle |
-| `PlayerWalkState` | Walk |
-| `PlayerDashState` | Dash |
-| `PlayerJumpState` | Jump |
-| `PlayerCrouchState` | Crouch |
-| `PlayerAttackState` | Attack |
-| `PlayerDamageState` | Damage |
-| `PlayerDeadState` | Dead |
-| `PlayerShadowState` | InShadow |
-| `PlayerInteractState` | Interact |
-| `PlayerInteractAnimationState` | InteractAnimation |
+| `PlayerIdleState` | Move Speed `300`、Rotation Interp Speed `10`、Footstep Noise Level `1` |
+| `PlayerWalkState` | Move Speed `300`、Rotation Interp Speed `10`、Footstep Noise Level `1` |
+| `PlayerDashState` | Move Speed `600`、Stamina Consumption Rate `1` |
+| `PlayerCrouchState` | Move Speed `100`、Capsule Height Ratio `0.8`、Footstep Noise Level `0` |
+| `PlayerJumpState` | Move Speed `300`、Jump Impulse `1500`、Gravity Curve Base `10000`、Maximum Fall Speed `1800`、Jump Noise Level `3` |
+| `PlayerAttackState` | Move Speed `0`、Attack Range `150`、Attack Radius `70`、Sneak Kill Damage `10`、Attack Duration `1`、Attack Cooldown `0.3`、Minimum Facing Dot `0.4`、Attack Gravity Scale `0.1` |
+| `PlayerDamageState` | Move Speed `0`、Recovery Duration `1`、Invincibility Duration `5`、Knockback Multiplier `1` |
+| `PlayerDeadState` | Move Speed `0`、Open Game Over Level `true`、Game Over Level `GameOver` |
+| `PlayerShadowState` | Move Speed `300`、Stamina Consumption Rate `1`、Capsule Height Ratio `0.16666667`、Shadow Mesh、Shadow Effect Class |
+| `PlayerInteractState` | Move Speed `300`、Acceptance Radius `50`、Approach Input Scale `0.5`、Rotation Interp Speed `10` |
+| `PlayerInteractAnimationState` | Move Speed `0`、Interaction Duration `2.5`、Wait For Animation Notify `false` |
 
-親クラスが設定する `Player Status` は変更せず使ってください。動作を独自実装する場合は `PlayerStateBase` を親に BP を作り、対応する `Player Status` を指定して登録したクラスを置き換えることもできます。
+- **Rotation Interp Speed**：移動・接近時の旋回補間速度。角速度そのものではありません。
+- **Camera → Override Camera / Camera Settings**：状態別のカメラ距離・画角・ソケットオフセット（ofSet）・補間速度。Dash / Crouch / Shadow は初期状態で有効です。カメラの更新処理はプレイヤー共通ですが、状態別の設定はステートに保持します。`Set Event Camera Change` による演出指定は一時的に優先します。
+- **Stamina Consumption Rate**：共有の消費時間が1秒あたり増える量。`1` なら5秒分のスタミナを5秒で消費します。状態から退出すると消費が止まります。
+- **Allow Manual Control / Allow Movement Input**：ネイティブ親が設定済みです。攻撃・被ダメージ・死亡・インタラクト中は手動操作を止めるため、通常は変更不要です。
+- 被ダメージ時の無敵時間は復帰時間以上に保ちます。`Invincibility Duration` を短くしても、反応中に同一 Damage へ再入場することを防ぎます。
+- **Wait For Animation Notify** を有効にした場合、時間では終了しません。アニメーション通知からプレイヤーの既存関数 **On Interact Animation End** を呼んでください。
+- **Shadow Mesh** が未設定の場合は通常メッシュを維持します。**Shadow Effect Class** が未設定の場合はエフェクトを生成しません。
 
-未設定・ステータス重複・必要なステートの不足はログにエラーを出します。不完全な状態で操作処理だけが進まないよう、初期設定が失敗した場合はプレイヤーの操作を無効にします。
+共有スタミナの **Maximum Stamina（初期値5） / Stamina Recovery Rate（初期値1.5）** は、マシーン BP の Class Defaults → Stamina にあります。
 
-## BP から処理を拡張する
+### 既存プレイヤー BP から移す設定
 
-各ステート BP で次をオーバーライドできます。
+**旧プレイヤー BP の設定値は自動移行されません。** 以前に変更していた値は、対応するステート BP へ設定し直してください。
 
-- `On Enter`：開始処理。
-- `On Update`：現在のステートだけが毎フレーム実行する処理。
-- `On Exit`：終了・割り込み時の後始末。
-- `Can Enter State` / `Can Exit State` / `Can Transition To Status`：通常遷移の条件。
+| 旧プレイヤー設定 | 移動先 |
+| --- | --- |
+| Walk Speed | Idle / Walk の Move Speed。必要に応じて Jump / Shadow / Interact にも個別設定 |
+| Dash Speed、ダッシュの消費倍率 | Dash の Move Speed / Stamina Consumption Rate |
+| Crouch Speed、Cranch Collision Ratio | Crouch の Move Speed / Capsule Height Ratio |
+| Jump Vector | Jump の Jump Impulse |
+| 攻撃範囲・半径・ダメージ・クールダウン | Attack の各設定 |
+| ダメージ復帰時間・無敵時間 | Damage の Recovery Duration / Invincibility Duration |
+| 影メッシュ・影エフェクトクラス・カプセル比率 | Shadow の各設定 |
+| 最大スタミナ・回復倍率 | マシーンの Maximum Stamina / Stamina Recovery Rate |
+| Initial Player Status | マシーンの Initial Status |
+| 旧 Camera Init Pos の Dash / Crouch / InShadow | 各ステートの Camera Settings |
+| 旧 Camera Init Pos の ThirdPerson / TopDownView | プレイヤーの Third Person Camera / Top Down Camera |
 
-既存動作を使いながら拡張する場合は **親の関数を呼び出す** ノードを接続してください。例えば Damage の `On Update` は経過時間による復帰を、Attack の `On Exit` は攻撃フラグ・カメラ・重力の復元を行います。親を呼ばない場合は、それらも BP で実装します。
+通常メッシュ、通常カプセル寸法、通常・俯瞰の共通カメラ設定、入力アセットは引き続きプレイヤー BP に設定します。クラウド側では `.uasset` を編集していません。
 
-`Get Player` でプレイヤーを取得でき、`Request Player State` で登録済みの状態への遷移を要求できます。外部 BP からはプレイヤーの `Get Player State Machine → Change Player State` を使います。戻り値は実際に遷移できたかを表します。同一ステートへの再遷移はしません。
+## BP で処理を追加する場合
 
-遷移の最中に再帰的な切り替えを起こさないよう、`On Enter` / `On Exit` / 遷移条件の評価中の遷移要求は拒否します。次の状態の要求は `On Update` や後続イベントから行ってください。
+既存動作を使うだけならイベントグラフは空で使えます。拡張時は `On Enter / On Update / On Exit` をオーバーライドし、既存動作を残すため **親の関数を呼び出す** を接続してください。`On Move Input` と `On Stamina Depleted` も拡張できます。
 
-Damage / Dead は通常の終了条件に関係なく割り込みます。Dead から通常遷移では復帰しません。復帰は従来どおりレベルの再開などで行います。
+`Get Player` でプレイヤーを、`Get Player Machine` でマシーンを取得できます。`Request Player State` の戻り値は実際に遷移できたかを表します。外部 BP からはプレイヤーの `Get Player State Machine → Get Player State` で登録済みのステートを取得できます。
 
-## 既存処理との分担
+`Can Enter State / Can Exit State / Can Transition To Status` は通常の遷移条件です。Damage / Dead は終了条件を無視して割り込み、Dead から通常遷移では復帰しません。入場・退出・遷移条件の評価中の再帰的な遷移要求は拒否されるので、次の遷移は `On Update` または後続イベントから要求してください。
 
-- 移動は従来の Enhanced Input による処理を使います。移動系ステートは入力、しゃがみ、ダッシュ、ジャンプのフラグを参照し、`Jump → Crouch → Dash → Walk → Idle` の優先順で状態を選びます。これらのフラグは姿勢や入力の情報で、実行中ステートの別コピーではありません。移動キーを離した場合も入力値をクリアします。
-- 移動系ステートを BP から直接要求するだけでは、ジャンプの打ち上げやダッシュの入力処理を実行することにはなりません。従来の入力処理を使うか、独自 BP ステートに開始動作を実装してください。
-- 無敵時間、スタミナ、ジャンプの物理更新、カメラは共通処理としてプレイヤー側で更新します。被ダメージ中なども必要な更新を止めないためです。
-- 攻撃終了の通知は Attack 中だけ受け付けます。割り込み後に遅れて届いた通知で Damage / Dead の操作ロックを解除しません。
-- 影の見た目・カプセル設定は Shadow の開始・終了で切り替えるため、BP からの遷移やダメージ割り込みでも後始末が実行されます。
-- インタラクトの待機時間はアニメーションステートへの入場時にリセットします。終了遷移を BP が拒否した場合も `Interact` の実行は入場ごとに一度だけです。
+## 動作上の扱いと検証
 
-## 検証範囲
+- 移動系の状態選択はマシーン側で行います。ジャンプ・着地、しゃがみ、ダッシュ、歩き／待機を入力と移動状態に応じて切り替えます。
+- 被ダメージによる割り込みではジャンプの独自重力を終了し、以後は CharacterMovement の重力に戻します。しゃがみの要求は保持するため、復帰後は必要に応じて Crouch に戻ります。ダッシュは攻撃・被ダメージ・インタラクト・影への入場で解除します。
+- 無敵時間と攻撃クールダウンは、対応するステートが非アクティブでも更新します。
+- 剣コンポーネントの終了通知と、Attack の時間上限の双方で攻撃終了を扱います。割り込み後の終了通知は現在の状態を確認して無視します。
+- インタラクト対象は接触情報から状態開始時に保持します。途中で接触が外れても有効な対象は維持し、破棄されたら処理を中断します。実行は入場ごとに一度だけです。
 
-クラウド上ではソース差分と参照関係の静的確認のみです。UE 5.7 による C++ ビルド、UHT、BP コンパイル、ゲーム実行は未実施です。
-
-UE が使える環境で確認する場合は、上記 BP 設定後に次を確認してください。
-
-- Idle / Walk、ダッシュ開始・解除、しゃがみ、ジャンプ・着地で状態が切り替わる。
-- 攻撃完了で復帰し、攻撃を Damage / Dead で割り込んだ後の遅い通知で操作が再開しない。
-- 影の開始・解除・光・スタミナ切れ・被ダメージで見た目とカプセルが戻る。
-- インタラクトへの移動、アニメーション、完了、割り込みと再開始でタイマーと操作が復元する。
-- BP の遷移条件が通常遷移を止め、Damage / Dead の割り込みは止めない。
-- 未登録や二重登録がログで分かり、操作が無効になる。
+UE 5.7 による C++ / UHT / BP のビルドとゲーム実行は、この環境では未実施です。エディタで BP の値を変更した後、速度の切り替え、ジャンプ・着地、割り込み、影解除時の衝突復元、通知待ちインタラクト、スタミナ切れを確認してください。
