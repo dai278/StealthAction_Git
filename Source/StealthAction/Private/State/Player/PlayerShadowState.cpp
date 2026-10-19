@@ -5,15 +5,15 @@ UPlayerShadowState::UPlayerShadowState() { PlayerStatus = EPlayerStatus::InShado
 
 void UPlayerShadowState::OnEnter_Implementation()
 {
-	if (APlayerCharacter* Player = GetPlayer()) { Player->EnterShadowState(); }
+	if (APlayerCharacter* PlayerCharacter = GetPlayer()) { PlayerCharacter->EnterShadowState(); }
 }
 
 void UPlayerShadowState::OnExit_Implementation()
 {
-	if (APlayerCharacter* Player = GetPlayer()) { Player->ExitShadowState(); }
+	if (APlayerCharacter* PlayerCharacter = GetPlayer()) { PlayerCharacter->ExitShadowState(); }
 }
 
 void UPlayerShadowState::OnUpdate_Implementation(float DeltaTime)
 {
-	if (APlayerCharacter* Player = GetPlayer()) { Player->UpdateShadow(DeltaTime); }
+	if (APlayerCharacter* PlayerCharacter = GetPlayer()) { PlayerCharacter->UpdateShadow(DeltaTime); }
 }

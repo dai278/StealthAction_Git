@@ -5,10 +5,10 @@ UPlayerDeadState::UPlayerDeadState() { PlayerStatus = EPlayerStatus::Dead; }
 
 void UPlayerDeadState::OnEnter_Implementation()
 {
-	if (APlayerCharacter* Player = GetPlayer())
+	if (APlayerCharacter* PlayerCharacter = GetPlayer())
 	{
-		if (Player->m_bDash) { Player->EndDash(); }
-		Player->m_bCanControl = false;
-		Player->m_playerInfo.isAlive = false;
+		if (PlayerCharacter->m_bDash) { PlayerCharacter->EndDash(); }
+		PlayerCharacter->m_bCanControl = false;
+		PlayerCharacter->m_playerInfo.isAlive = false;
 	}
 }

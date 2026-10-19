@@ -5,23 +5,23 @@ UPlayerAttackState::UPlayerAttackState() { PlayerStatus = EPlayerStatus::Attack;
 
 void UPlayerAttackState::OnEnter_Implementation()
 {
-	if (APlayerCharacter* Player = GetPlayer())
+	if (APlayerCharacter* PlayerCharacter = GetPlayer())
 	{
-		if (Player->m_bDash) { Player->EndDash(); }
-		Player->m_bCanControl = false;
-		Player->m_bCanAttack = true;
+		if (PlayerCharacter->m_bDash) { PlayerCharacter->EndDash(); }
+		PlayerCharacter->m_bCanControl = false;
+		PlayerCharacter->m_bCanAttack = true;
 	}
 }
 
 void UPlayerAttackState::OnUpdate_Implementation(float DeltaTime)
 {
-	if (APlayerCharacter* Player = GetPlayer())
+	if (APlayerCharacter* PlayerCharacter = GetPlayer())
 	{
-		if (!Player->m_bCanAttack) { RequestPlayerState(EPlayerStatus::Idle); }
+		if (!PlayerCharacter->m_bCanAttack) { RequestPlayerState(EPlayerStatus::Idle); }
 	}
 }
 
 void UPlayerAttackState::OnExit_Implementation()
 {
-	if (APlayerCharacter* Player = GetPlayer()) { Player->FinishAttackState(); }
+	if (APlayerCharacter* PlayerCharacter = GetPlayer()) { PlayerCharacter->FinishAttackState(); }
 }

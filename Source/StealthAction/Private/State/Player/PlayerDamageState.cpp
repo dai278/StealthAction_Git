@@ -5,26 +5,26 @@ UPlayerDamageState::UPlayerDamageState() { PlayerStatus = EPlayerStatus::Damage;
 
 void UPlayerDamageState::OnEnter_Implementation()
 {
-	if (APlayerCharacter* Player = GetPlayer())
+	if (APlayerCharacter* PlayerCharacter = GetPlayer())
 	{
-		if (Player->m_bDash) { Player->EndDash(); }
-		Player->m_bCanControl = false;
+		if (PlayerCharacter->m_bDash) { PlayerCharacter->EndDash(); }
+		PlayerCharacter->m_bCanControl = false;
 	}
 }
 
 void UPlayerDamageState::OnUpdate_Implementation(float DeltaTime)
 {
-	if (APlayerCharacter* Player = GetPlayer())
+	if (APlayerCharacter* PlayerCharacter = GetPlayer())
 	{
-		if (m_stateTimer >= Player->m_damageTime) { RequestPlayerState(EPlayerStatus::Idle); }
+		if (m_stateTimer >= PlayerCharacter->m_damageTime) { RequestPlayerState(EPlayerStatus::Idle); }
 	}
 }
 
 void UPlayerDamageState::OnExit_Implementation()
 {
-	if (APlayerCharacter* Player = GetPlayer())
+	if (APlayerCharacter* PlayerCharacter = GetPlayer())
 	{
-		Player->m_knockBackVelocity = FVector::ZeroVector;
-		Player->m_bCanControl = true;
+		PlayerCharacter->m_knockBackVelocity = FVector::ZeroVector;
+		PlayerCharacter->m_bCanControl = true;
 	}
 }

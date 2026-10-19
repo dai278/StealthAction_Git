@@ -12,7 +12,6 @@
 class USphereComponent;
 
 //クラスのメンバ関数をノイズイベントのコールバックにするときのマクロ
-#define CreateSwingEndCallback(_func) std::bind(&_func, this,std::placeholders::_1)
 #define CreateSwingEndCallback(_func) std::bind(&_func, this)
 
 

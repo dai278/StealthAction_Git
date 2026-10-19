@@ -75,7 +75,7 @@ void AItemBase::HandleOverlap(AActor* OtherActor)
 // カメラフォーカス開始処理
 void AItemBase::CameraFocusStart(AActor* OtherActor)
 {
-	if (!IsValid(OtherActor) || !IsValid(OtherActor)->ActorHasTag(TEXT("Player"))) { return; }
+	if (!IsValid(OtherActor) || !OtherActor->ActorHasTag(TEXT("Player"))) { return; }
 	
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 	if (!IsValid(Player) || !IsValid(FocusProviderComp)) { return; }

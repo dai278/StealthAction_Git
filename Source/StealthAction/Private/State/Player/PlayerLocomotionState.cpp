@@ -3,5 +3,5 @@
 
 void UPlayerLocomotionState::OnUpdate_Implementation(float DeltaTime)
 {
-	if (APlayerCharacter* Player = GetPlayer()) { Player->RefreshLocomotionState(); }
+	if (APlayerCharacter* PlayerCharacter = GetPlayer()) { PlayerCharacter->RefreshLocomotionState(); }
 }
