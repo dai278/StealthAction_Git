@@ -453,8 +453,6 @@ public:
 		//ƒJƒƒ‰•Ç‰ñ”ğˆ—
 		void UpdateCamerawallSiseOffset(float _deltaTime);
 
-		UPROPERTY(EditAnywhere, Category = "Cranch")
 
-		UPROPERTY(EditAnywhere, Category = "Shadow")
 
 };
