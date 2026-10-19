@@ -99,7 +99,7 @@ public:
 	void Reset(UStateBase* _initialState);
 
 	//オーナー取得
-	AActor* GetOwner() { return m_owner; }
+	AActor* GetOwner() const { return m_owner; }
 
 	void Start();
 
