@@ -34,7 +34,7 @@
 | `PlayerAttackState` | Move Speed `0`、Attack Range `150`、Attack Radius `70`、Sneak Kill Damage `10`、Attack Duration `1`、Attack Cooldown `0.3`、Minimum Facing Dot `0.4`、Attack Gravity Scale `0.1` |
 | `PlayerDamageState` | Move Speed `0`、Recovery Duration `1`、Invincibility Duration `5`、Knockback Multiplier `1` |
 | `PlayerDeadState` | Move Speed `0`、Open Game Over Level `true`、Game Over Level `GameOver` |
-| `PlayerShadowState` | Move Speed `300`、Stamina Consumption Rate `1`、Capsule Height Ratio `0.16666667`、Shadow Mesh、Shadow Effect Class |
+| `PlayerShadowState` | Move Speed `300`、Stamina Consumption Rate `1`、Shadow Collision Profile `PlayerInShadow`、Shadow Mesh、Shadow Effect Class |
 | `PlayerInteractState` | Move Speed `300`、Acceptance Radius `50`、Approach Input Scale `0.5`、Rotation Interp Speed `10` |
 | `PlayerInteractAnimationState` | Move Speed `0`、Interaction Duration `2.5`、Wait For Animation Notify `false` |
 
@@ -60,7 +60,7 @@
 | Jump Vector | Jump の Jump Impulse |
 | 攻撃範囲・半径・ダメージ・クールダウン | Attack の各設定 |
 | ダメージ復帰時間・無敵時間 | Damage の Recovery Duration / Invincibility Duration |
-| 影メッシュ・影エフェクトクラス・カプセル比率 | Shadow の各設定 |
+| 影メッシュ・影エフェクトクラス | Shadow の各設定 |
 | 最大スタミナ・回復倍率 | マシーンの Maximum Stamina / Stamina Recovery Rate |
 | Initial Player Status | マシーンの Initial Status |
 | 旧 Camera Init Pos の Dash / Crouch / InShadow | 各ステートの Camera Settings |
@@ -85,3 +85,9 @@
 - インタラクト対象は接触情報から状態開始時に保持します。途中で接触が外れても有効な対象は維持し、破棄されたら処理を中断します。実行は入場ごとに一度だけです。
 
 UE 5.7 による C++ / UHT / BP のビルドとゲーム実行は、この環境では未実施です。エディタで BP の値を変更した後、速度の切り替え、ジャンプ・着地、割り込み、影解除時の衝突復元、通知待ちインタラクト、スタミナ切れを確認してください。
+
+### 影状態の障害物判定
+
+影状態ではカプセルのサイズ・位置を変更せず、Shadow ステートBPの **Shadow Collision Profile**（既定 `PlayerInShadow`）に切り替えます。退出時は入場前のプリセットへ戻します。旧 Capsule Height Ratio は使用しません。
+
+通過させたい障害物のコリジョン設定で、Object Response の **PlayerInShadow** を **Ignore** にしてください。床と通過不可の壁は **Block** のままにします。同じコリジョンで床と障害物をまとめている場合は、別コンポーネントに分けて設定してください。この方式は指定した障害物全体を通過するため、隙間の寸法による判定は行いません。既存の影解除時の障害物チェックと退避位置への復帰処理は継続します。

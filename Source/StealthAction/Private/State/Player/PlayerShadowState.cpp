@@ -40,10 +40,8 @@ void UPlayerShadowState::OnEnter_Implementation()
 	USkeletalMeshComponent* Mesh = PlayerCharacter->GetMesh();
 	if (!IsValid(Capsule) || !IsValid(Mesh)) { return; }
 	bShadowApplied = true;
-	Capsule->SetCollisionProfileName(TEXT("PlayerInShadow"));
-	const float Height = PlayerCharacter->m_capsuleHeight * FMath::Clamp(CapsuleHeightRatio, 0.01f, 1.f);
-	Capsule->SetCapsuleHalfHeight(Height);
-	PlayerCharacter->SetActorLocation(PlayerCharacter->GetActorLocation() - FVector(0.f, 0.f, Height));
+	OriginalCollisionProfile = Capsule->GetCollisionProfileName();
+	Capsule->SetCollisionProfileName(ShadowCollisionProfile);
 	OriginalMesh = Mesh->GetSkeletalMeshAsset();
 	OriginalMeshCollision = Mesh->GetCollisionEnabled();
 	bOriginalOverlapEvents = Mesh->GetGenerateOverlapEvents();
@@ -83,8 +81,7 @@ void UPlayerShadowState::OnExit_Implementation()
 	if (PlayerCharacter->IsUpPosWall(PlayerCharacter->GetFeetLocation())) { PlayerCharacter->SetActorLocation(PlayerCharacter->m_saveLastNotUpWallPos); }
 	if (UCapsuleComponent* Capsule = PlayerCharacter->GetCapsuleComponent())
 	{
-		Capsule->SetCollisionProfileName(TEXT("Player"));
-		Capsule->SetCapsuleHalfHeight(PlayerCharacter->m_capsuleHeight);
+		Capsule->SetCollisionProfileName(OriginalCollisionProfile);
 	}
 	if (USkeletalMeshComponent* Mesh = PlayerCharacter->GetMesh())
 	{

@@ -13,8 +13,8 @@ public:
 	UPlayerShadowState();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow", meta = (ClampMin = "0.01", ClampMax = "1.0"))
-	float CapsuleHeightRatio = 0.16666667f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
+	FName ShadowCollisionProfile = TEXT("PlayerInShadow");
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
 	TObjectPtr<class USkeletalMesh> ShadowMesh = nullptr;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
@@ -27,6 +27,7 @@ protected:
 private:
 	UPROPERTY(Transient)
 	TObjectPtr<class USkeletalMesh> OriginalMesh = nullptr;
+	FName OriginalCollisionProfile = NAME_None;
 	ECollisionEnabled::Type OriginalMeshCollision = ECollisionEnabled::QueryOnly;
 	bool bOriginalOverlapEvents = false;
 	bool bShadowApplied = false;
