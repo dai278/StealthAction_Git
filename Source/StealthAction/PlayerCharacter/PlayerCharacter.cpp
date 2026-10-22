@@ -1,9 +1,12 @@
+#include "PlayerCharacter.h"
+#include "State/Player/PlayerCrouchState.h"
+#include "State/Player/PlayerShadowState.h"
+#include "State/Player/PlayerDashState.h"
 //----------------------------------------------------------
 // 概要				：プレイヤーキャラを制御するCharacterオブジェクト
 // 更新日　　　　 　：11/19　
 //----------------------------------------------------------
 
-#include "PlayerCharacter.h"
 #include "Engine/World.h"
 #include "Engine/GameInstance.h"
 #include "State/Player/PlayerStateMachine.h"
@@ -616,9 +619,24 @@ void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakK
 //-----------------------------------------------------
 //状態変更処理
 //-----------------------------------------------------
-EPlayerStatus APlayerCharacter::GetPlayerStatus() const
+UPlayerStateBase* APlayerCharacter::GetPlayerState() const
 {
-	return IsValid(m_stateMachine) ? m_stateMachine->GetPlayerStatus() : EPlayerStatus::Idle;
+	return IsValid(m_stateMachine) ? Cast<UPlayerStateBase>(m_stateMachine->GetCurrentState()) : nullptr;
+}
+
+bool APlayerCharacter::IsCrouch() const
+{
+	return IsValid(m_stateMachine) && m_stateMachine->IsCurrentState<UPlayerCrouchState>();
+}
+
+bool APlayerCharacter::IsShadow() const
+{
+	return IsValid(m_stateMachine) && m_stateMachine->IsCurrentState<UPlayerShadowState>();
+}
+
+bool APlayerCharacter::IsDash() const
+{
+	return IsValid(m_stateMachine) && m_stateMachine->IsCurrentState<UPlayerDashState>();
 }
 
 UPlayerStateMachine* APlayerCharacter::GetPlayerStateMachine() const
@@ -672,7 +690,7 @@ bool APlayerCharacter::IsUpPosWall(const FVector& _startPos)const
 //-----------------------------------------------------
 bool APlayerCharacter::IsInShadow()const
 {
-	return GetPlayerStatus() == EPlayerStatus::InShadow;
+	return IsShadow();
 }
 
 //-------------------------------------------------------
@@ -1031,7 +1049,7 @@ float APlayerCharacter::GetMaxShadowTime() const
 AEnemyBase* APlayerCharacter::GetNearestEnemy()
 {
 	const UPlayerAttackState* Attack = IsValid(m_stateMachine)
-		? Cast<UPlayerAttackState>(m_stateMachine->GetPlayerState(EPlayerStatus::Attack)) : nullptr;
+		? m_stateMachine->GetState<UPlayerAttackState>() : nullptr;
 	return Attack ? Attack->FindTarget() : nullptr;
 }
 

@@ -15,10 +15,10 @@
 3. 下表の各 C++ ステートを親に、それぞれステート BP を作成します。
 4. マシーン BP の **Class Defaults → State Machine → State Classes** に、11個のステート BP クラスを重複なく登録します。順序は自由です。
 5. プレイヤー BP の **Class Defaults → State Machine → Player State Machine Class** にマシーン BP を指定します。
-6. マシーン BP の **Initial Status** を通常は `Idle` にします。
+6. マシーン BP の **Initial State Class** を通常は `PlayerIdleState` にします。
 7. 各 BP をコンパイルして保存します。
 
-ステート BP は表のネイティブ親クラスから派生してください。`Player Status` の値は親の設定を維持します。必要なステートの不足や重複はログにエラーを出し、不完全な設定では操作を無効にします。
+ステート BP は表のネイティブ親クラスから派生してください。状態の識別には親クラスの型を使います。必要なステートの不足や重複はログにエラーを出し、不完全な設定では操作を無効にします。
 
 ## 各ステート BP のパラメータ
 
@@ -62,7 +62,7 @@
 | ダメージ復帰時間・無敵時間 | Damage の Recovery Duration / Invincibility Duration |
 | 影メッシュ・影エフェクトクラス | Shadow の各設定 |
 | 最大スタミナ・回復倍率 | マシーンの Maximum Stamina / Stamina Recovery Rate |
-| Initial Player Status | マシーンの Initial Status |
+| Initial Player Status | マシーンの Initial State Class |
 | 旧 Camera Init Pos の Dash / Crouch / InShadow | 各ステートの Camera Settings |
 | 旧 Camera Init Pos の ThirdPerson / TopDownView | プレイヤーの Third Person Camera / Top Down Camera |
 
@@ -74,7 +74,7 @@
 
 `Get Player` でプレイヤーを、`Get Player Machine` でマシーンを取得できます。`Request Player State` の戻り値は実際に遷移できたかを表します。外部 BP からはプレイヤーの `Get Player State Machine → Get Player State` で登録済みのステートを取得できます。
 
-`Can Enter State / Can Exit State / Can Transition To Status` は通常の遷移条件です。Damage / Dead は終了条件を無視して割り込み、Dead から通常遷移では復帰しません。入場・退出・遷移条件の評価中の再帰的な遷移要求は拒否されるので、次の遷移は `On Update` または後続イベントから要求してください。
+`Can Enter State / Can Exit State / Can Transition To State` は通常の遷移条件です。Damage / Dead は終了条件を無視して割り込み、Dead から通常遷移では復帰しません。入場・退出・遷移条件の評価中の再帰的な遷移要求は拒否されるので、次の遷移は `On Update` または後続イベントから要求してください。
 
 ## 動作上の扱いと検証
 
@@ -91,3 +91,9 @@ UE 5.7 による C++ / UHT / BP のビルドとゲーム実行は、この環境
 影状態ではカプセルのサイズ・位置を変更せず、Shadow ステートBPの **Shadow Collision Profile**（既定 `PlayerInShadow`）に切り替えます。退出時は入場前のプリセットへ戻します。旧 Capsule Height Ratio は使用しません。
 
 通過させたい障害物のコリジョン設定で、Object Response の **PlayerInShadow** を **Ignore** にしてください。床と通過不可の壁は **Block** のままにします。同じコリジョンで床と障害物をまとめている場合は、別コンポーネントに分けて設定してください。この方式は指定した障害物全体を通過するため、隙間の寸法による判定は行いません。既存の影解除時の障害物チェックと退避位置への復帰処理は継続します。
+
+### クラスでのステート管理
+
+プレイヤーの状態EnumとEnum用の対応表は削除しました。State Classesの登録済みインスタンスをクラスで検索し、現在のステート自身の型で判定します。ネイティブクラスを指定しても登録したBP派生クラスを取得するため、BPの設定値は継続して使用します。同じ役割の派生クラスは1つずつ登録してください。
+
+開始状態はステートマシンBPの Initial State Class で指定します（既定はPlayerIdleState）。Change Player State / Request Player State / Get Player State はEnumの代わりにステートクラスを指定します。Can Transition To Status は Can Transition To State に変更しました。プレイヤーの Get Player Status は Get Player State に変更し、ステート本体を返します。旧Enumを参照するBPは該当ノードを差し替えて再コンパイルしてください。Is Shadow / Is Dash / Is Crouch はそのまま使用できます。

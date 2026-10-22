@@ -5,7 +5,7 @@
 #include "Noise/NoiseManager.h"
 #include "Engine/World.h"
 
-UPlayerJumpState::UPlayerJumpState() { PlayerStatus = EPlayerStatus::Jump; }
+UPlayerJumpState::UPlayerJumpState() { }
 
 bool UPlayerJumpState::CanEnterState_Implementation() const
 {
@@ -47,7 +47,7 @@ void UPlayerJumpState::OnUpdate_Implementation(float DeltaTime)
 		Movement->Velocity.Z = FMath::Max(-static_cast<double>(FMath::Max(0.f, MaximumFallSpeed)),
 			static_cast<double>(Movement->Velocity.Z) - static_cast<double>(FMath::Pow(FMath::Max(1.f, GravityCurveBase), m_stateTimer)));
 	}
-	// Landed is the authoritative notification; it fires before the movement mode changes.
+	//着地直後は移動モードが空中のままなのでLanded側で戻す
 }
 
 void UPlayerJumpState::OnExit_Implementation()

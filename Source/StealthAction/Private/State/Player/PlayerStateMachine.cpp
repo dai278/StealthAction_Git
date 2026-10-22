@@ -1,4 +1,13 @@
 #include "State/Player/PlayerStateMachine.h"
+#include "State/Player/PlayerIdleState.h"
+#include "State/Player/PlayerWalkState.h"
+#include "State/Player/PlayerDashState.h"
+#include "State/Player/PlayerJumpState.h"
+#include "State/Player/PlayerCrouchState.h"
+#include "State/Player/PlayerDeadState.h"
+#include "State/Player/PlayerShadowState.h"
+#include "State/Player/PlayerInteractState.h"
+#include "State/Player/PlayerLocomotionState.h"
 #include "State/Player/PlayerStateBase.h"
 #include "State/Player/PlayerDamageState.h"
 #include "State/Player/PlayerAttackState.h"
@@ -6,10 +15,14 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 
+UPlayerStateMachine::UPlayerStateMachine()
+{
+	InitialStateClass = UPlayerIdleState::StaticClass();
+}
+
 void UPlayerStateMachine::Initialize(AActor* Owner)
 {
 	Super::Initialize(Owner);
-	PlayerStates.Reset();
 	bConfigured = false;
 	const APlayerCharacter* Player = Cast<APlayerCharacter>(Owner);
 	if (!Player)
@@ -19,79 +32,63 @@ void UPlayerStateMachine::Initialize(AActor* Owner)
 	}
 	StaminaUsed = 0.f;
 	CancelLocomotionRequests();
+	//入力で使うステートの登録確認
 	bool bValid = true;
+	const TSubclassOf<UPlayerStateBase> RequiredStates[] = {
+		UPlayerIdleState::StaticClass(),
+		UPlayerWalkState::StaticClass(),
+		UPlayerDashState::StaticClass(),
+		UPlayerJumpState::StaticClass(),
+		UPlayerCrouchState::StaticClass(),
+		UPlayerAttackState::StaticClass(),
+		UPlayerDamageState::StaticClass(),
+		UPlayerDeadState::StaticClass(),
+		UPlayerShadowState::StaticClass(),
+		UPlayerInteractState::StaticClass(),
+		UPlayerInteractAnimationState::StaticClass()
+	};
+	for (const auto& StateClass : RequiredStates)
+	{
+		int32 Count = 0;
+		for (UStateBase* State : GetRegisteredStates())
+		{
+			if (IsValid(State) && State->IsA(StateClass)) { ++Count; }
+		}
+		if (Count != 1)
+		{
+			UE_LOG(LogTemp, Error, TEXT("%s: Register exactly one subclass of %s."), *GetName(), *StateClass->GetName());
+			bValid = false;
+		}
+	}
 	for (UStateBase* State : GetRegisteredStates())
 	{
-		UPlayerStateBase* PlayerState = Cast<UPlayerStateBase>(State);
-		if (!PlayerState || PlayerStates.Contains(PlayerState->GetPlayerStatus()))
-		{
-			UE_LOG(LogTemp, Error, TEXT("%s: State Classes must contain unique player statuses and only PlayerStateBase subclasses."), *GetName());
-			bValid = false;
-			continue;
-		}
-		PlayerStates.Add(PlayerState->GetPlayerStatus(), PlayerState);
-	}
-
-	// Existing character inputs rely on all of these statuses. Fail configuration
-	// explicitly rather than silently applying half a transition's side effects.
-	const EPlayerStatus RequiredStatuses[] = {
-		EPlayerStatus::Idle, EPlayerStatus::Walk, EPlayerStatus::Dash,
-		EPlayerStatus::Jump, EPlayerStatus::Crouch, EPlayerStatus::Attack,
-		EPlayerStatus::Damage, EPlayerStatus::Dead, EPlayerStatus::InShadow,
-		EPlayerStatus::Interact, EPlayerStatus::InteractAnimation
-	};
-	for (EPlayerStatus Status : RequiredStatuses)
-	{
-		if (!PlayerStates.Contains(Status))
-		{
-			UE_LOG(LogTemp, Error, TEXT("%s: Missing State Classes entry for EPlayerStatus %d."), *GetName(), static_cast<int32>(Status));
-			bValid = false;
-		}
+		if (!IsValid(Cast<UPlayerStateBase>(State))) { bValid = false; }
 	}
 	bConfigured = bValid;
-	if (bConfigured && !ChangePlayerState(InitialStatus))
+	if (bConfigured && !ChangePlayerState(InitialStateClass))
 	{
 		bConfigured = false;
 		UE_LOG(LogTemp, Error, TEXT("%s: Initial player state refused entry."), *GetName());
 	}
 }
 
-bool UPlayerStateMachine::ChangePlayerState(EPlayerStatus NewStatus)
+bool UPlayerStateMachine::ChangePlayerState(TSubclassOf<UPlayerStateBase> NewStateClass)
 {
 	if (!bConfigured || bTransitionInProgress) { return false; }
 	TGuardValue<bool> TransitionGuard(bTransitionInProgress, true);
-	const TObjectPtr<UPlayerStateBase>* State = PlayerStates.Find(NewStatus);
-	if (!State || !IsValid(State->Get())) { return false; }
-	const UPlayerStateBase* Current = Cast<UPlayerStateBase>(GetCurrentState());
-	if (Current && Current->GetPlayerStatus() == EPlayerStatus::Dead) { return false; }
-	// Damage and death must interrupt attack/interaction even if a BP locks exit.
-	if (NewStatus == EPlayerStatus::Damage || NewStatus == EPlayerStatus::Dead)
+	UPlayerStateBase* State = GetPlayerState(NewStateClass);
+	if (!State || IsCurrentState<UPlayerDeadState>()) { return false; }
+	//被ダメージと死亡は終了待ち中でも割り込む
+	if (State->IsA<UPlayerDamageState>() || State->IsA<UPlayerDeadState>())
 	{
-		return ForceChangeState(State->Get());
+		return ForceChangeState(State);
 	}
-	return ChangeState(State->Get());
-}
-
-EPlayerStatus UPlayerStateMachine::GetPlayerStatus() const
-{
-	const UPlayerStateBase* State = Cast<UPlayerStateBase>(GetCurrentState());
-	return State ? State->GetPlayerStatus() : InitialStatus;
+	return ChangeState(State);
 }
 
 bool UPlayerStateMachine::IsLocomotionState() const
 {
-	if (!bConfigured || !GetCurrentState()) { return false; }
-	switch (GetPlayerStatus())
-	{
-	case EPlayerStatus::Idle:
-	case EPlayerStatus::Walk:
-	case EPlayerStatus::Dash:
-	case EPlayerStatus::Jump:
-	case EPlayerStatus::Crouch:
-		return true;
-	default:
-		return false;
-	}
+	return bConfigured && IsCurrentState<UPlayerLocomotionState>();
 }
 
 void UPlayerStateMachine::Stop()
@@ -99,15 +96,19 @@ void UPlayerStateMachine::Stop()
 	if (bTransitionInProgress) { return; }
 	TGuardValue<bool> TransitionGuard(bTransitionInProgress, true);
 	Super::Stop();
-	if (UPlayerDamageState* DamageState = Cast<UPlayerDamageState>(GetPlayerState(EPlayerStatus::Damage))) { DamageState->ClearProtection(); }
+	if (UPlayerDamageState* DamageState = GetState<UPlayerDamageState>()) { DamageState->ClearProtection(); }
 	CancelLocomotionRequests();
 	bConfigured = false;
 }
 
-UPlayerStateBase* UPlayerStateMachine::GetPlayerState(EPlayerStatus Status) const
+UPlayerStateBase* UPlayerStateMachine::GetPlayerState(TSubclassOf<UPlayerStateBase> StateClass) const
 {
-	const TObjectPtr<UPlayerStateBase>* State = PlayerStates.Find(Status);
-	return State && IsValid(State->Get()) ? State->Get() : nullptr;
+	if (!StateClass) { return nullptr; }
+	for (UStateBase* State : GetRegisteredStates())
+	{
+		if (IsValid(State) && State->IsA(StateClass)) { return Cast<UPlayerStateBase>(State); }
+	}
+	return nullptr;
 }
 
 bool UPlayerStateMachine::CanControl() const
@@ -122,9 +123,9 @@ void UPlayerStateMachine::Update(float DeltaTime)
 {
 	if (!bConfigured) { return; }
 	DeltaTime = FMath::Max(0.f, DeltaTime);
-	for (const auto& Entry : PlayerStates)
+	for (UStateBase* RegisteredState : GetRegisteredStates())
 	{
-		if (IsValid(Entry.Value)) { Entry.Value->BackgroundUpdate(DeltaTime); }
+		if (UPlayerStateBase* State = Cast<UPlayerStateBase>(RegisteredState)) { State->BackgroundUpdate(DeltaTime); }
 	}
 	Super::Update(DeltaTime);
 	UPlayerStateBase* State = Cast<UPlayerStateBase>(GetCurrentState());
@@ -138,25 +139,25 @@ void UPlayerStateMachine::Update(float DeltaTime)
 	else { StaminaUsed = FMath::Max(0.f, StaminaUsed - DeltaTime * FMath::Max(0.f, StaminaRecoveryRate)); }
 }
 
-EPlayerStatus UPlayerStateMachine::SelectLocomotionStatus(bool bAfterLanding) const
+TSubclassOf<UPlayerStateBase> UPlayerStateMachine::SelectLocomotionState(bool bAfterLanding) const
 {
 	const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwner());
-	if (!IsValid(PlayerCharacter)) { return EPlayerStatus::Idle; }
+	if (!IsValid(PlayerCharacter)) { return UPlayerIdleState::StaticClass(); }
 	const UCharacterMovementComponent* Movement = PlayerCharacter->GetCharacterMovement();
-	if (!bAfterLanding && IsValid(Movement) && Movement->IsFalling()) { return EPlayerStatus::Jump; }
-	if (bCrouchRequested) { return EPlayerStatus::Crouch; }
-	if (bDashRequested && !IsStaminaDepleted() && !PlayerCharacter->m_charaMoveInput.IsNearlyZero(0.1f)) { return EPlayerStatus::Dash; }
-	return PlayerCharacter->m_charaMoveInput.IsNearlyZero(0.1f) ? EPlayerStatus::Idle : EPlayerStatus::Walk;
+	if (!bAfterLanding && IsValid(Movement) && Movement->IsFalling()) { return UPlayerJumpState::StaticClass(); }
+	if (bCrouchRequested) { return UPlayerCrouchState::StaticClass(); }
+	if (bDashRequested && !IsStaminaDepleted() && !PlayerCharacter->m_charaMoveInput.IsNearlyZero(0.1f)) { return UPlayerDashState::StaticClass(); }
+	return PlayerCharacter->m_charaMoveInput.IsNearlyZero(0.1f) ? UPlayerIdleState::StaticClass() : UPlayerWalkState::StaticClass();
 }
 
 void UPlayerStateMachine::RefreshLocomotionState()
 {
-	if (IsLocomotionState() && GetPlayerStatus() != EPlayerStatus::Jump) { ChangePlayerState(SelectLocomotionStatus()); }
+	if (IsLocomotionState() && !IsCurrentState<UPlayerJumpState>()) { ChangePlayerState(SelectLocomotionState()); }
 }
 
 bool UPlayerStateMachine::ReturnToLocomotion(bool bAfterLanding)
 {
-	return ChangePlayerState(SelectLocomotionStatus(bAfterLanding));
+	return ChangePlayerState(SelectLocomotionState(bAfterLanding));
 }
 
 void UPlayerStateMachine::MoveInput()
@@ -182,61 +183,61 @@ void UPlayerStateMachine::ToggleCrouch()
 
 void UPlayerStateMachine::TryJump()
 {
-	if (!CanControl() || !IsLocomotionState() || GetPlayerStatus() == EPlayerStatus::Jump) { return; }
+	if (!CanControl() || !IsLocomotionState() || IsCurrentState<UPlayerJumpState>()) { return; }
 	bJumpRequested = true;
-	ChangePlayerState(EPlayerStatus::Jump);
+	ChangePlayerState(UPlayerJumpState::StaticClass());
 	bJumpRequested = false;
 }
 
 void UPlayerStateMachine::TryAttack()
 {
 	if (!CanControl()) { return; }
-	if (GetPlayerStatus() == EPlayerStatus::InShadow && !ReturnToLocomotion()) { return; }
-	ChangePlayerState(EPlayerStatus::Attack);
+	if (IsCurrentState<UPlayerShadowState>() && !ReturnToLocomotion()) { return; }
+	ChangePlayerState(UPlayerAttackState::StaticClass());
 }
 
 void UPlayerStateMachine::ToggleShadow()
 {
 	if (!CanControl()) { return; }
-	if (GetPlayerStatus() == EPlayerStatus::InShadow) { ReturnToLocomotion(); }
-	else { ChangePlayerState(EPlayerStatus::InShadow); }
+	if (IsCurrentState<UPlayerShadowState>()) { ReturnToLocomotion(); }
+	else { ChangePlayerState(UPlayerShadowState::StaticClass()); }
 }
 
 void UPlayerStateMachine::TryInteract()
 {
-	if (CanControl() && IsLocomotionState() && GetPlayerStatus() != EPlayerStatus::Jump) { ChangePlayerState(EPlayerStatus::Interact); }
+	if (CanControl() && IsLocomotionState() && !IsCurrentState<UPlayerJumpState>()) { ChangePlayerState(UPlayerInteractState::StaticClass()); }
 }
 
 void UPlayerStateMachine::NotifyLanded()
 {
-	if (GetPlayerStatus() == EPlayerStatus::Jump) { ReturnToLocomotion(true); }
+	if (IsCurrentState<UPlayerJumpState>()) { ReturnToLocomotion(true); }
 }
 
 void UPlayerStateMachine::NotifyAttackFinished()
 {
-	if (GetPlayerStatus() != EPlayerStatus::Attack) { return; }
-	if (UPlayerAttackState* State = Cast<UPlayerAttackState>(GetPlayerState(EPlayerStatus::Attack))) { State->NotifyAttackFinished(); }
+	if (!IsCurrentState<UPlayerAttackState>()) { return; }
+	if (UPlayerAttackState* State = GetState<UPlayerAttackState>()) { State->NotifyAttackFinished(); }
 }
 
 void UPlayerStateMachine::NotifyInteractionFinished()
 {
-	if (GetPlayerStatus() != EPlayerStatus::InteractAnimation) { return; }
-	if (UPlayerInteractAnimationState* State = Cast<UPlayerInteractAnimationState>(GetPlayerState(EPlayerStatus::InteractAnimation))) { State->CompleteInteraction(); }
+	if (!IsCurrentState<UPlayerInteractAnimationState>()) { return; }
+	if (UPlayerInteractAnimationState* State = GetState<UPlayerInteractAnimationState>()) { State->CompleteInteraction(); }
 }
 
 void UPlayerStateMachine::ReceiveDamage(int32 Amount, const FVector& Knockback)
 {
-	if (UPlayerDamageState* State = Cast<UPlayerDamageState>(GetPlayerState(EPlayerStatus::Damage))) { State->ReceiveDamage(Amount, Knockback); }
+	if (UPlayerDamageState* State = GetState<UPlayerDamageState>()) { State->ReceiveDamage(Amount, Knockback); }
 }
 
 bool UPlayerStateMachine::IsInvincible() const
 {
-	const UPlayerDamageState* State = Cast<UPlayerDamageState>(GetPlayerState(EPlayerStatus::Damage));
+	const UPlayerDamageState* State = GetState<UPlayerDamageState>();
 	return State && State->IsInvincible();
 }
 
 bool UPlayerStateMachine::IsAttacking() const
 {
-	const UPlayerAttackState* State = Cast<UPlayerAttackState>(GetPlayerState(EPlayerStatus::Attack));
-	return GetPlayerStatus() == EPlayerStatus::Attack && State && State->IsAttackActive();
+	const UPlayerAttackState* State = GetState<UPlayerAttackState>();
+	return IsCurrentState<UPlayerAttackState>() && State && State->IsAttackActive();
 }

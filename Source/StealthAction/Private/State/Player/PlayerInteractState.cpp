@@ -7,7 +7,6 @@
 
 UPlayerInteractState::UPlayerInteractState()
 {
-	PlayerStatus = EPlayerStatus::Interact;
 	bAllowManualControl = false;
 }
 
@@ -37,11 +36,11 @@ void UPlayerInteractState::OnUpdate_Implementation(float DeltaTime)
 	Direction.Z = 0.f;
 	if (InteractionPosition.IsNearlyZero() || Direction.Size() <= FMath::Max(0.f, AcceptanceRadius))
 	{
-		if (UPlayerInteractAnimationState* Animation = Cast<UPlayerInteractAnimationState>(Machine->GetPlayerState(EPlayerStatus::InteractAnimation)))
+		if (UPlayerInteractAnimationState* Animation = Machine->GetState<UPlayerInteractAnimationState>())
 		{
 			Animation->BeginInteraction(InteractionTarget.Get());
 		}
-		else { Machine->ChangePlayerState(EPlayerStatus::InteractAnimation); }
+		else { Machine->ChangePlayerState(UPlayerInteractAnimationState::StaticClass()); }
 		return;
 	}
 	PlayerCharacter->AddMovementInput(Direction.GetSafeNormal(), FMath::Clamp(ApproachInputScale, 0.f, 1.f));

@@ -10,7 +10,6 @@
 
 UPlayerAttackState::UPlayerAttackState()
 {
-	PlayerStatus = EPlayerStatus::Attack;
 	MoveSpeed = 0.f;
 	bAllowManualControl = false;
 }

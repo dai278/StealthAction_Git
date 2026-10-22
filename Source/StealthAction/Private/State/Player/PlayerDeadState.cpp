@@ -6,7 +6,6 @@
 
 UPlayerDeadState::UPlayerDeadState()
 {
-	PlayerStatus = EPlayerStatus::Dead;
 	MoveSpeed = 0.f;
 	bAllowManualControl = false;
 }

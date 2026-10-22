@@ -4,7 +4,7 @@
 #include "State/Player/PlayerStateBase.h"
 #include "PlayerLocomotionState.generated.h"
 
-// Shared locomotion selection; movement itself still uses Enhanced Input.
+//移動系ステートの共通処理
 UCLASS(Abstract, Blueprintable)
 class STEALTHACTION_API UPlayerLocomotionState : public UPlayerStateBase
 {

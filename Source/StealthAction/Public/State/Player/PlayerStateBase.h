@@ -2,15 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "State/StateBase.h"
-#include "State/Player/PlayerStatus.h"
 #include "Camera/CameraInfo.h"
 #include "PlayerStateBase.generated.h"
 
 class APlayerCharacter;
 class UPlayerStateMachine;
 
-// Derive a Blueprint from this class (or a native player state) and register it
-// in the state-machine Blueprint's State Classes array.
+//プレイヤー用ステートの共通処理
 UCLASS(Abstract, BlueprintType, Blueprintable)
 class STEALTHACTION_API UPlayerStateBase : public UStateBase
 {
@@ -28,13 +26,10 @@ public:
 	virtual bool CanTransitionTo(const UStateBase* NewState) const override;
 
 	UFUNCTION(BlueprintPure, Category = "Player State")
-	EPlayerStatus GetPlayerStatus() const { return PlayerStatus; }
-
-	UFUNCTION(BlueprintPure, Category = "Player State")
 	APlayerCharacter* GetPlayer() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Player State")
-	bool RequestPlayerState(EPlayerStatus NewStatus);
+	bool RequestPlayerState(TSubclassOf<UPlayerStateBase> NewStateClass);
 
 	UFUNCTION(BlueprintPure, Category = "Player State")
 	UPlayerStateMachine* GetPlayerMachine() const;
@@ -58,32 +53,37 @@ public:
 	virtual void OnStaminaDepleted_Implementation();
 
 protected:
+	//カメラ設定を切り替えるか
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	bool bOverrideCamera = false;
 
+	//カメラ設定
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera", meta = (EditCondition = "bOverrideCamera"))
 	FCameraViewSetting CameraSettings;
 
+	//移動速度
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement", meta = (ClampMin = "0.0", Units = "cm/s"))
 	float MoveSpeed = 300.f;
 
+	//向きの補間速度
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement", meta = (ClampMin = "0.0"))
 	float RotationInterpSpeed = 10.f;
 
+	//操作可能か
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	bool bAllowManualControl = true;
 
+	//移動入力を受け付けるか
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	bool bAllowMovementInput = false;
 
+	//足音の大きさ
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement", meta = (ClampMin = "0"))
 	int32 FootstepNoiseLevel = 0;
 
+	//スタミナ消費速度
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stamina", meta = (ClampMin = "0.0"))
 	float StaminaConsumptionRate = 0.f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player State")
-	EPlayerStatus PlayerStatus = EPlayerStatus::Idle;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Player State")
 	void OnEnter();
@@ -106,8 +106,8 @@ protected:
 	virtual bool CanExitState_Implementation() const;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Player State")
-	bool CanTransitionToStatus(EPlayerStatus NewStatus) const;
-	virtual bool CanTransitionToStatus_Implementation(EPlayerStatus NewStatus) const;
+	bool CanTransitionToState(TSubclassOf<UPlayerStateBase> NewStateClass) const;
+	virtual bool CanTransitionToState_Implementation(TSubclassOf<UPlayerStateBase> NewStateClass) const;
 
 private:
 	UPROPERTY(Transient)

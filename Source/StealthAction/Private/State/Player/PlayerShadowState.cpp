@@ -10,7 +10,6 @@
 
 UPlayerShadowState::UPlayerShadowState()
 {
-	PlayerStatus = EPlayerStatus::InShadow;
 	bOverrideCamera = true;
 	CameraSettings = { FRotator(0.f, 0.f, 0.f), 60.f, 300.f, FVector(0.f, 70.f, 20.f), 5.f };
 	bAllowMovementInput = true;

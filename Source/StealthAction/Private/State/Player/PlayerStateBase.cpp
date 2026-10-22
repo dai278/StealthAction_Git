@@ -63,13 +63,13 @@ bool UPlayerStateBase::CanTransitionTo(const UStateBase* NewState) const
 {
 	const UPlayerStateBase* PlayerState = Cast<UPlayerStateBase>(NewState);
 	return PlayerState && Super::CanTransitionTo(NewState)
-		&& CanTransitionToStatus(PlayerState->GetPlayerStatus());
+		&& CanTransitionToState(PlayerState->GetClass());
 }
 
-bool UPlayerStateBase::RequestPlayerState(EPlayerStatus NewStatus)
+bool UPlayerStateBase::RequestPlayerState(TSubclassOf<UPlayerStateBase> NewStateClass)
 {
 	UPlayerStateMachine* Machine = Cast<UPlayerStateMachine>(m_pStateMachine);
-	return Machine && Machine->ChangePlayerState(NewStatus);
+	return Machine && Machine->ChangePlayerState(NewStateClass);
 }
 
 void UPlayerStateBase::OnEnter_Implementation() {}
@@ -77,7 +77,7 @@ void UPlayerStateBase::OnUpdate_Implementation(float DeltaTime) {}
 void UPlayerStateBase::OnExit_Implementation() {}
 bool UPlayerStateBase::CanEnterState_Implementation() const { return true; }
 bool UPlayerStateBase::CanExitState_Implementation() const { return true; }
-bool UPlayerStateBase::CanTransitionToStatus_Implementation(EPlayerStatus NewStatus) const { return true; }
+bool UPlayerStateBase::CanTransitionToState_Implementation(TSubclassOf<UPlayerStateBase> NewStateClass) const { return true; }
 
 APlayerCharacter* UPlayerStateBase::GetPlayer() const
 {

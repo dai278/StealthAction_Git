@@ -1,4 +1,5 @@
 #include "State/Player/PlayerDamageState.h"
+#include "State/Player/PlayerDeadState.h"
 #include "State/Player/PlayerStateMachine.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 #include "Components/CapsuleComponent.h"
@@ -6,7 +7,6 @@
 
 UPlayerDamageState::UPlayerDamageState()
 {
-	PlayerStatus = EPlayerStatus::Damage;
 	MoveSpeed = 0.f;
 	bAllowManualControl = false;
 }
@@ -16,11 +16,11 @@ void UPlayerDamageState::ReceiveDamage(int32 Amount, const FVector& Knockback)
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	UPlayerStateMachine* Machine = GetPlayerMachine();
 	if (!PlayerCharacter || !Machine || !Machine->IsConfigured() || IsInvincible()
-		|| !PlayerCharacter->IsAlive() || Amount <= 0 || Machine->GetPlayerStatus() == EPlayerStatus::Dead) { return; }
+		|| !PlayerCharacter->IsAlive() || Amount <= 0 || Machine->IsCurrentState<UPlayerDeadState>()) { return; }
 	const int32 PreviousHP = PlayerCharacter->m_playerInfo.hp;
 	PlayerCharacter->m_playerInfo.hp = Amount >= PreviousHP ? 0 : PreviousHP - Amount;
 	PendingKnockback = Knockback * FMath::Max(0.f, KnockbackMultiplier);
-	const EPlayerStatus Next = PlayerCharacter->m_playerInfo.hp <= 0 ? EPlayerStatus::Dead : EPlayerStatus::Damage;
+	const TSubclassOf<UPlayerStateBase> Next = PlayerCharacter->m_playerInfo.hp <= 0 ? UPlayerDeadState::StaticClass() : UPlayerDamageState::StaticClass();
 	if (!Machine->ChangePlayerState(Next)) { PlayerCharacter->m_playerInfo.hp = PreviousHP; }
 }
 

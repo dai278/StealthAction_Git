@@ -13,10 +13,13 @@ public:
 	UPlayerShadowState();
 
 protected:
+	//影状態のコリジョン設定
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
 	FName ShadowCollisionProfile = TEXT("PlayerInShadow");
+	//影状態のメッシュ
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
 	TObjectPtr<class USkeletalMesh> ShadowMesh = nullptr;
+	//影エフェクトのクラス
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
 	TSubclassOf<AActor> ShadowEffectClass;
 	virtual bool CanEnterState_Implementation() const override;

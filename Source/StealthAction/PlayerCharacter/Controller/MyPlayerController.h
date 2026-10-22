@@ -12,7 +12,6 @@
 //class APlayerCharacter;
 //class UShadowEffect;
 //
-//enum class EPlayerStatus : uint8;
 //
 //UCLASS(Blueprintable, BlueprintType)
 //class STEALTHACTION_API AMyPlayerController : public APlayerController

@@ -1,3 +1,4 @@
+#include "State/Player/PlayerShadowState.h"
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
@@ -34,10 +35,10 @@ void UShadowEffect::NativeOnInitialized()
 //--------------------------------
 //ƒvƒŒƒCƒ„[‚Ìó‘Ô‚ª•Ï‰»‚µ‚½‚Æ‚«‚ÉŒÄ‚Î‚ê‚éŠÖ”
 //--------------------------------
-void UShadowEffect::OnPlayerStatusChanged(EPlayerStatus _state)
+void UShadowEffect::OnPlayerStatusChanged(UPlayerStateBase* _state)
 {
 	//‰e‚Ì’†‚É‚¢‚é‚Æ‚«
-	if (_state == EPlayerStatus::InShadow)
+	if (IsValid(_state) && _state->IsA<UPlayerShadowState>())
 	{
 		SetVisibility(ESlateVisibility::Visible);
 	}

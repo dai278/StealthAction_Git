@@ -5,7 +5,6 @@
 
 UPlayerCrouchState::UPlayerCrouchState()
 {
-	PlayerStatus = EPlayerStatus::Crouch;
 	bOverrideCamera = true;
 	CameraSettings = { FRotator(0.f, 0.f, 0.f), 60.f, 250.f, FVector(0.f, 70.f, 20.f), 5.f };
 	MoveSpeed = 100.f;

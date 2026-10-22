@@ -1,11 +1,11 @@
 #include "State/Player/PlayerInteractAnimationState.h"
+#include "State/Player/PlayerInteractState.h"
 #include "State/Player/PlayerStateMachine.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 #include "Interact/Interact.h"
 
 UPlayerInteractAnimationState::UPlayerInteractAnimationState()
 {
-	PlayerStatus = EPlayerStatus::InteractAnimation;
 	MoveSpeed = 0.f;
 	bAllowManualControl = false;
 }
@@ -13,7 +13,7 @@ UPlayerInteractAnimationState::UPlayerInteractAnimationState()
 bool UPlayerInteractAnimationState::BeginInteraction(AInteract* Target)
 {
 	InteractionTarget = Target;
-	const bool bStarted = RequestPlayerState(EPlayerStatus::InteractAnimation);
+	const bool bStarted = RequestPlayerState(UPlayerInteractAnimationState::StaticClass());
 	if (!bStarted) { InteractionTarget.Reset(); }
 	return bStarted;
 }
@@ -47,13 +47,13 @@ void UPlayerInteractAnimationState::CompleteInteraction()
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	UPlayerStateMachine* Machine = GetPlayerMachine();
-	if (!PlayerCharacter || !Machine || Machine->GetPlayerStatus() != EPlayerStatus::InteractAnimation) { return; }
+	if (!PlayerCharacter || !Machine || !Machine->IsCurrentState<UPlayerInteractAnimationState>()) { return; }
 	if (!bInteractionExecuted)
 	{
 		bInteractionExecuted = true;
 		if (InteractionTarget.IsValid()) { InteractionTarget->Interact(PlayerCharacter); }
 	}
-	if (IsValid(Machine) && Machine->GetPlayerStatus() == EPlayerStatus::InteractAnimation) { Machine->ReturnToLocomotion(); }
+	if (IsValid(Machine) && Machine->IsCurrentState<UPlayerInteractAnimationState>()) { Machine->ReturnToLocomotion(); }
 }
 
 void UPlayerInteractAnimationState::OnExit_Implementation() { InteractionTarget.Reset(); }

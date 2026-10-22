@@ -7,7 +7,7 @@
 #include "ShadowEffect.generated.h"
 
 
-enum class EPlayerStatus : uint8;
+class UPlayerStateBase;
 /**
  * 
  */
@@ -25,6 +25,6 @@ public:
 
 	//ƒvƒŒƒCƒ„[‚Ìó‘Ô‚ª•Ï‰»‚µ‚½‚Æ‚«‚ÉŒÄ‚Î‚ê‚éŠÖ”
 	UFUNCTION()
-	void OnPlayerStatusChanged(EPlayerStatus _state);
+	void OnPlayerStatusChanged(UPlayerStateBase* _state);
 	
 };

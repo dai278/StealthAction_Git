@@ -13,9 +13,10 @@
 #include "GameInstance/PlayDataInfo.h"//プレイデータ構造体が複数あるものPlayerInfoのみ使用
 #include "Damage/IDamage.h"
 #include "Camera/CameraInfo.h"
-#include "State/Player/PlayerStatus.h"
 
 #include "PlayerCharacter.generated.h"
+
+class UPlayerStateBase;
 
 //前方宣言
 class USpringArmComponent;
@@ -182,22 +183,22 @@ public:
 	bool IsAlive() const { return m_playerInfo.isAlive; }
 
 	UFUNCTION(BlueprintPure, Category = "state")
-	EPlayerStatus GetPlayerStatus() const;
+	UPlayerStateBase* GetPlayerState() const;
 
 	UFUNCTION(BlueprintPure, Category = "state")
 	UPlayerStateMachine* GetPlayerStateMachine() const;
 
 	UFUNCTION(BlueprintPure, Category = "state")
-	bool IsCrouch() const { return GetPlayerStatus() == EPlayerStatus::Crouch; }
+	bool IsCrouch() const;
 
 	UFUNCTION(BlueprintPure, Category = "state")
 	bool CanAttack() const;
 
 	UFUNCTION(BlueprintPure, Category = "state")
-	bool IsShadow() const { return GetPlayerStatus() == EPlayerStatus::InShadow; }
+	bool IsShadow() const;
 
 	UFUNCTION(BlueprintPure, Category = "state")
-	bool IsDash() const { return GetPlayerStatus() == EPlayerStatus::Dash; }
+	bool IsDash() const;
 
 	UFUNCTION(BlueprintPure, Category = "state")
 	bool IsInvincible() const;
