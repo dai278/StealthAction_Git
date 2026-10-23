@@ -9,8 +9,9 @@
 //----------------------------
 //BeginPlay
 //----------------------------
-void UNoiseManager:: OnWorldBeginPlay(UWorld&)
+void UNoiseManager:: OnWorldBeginPlay(UWorld& InWorld)
 {
+	Super::OnWorldBeginPlay(InWorld);
 	//”z—ñ‚ð‹ó‚É
 	m_noiseListeners.Empty();
 }

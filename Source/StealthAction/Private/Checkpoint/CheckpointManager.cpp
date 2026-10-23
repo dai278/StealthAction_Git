@@ -22,8 +22,9 @@ UCheckpointManager::UCheckpointManager()
 //------------------------------------------------
 // BeginPlayŠÖ”
 //------------------------------------------------
-void UCheckpointManager::OnWorldBeginPlay(UWorld&)
+void UCheckpointManager::OnWorldBeginPlay(UWorld& InWorld)
 {
+	Super::OnWorldBeginPlay(InWorld);
 	if (!GetWorld()) { return; }
 
 	//ƒCƒ“ƒQ[ƒ€ƒŒƒxƒ‹‚Å‚È‚¯‚ê‚Îˆ—‚µ‚È‚¢

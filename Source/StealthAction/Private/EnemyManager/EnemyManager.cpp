@@ -20,8 +20,9 @@ UEnemyManager::UEnemyManager()
 //------------------------------------------------
 // BeginPlayŠÖ”
 //------------------------------------------------
-void UEnemyManager::OnWorldBeginPlay(UWorld& )
+void UEnemyManager::OnWorldBeginPlay(UWorld& InWorld)
 {
+	Super::OnWorldBeginPlay(InWorld);
 	if (!GetWorld()) { return; }
 
 	//ƒCƒ“ƒQ[ƒ€ƒŒƒxƒ‹‚Å‚È‚¯‚ê‚Îˆ—‚µ‚È‚¢

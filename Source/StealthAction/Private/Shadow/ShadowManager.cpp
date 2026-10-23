@@ -22,8 +22,9 @@ UShadowManager::UShadowManager()
 //----------------------------------------
 //BeginPlay
 //----------------------------------------
-void UShadowManager::OnWorldBeginPlay(UWorld&)
+void UShadowManager::OnWorldBeginPlay(UWorld& InWorld)
 {
+	Super::OnWorldBeginPlay(InWorld);
 	if (!GetWorld()) { return; }
 
 	//”z—ñ‚ð‹ó‚É‚µ‚Ä’u‚­

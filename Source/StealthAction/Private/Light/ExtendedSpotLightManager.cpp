@@ -7,9 +7,9 @@
 //----------------------------------------
 //BeginPlay
 //----------------------------------------
-void UExtendedSpotLightManager::OnWorldBeginPlay(UWorld&)
+void UExtendedSpotLightManager::OnWorldBeginPlay(UWorld& InWorld)
 {
-	//Super::OnWorldBeginPlay();
+	Super::OnWorldBeginPlay(InWorld);
 	//ライト配列を空に
 	m_pLights.Empty();
 	//敵ライト配列を空に
