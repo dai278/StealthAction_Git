@@ -275,6 +275,8 @@ bool AExtendedSpotLight::IsHit(const FVector& _pos)const
 	FCollisionObjectQueryParams ObjParams;
 	ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
 	ObjParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	//“G‚àÕ•Á•¨‚Æ‚µ‚Ä”»’è‚·‚é
+	ObjParams.AddObjectTypesToQuery(ECC_GameTraceChannel2);
 	// Shadowê—pObjectType‚Íu“ü‚ê‚È‚¢v
 
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(LightOcclusion), false);
