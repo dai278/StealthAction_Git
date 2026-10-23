@@ -17,9 +17,6 @@ protected:
 	//影状態のコリジョン設定
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
 	FName ShadowCollisionProfile = TEXT("PlayerInShadow");
-	//影状態のメッシュ
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
-	TObjectPtr<class USkeletalMesh> ShadowMesh = nullptr;
 	//影エフェクトのクラス
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
 	TSubclassOf<AActor> ShadowEffectClass;
@@ -29,9 +26,8 @@ protected:
 	virtual void OnExit_Implementation() override;
 
 private:
-	//変更前のメッシュ
-	UPROPERTY(Transient)
-	TObjectPtr<class USkeletalMesh> OriginalMesh = nullptr;
+	//変更前のメッシュの表示状態
+	bool bOriginalMeshVisible = true;
 	//変更前のコリジョン設定
 	FName OriginalCollisionProfile = NAME_None;
 	//変更前のメッシュの衝突設定

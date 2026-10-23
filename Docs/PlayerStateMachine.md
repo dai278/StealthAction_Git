@@ -34,7 +34,7 @@
 | `PlayerAttackState` | Move Speed `0`、Attack Range `150`、Attack Radius `70`、Sneak Kill Damage `10`、Attack Duration `1`、Attack Cooldown `0.3`、Minimum Facing Dot `0.4`、Attack Gravity Scale `0.1` |
 | `PlayerDamageState` | Move Speed `0`、Recovery Duration `1`、Invincibility Duration `5`、Knockback Multiplier `1` |
 | `PlayerDeadState` | Move Speed `0`、Open Game Over Level `true`、Game Over Level `GameOver` |
-| `PlayerShadowState` | Move Speed `300`、Stamina Consumption Rate `1`、Shadow Collision Profile `PlayerInShadow`、Shadow Mesh、Shadow Effect Class |
+| `PlayerShadowState` | Move Speed `300`、Stamina Consumption Rate `1`、Shadow Collision Profile `PlayerInShadow`、Shadow Effect Class |
 | `PlayerInteractState` | Move Speed `300`、Acceptance Radius `50`、Approach Input Scale `0.5`、Rotation Interp Speed `10` |
 | `PlayerInteractAnimationState` | Move Speed `0`、Interaction Duration `2.5`、Wait For Animation Notify `false` |
 
@@ -44,7 +44,7 @@
 - **Allow Manual Control / Allow Movement Input**：ネイティブ親が設定済みです。攻撃・被ダメージ・死亡・インタラクト中は手動操作を止めるため、通常は変更不要です。
 - 被ダメージ時の無敵時間は復帰時間以上に保ちます。`Invincibility Duration` を短くしても、反応中に同一 Damage へ再入場することを防ぎます。
 - **Wait For Animation Notify** を有効にした場合、時間では終了しません。アニメーション通知からプレイヤーの既存関数 **On Interact Animation End** を呼んでください。
-- **Shadow Mesh** が未設定の場合は通常メッシュを維持します。**Shadow Effect Class** が未設定の場合はエフェクトを生成しません。
+- 影状態ではプレイヤーのメッシュを非表示にし、解除時は入る前の表示状態に戻します。メッシュ差し替え用の Shadow Mesh は廃止しました。**Shadow Effect Class** が未設定の場合はエフェクトを生成しません。
 
 共有スタミナの **Maximum Stamina（初期値5） / Stamina Recovery Rate（初期値1.5）** は、マシーン BP の Class Defaults → Stamina にあります。
 
@@ -60,7 +60,7 @@
 | Jump Vector | Jump の Jump Impulse |
 | 攻撃範囲・半径・ダメージ・クールダウン | Attack の各設定 |
 | ダメージ復帰時間・無敵時間 | Damage の Recovery Duration / Invincibility Duration |
-| 影メッシュ・影エフェクトクラス | Shadow の各設定 |
+| 影エフェクトクラス | Shadow の Shadow Effect Class |
 | 最大スタミナ・回復倍率 | マシーンの Maximum Stamina / Stamina Recovery Rate |
 | Initial Player Status | マシーンの Initial State Class |
 | 旧 Camera Init Pos の Dash / Crouch / InShadow | 各ステートの Camera Settings |

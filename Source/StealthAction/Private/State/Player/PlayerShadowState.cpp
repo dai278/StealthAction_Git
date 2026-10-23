@@ -52,10 +52,11 @@ void UPlayerShadowState::OnEnter_Implementation()
 	//サイズは変えずに影用のコリジョンへ切り替える
 	OriginalCollisionProfile = Capsule->GetCollisionProfileName();
 	Capsule->SetCollisionProfileName(ShadowCollisionProfile);
-	OriginalMesh = Mesh->GetSkeletalMeshAsset();
+	//プレイヤーの姿だけ消して影エフェクトは残す
+	bOriginalMeshVisible = Mesh->IsVisible();
+	Mesh->SetVisibility(false);
 	OriginalMeshCollision = Mesh->GetCollisionEnabled();
 	bOriginalOverlapEvents = Mesh->GetGenerateOverlapEvents();
-	if (ShadowMesh) { Mesh->SetSkeletalMesh(ShadowMesh.Get()); }
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Mesh->SetGenerateOverlapEvents(false);
 	PlayerCharacter->m_cameraStatus = ECameraStatus::InShadow;
@@ -102,11 +103,11 @@ void UPlayerShadowState::OnExit_Implementation()
 	}
 	if (USkeletalMeshComponent* Mesh = PlayerCharacter->GetMesh())
 	{
-		Mesh->SetSkeletalMesh(OriginalMesh.Get());
+		//影に入る前の表示状態へ戻す
+		Mesh->SetVisibility(bOriginalMeshVisible);
 		Mesh->SetCollisionEnabled(OriginalMeshCollision);
 		Mesh->SetGenerateOverlapEvents(bOriginalOverlapEvents);
 	}
-	OriginalMesh = nullptr;
 	if (IsValid(PlayerCharacter->m_ShadowEffectChild))
 	{
 		if (AActor* Effect = PlayerCharacter->m_ShadowEffectChild->GetChildActor()) { Effect->SetActorHiddenInGame(true); }
