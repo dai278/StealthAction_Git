@@ -2,6 +2,7 @@
 
 
 #include "Camera/CameraFocusDirectorComponent.h"
+#include "Camera/CameraActor.h"
 
 
 #include "GameFramework/PlayerController.h"
