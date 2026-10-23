@@ -7,6 +7,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Light/ExtendedSpotLightManager.h"
 #include "Engine/World.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInterface.h"
 
 //-----------------------------------------------------
 //コンストラクタ
@@ -52,9 +54,34 @@ void UPlayerShadowState::OnEnter_Implementation()
 	//サイズは変えずに影用のコリジョンへ切り替える
 	OriginalCollisionProfile = Capsule->GetCollisionProfileName();
 	Capsule->SetCollisionProfileName(ShadowCollisionProfile);
-	//プレイヤーの姿だけ消して影エフェクトは残す
+	//移動用のカプセルは触らずに見た目だけ変更する
 	bOriginalMeshVisible = Mesh->IsVisible();
-	Mesh->SetVisibility(false);
+	OriginalMeshLocation = Mesh->GetRelativeLocation();
+	SinkElapsed = 0.f;
+	OriginalMaterials.Reset();
+	SinkMaterials.Reset();
+	OriginalOpacities.Reset();
+	bool bMissingOpacity = false;
+	for (int32 Index = 0; Index < Mesh->GetNumMaterials(); ++Index)
+	{
+		UMaterialInterface* Material = Mesh->GetMaterial(Index);
+		OriginalMaterials.Add(Material);
+		float Opacity = 1.f;
+		UMaterialInstanceDynamic* DynamicMaterial = nullptr;
+		if (IsValid(Material) && Material->GetScalarParameterValue(FMaterialParameterInfo(OpacityParameterName), Opacity))
+		{
+			//元のマテリアルの値は変更しない
+			DynamicMaterial = Mesh->CreateDynamicMaterialInstance(Index);
+		}
+		else if (IsValid(Material)) { bMissingOpacity = true; }
+		SinkMaterials.Add(DynamicMaterial);
+		OriginalOpacities.Add(Opacity);
+	}
+	if (bMissingOpacity)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: Mesh materials need a scalar parameter '%s' connected to opacity for shadow fading."), *GetName(), *OpacityParameterName.ToString());
+	}
+	UpdateSinkAppearance(0.f);
 	OriginalMeshCollision = Mesh->GetCollisionEnabled();
 	bOriginalOverlapEvents = Mesh->GetGenerateOverlapEvents();
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -78,6 +105,7 @@ void UPlayerShadowState::OnUpdate_Implementation(float DeltaTime)
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	UWorld* World = GetWorld();
 	if (!PlayerCharacter) { return; }
+	UpdateSinkAppearance(DeltaTime);
 	UExtendedSpotLightManager* Lights = World ? World->GetSubsystem<UExtendedSpotLightManager>() : nullptr;
 	if (!IsValid(Lights) || Lights->IsHitAllLight(PlayerCharacter->GetFeetLocation())
 		|| (PlayerCharacter->m_bOnShadow && Lights->IsHitEnemyLight(PlayerCharacter->GetFeetLocation())))
@@ -103,15 +131,46 @@ void UPlayerShadowState::OnExit_Implementation()
 	}
 	if (USkeletalMeshComponent* Mesh = PlayerCharacter->GetMesh())
 	{
-		//影に入る前の表示状態へ戻す
+		//途中で解除されても位置とマテリアルを元に戻す
+		Mesh->SetRelativeLocation(OriginalMeshLocation);
+		for (int32 Index = 0; Index < OriginalMaterials.Num(); ++Index)
+		{
+			Mesh->SetMaterial(Index, OriginalMaterials[Index].Get());
+		}
 		Mesh->SetVisibility(bOriginalMeshVisible);
 		Mesh->SetCollisionEnabled(OriginalMeshCollision);
 		Mesh->SetGenerateOverlapEvents(bOriginalOverlapEvents);
 	}
+	OriginalMaterials.Reset();
+	SinkMaterials.Reset();
+	OriginalOpacities.Reset();
 	if (IsValid(PlayerCharacter->m_ShadowEffectChild))
 	{
 		if (AActor* Effect = PlayerCharacter->m_ShadowEffectChild->GetChildActor()) { Effect->SetActorHiddenInGame(true); }
 	}
 	PlayerCharacter->m_cameraStatus = ECameraStatus::ThirdPerson;
 	PlayerCharacter->m_bCameraSwitching = true;
+}
+
+//-----------------------------------------------------
+//影に潜る演出
+//-----------------------------------------------------
+void UPlayerShadowState::UpdateSinkAppearance(float DeltaTime)
+{
+	APlayerCharacter* PlayerCharacter = GetPlayer();
+	USkeletalMeshComponent* Mesh = PlayerCharacter ? PlayerCharacter->GetMesh() : nullptr;
+	if (!bShadowApplied || !IsValid(Mesh)) { return; }
+	SinkElapsed += FMath::Max(0.f, DeltaTime);
+	const float Alpha = SinkDuration > 0.f ? FMath::Clamp(SinkElapsed / SinkDuration, 0.f, 1.f) : 1.f;
+	//プレイヤーの移動に付いていきながら下へ沈む
+	Mesh->SetRelativeLocation(OriginalMeshLocation - FVector(0.f, 0.f, FMath::Max(0.f, SinkDistance) * Alpha));
+	for (int32 Index = 0; Index < SinkMaterials.Num(); ++Index)
+	{
+		if (IsValid(SinkMaterials[Index]))
+		{
+			SinkMaterials[Index]->SetScalarParameterValue(OpacityParameterName, OriginalOpacities[Index] * (1.f - Alpha));
+		}
+	}
+	//潜り終わったら完全に非表示にする
+	Mesh->SetVisibility(bOriginalMeshVisible && Alpha < 1.f);
 }

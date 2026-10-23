@@ -111,3 +111,11 @@ BPでイベントを上書きしたときは、イベントノードの右クリ
 EPlayerStatus はアニメーション用の値として使用します。各ステートが Animation → Player Status を持ち、ネイティブの各ステートには対応する既定値を設定しています。プレイヤーの Get Player Status は現在のステートから値を取得し、ステートが無い場合は Idle を返します。AnimBPではプレイヤーから Get Player Status を取得し、Blend Poses by Enum や遷移条件に使用できます。
 
 ステートの変更・検索・現在状態の判定は従来通りクラスで行います。Enumを別途更新する処理や、Enumからステートを選ぶ対応表はありません。
+
+### 影に潜る演出
+
+Shadow BP の Shadow → Appearance で Sink Duration（既定0.4秒）、Sink Distance（既定100cm）、Opacity Parameter Name（既定Opacity）を設定します。移動を止めずにメッシュだけ下げ、不透明度を下げます。潜り終わったらメッシュを非表示にします。途中の解除や被ダメージによる割り込みでも、元の相対位置・マテリアル・表示・衝突設定へ戻します。退出時は即座に復元します。
+
+**マテリアル設定が必要です。** プレイヤーの全マテリアルに Scalar Parameter「Opacity」（既定1）を用意し、Maskedなら DitherTemporalAA の Alpha Threshold に接続し、その出力を Opacity Mask へ接続します（既存のマスクがあれば掛け合わせます）。Translucentなら Opacity に接続します。Opaqueのまま、またはパラメータを追加しただけでは透明になりません。パラメータが無いマテリアルは警告を出し、沈む動作と最後の非表示のみになります。この環境ではマテリアルアセット自体は変更していません。
+
+演出には一時的な動的マテリアルを使い、元のマテリアルインスタンスや他のキャラクターの値を変更しません。BPでOn Enter / On Update / On Exitを上書きする場合は「親関数を呼び出す」を接続してください。
