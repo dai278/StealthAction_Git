@@ -5,17 +5,26 @@
 #include "Interact/Interact.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+//-----------------------------------------------------
+//コンストラクタ
+//-----------------------------------------------------
 UPlayerInteractState::UPlayerInteractState()
 {
 	bAllowManualControl = false;
 }
 
+//-----------------------------------------------------
+//開始条件
+//-----------------------------------------------------
 bool UPlayerInteractState::CanEnterState_Implementation() const
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	return PlayerCharacter && IsValid(PlayerCharacter->m_hitInteractOb) && PlayerCharacter->m_hitInteractOb->CanInteract();
 }
 
+//-----------------------------------------------------
+//開始処理
+//-----------------------------------------------------
 void UPlayerInteractState::OnEnter_Implementation()
 {
 	if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->CancelDash(); }
@@ -26,6 +35,9 @@ void UPlayerInteractState::OnEnter_Implementation()
 	}
 }
 
+//-----------------------------------------------------
+//更新処理
+//-----------------------------------------------------
 void UPlayerInteractState::OnUpdate_Implementation(float DeltaTime)
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
@@ -47,4 +59,7 @@ void UPlayerInteractState::OnUpdate_Implementation(float DeltaTime)
 	PlayerCharacter->SetActorRotation(FMath::RInterpTo(PlayerCharacter->GetActorRotation(), Direction.Rotation(), DeltaTime, FMath::Max(0.f, RotationInterpSpeed)));
 }
 
+//-----------------------------------------------------
+//終了処理
+//-----------------------------------------------------
 void UPlayerInteractState::OnExit_Implementation() { InteractionTarget.Reset(); }

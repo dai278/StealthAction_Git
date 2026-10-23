@@ -10,6 +10,7 @@ class STEALTHACTION_API UPlayerLocomotionState : public UPlayerStateBase
 {
 	GENERATED_BODY()
 public:
+	//コンストラクタ
 	UPlayerLocomotionState();
 protected:
 	virtual void OnUpdate_Implementation(float DeltaTime) override;

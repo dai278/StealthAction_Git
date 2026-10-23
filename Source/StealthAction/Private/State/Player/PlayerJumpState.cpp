@@ -5,8 +5,14 @@
 #include "Noise/NoiseManager.h"
 #include "Engine/World.h"
 
+//-----------------------------------------------------
+//コンストラクタ
+//-----------------------------------------------------
 UPlayerJumpState::UPlayerJumpState() { }
 
+//-----------------------------------------------------
+//開始条件
+//-----------------------------------------------------
 bool UPlayerJumpState::CanEnterState_Implementation() const
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
@@ -15,6 +21,9 @@ bool UPlayerJumpState::CanEnterState_Implementation() const
 	return IsValid(Movement) && Machine && (Machine->IsJumpRequested() ? Movement->IsMovingOnGround() : Movement->IsFalling());
 }
 
+//-----------------------------------------------------
+//開始処理
+//-----------------------------------------------------
 void UPlayerJumpState::OnEnter_Implementation()
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
@@ -37,6 +46,9 @@ void UPlayerJumpState::OnEnter_Implementation()
 	}
 }
 
+//-----------------------------------------------------
+//更新処理
+//-----------------------------------------------------
 void UPlayerJumpState::OnUpdate_Implementation(float DeltaTime)
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
@@ -50,6 +62,9 @@ void UPlayerJumpState::OnUpdate_Implementation(float DeltaTime)
 	//着地直後は移動モードが空中のままなのでLanded側で戻す
 }
 
+//-----------------------------------------------------
+//終了処理
+//-----------------------------------------------------
 void UPlayerJumpState::OnExit_Implementation()
 {
 	if (APlayerCharacter* PlayerCharacter = GetPlayer())

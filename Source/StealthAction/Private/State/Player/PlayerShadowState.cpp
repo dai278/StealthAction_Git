@@ -8,6 +8,9 @@
 #include "Light/ExtendedSpotLightManager.h"
 #include "Engine/World.h"
 
+//-----------------------------------------------------
+//コンストラクタ
+//-----------------------------------------------------
 UPlayerShadowState::UPlayerShadowState()
 {
 	bOverrideCamera = true;
@@ -16,6 +19,9 @@ UPlayerShadowState::UPlayerShadowState()
 	StaminaConsumptionRate = 1.f;
 }
 
+//-----------------------------------------------------
+//開始条件
+//-----------------------------------------------------
 bool UPlayerShadowState::CanEnterState_Implementation() const
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
@@ -29,6 +35,9 @@ bool UPlayerShadowState::CanEnterState_Implementation() const
 		|| (PlayerCharacter->m_bOnShadow && !Lights->IsHitEnemyLight(Feet)));
 }
 
+//-----------------------------------------------------
+//開始処理
+//-----------------------------------------------------
 void UPlayerShadowState::OnEnter_Implementation()
 {
 	bShadowApplied = false;
@@ -39,6 +48,7 @@ void UPlayerShadowState::OnEnter_Implementation()
 	USkeletalMeshComponent* Mesh = PlayerCharacter->GetMesh();
 	if (!IsValid(Capsule) || !IsValid(Mesh)) { return; }
 	bShadowApplied = true;
+	//サイズは変えずに影用のコリジョンへ切り替える
 	OriginalCollisionProfile = Capsule->GetCollisionProfileName();
 	Capsule->SetCollisionProfileName(ShadowCollisionProfile);
 	OriginalMesh = Mesh->GetSkeletalMeshAsset();
@@ -58,6 +68,9 @@ void UPlayerShadowState::OnEnter_Implementation()
 	}
 }
 
+//-----------------------------------------------------
+//更新処理
+//-----------------------------------------------------
 void UPlayerShadowState::OnUpdate_Implementation(float DeltaTime)
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
@@ -71,12 +84,16 @@ void UPlayerShadowState::OnUpdate_Implementation(float DeltaTime)
 	}
 }
 
+//-----------------------------------------------------
+//終了処理
+//-----------------------------------------------------
 void UPlayerShadowState::OnExit_Implementation()
 {
 	if (!bShadowApplied) { return; }
 	bShadowApplied = false;
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	if (!PlayerCharacter) { return; }
+	//障害物の中で解除した場合は最後に戻れた位置へ戻す
 	if (PlayerCharacter->IsUpPosWall(PlayerCharacter->GetFeetLocation())) { PlayerCharacter->SetActorLocation(PlayerCharacter->m_saveLastNotUpWallPos); }
 	if (UCapsuleComponent* Capsule = PlayerCharacter->GetCapsuleComponent())
 	{

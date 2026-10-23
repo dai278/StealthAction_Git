@@ -9,6 +9,7 @@ class STEALTHACTION_API UPlayerDashState : public UPlayerLocomotionState
 {
 	GENERATED_BODY()
 public:
+	//コンストラクタ
 	UPlayerDashState();
 
 protected:

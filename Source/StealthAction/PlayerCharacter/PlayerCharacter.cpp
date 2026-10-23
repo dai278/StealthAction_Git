@@ -619,26 +619,41 @@ void APlayerCharacter::OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakK
 //-----------------------------------------------------
 //状態変更処理
 //-----------------------------------------------------
+//-----------------------------------------------------
+//現在ステート取得
+//-----------------------------------------------------
 UPlayerStateBase* APlayerCharacter::GetPlayerState() const
 {
 	return IsValid(m_stateMachine) ? Cast<UPlayerStateBase>(m_stateMachine->GetCurrentState()) : nullptr;
 }
 
+//-----------------------------------------------------
+//しゃがみ中か
+//-----------------------------------------------------
 bool APlayerCharacter::IsCrouch() const
 {
 	return IsValid(m_stateMachine) && m_stateMachine->IsCurrentState<UPlayerCrouchState>();
 }
 
+//-----------------------------------------------------
+//影状態か
+//-----------------------------------------------------
 bool APlayerCharacter::IsShadow() const
 {
 	return IsValid(m_stateMachine) && m_stateMachine->IsCurrentState<UPlayerShadowState>();
 }
 
+//-----------------------------------------------------
+//ダッシュ中か
+//-----------------------------------------------------
 bool APlayerCharacter::IsDash() const
 {
 	return IsValid(m_stateMachine) && m_stateMachine->IsCurrentState<UPlayerDashState>();
 }
 
+//-----------------------------------------------------
+//ステートマシン取得
+//-----------------------------------------------------
 UPlayerStateMachine* APlayerCharacter::GetPlayerStateMachine() const
 {
 	return IsValid(m_stateMachine) ? m_stateMachine.Get() : nullptr;

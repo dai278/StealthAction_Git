@@ -5,18 +5,25 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+//-----------------------------------------------------
+//コンストラクタ
+//-----------------------------------------------------
 UPlayerDamageState::UPlayerDamageState()
 {
 	MoveSpeed = 0.f;
 	bAllowManualControl = false;
 }
 
+//-----------------------------------------------------
+//被ダメージ処理
+//-----------------------------------------------------
 void UPlayerDamageState::ReceiveDamage(int32 Amount, const FVector& Knockback)
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	UPlayerStateMachine* Machine = GetPlayerMachine();
 	if (!PlayerCharacter || !Machine || !Machine->IsConfigured() || IsInvincible()
 		|| !PlayerCharacter->IsAlive() || Amount <= 0 || Machine->IsCurrentState<UPlayerDeadState>()) { return; }
+	//ステート変更できなかった場合にHPを戻すため保存
 	const int32 PreviousHP = PlayerCharacter->m_playerInfo.hp;
 	PlayerCharacter->m_playerInfo.hp = Amount >= PreviousHP ? 0 : PreviousHP - Amount;
 	PendingKnockback = Knockback * FMath::Max(0.f, KnockbackMultiplier);
@@ -24,6 +31,9 @@ void UPlayerDamageState::ReceiveDamage(int32 Amount, const FVector& Knockback)
 	if (!Machine->ChangePlayerState(Next)) { PlayerCharacter->m_playerInfo.hp = PreviousHP; }
 }
 
+//-----------------------------------------------------
+//開始処理
+//-----------------------------------------------------
 void UPlayerDamageState::OnEnter_Implementation()
 {
 	InvincibilityRemaining = FMath::Max(InvincibilityDuration, RecoveryDuration);
@@ -44,6 +54,9 @@ void UPlayerDamageState::OnEnter_Implementation()
 	}
 }
 
+//-----------------------------------------------------
+//更新処理
+//-----------------------------------------------------
 void UPlayerDamageState::OnUpdate_Implementation(float DeltaTime)
 {
 	if (m_stateTimer >= FMath::Max(0.f, RecoveryDuration))
@@ -52,6 +65,9 @@ void UPlayerDamageState::OnUpdate_Implementation(float DeltaTime)
 	}
 }
 
+//-----------------------------------------------------
+//他のステート中も更新する処理
+//-----------------------------------------------------
 void UPlayerDamageState::BackgroundUpdate(float DeltaTime)
 {
 	if (InvincibilityRemaining <= 0.f) { return; }
@@ -59,6 +75,9 @@ void UPlayerDamageState::BackgroundUpdate(float DeltaTime)
 	if (InvincibilityRemaining <= 0.f) { ClearProtection(); }
 }
 
+//-----------------------------------------------------
+//無敵解除
+//-----------------------------------------------------
 void UPlayerDamageState::ClearProtection()
 {
 	InvincibilityRemaining = 0.f;

@@ -15,39 +15,58 @@ class STEALTHACTION_API UPlayerStateBase : public UStateBase
 	GENERATED_BODY()
 
 public:
+	//ワールド取得
 	virtual UWorld* GetWorld() const override;
+	//初期化
 	virtual void Initialize(UStateMachine* StateMachine, AActor* Owner) override;
+	//開始処理
 	virtual void Enter() override;
+	//更新処理
 	virtual void Update(const float& DeltaTime) override;
+	//終了処理
 	virtual void Exit() override;
+	//他のステート中も更新する処理
 	virtual void BackgroundUpdate(float DeltaTime) {}
+	//開始可能か
 	virtual bool CanEnter() const override;
+	//終了可能か
 	virtual bool CanExit() const override;
+	//遷移可能か
 	virtual bool CanTransitionTo(const UStateBase* NewState) const override;
 
+	//プレイヤー取得
 	UFUNCTION(BlueprintPure, Category = "Player State")
 	APlayerCharacter* GetPlayer() const;
 
+	//ステート変更要求
 	UFUNCTION(BlueprintCallable, Category = "Player State")
 	bool RequestPlayerState(TSubclassOf<UPlayerStateBase> NewStateClass);
 
+	//ステートマシン取得
 	UFUNCTION(BlueprintPure, Category = "Player State")
 	UPlayerStateMachine* GetPlayerMachine() const;
 
+	//移動速度取得
 	UFUNCTION(BlueprintPure, Category = "Player State")
 	float GetMoveSpeed() const { return MoveSpeed; }
 
+	//スタミナ消費速度取得
 	UFUNCTION(BlueprintPure, Category = "Player State")
 	float GetStaminaConsumptionRate() const { return StaminaConsumptionRate; }
 
+	//操作可能か
 	bool AllowsManualControl() const { return bAllowManualControl; }
+	//専用のカメラ設定を使うか
 	bool UsesCameraOverride() const { return bOverrideCamera; }
+	//カメラ設定取得
 	const FCameraViewSetting& GetCameraSettings() const { return CameraSettings; }
 
+	//移動入力処理
 	UFUNCTION(BlueprintNativeEvent, Category = "Player State")
 	void OnMoveInput();
 	virtual void OnMoveInput_Implementation();
 
+	//スタミナ切れ処理
 	UFUNCTION(BlueprintNativeEvent, Category = "Player State")
 	void OnStaminaDepleted();
 	virtual void OnStaminaDepleted_Implementation();
@@ -85,31 +104,38 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stamina", meta = (ClampMin = "0.0"))
 	float StaminaConsumptionRate = 0.f;
 
+	//開始処理
 	UFUNCTION(BlueprintNativeEvent, Category = "Player State")
 	void OnEnter();
 	virtual void OnEnter_Implementation();
 
+	//更新処理
 	UFUNCTION(BlueprintNativeEvent, Category = "Player State")
 	void OnUpdate(float DeltaTime);
 	virtual void OnUpdate_Implementation(float DeltaTime);
 
+	//終了処理
 	UFUNCTION(BlueprintNativeEvent, Category = "Player State")
 	void OnExit();
 	virtual void OnExit_Implementation();
 
+	//開始条件
 	UFUNCTION(BlueprintNativeEvent, Category = "Player State")
 	bool CanEnterState() const;
 	virtual bool CanEnterState_Implementation() const;
 
+	//終了条件
 	UFUNCTION(BlueprintNativeEvent, Category = "Player State")
 	bool CanExitState() const;
 	virtual bool CanExitState_Implementation() const;
 
+	//遷移条件
 	UFUNCTION(BlueprintNativeEvent, Category = "Player State")
 	bool CanTransitionToState(TSubclassOf<UPlayerStateBase> NewStateClass) const;
 	virtual bool CanTransitionToState_Implementation(TSubclassOf<UPlayerStateBase> NewStateClass) const;
 
 private:
+	//プレイヤーの保存用
 	UPROPERTY(Transient)
 	TObjectPtr<APlayerCharacter> Player = nullptr;
 };

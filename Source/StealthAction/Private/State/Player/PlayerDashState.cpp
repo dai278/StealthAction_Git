@@ -2,6 +2,9 @@
 #include "State/Player/PlayerStateMachine.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 
+//-----------------------------------------------------
+//コンストラクタ
+//-----------------------------------------------------
 UPlayerDashState::UPlayerDashState()
 {
 	bOverrideCamera = true;
@@ -10,12 +13,18 @@ UPlayerDashState::UPlayerDashState()
 	StaminaConsumptionRate = 1.f;
 }
 
+//-----------------------------------------------------
+//開始条件
+//-----------------------------------------------------
 bool UPlayerDashState::CanEnterState_Implementation() const
 {
 	const UPlayerStateMachine* Machine = GetPlayerMachine();
 	return Machine && !Machine->IsStaminaDepleted();
 }
 
+//-----------------------------------------------------
+//開始処理
+//-----------------------------------------------------
 void UPlayerDashState::OnEnter_Implementation()
 {
 	if (APlayerCharacter* PlayerCharacter = GetPlayer())
@@ -25,6 +34,9 @@ void UPlayerDashState::OnEnter_Implementation()
 	}
 }
 
+//-----------------------------------------------------
+//終了処理
+//-----------------------------------------------------
 void UPlayerDashState::OnExit_Implementation()
 {
 	if (APlayerCharacter* PlayerCharacter = GetPlayer())

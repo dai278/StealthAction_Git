@@ -15,11 +15,17 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 
+//-----------------------------------------------------
+//コンストラクタ
+//-----------------------------------------------------
 UPlayerStateMachine::UPlayerStateMachine()
 {
 	InitialStateClass = UPlayerIdleState::StaticClass();
 }
 
+//-----------------------------------------------------
+//初期化
+//-----------------------------------------------------
 void UPlayerStateMachine::Initialize(AActor* Owner)
 {
 	Super::Initialize(Owner);
@@ -72,9 +78,13 @@ void UPlayerStateMachine::Initialize(AActor* Owner)
 	}
 }
 
+//-----------------------------------------------------
+//ステート変更処理
+//-----------------------------------------------------
 bool UPlayerStateMachine::ChangePlayerState(TSubclassOf<UPlayerStateBase> NewStateClass)
 {
 	if (!bConfigured || bTransitionInProgress) { return false; }
+	//開始や終了処理から重ねてステートを変更しないようにする
 	TGuardValue<bool> TransitionGuard(bTransitionInProgress, true);
 	UPlayerStateBase* State = GetPlayerState(NewStateClass);
 	if (!State || IsCurrentState<UPlayerDeadState>()) { return false; }
@@ -86,6 +96,9 @@ bool UPlayerStateMachine::ChangePlayerState(TSubclassOf<UPlayerStateBase> NewSta
 	return ChangeState(State);
 }
 
+//-----------------------------------------------------
+//移動系ステートか
+//-----------------------------------------------------
 bool UPlayerStateMachine::IsLocomotionState() const
 {
 	return bConfigured && IsCurrentState<UPlayerLocomotionState>();
@@ -94,6 +107,7 @@ bool UPlayerStateMachine::IsLocomotionState() const
 void UPlayerStateMachine::Stop()
 {
 	if (bTransitionInProgress) { return; }
+	//開始や終了処理から重ねてステートを変更しないようにする
 	TGuardValue<bool> TransitionGuard(bTransitionInProgress, true);
 	Super::Stop();
 	if (UPlayerDamageState* DamageState = GetState<UPlayerDamageState>()) { DamageState->ClearProtection(); }
@@ -101,9 +115,13 @@ void UPlayerStateMachine::Stop()
 	bConfigured = false;
 }
 
+//-----------------------------------------------------
+//登録済みステート取得
+//-----------------------------------------------------
 UPlayerStateBase* UPlayerStateMachine::GetPlayerState(TSubclassOf<UPlayerStateBase> StateClass) const
 {
 	if (!StateClass) { return nullptr; }
+	//親クラス指定でも登録したBPのステートを返す
 	for (UStateBase* State : GetRegisteredStates())
 	{
 		if (IsValid(State) && State->IsA(StateClass)) { return Cast<UPlayerStateBase>(State); }
@@ -111,6 +129,9 @@ UPlayerStateBase* UPlayerStateMachine::GetPlayerState(TSubclassOf<UPlayerStateBa
 	return nullptr;
 }
 
+//-----------------------------------------------------
+//操作可能か
+//-----------------------------------------------------
 bool UPlayerStateMachine::CanControl() const
 {
 	const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwner());
@@ -119,10 +140,14 @@ bool UPlayerStateMachine::CanControl() const
 		&& State && State->AllowsManualControl();
 }
 
+//-----------------------------------------------------
+//更新処理
+//-----------------------------------------------------
 void UPlayerStateMachine::Update(float DeltaTime)
 {
 	if (!bConfigured) { return; }
 	DeltaTime = FMath::Max(0.f, DeltaTime);
+	//待ち時間と無敵時間は他のステート中も進める
 	for (UStateBase* RegisteredState : GetRegisteredStates())
 	{
 		if (UPlayerStateBase* State = Cast<UPlayerStateBase>(RegisteredState)) { State->BackgroundUpdate(DeltaTime); }
@@ -131,6 +156,7 @@ void UPlayerStateMachine::Update(float DeltaTime)
 	UPlayerStateBase* State = Cast<UPlayerStateBase>(GetCurrentState());
 	if (!IsValid(State)) { return; }
 	const float Rate = FMath::Max(0.f, State->GetStaminaConsumptionRate());
+	//消費しないステート中はスタミナを回復
 	if (Rate > 0.f)
 	{
 		StaminaUsed = FMath::Clamp(StaminaUsed + DeltaTime * Rate, 0.f, GetMaximumStamina());
@@ -139,6 +165,9 @@ void UPlayerStateMachine::Update(float DeltaTime)
 	else { StaminaUsed = FMath::Max(0.f, StaminaUsed - DeltaTime * FMath::Max(0.f, StaminaRecoveryRate)); }
 }
 
+//-----------------------------------------------------
+//移動ステート選択
+//-----------------------------------------------------
 TSubclassOf<UPlayerStateBase> UPlayerStateMachine::SelectLocomotionState(bool bAfterLanding) const
 {
 	const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwner());
@@ -150,16 +179,25 @@ TSubclassOf<UPlayerStateBase> UPlayerStateMachine::SelectLocomotionState(bool bA
 	return PlayerCharacter->m_charaMoveInput.IsNearlyZero(0.1f) ? UPlayerIdleState::StaticClass() : UPlayerWalkState::StaticClass();
 }
 
+//-----------------------------------------------------
+//入力に合わせて移動ステートを変更
+//-----------------------------------------------------
 void UPlayerStateMachine::RefreshLocomotionState()
 {
 	if (IsLocomotionState() && !IsCurrentState<UPlayerJumpState>()) { ChangePlayerState(SelectLocomotionState()); }
 }
 
+//-----------------------------------------------------
+//移動ステートに戻す
+//-----------------------------------------------------
 bool UPlayerStateMachine::ReturnToLocomotion(bool bAfterLanding)
 {
 	return ChangePlayerState(SelectLocomotionState(bAfterLanding));
 }
 
+//-----------------------------------------------------
+//移動入力
+//-----------------------------------------------------
 void UPlayerStateMachine::MoveInput()
 {
 	if (!CanControl()) { return; }
@@ -167,6 +205,9 @@ void UPlayerStateMachine::MoveInput()
 	if (UPlayerStateBase* State = Cast<UPlayerStateBase>(GetCurrentState())) { State->OnMoveInput(); }
 }
 
+//-----------------------------------------------------
+//ダッシュ入力の保存
+//-----------------------------------------------------
 void UPlayerStateMachine::SetDashRequested(bool bRequested)
 {
 	if (bRequested && (!CanControl() || !IsLocomotionState() || bCrouchRequested || IsStaminaDepleted())) { return; }
@@ -174,6 +215,9 @@ void UPlayerStateMachine::SetDashRequested(bool bRequested)
 	RefreshLocomotionState();
 }
 
+//-----------------------------------------------------
+//しゃがみ切り替え
+//-----------------------------------------------------
 void UPlayerStateMachine::ToggleCrouch()
 {
 	if (!CanControl() || !IsLocomotionState()) { return; }
@@ -181,6 +225,9 @@ void UPlayerStateMachine::ToggleCrouch()
 	RefreshLocomotionState();
 }
 
+//-----------------------------------------------------
+//ジャンプ開始
+//-----------------------------------------------------
 void UPlayerStateMachine::TryJump()
 {
 	if (!CanControl() || !IsLocomotionState() || IsCurrentState<UPlayerJumpState>()) { return; }
@@ -189,6 +236,9 @@ void UPlayerStateMachine::TryJump()
 	bJumpRequested = false;
 }
 
+//-----------------------------------------------------
+//攻撃開始
+//-----------------------------------------------------
 void UPlayerStateMachine::TryAttack()
 {
 	if (!CanControl()) { return; }
@@ -196,6 +246,9 @@ void UPlayerStateMachine::TryAttack()
 	ChangePlayerState(UPlayerAttackState::StaticClass());
 }
 
+//-----------------------------------------------------
+//影状態切り替え
+//-----------------------------------------------------
 void UPlayerStateMachine::ToggleShadow()
 {
 	if (!CanControl()) { return; }
@@ -203,39 +256,60 @@ void UPlayerStateMachine::ToggleShadow()
 	else { ChangePlayerState(UPlayerShadowState::StaticClass()); }
 }
 
+//-----------------------------------------------------
+//インタラクト開始
+//-----------------------------------------------------
 void UPlayerStateMachine::TryInteract()
 {
 	if (CanControl() && IsLocomotionState() && !IsCurrentState<UPlayerJumpState>()) { ChangePlayerState(UPlayerInteractState::StaticClass()); }
 }
 
+//-----------------------------------------------------
+//着地通知
+//-----------------------------------------------------
 void UPlayerStateMachine::NotifyLanded()
 {
 	if (IsCurrentState<UPlayerJumpState>()) { ReturnToLocomotion(true); }
 }
 
+//-----------------------------------------------------
+//攻撃終了通知
+//-----------------------------------------------------
 void UPlayerStateMachine::NotifyAttackFinished()
 {
 	if (!IsCurrentState<UPlayerAttackState>()) { return; }
 	if (UPlayerAttackState* State = GetState<UPlayerAttackState>()) { State->NotifyAttackFinished(); }
 }
 
+//-----------------------------------------------------
+//インタラクト終了通知
+//-----------------------------------------------------
 void UPlayerStateMachine::NotifyInteractionFinished()
 {
 	if (!IsCurrentState<UPlayerInteractAnimationState>()) { return; }
 	if (UPlayerInteractAnimationState* State = GetState<UPlayerInteractAnimationState>()) { State->CompleteInteraction(); }
 }
 
+//-----------------------------------------------------
+//被ダメージ処理
+//-----------------------------------------------------
 void UPlayerStateMachine::ReceiveDamage(int32 Amount, const FVector& Knockback)
 {
 	if (UPlayerDamageState* State = GetState<UPlayerDamageState>()) { State->ReceiveDamage(Amount, Knockback); }
 }
 
+//-----------------------------------------------------
+//無敵中か
+//-----------------------------------------------------
 bool UPlayerStateMachine::IsInvincible() const
 {
 	const UPlayerDamageState* State = GetState<UPlayerDamageState>();
 	return State && State->IsInvincible();
 }
 
+//-----------------------------------------------------
+//攻撃中か
+//-----------------------------------------------------
 bool UPlayerStateMachine::IsAttacking() const
 {
 	const UPlayerAttackState* State = GetState<UPlayerAttackState>();

@@ -9,9 +9,11 @@ class STEALTHACTION_API UPlayerCrouchState : public UPlayerLocomotionState
 {
 	GENERATED_BODY()
 public:
+	//コンストラクタ
 	UPlayerCrouchState();
 
 protected:
+	//しゃがみ中のカプセル高さの倍率
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crouch", meta = (ClampMin = "0.01", ClampMax = "1.0"))
 	float CapsuleHeightRatio = 0.8f;
 

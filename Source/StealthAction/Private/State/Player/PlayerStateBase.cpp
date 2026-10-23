@@ -5,17 +5,26 @@
 #include "Engine/World.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 
+//-----------------------------------------------------
+//ワールド取得
+//-----------------------------------------------------
 UWorld* UPlayerStateBase::GetWorld() const
 {
 	return IsValid(Player) ? Player->GetWorld() : nullptr;
 }
 
+//-----------------------------------------------------
+//初期化
+//-----------------------------------------------------
 void UPlayerStateBase::Initialize(UStateMachine* StateMachine, AActor* Owner)
 {
 	Super::Initialize(StateMachine, Owner);
 	Player = Cast<APlayerCharacter>(Owner);
 }
 
+//-----------------------------------------------------
+//開始処理
+//-----------------------------------------------------
 void UPlayerStateBase::Enter()
 {
 	Super::Enter();
@@ -23,6 +32,7 @@ void UPlayerStateBase::Enter()
 	{
 		if (UCharacterMovementComponent* Movement = PlayerCharacter->GetCharacterMovement())
 		{
+			//このステートの移動速度を反映
 			Movement->MaxWalkSpeed = FMath::Max(0.f, MoveSpeed);
 		}
 	}
@@ -33,12 +43,18 @@ void UPlayerStateBase::Enter()
 	OnEnter();
 }
 
+//-----------------------------------------------------
+//更新処理
+//-----------------------------------------------------
 void UPlayerStateBase::Update(const float& DeltaTime)
 {
 	Super::Update(DeltaTime);
 	OnUpdate(DeltaTime);
 }
 
+//-----------------------------------------------------
+//終了処理
+//-----------------------------------------------------
 void UPlayerStateBase::Exit()
 {
 	OnExit();
@@ -49,16 +65,25 @@ void UPlayerStateBase::Exit()
 	Super::Exit();
 }
 
+//-----------------------------------------------------
+//開始可能か
+//-----------------------------------------------------
 bool UPlayerStateBase::CanEnter() const
 {
 	return IsValid(Player) && Super::CanEnter() && CanEnterState();
 }
 
+//-----------------------------------------------------
+//終了可能か
+//-----------------------------------------------------
 bool UPlayerStateBase::CanExit() const
 {
 	return Super::CanExit() && CanExitState();
 }
 
+//-----------------------------------------------------
+//遷移可能か
+//-----------------------------------------------------
 bool UPlayerStateBase::CanTransitionTo(const UStateBase* NewState) const
 {
 	const UPlayerStateBase* PlayerState = Cast<UPlayerStateBase>(NewState);
@@ -66,29 +91,59 @@ bool UPlayerStateBase::CanTransitionTo(const UStateBase* NewState) const
 		&& CanTransitionToState(PlayerState->GetClass());
 }
 
+//-----------------------------------------------------
+//ステート変更要求
+//-----------------------------------------------------
 bool UPlayerStateBase::RequestPlayerState(TSubclassOf<UPlayerStateBase> NewStateClass)
 {
 	UPlayerStateMachine* Machine = Cast<UPlayerStateMachine>(m_pStateMachine);
 	return Machine && Machine->ChangePlayerState(NewStateClass);
 }
 
+//-----------------------------------------------------
+//開始処理
+//-----------------------------------------------------
 void UPlayerStateBase::OnEnter_Implementation() {}
+//-----------------------------------------------------
+//更新処理
+//-----------------------------------------------------
 void UPlayerStateBase::OnUpdate_Implementation(float DeltaTime) {}
+//-----------------------------------------------------
+//終了処理
+//-----------------------------------------------------
 void UPlayerStateBase::OnExit_Implementation() {}
+//-----------------------------------------------------
+//開始条件
+//-----------------------------------------------------
 bool UPlayerStateBase::CanEnterState_Implementation() const { return true; }
+//-----------------------------------------------------
+//終了条件
+//-----------------------------------------------------
 bool UPlayerStateBase::CanExitState_Implementation() const { return true; }
+//-----------------------------------------------------
+//遷移条件
+//-----------------------------------------------------
 bool UPlayerStateBase::CanTransitionToState_Implementation(TSubclassOf<UPlayerStateBase> NewStateClass) const { return true; }
 
+//-----------------------------------------------------
+//プレイヤー取得
+//-----------------------------------------------------
 APlayerCharacter* UPlayerStateBase::GetPlayer() const
 {
 	return IsValid(Player) ? Player.Get() : nullptr;
 }
 
+//-----------------------------------------------------
+//ステートマシン取得
+//-----------------------------------------------------
 UPlayerStateMachine* UPlayerStateBase::GetPlayerMachine() const
 {
 	return Cast<UPlayerStateMachine>(m_pStateMachine);
 }
 
+//-----------------------------------------------------
+//移動入力処理
+//-----------------------------------------------------
 void UPlayerStateBase::OnMoveInput_Implementation()
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
@@ -97,6 +152,7 @@ void UPlayerStateBase::OnMoveInput_Implementation()
 	UWorld* World = GetWorld();
 	if (!IsValid(Movement) || !World || !Movement->IsMovingOnGround()
 		|| PlayerCharacter->m_charaMoveInput.IsNearlyZero(0.1f)) { return; }
+	//カメラの向きに合わせて移動方向を決める
 	const float Yaw = PlayerCharacter->m_cameraStatus == ECameraStatus::TopDownView
 		? PlayerCharacter->GetActorRotation().Yaw : PlayerCharacter->GetControlRotation().Yaw;
 	const FRotator Rotation(0.f, Yaw, 0.f);
@@ -116,6 +172,9 @@ void UPlayerStateBase::OnMoveInput_Implementation()
 	}
 }
 
+//-----------------------------------------------------
+//スタミナ切れ処理
+//-----------------------------------------------------
 void UPlayerStateBase::OnStaminaDepleted_Implementation()
 {
 	if (UPlayerStateMachine* Machine = GetPlayerMachine())

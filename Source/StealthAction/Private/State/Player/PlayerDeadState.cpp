@@ -4,12 +4,18 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
+//-----------------------------------------------------
+//コンストラクタ
+//-----------------------------------------------------
 UPlayerDeadState::UPlayerDeadState()
 {
 	MoveSpeed = 0.f;
 	bAllowManualControl = false;
 }
 
+//-----------------------------------------------------
+//開始処理
+//-----------------------------------------------------
 void UPlayerDeadState::OnEnter_Implementation()
 {
 	if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->CancelDash(); }

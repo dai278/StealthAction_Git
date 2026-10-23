@@ -3,6 +3,9 @@
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 #include "Components/CapsuleComponent.h"
 
+//-----------------------------------------------------
+//コンストラクタ
+//-----------------------------------------------------
 UPlayerCrouchState::UPlayerCrouchState()
 {
 	bOverrideCamera = true;
@@ -11,6 +14,9 @@ UPlayerCrouchState::UPlayerCrouchState()
 	FootstepNoiseLevel = 0;
 }
 
+//-----------------------------------------------------
+//開始処理
+//-----------------------------------------------------
 void UPlayerCrouchState::OnEnter_Implementation()
 {
 	if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->CancelDash(); }
@@ -25,6 +31,9 @@ void UPlayerCrouchState::OnEnter_Implementation()
 	}
 }
 
+//-----------------------------------------------------
+//終了処理
+//-----------------------------------------------------
 void UPlayerCrouchState::OnExit_Implementation()
 {
 	if (APlayerCharacter* PlayerCharacter = GetPlayer())

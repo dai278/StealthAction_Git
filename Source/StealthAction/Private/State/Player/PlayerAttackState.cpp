@@ -8,12 +8,18 @@
 #include "Sword/SwordAttackComponent.h"
 #include "Engine/World.h"
 
+//-----------------------------------------------------
+//コンストラクタ
+//-----------------------------------------------------
 UPlayerAttackState::UPlayerAttackState()
 {
 	MoveSpeed = 0.f;
 	bAllowManualControl = false;
 }
 
+//-----------------------------------------------------
+//攻撃対象取得
+//-----------------------------------------------------
 AEnemyBase* UPlayerAttackState::FindTarget() const
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
@@ -23,6 +29,9 @@ AEnemyBase* UPlayerAttackState::FindTarget() const
 	return IsValid(Enemies) ? Enemies->GetNearestEnemy(PlayerCharacter->GetActorLocation(), FMath::Max(0.f, AttackRange)) : nullptr;
 }
 
+//-----------------------------------------------------
+//開始条件
+//-----------------------------------------------------
 bool UPlayerAttackState::CanEnterState_Implementation() const
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
@@ -36,6 +45,9 @@ bool UPlayerAttackState::CanEnterState_Implementation() const
 	return FVector::DotProduct(Direction, PlayerCharacter->GetMesh()->GetRightVector()) > MinimumFacingDot;
 }
 
+//-----------------------------------------------------
+//開始処理
+//-----------------------------------------------------
 void UPlayerAttackState::OnEnter_Implementation()
 {
 	bAttackActive = false;
@@ -60,17 +72,26 @@ void UPlayerAttackState::OnEnter_Implementation()
 	if (IsValid(PlayerCharacter)) { PlayerCharacter->OnSneakKillStarted_BP(); }
 }
 
+//-----------------------------------------------------
+//更新処理
+//-----------------------------------------------------
 void UPlayerAttackState::OnUpdate_Implementation(float DeltaTime)
 {
 	if (!bAttackActive || m_stateTimer >= FMath::Max(0.01f, AttackDuration)) { NotifyAttackFinished(); }
 }
 
+//-----------------------------------------------------
+//攻撃終了通知
+//-----------------------------------------------------
 void UPlayerAttackState::NotifyAttackFinished()
 {
 	bAttackActive = false;
 	if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->ReturnToLocomotion(); }
 }
 
+//-----------------------------------------------------
+//終了処理
+//-----------------------------------------------------
 void UPlayerAttackState::OnExit_Implementation()
 {
 	bAttackActive = false;
@@ -85,6 +106,9 @@ void UPlayerAttackState::OnExit_Implementation()
 	}
 }
 
+//-----------------------------------------------------
+//他のステート中も更新する処理
+//-----------------------------------------------------
 void UPlayerAttackState::BackgroundUpdate(float DeltaTime)
 {
 	CooldownRemaining = FMath::Max(0.f, CooldownRemaining - DeltaTime);

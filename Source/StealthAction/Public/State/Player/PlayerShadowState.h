@@ -10,6 +10,7 @@ class STEALTHACTION_API UPlayerShadowState : public UPlayerStateBase
 {
 	GENERATED_BODY()
 public:
+	//コンストラクタ
 	UPlayerShadowState();
 
 protected:
@@ -28,10 +29,15 @@ protected:
 	virtual void OnExit_Implementation() override;
 
 private:
+	//変更前のメッシュ
 	UPROPERTY(Transient)
 	TObjectPtr<class USkeletalMesh> OriginalMesh = nullptr;
+	//変更前のコリジョン設定
 	FName OriginalCollisionProfile = NAME_None;
+	//変更前のメッシュの衝突設定
 	ECollisionEnabled::Type OriginalMeshCollision = ECollisionEnabled::QueryOnly;
+	//変更前のオーバーラップ設定
 	bool bOriginalOverlapEvents = false;
+	//影状態の設定を反映済みか
 	bool bShadowApplied = false;
 };
