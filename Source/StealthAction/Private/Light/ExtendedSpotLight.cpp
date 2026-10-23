@@ -276,7 +276,7 @@ bool AExtendedSpotLight::IsHit(const FVector& _pos)const
 	ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
 	ObjParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 	//敵も遮蔽物として判定する
-	ObjParams.AddObjectTypesToQuery(ECC_GameTraceChannel2);
+	ObjParams.AddObjectTypesToQuery(ECC_GameTraceChannel8);
 	// Shadow専用ObjectTypeは「入れない」
 
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(LightOcclusion), false);
@@ -291,10 +291,36 @@ bool AExtendedSpotLight::IsHit(const FVector& _pos)const
 		Params
 	);
 
+	//当たったら赤、何も当たらなければ緑
+	DrawDebugLine(
+		GetWorld(),
+		lightPos,
+		_pos,
+		bHit ? FColor::Red : FColor::Green,
+		false,
+		0.1f,
+		0,
+		2.f
+	);
+
+	//当たった場所
+	if (bHit)
+	{
+		DrawDebugSphere(
+			GetWorld(),
+			Hit.ImpactPoint,
+			8.f,
+			12,
+			FColor::Yellow,
+			false,
+			0.1f
+		);
+	}
+
 	if (bHit)
 	{
 		// さえぎられず、少しマージン
-		if (Hit.Distance < distance - 100.0f)
+		if (Hit.Distance < distance)
 		{
 			return false;
 		}
