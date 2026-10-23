@@ -44,7 +44,7 @@
 - **Allow Manual Control / Allow Movement Input**：ネイティブ親が設定済みです。攻撃・被ダメージ・死亡・インタラクト中は手動操作を止めるため、通常は変更不要です。
 - 被ダメージ時の無敵時間は復帰時間以上に保ちます。`Invincibility Duration` を短くしても、反応中に同一 Damage へ再入場することを防ぎます。
 - **Wait For Animation Notify** を有効にした場合、時間では終了しません。アニメーション通知からプレイヤーの既存関数 **On Interact Animation End** を呼んでください。
-- 影状態ではプレイヤーのメッシュを非表示にし、解除時は入る前の表示状態に戻します。メッシュ差し替え用の Shadow Mesh は廃止しました。**Shadow Effect Class** が未設定の場合はエフェクトを生成しません。
+- 影状態ではプレイヤーのメッシュを非表示にし、解除時は入る前の表示状態に戻します。メッシュ差し替え用の Shadow Mesh は廃止しました。**Shadow Effect Class** が未設定の場合はプレイヤーBPの ShadowEffectChild に設定した既存のエフェクトを使用します。両方未設定の場合は警告を出します。
 
 共有スタミナの **Maximum Stamina（初期値5） / Stamina Recovery Rate（初期値1.5）** は、マシーン BP の Class Defaults → Stamina にあります。
 

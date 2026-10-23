@@ -91,9 +91,17 @@ void UPlayerShadowState::OnEnter_Implementation()
 	PlayerCharacter->m_saveLastNotUpWallPos = PlayerCharacter->GetActorLocation();
 	if (IsValid(PlayerCharacter->m_ShadowEffectChild))
 	{
-		PlayerCharacter->m_ShadowEffectChild->SetChildActorClass(ShadowEffectClass);
+		//ステート側が未設定ならプレイヤーBPのエフェクトをそのまま使う
+		if (ShadowEffectClass)
+		{
+			PlayerCharacter->m_ShadowEffectChild->SetChildActorClass(ShadowEffectClass);
+		}
 		PlayerCharacter->m_ShadowEffectChild->SetWorldLocation(PlayerCharacter->GetFeetLocation());
 		if (AActor* Effect = PlayerCharacter->m_ShadowEffectChild->GetChildActor()) { Effect->SetActorHiddenInGame(false); }
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s: Set Shadow Effect Class in the shadow state BP or Child Actor Class on ShadowEffectChild."), *GetName());
+		}
 	}
 }
 
