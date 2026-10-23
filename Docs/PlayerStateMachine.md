@@ -34,7 +34,7 @@
 | `PlayerAttackState` | Move Speed `0`、Attack Range `150`、Attack Radius `70`、Sneak Kill Damage `10`、Attack Duration `1`、Attack Cooldown `0.3`、Minimum Facing Dot `0.4`、Attack Gravity Scale `0.1` |
 | `PlayerDamageState` | Move Speed `0`、Recovery Duration `1`、Invincibility Duration `5`、Knockback Multiplier `1` |
 | `PlayerDeadState` | Move Speed `0`、Open Game Over Level `true`、Game Over Level `GameOver` |
-| `PlayerShadowState` | Move Speed `300`、Stamina Consumption Rate `1`、Shadow Collision Profile `PlayerInShadow`、Shadow Effect Class |
+| `PlayerShadowState` | Move Speed `300`、Stamina Consumption Rate `1`、Shadow Collision Profile `PlayerInShadow`、Shadow Effect System |
 | `PlayerInteractState` | Move Speed `300`、Acceptance Radius `50`、Approach Input Scale `0.5`、Rotation Interp Speed `10` |
 | `PlayerInteractAnimationState` | Move Speed `0`、Interaction Duration `2.5`、Wait For Animation Notify `false` |
 
@@ -44,7 +44,7 @@
 - **Allow Manual Control / Allow Movement Input**：ネイティブ親が設定済みです。攻撃・被ダメージ・死亡・インタラクト中は手動操作を止めるため、通常は変更不要です。
 - 被ダメージ時の無敵時間は復帰時間以上に保ちます。`Invincibility Duration` を短くしても、反応中に同一 Damage へ再入場することを防ぎます。
 - **Wait For Animation Notify** を有効にした場合、時間では終了しません。アニメーション通知からプレイヤーの既存関数 **On Interact Animation End** を呼んでください。
-- 影状態ではプレイヤーのメッシュを非表示にし、解除時は入る前の表示状態に戻します。メッシュ差し替え用の Shadow Mesh は廃止しました。**Shadow Effect Class** が未設定の場合はプレイヤーBPの ShadowEffectChild に設定した既存のエフェクトを使用します。両方未設定の場合は警告を出します。
+- 影状態ではメッシュを沈めて非表示にし、解除時は入る前の表示状態に戻します。影エフェクトは Shadow Effect System に指定したNiagaraを使用します。未設定の場合は警告を出し、エフェクトは生成しません。
 
 共有スタミナの **Maximum Stamina（初期値5） / Stamina Recovery Rate（初期値1.5）** は、マシーン BP の Class Defaults → Stamina にあります。
 
@@ -60,7 +60,7 @@
 | Jump Vector | Jump の Jump Impulse |
 | 攻撃範囲・半径・ダメージ・クールダウン | Attack の各設定 |
 | ダメージ復帰時間・無敵時間 | Damage の Recovery Duration / Invincibility Duration |
-| 影エフェクトクラス | Shadow の Shadow Effect Class |
+| 旧影エフェクトActorクラス | Shadow の Shadow Effect System にNiagara Systemを指定し直す |
 | 最大スタミナ・回復倍率 | マシーンの Maximum Stamina / Stamina Recovery Rate |
 | Initial Player Status | マシーンの Initial State Class |
 | 旧 Camera Init Pos の Dash / Crouch / InShadow | 各ステートの Camera Settings |
@@ -119,3 +119,11 @@ Shadow BP の Shadow → Appearance で Sink Duration（既定0.4秒）、Sink D
 **マテリアル設定が必要です。** プレイヤーの全マテリアルに Scalar Parameter「Opacity」（既定1）を用意し、Maskedなら DitherTemporalAA の Alpha Threshold に接続し、その出力を Opacity Mask へ接続します（既存のマスクがあれば掛け合わせます）。Translucentなら Opacity に接続します。Opaqueのまま、またはパラメータを追加しただけでは透明になりません。パラメータが無いマテリアルは警告を出し、沈む動作と最後の非表示のみになります。この環境ではマテリアルアセット自体は変更していません。
 
 演出には一時的な動的マテリアルを使い、元のマテリアルインスタンスや他のキャラクターの値を変更しません。BPでOn Enter / On Update / On Exitを上書きする場合は「親関数を呼び出す」を接続してください。
+
+### 影エフェクトのNiagara設定
+
+BP_PlayerShadowState のクラスデフォルトで Shadow Effect System にNiagara Systemを指定します。旧ShadowEffectChildとActorクラス指定は廃止しました。以前のエフェクトActorはそのまま指定できないため、使用するNiagara Systemを指定し直してください。この変更で新しいNiagaraアセット自体は作成していません。
+
+Shadow Effect Offset は足元からの位置調整（既定Z=2cm）です。エフェクトはメッシュではなくルートに追従するため、メッシュと一緒には沈みません。Shadow Alpha Parameter Name（既定User.ShadowAlpha）へ潜る進行度0～1を渡します。Niagara側にFloatのUser Parameter「ShadowAlpha」を追加し、粒子の色のAlphaや大きさなどへ接続すると潜る演出に合わせて表示できます。
+
+解除・被ダメージ・終了時に生成したNiagaraを切り離して停止し、完了後に自動破棄します。NiagaraのEmitter StateでInactive ResponseをCompleteにし、粒子に有限の寿命を設定してください。影の間ずっと表示する場合はシステムをループさせてください。Niagaraプラグインとモジュール依存も追加しています。エディタを閉じてC++をビルドし直した後、プレイヤーBPを再コンパイルしてください。

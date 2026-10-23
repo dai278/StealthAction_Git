@@ -17,9 +17,15 @@ protected:
 	//影状態のコリジョン設定
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
 	FName ShadowCollisionProfile = TEXT("PlayerInShadow");
-	//影エフェクトのクラス
+	//影エフェクトのNiagara
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
-	TSubclassOf<AActor> ShadowEffectClass;
+	TObjectPtr<class UNiagaraSystem> ShadowEffectSystem = nullptr;
+	//足元からのエフェクトの位置調整
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow|Effect")
+	FVector ShadowEffectOffset = FVector(0.f, 0.f, 2.f);
+	//潜る進行度を渡すNiagaraのパラメータ名
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow|Effect")
+	FName ShadowAlphaParameterName = TEXT("User.ShadowAlpha");
 	//影に潜るまでの時間
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow|Appearance", meta = (ClampMin = "0.0", Units = "s"))
 	float SinkDuration = 0.4f;
@@ -35,6 +41,11 @@ protected:
 	virtual void OnExit_Implementation() override;
 
 private:
+	//生成した影エフェクト
+	UPROPERTY(Transient)
+	TObjectPtr<class UNiagaraComponent> ShadowEffect = nullptr;
+	//影エフェクト停止
+	void StopShadowEffect();
 	//移動は止めずにメッシュだけ影に沈める
 	void UpdateSinkAppearance(float DeltaTime);
 	//変更前のメッシュ位置

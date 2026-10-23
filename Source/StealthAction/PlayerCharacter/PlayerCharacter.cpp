@@ -38,7 +38,6 @@
 #include "Camera/CameraFocusDirectorComponent.h"
 #include "UI/HUD/HUDWidget.h"
 #include "StealthAction/PlayerCharacter/Controller/MyPlayerController.h"
-#include "Components/ChildActorComponent.h"
 
 
 //----------------------------------------------------------
@@ -133,13 +132,7 @@ APlayerCharacter::APlayerCharacter()
 
 	}
 
-	m_ShadowEffectChild = CreateDefaultSubobject<UChildActorComponent>(TEXT("ShadowEffectChild"));
-	m_ShadowEffectChild->SetupAttachment(GetRootComponent()); // もしくは GetMesh()
-
-	// ここで固定でクラス指定するなら
-	// ShadowEffectChild->SetChildActorClass(AShadowEffectActor::StaticClass());
-
-//カメラフォーカスディレクターコンポーネント生成
+	//カメラフォーカス用コンポーネント生成
 	m_pCameraFocusDirector = CreateDefaultSubobject<UCameraFocusDirectorComponent>(TEXT("CameraFocusDirector"));
 }
 
@@ -219,10 +212,6 @@ void APlayerCharacter::BeginPlay()
 		}
 	}
 
-	if (IsValid(m_ShadowEffectChild))
-	{
-		if (AActor* Effect = m_ShadowEffectChild->GetChildActor()) { Effect->SetActorHiddenInGame(true); }
-	}
 
 	if (IsValid(Controller))
 	{

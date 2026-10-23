@@ -3,7 +3,9 @@
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Components/ChildActorComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Light/ExtendedSpotLightManager.h"
 #include "Engine/World.h"
@@ -81,7 +83,6 @@ void UPlayerShadowState::OnEnter_Implementation()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s: Mesh materials need a scalar parameter '%s' connected to opacity for shadow fading."), *GetName(), *OpacityParameterName.ToString());
 	}
-	UpdateSinkAppearance(0.f);
 	OriginalMeshCollision = Mesh->GetCollisionEnabled();
 	bOriginalOverlapEvents = Mesh->GetGenerateOverlapEvents();
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -89,20 +90,25 @@ void UPlayerShadowState::OnEnter_Implementation()
 	PlayerCharacter->m_cameraStatus = ECameraStatus::InShadow;
 	PlayerCharacter->m_bCameraSwitching = true;
 	PlayerCharacter->m_saveLastNotUpWallPos = PlayerCharacter->GetActorLocation();
-	if (IsValid(PlayerCharacter->m_ShadowEffectChild))
+	//沈むメッシュではなく移動用のルートへ追従させる
+	StopShadowEffect();
+	if (IsValid(ShadowEffectSystem))
 	{
-		//ステート側が未設定ならプレイヤーBPのエフェクトをそのまま使う
-		if (ShadowEffectClass)
+		ShadowEffect = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			ShadowEffectSystem.Get(), PlayerCharacter->GetRootComponent(), NAME_None,
+			PlayerCharacter->GetFeetLocation() + ShadowEffectOffset, FRotator::ZeroRotator,
+			EAttachLocation::KeepWorldPosition, true, false, ENCPoolMethod::None, false);
+		if (IsValid(ShadowEffect))
 		{
-			PlayerCharacter->m_ShadowEffectChild->SetChildActorClass(ShadowEffectClass);
-		}
-		PlayerCharacter->m_ShadowEffectChild->SetWorldLocation(PlayerCharacter->GetFeetLocation());
-		if (AActor* Effect = PlayerCharacter->m_ShadowEffectChild->GetChildActor()) { Effect->SetActorHiddenInGame(false); }
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("%s: Set Shadow Effect Class in the shadow state BP or Child Actor Class on ShadowEffectChild."), *GetName());
+			ShadowEffect->SetVariableFloat(ShadowAlphaParameterName, SinkDuration > 0.f ? 0.f : 1.f);
+			ShadowEffect->Activate(true);
 		}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: Set Shadow Effect System in the shadow state BP."), *GetName());
+	}
+	UpdateSinkAppearance(0.f);
 }
 
 //-----------------------------------------------------
@@ -129,6 +135,7 @@ void UPlayerShadowState::OnExit_Implementation()
 {
 	if (!bShadowApplied) { return; }
 	bShadowApplied = false;
+	StopShadowEffect();
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	if (!PlayerCharacter) { return; }
 	//障害物の中で解除した場合は最後に戻れた位置へ戻す
@@ -152,10 +159,7 @@ void UPlayerShadowState::OnExit_Implementation()
 	OriginalMaterials.Reset();
 	SinkMaterials.Reset();
 	OriginalOpacities.Reset();
-	if (IsValid(PlayerCharacter->m_ShadowEffectChild))
-	{
-		if (AActor* Effect = PlayerCharacter->m_ShadowEffectChild->GetChildActor()) { Effect->SetActorHiddenInGame(true); }
-	}
+
 	PlayerCharacter->m_cameraStatus = ECameraStatus::ThirdPerson;
 	PlayerCharacter->m_bCameraSwitching = true;
 }
@@ -179,6 +183,26 @@ void UPlayerShadowState::UpdateSinkAppearance(float DeltaTime)
 			SinkMaterials[Index]->SetScalarParameterValue(OpacityParameterName, OriginalOpacities[Index] * (1.f - Alpha));
 		}
 	}
+	if (IsValid(ShadowEffect))
+	{
+		ShadowEffect->SetWorldLocation(PlayerCharacter->GetFeetLocation() + ShadowEffectOffset);
+		ShadowEffect->SetVariableFloat(ShadowAlphaParameterName, Alpha);
+	}
 	//潜り終わったら完全に非表示にする
 	Mesh->SetVisibility(bOriginalMeshVisible && Alpha < 1.f);
+}
+
+//-----------------------------------------------------
+//影エフェクト停止
+//-----------------------------------------------------
+void UPlayerShadowState::StopShadowEffect()
+{
+	if (IsValid(ShadowEffect))
+	{
+		//残った粒子はその場で消し、完了後に自動破棄する
+		ShadowEffect->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		ShadowEffect->SetAutoDestroy(true);
+		ShadowEffect->Deactivate();
+	}
+	ShadowEffect = nullptr;
 }
