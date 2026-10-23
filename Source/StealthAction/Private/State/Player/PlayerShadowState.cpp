@@ -99,8 +99,12 @@ void UPlayerShadowState::OnEnter_Implementation()
 		UMaterialInstanceDynamic* DynamicMaterial = nullptr;
 		if (IsValid(Material) && Material->GetScalarParameterValue(FMaterialParameterInfo(OpacityParameterName), Opacity))
 		{
-			//元のマテリアルの値は変更しない
-			DynamicMaterial = Mesh->CreateDynamicMaterialInstance(Index);
+			//元が動的マテリアルでも演出用は別に作る
+			DynamicMaterial = UMaterialInstanceDynamic::Create(Material, Mesh);
+			if (IsValid(DynamicMaterial))
+			{
+				Mesh->SetMaterial(Index, DynamicMaterial);
+			}
 		}
 		else if (IsValid(Material)) { bMissingOpacity = true; }
 		SinkMaterials.Add(DynamicMaterial);
