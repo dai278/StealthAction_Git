@@ -133,3 +133,11 @@ Shadow Effect Offset は足元からの位置調整（既定Z=2cm）です。エ
 BP_PlayerShadowState の Shadow → Collision で Shadow Capsule Radius（半径）と Shadow Capsule Half Height（半高さ）を設定します。既定は両方10cmで直径20cmの球状になります。半高さは半径より小さくできないため、コードでも補正しています。もっと低い隙間を通す場合は両方を小さくしてください。
 
 縮小時も足元の高さとメッシュの開始位置を維持します。影の間も、入る前のカプセルサイズ・プリセットで戻れる位置を記録し、解除時に収まらなければその位置へ戻します。表示用メッシュだけを沈める演出とNiagaraの足元への追従は継続します。
+
+### インタラクトのモンタージュ
+
+BP_PlayerInteractAnimationState の Interaction → Animation で Interaction Montage を指定します。対象位置へ着くと再生し、通常はモンタージュの終了後に対象のInteractを1回実行して移動へ戻ります。Montage Play Rate（既定1）と Montage Blend Out Time（既定0.15秒）を調整できます。被ダメージ・対象消失・モンタージュの中断・再生失敗では実行せずに解除します。モンタージュ未設定なら以前のInteraction Durationを使います。
+
+実行タイミングを通知で指定する場合は Wait For Animation Notify を有効にして、AnimNotifyからプレイヤーの On Interact Animation End を呼んでください。その時点で実行・終了します。通知が無いままモンタージュが終了した場合は警告を出してキャンセルします。対象のInteractは終了条件待ち中にも重複実行しません。
+
+AnimBPのAnimGraphには、モンタージュが使用するSlot（例DefaultSlot）のノードを通常のポーズとOutput Poseの間に接続してください。スケルトンが一致するモンタージュを使用し、自動終了させる場合はループやEnable Auto Blend Outの無効化を避けてください。BPでOn Enter / On Update / On Exitを上書きしている場合は親関数を呼び出してください。アセット自体の作成・割り当てはエディタで行ってください。
