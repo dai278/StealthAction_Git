@@ -10,6 +10,7 @@
 //-----------------------------------------------------
 UPlayerInteractState::UPlayerInteractState()
 {
+	PlayerStatus = EPlayerStatus::Interact;
 	bAllowManualControl = false;
 }
 

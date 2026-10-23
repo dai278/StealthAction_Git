@@ -3,4 +3,7 @@
 //-----------------------------------------------------
 //コンストラクタ
 //-----------------------------------------------------
-UPlayerWalkState::UPlayerWalkState() { MoveSpeed = 300.f; }
+UPlayerWalkState::UPlayerWalkState() {
+	PlayerStatus = EPlayerStatus::Walk;
+	MoveSpeed = 300.f;
+}

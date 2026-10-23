@@ -7,6 +7,7 @@
 //-----------------------------------------------------
 UPlayerDashState::UPlayerDashState()
 {
+	PlayerStatus = EPlayerStatus::Dash;
 	bOverrideCamera = true;
 	CameraSettings = { FRotator(0.f, 0.f, 0.f), 90.f, 200.f, FVector(0.f, 70.f, 20.f), 5.f };
 	MoveSpeed = 600.f;

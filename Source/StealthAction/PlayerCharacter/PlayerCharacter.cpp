@@ -628,6 +628,15 @@ UPlayerStateBase* APlayerCharacter::GetPlayerState() const
 }
 
 //-----------------------------------------------------
+//現在ステートのAnimBP用の状態取得
+//-----------------------------------------------------
+EPlayerStatus APlayerCharacter::GetPlayerStatus() const
+{
+	const UPlayerStateBase* State = GetPlayerState();
+	return IsValid(State) ? State->GetPlayerStatus() : EPlayerStatus::Idle;
+}
+
+//-----------------------------------------------------
 //しゃがみ中か
 //-----------------------------------------------------
 bool APlayerCharacter::IsCrouch() const

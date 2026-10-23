@@ -94,9 +94,9 @@ UE 5.7 による C++ / UHT / BP のビルドとゲーム実行は、この環境
 
 ### クラスでのステート管理
 
-プレイヤーの状態EnumとEnum用の対応表は削除しました。State Classesの登録済みインスタンスをクラスで検索し、現在のステート自身の型で判定します。ネイティブクラスを指定しても登録したBP派生クラスを取得するため、BPの設定値は継続して使用します。同じ役割の派生クラスは1つずつ登録してください。
+ステート遷移用のEnum対応表は削除しました。State Classesの登録済みインスタンスをクラスで検索し、現在のステート自身の型で判定します。ネイティブクラスを指定しても登録したBP派生クラスを取得するため、BPの設定値は継続して使用します。同じ役割の派生クラスは1つずつ登録してください。
 
-開始状態はステートマシンBPの Initial State Class で指定します（既定はPlayerIdleState）。Change Player State / Request Player State / Get Player State はEnumの代わりにステートクラスを指定します。Can Transition To Status は Can Transition To State に変更しました。プレイヤーの Get Player Status は Get Player State に変更し、ステート本体を返します。旧Enumを参照するBPは該当ノードを差し替えて再コンパイルしてください。Is Shadow / Is Dash / Is Crouch はそのまま使用できます。
+開始状態はステートマシンBPの Initial State Class で指定します（既定はPlayerIdleState）。Change Player State / Request Player State / Get Player State はEnumの代わりにステートクラスを指定します。Can Transition To Status は Can Transition To State に変更しました。プレイヤーの Get Player State はステート本体を返します。Get Player Status はAnimBP用のEnumを返します。旧Enumでステートを変更するBPはクラス指定のノードへ差し替えて再コンパイルしてください。Is Shadow / Is Dash / Is Crouch はそのまま使用できます。
 
 ### 共通BaseのBP処理
 
@@ -105,3 +105,9 @@ On Enter / On Update / On Exit と Can Enter State / Can Exit State / Can Transi
 BPでイベントを上書きしたときは、イベントノードの右クリックから「親関数を呼び出す」でC++の処理を実行できます。C++では Super::OnEnter_Implementation() などを呼びます。呼ばなければ、そのイベントの親処理は実行しません。タイマー更新は共通の Enter / Update、プレイヤーの移動速度反映とカメラ切り替えは UPlayerStateBase の Enter / Exit に残すため、BPで親イベントを呼ばなくても実行します。
 
 ステートマシンは旧ステートの Exit、現在ステートの差し替え、新ステートの Enter の順で切り替えます。通常の Update は現在のステートだけに呼びます。プレイヤー用の BackgroundUpdate は攻撃の待ち時間と無敵時間を別ステート中も進めるための処理です。
+
+### AnimBP用の状態Enum
+
+EPlayerStatus はアニメーション用の値として使用します。各ステートが Animation → Player Status を持ち、ネイティブの各ステートには対応する既定値を設定しています。プレイヤーの Get Player Status は現在のステートから値を取得し、ステートが無い場合は Idle を返します。AnimBPではプレイヤーから Get Player Status を取得し、Blend Poses by Enum や遷移条件に使用できます。
+
+ステートの変更・検索・現在状態の判定は従来通りクラスで行います。Enumを別途更新する処理や、Enumからステートを選ぶ対応表はありません。

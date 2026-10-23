@@ -13,6 +13,7 @@
 #include "GameInstance/PlayDataInfo.h"//プレイデータ構造体が複数あるものPlayerInfoのみ使用
 #include "Damage/IDamage.h"
 #include "Camera/CameraInfo.h"
+#include "State/Player/PlayerStatus.h"
 
 #include "PlayerCharacter.generated.h"
 
@@ -184,6 +185,10 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "state")
 	UPlayerStateBase* GetPlayerState() const;
+
+	//現在ステートのAnimBP用の状態取得
+	UFUNCTION(BlueprintPure, Category = "state")
+	EPlayerStatus GetPlayerStatus() const;
 
 	UFUNCTION(BlueprintPure, Category = "state")
 	UPlayerStateMachine* GetPlayerStateMachine() const;

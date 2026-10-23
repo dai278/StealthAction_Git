@@ -3,4 +3,7 @@
 //-----------------------------------------------------
 //コンストラクタ
 //-----------------------------------------------------
-UPlayerIdleState::UPlayerIdleState() { MoveSpeed = 300.f; }
+UPlayerIdleState::UPlayerIdleState() {
+	PlayerStatus = EPlayerStatus::Idle;
+	MoveSpeed = 300.f;
+}

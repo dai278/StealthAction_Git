@@ -10,6 +10,7 @@
 //-----------------------------------------------------
 UPlayerDamageState::UPlayerDamageState()
 {
+	PlayerStatus = EPlayerStatus::Damage;
 	MoveSpeed = 0.f;
 	bAllowManualControl = false;
 }

@@ -8,7 +8,9 @@
 //-----------------------------------------------------
 //コンストラクタ
 //-----------------------------------------------------
-UPlayerJumpState::UPlayerJumpState() { }
+UPlayerJumpState::UPlayerJumpState() {
+	PlayerStatus = EPlayerStatus::Jump;
+}
 
 //-----------------------------------------------------
 //開始条件

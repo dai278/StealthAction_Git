@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "State/StateBase.h"
 #include "Camera/CameraInfo.h"
+#include "State/Player/PlayerStatus.h"
 #include "PlayerStateBase.generated.h"
 
 class APlayerCharacter;
@@ -15,6 +16,10 @@ class STEALTHACTION_API UPlayerStateBase : public UStateBase
 	GENERATED_BODY()
 
 public:
+	//AnimBP用の状態取得
+	UFUNCTION(BlueprintPure, Category = "Player State|Animation")
+	EPlayerStatus GetPlayerStatus() const { return PlayerStatus; }
+
 	//ワールド取得
 	virtual UWorld* GetWorld() const override;
 	//初期化
@@ -68,6 +73,10 @@ public:
 	virtual void OnStaminaDepleted_Implementation();
 
 protected:
+	//このステートに対応するAnimBP用の状態
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	EPlayerStatus PlayerStatus = EPlayerStatus::Idle;
+
 	//カメラ設定を切り替えるか
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	bool bOverrideCamera = false;

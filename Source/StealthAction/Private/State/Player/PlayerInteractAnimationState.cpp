@@ -9,6 +9,7 @@
 //-----------------------------------------------------
 UPlayerInteractAnimationState::UPlayerInteractAnimationState()
 {
+	PlayerStatus = EPlayerStatus::InteractAnimation;
 	MoveSpeed = 0.f;
 	bAllowManualControl = false;
 }
