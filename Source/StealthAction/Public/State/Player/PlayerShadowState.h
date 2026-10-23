@@ -17,6 +17,12 @@ protected:
 	//影状態のコリジョン設定
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
 	FName ShadowCollisionProfile = TEXT("PlayerInShadow");
+	//影状態のカプセル半径
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow|Collision", meta = (ClampMin = "1.0", Units = "cm"))
+	float ShadowCapsuleRadius = 10.f;
+	//影状態のカプセル半高さ(半径より小さくはできない)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow|Collision", meta = (ClampMin = "1.0", Units = "cm"))
+	float ShadowCapsuleHalfHeight = 10.f;
 	//影エフェクトのNiagara
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
 	TObjectPtr<class UNiagaraSystem> ShadowEffectSystem = nullptr;
@@ -41,6 +47,15 @@ protected:
 	virtual void OnExit_Implementation() override;
 
 private:
+	//元のサイズで戻れる場所か
+	bool CanRestoreAtFeet(const FVector& Feet) const;
+	//変更前のカプセルサイズ
+	float OriginalCapsuleRadius = 0.f;
+	float OriginalCapsuleHalfHeight = 0.f;
+	//最後に元のサイズで戻れた足元位置
+	FVector LastSafeFeet = FVector::ZeroVector;
+	//縮小時の位置補正後のメッシュ位置
+	FVector SinkStartMeshLocation = FVector::ZeroVector;
 	//生成した影エフェクト
 	UPROPERTY(Transient)
 	TObjectPtr<class UNiagaraComponent> ShadowEffect = nullptr;

@@ -88,9 +88,9 @@ UE 5.7 による C++ / UHT / BP のビルドとゲーム実行は、この環境
 
 ### 影状態の障害物判定
 
-影状態ではカプセルのサイズ・位置を変更せず、Shadow ステートBPの **Shadow Collision Profile**（既定 `PlayerInShadow`）に切り替えます。退出時は入場前のプリセットへ戻します。旧 Capsule Height Ratio は使用しません。
+影状態では足元を維持してカプセルを縮小し、Shadow ステートBPの **Shadow Collision Profile**（既定 `PlayerInShadow`）に切り替えます。退出時は入場前のプリセットへ戻します。旧 Capsule Height Ratio は使用しません。
 
-通過させたい障害物のコリジョン設定で、Object Response の **PlayerInShadow** を **Ignore** にしてください。床と通過不可の壁は **Block** のままにします。同じコリジョンで床と障害物をまとめている場合は、別コンポーネントに分けて設定してください。この方式は指定した障害物全体を通過するため、隙間の寸法による判定は行いません。既存の影解除時の障害物チェックと退避位置への復帰処理は継続します。
+通過させたい障害物のコリジョン設定で、Object Response の **PlayerInShadow** を **Ignore** にしてください。床と通過不可の壁は **Block** のままにします。同じコリジョンで床と障害物をまとめている場合は、別コンポーネントに分けて設定してください。Ignoreに指定した障害物全体は通過します。Blockの障害物では影用カプセルのサイズに応じて通行可否が決まります。解除時は元のサイズと衝突プリセットで復帰可能か確認します。
 
 ### クラスでのステート管理
 
@@ -127,3 +127,9 @@ BP_PlayerShadowState のクラスデフォルトで Shadow Effect System にNiag
 Shadow Effect Offset は足元からの位置調整（既定Z=2cm）です。エフェクトはメッシュではなくルートに追従するため、メッシュと一緒には沈みません。Shadow Alpha Parameter Name（既定User.ShadowAlpha）へ潜る進行度0～1を渡します。Niagara側にFloatのUser Parameter「ShadowAlpha」を追加し、粒子の色のAlphaや大きさなどへ接続すると潜る演出に合わせて表示できます。
 
 解除・被ダメージ・終了時に生成したNiagaraを切り離して停止し、完了後に自動破棄します。NiagaraのEmitter StateでInactive ResponseをCompleteにし、粒子に有限の寿命を設定してください。影の間ずっと表示する場合はシステムをループさせてください。Niagaraプラグインとモジュール依存も追加しています。エディタを閉じてC++をビルドし直した後、プレイヤーBPを再コンパイルしてください。
+
+### 影状態のカプセルサイズ
+
+BP_PlayerShadowState の Shadow → Collision で Shadow Capsule Radius（半径）と Shadow Capsule Half Height（半高さ）を設定します。既定は両方10cmで直径20cmの球状になります。半高さは半径より小さくできないため、コードでも補正しています。もっと低い隙間を通す場合は両方を小さくしてください。
+
+縮小時も足元の高さとメッシュの開始位置を維持します。影の間も、入る前のカプセルサイズ・プリセットで戻れる位置を記録し、解除時に収まらなければその位置へ戻します。表示用メッシュだけを沈める演出とNiagaraの足元への追従は継続します。

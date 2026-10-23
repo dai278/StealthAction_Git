@@ -9,6 +9,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Light/ExtendedSpotLightManager.h"
 #include "Engine/World.h"
+#include "CollisionQueryParams.h"
+#include "CollisionShape.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
 
@@ -53,12 +55,23 @@ void UPlayerShadowState::OnEnter_Implementation()
 	USkeletalMeshComponent* Mesh = PlayerCharacter->GetMesh();
 	if (!IsValid(Capsule) || !IsValid(Mesh)) { return; }
 	bShadowApplied = true;
-	//サイズは変えずに影用のコリジョンへ切り替える
+	//足元と元のサイズを保存
+	LastSafeFeet = PlayerCharacter->GetFeetLocation();
+	OriginalCapsuleRadius = Capsule->GetUnscaledCapsuleRadius();
+	OriginalCapsuleHalfHeight = Capsule->GetUnscaledCapsuleHalfHeight();
+	OriginalMeshLocation = Mesh->GetRelativeLocation();
+	const float PreviousHeight = Capsule->GetScaledCapsuleHalfHeight();
+	//高さだけでなく半径も小さくする
 	OriginalCollisionProfile = Capsule->GetCollisionProfileName();
 	Capsule->SetCollisionProfileName(ShadowCollisionProfile);
-	//移動用のカプセルは触らずに見た目だけ変更する
+	const float Radius = FMath::Max(1.f, ShadowCapsuleRadius);
+	Capsule->SetCapsuleSize(Radius, FMath::Max(Radius, ShadowCapsuleHalfHeight));
+	const float HeightDifference = PreviousHeight - Capsule->GetScaledCapsuleHalfHeight();
+	PlayerCharacter->SetActorLocation(PlayerCharacter->GetActorLocation() - FVector(0.f, 0.f, HeightDifference));
+	//カプセルが下がった分だけメッシュを補正してから沈める
+	Mesh->AddWorldOffset(FVector(0.f, 0.f, HeightDifference));
+	SinkStartMeshLocation = Mesh->GetRelativeLocation();
 	bOriginalMeshVisible = Mesh->IsVisible();
-	OriginalMeshLocation = Mesh->GetRelativeLocation();
 	SinkElapsed = 0.f;
 	OriginalMaterials.Reset();
 	SinkMaterials.Reset();
@@ -120,6 +133,8 @@ void UPlayerShadowState::OnUpdate_Implementation(float DeltaTime)
 	UWorld* World = GetWorld();
 	if (!PlayerCharacter) { return; }
 	UpdateSinkAppearance(DeltaTime);
+	const FVector Feet = PlayerCharacter->GetFeetLocation();
+	if (CanRestoreAtFeet(Feet)) { LastSafeFeet = Feet; }
 	UExtendedSpotLightManager* Lights = World ? World->GetSubsystem<UExtendedSpotLightManager>() : nullptr;
 	if (!IsValid(Lights) || Lights->IsHitAllLight(PlayerCharacter->GetFeetLocation())
 		|| (PlayerCharacter->m_bOnShadow && Lights->IsHitEnemyLight(PlayerCharacter->GetFeetLocation())))
@@ -138,10 +153,13 @@ void UPlayerShadowState::OnExit_Implementation()
 	StopShadowEffect();
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	if (!PlayerCharacter) { return; }
-	//障害物の中で解除した場合は最後に戻れた位置へ戻す
-	if (PlayerCharacter->IsUpPosWall(PlayerCharacter->GetFeetLocation())) { PlayerCharacter->SetActorLocation(PlayerCharacter->m_saveLastNotUpWallPos); }
+	//狭い場所で解除した場合は最後に戻れる位置へ戻す
+	const FVector Feet = PlayerCharacter->GetFeetLocation();
+	const FVector RestoreFeet = CanRestoreAtFeet(Feet) ? Feet : LastSafeFeet;
 	if (UCapsuleComponent* Capsule = PlayerCharacter->GetCapsuleComponent())
 	{
+		Capsule->SetCapsuleSize(OriginalCapsuleRadius, OriginalCapsuleHalfHeight);
+		PlayerCharacter->SetActorLocation(RestoreFeet + FVector(0.f, 0.f, Capsule->GetScaledCapsuleHalfHeight()));
 		Capsule->SetCollisionProfileName(OriginalCollisionProfile);
 	}
 	if (USkeletalMeshComponent* Mesh = PlayerCharacter->GetMesh())
@@ -175,7 +193,7 @@ void UPlayerShadowState::UpdateSinkAppearance(float DeltaTime)
 	SinkElapsed += FMath::Max(0.f, DeltaTime);
 	const float Alpha = SinkDuration > 0.f ? FMath::Clamp(SinkElapsed / SinkDuration, 0.f, 1.f) : 1.f;
 	//プレイヤーの移動に付いていきながら下へ沈む
-	Mesh->SetRelativeLocation(OriginalMeshLocation - FVector(0.f, 0.f, FMath::Max(0.f, SinkDistance) * Alpha));
+	Mesh->SetRelativeLocation(SinkStartMeshLocation - FVector(0.f, 0.f, FMath::Max(0.f, SinkDistance) * Alpha));
 	for (int32 Index = 0; Index < SinkMaterials.Num(); ++Index)
 	{
 		if (IsValid(SinkMaterials[Index]))
@@ -205,4 +223,22 @@ void UPlayerShadowState::StopShadowEffect()
 		ShadowEffect->Deactivate();
 	}
 	ShadowEffect = nullptr;
+}
+
+//-----------------------------------------------------
+//元のサイズで戻れる場所か
+//-----------------------------------------------------
+bool UPlayerShadowState::CanRestoreAtFeet(const FVector& Feet) const
+{
+	APlayerCharacter* PlayerCharacter = GetPlayer();
+	UWorld* World = GetWorld();
+	const UCapsuleComponent* Capsule = PlayerCharacter ? PlayerCharacter->GetCapsuleComponent() : nullptr;
+	if (!World || !IsValid(Capsule)) { return false; }
+	const float Scale = Capsule->GetScaledCapsuleHalfHeight() / FMath::Max(1.f, Capsule->GetUnscaledCapsuleHalfHeight());
+	const float HalfHeight = OriginalCapsuleHalfHeight * Scale;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(PlayerCharacter);
+	return !World->OverlapBlockingTestByProfile(
+		Feet + FVector(0.f, 0.f, HalfHeight), Capsule->GetComponentQuat(), OriginalCollisionProfile,
+		FCollisionShape::MakeCapsule(OriginalCapsuleRadius * Scale, HalfHeight), Params);
 }
