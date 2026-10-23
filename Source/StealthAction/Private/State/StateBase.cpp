@@ -15,6 +15,68 @@ void UStateBase::Initialize(UStateMachine* _inStateMachine, AActor* _inOwner)
 	m_pOwner = _inOwner;
 }
 
+//-----------------------------------------------------
+//開始処理
+//-----------------------------------------------------
+void UStateBase::Enter()
+{
+	//BPで親を呼ばなくてもタイマーは初期化する
+	m_stateTimer = 0.f;
+	m_bUseTimer = true;
+	OnEnter();
+}
+
+//-----------------------------------------------------
+//更新処理
+//-----------------------------------------------------
+void UStateBase::Update(const float& _deltaTime)
+{
+	if (m_bUseTimer) { m_stateTimer += _deltaTime; }
+	OnUpdate(_deltaTime);
+}
+
+//-----------------------------------------------------
+//終了処理
+//-----------------------------------------------------
+void UStateBase::Exit()
+{
+	OnExit();
+}
+
+//-----------------------------------------------------
+//開始可能か
+//-----------------------------------------------------
+bool UStateBase::CanEnter() const
+{
+	return CanEnterState();
+}
+
+//-----------------------------------------------------
+//終了可能か
+//-----------------------------------------------------
+bool UStateBase::CanExit() const
+{
+	return m_bCanExit && CanExitState();
+}
+
+//-----------------------------------------------------
+//遷移可能か
+//-----------------------------------------------------
+bool UStateBase::CanTransitionTo(const UStateBase* _newState) const
+{
+	return IsValid(_newState) && CanTransitionToState(_newState->GetClass());
+}
+
+//-----------------------------------------------------
+//BPで上書きしない場合の共通処理
+//-----------------------------------------------------
+void UStateBase::OnEnter_Implementation() {}
+void UStateBase::OnUpdate_Implementation(float DeltaTime) {}
+void UStateBase::OnExit_Implementation() {}
+bool UStateBase::CanEnterState_Implementation() const { return true; }
+bool UStateBase::CanExitState_Implementation() const { return true; }
+bool UStateBase::CanTransitionToState_Implementation(TSubclassOf<UStateBase> NewStateClass) const { return true; }
+
 void UStateBase::Reset()
 {
 	m_stateTimer = 0.f;

@@ -17,31 +17,55 @@ public:
 
 	virtual void Initialize(UStateMachine* _inStateMachine, AActor* _inOwner);
 
-	virtual void Enter()
-	{
+	//開始処理
+	virtual void Enter();
+	//更新処理
+	virtual void Update(const float& _deltaTime);
+	//終了処理
+	virtual void Exit();
 
-		m_stateTimer = 0.f;
-		m_bUseTimer = true;
-	}
-
-	virtual void Update(const float& _deltaTime)
-	{
-		if (m_bUseTimer)
-		{
-			m_stateTimer += _deltaTime;
-		}
-	}
-	virtual void Exit() {}
-
-	virtual bool CanEnter()const { return true; }
-	virtual bool CanExit()const { return m_bCanExit; }
-	virtual bool CanTransitionTo(const UStateBase* _newState)const { return true; }
+	//開始可能か
+	virtual bool CanEnter() const;
+	//終了可能か
+	virtual bool CanExit() const;
+	//遷移可能か
+	virtual bool CanTransitionTo(const UStateBase* _newState) const;
 
 	virtual void Reset();
 
 	bool HasTag(FName _tag);
 	FName GetTag()const { return m_tag; }
 protected:
+
+	//開始処理(BPで上書き可能)
+	UFUNCTION(BlueprintNativeEvent, Category = "State")
+	void OnEnter();
+	virtual void OnEnter_Implementation();
+
+	//更新処理(BPで上書き可能)
+	UFUNCTION(BlueprintNativeEvent, Category = "State")
+	void OnUpdate(float DeltaTime);
+	virtual void OnUpdate_Implementation(float DeltaTime);
+
+	//終了処理(BPで上書き可能)
+	UFUNCTION(BlueprintNativeEvent, Category = "State")
+	void OnExit();
+	virtual void OnExit_Implementation();
+
+	//開始条件
+	UFUNCTION(BlueprintNativeEvent, Category = "State")
+	bool CanEnterState() const;
+	virtual bool CanEnterState_Implementation() const;
+
+	//終了条件
+	UFUNCTION(BlueprintNativeEvent, Category = "State")
+	bool CanExitState() const;
+	virtual bool CanExitState_Implementation() const;
+
+	//遷移条件
+	UFUNCTION(BlueprintNativeEvent, Category = "State")
+	bool CanTransitionToState(TSubclassOf<UStateBase> NewStateClass) const;
+	virtual bool CanTransitionToState_Implementation(TSubclassOf<UStateBase> NewStateClass) const;
 
 	UStateBase* GetNextStateClassInstance();
 
@@ -57,7 +81,7 @@ protected:
 
 	//ステートの時間
 	float m_stateTimer = 0.f;
-	bool m_bUseTimer;
+	bool m_bUseTimer = false;
 
 	//オーナーのポインタ
 	AActor* m_pOwner;

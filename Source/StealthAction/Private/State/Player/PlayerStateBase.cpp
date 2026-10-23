@@ -27,7 +27,6 @@ void UPlayerStateBase::Initialize(UStateMachine* StateMachine, AActor* Owner)
 //-----------------------------------------------------
 void UPlayerStateBase::Enter()
 {
-	Super::Enter();
 	if (APlayerCharacter* PlayerCharacter = GetPlayer())
 	{
 		if (UCharacterMovementComponent* Movement = PlayerCharacter->GetCharacterMovement())
@@ -40,16 +39,7 @@ void UPlayerStateBase::Enter()
 	{
 		if (APlayerCharacter* PlayerCharacter = GetPlayer()) { PlayerCharacter->m_bCameraSwitching = true; }
 	}
-	OnEnter();
-}
-
-//-----------------------------------------------------
-//更新処理
-//-----------------------------------------------------
-void UPlayerStateBase::Update(const float& DeltaTime)
-{
-	Super::Update(DeltaTime);
-	OnUpdate(DeltaTime);
+	Super::Enter();
 }
 
 //-----------------------------------------------------
@@ -57,12 +47,11 @@ void UPlayerStateBase::Update(const float& DeltaTime)
 //-----------------------------------------------------
 void UPlayerStateBase::Exit()
 {
-	OnExit();
+	Super::Exit();
 	if (bOverrideCamera)
 	{
 		if (APlayerCharacter* PlayerCharacter = GetPlayer()) { PlayerCharacter->m_bCameraSwitching = true; }
 	}
-	Super::Exit();
 }
 
 //-----------------------------------------------------
@@ -70,15 +59,7 @@ void UPlayerStateBase::Exit()
 //-----------------------------------------------------
 bool UPlayerStateBase::CanEnter() const
 {
-	return IsValid(Player) && Super::CanEnter() && CanEnterState();
-}
-
-//-----------------------------------------------------
-//終了可能か
-//-----------------------------------------------------
-bool UPlayerStateBase::CanExit() const
-{
-	return Super::CanExit() && CanExitState();
+	return IsValid(Player) && Super::CanEnter();
 }
 
 //-----------------------------------------------------
@@ -87,8 +68,7 @@ bool UPlayerStateBase::CanExit() const
 bool UPlayerStateBase::CanTransitionTo(const UStateBase* NewState) const
 {
 	const UPlayerStateBase* PlayerState = Cast<UPlayerStateBase>(NewState);
-	return PlayerState && Super::CanTransitionTo(NewState)
-		&& CanTransitionToState(PlayerState->GetClass());
+	return PlayerState && Super::CanTransitionTo(NewState);
 }
 
 //-----------------------------------------------------
@@ -99,31 +79,6 @@ bool UPlayerStateBase::RequestPlayerState(TSubclassOf<UPlayerStateBase> NewState
 	UPlayerStateMachine* Machine = Cast<UPlayerStateMachine>(m_pStateMachine);
 	return Machine && Machine->ChangePlayerState(NewStateClass);
 }
-
-//-----------------------------------------------------
-//開始処理
-//-----------------------------------------------------
-void UPlayerStateBase::OnEnter_Implementation() {}
-//-----------------------------------------------------
-//更新処理
-//-----------------------------------------------------
-void UPlayerStateBase::OnUpdate_Implementation(float DeltaTime) {}
-//-----------------------------------------------------
-//終了処理
-//-----------------------------------------------------
-void UPlayerStateBase::OnExit_Implementation() {}
-//-----------------------------------------------------
-//開始条件
-//-----------------------------------------------------
-bool UPlayerStateBase::CanEnterState_Implementation() const { return true; }
-//-----------------------------------------------------
-//終了条件
-//-----------------------------------------------------
-bool UPlayerStateBase::CanExitState_Implementation() const { return true; }
-//-----------------------------------------------------
-//遷移条件
-//-----------------------------------------------------
-bool UPlayerStateBase::CanTransitionToState_Implementation(TSubclassOf<UPlayerStateBase> NewStateClass) const { return true; }
 
 //-----------------------------------------------------
 //プレイヤー取得
