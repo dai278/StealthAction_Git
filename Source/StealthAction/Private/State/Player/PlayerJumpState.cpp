@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：ジャンプステート
+//----------------------------------------------------------
+
 #include "State/Player/PlayerJumpState.h"
 #include "State/Player/PlayerStateMachine.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
@@ -8,7 +12,8 @@
 //-----------------------------------------------------
 //コンストラクタ
 //-----------------------------------------------------
-UPlayerJumpState::UPlayerJumpState() {
+UPlayerJumpState::UPlayerJumpState()
+{
 	PlayerStatus = EPlayerStatus::Jump;
 }
 
@@ -31,7 +36,10 @@ void UPlayerJumpState::OnEnter_Implementation()
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	UPlayerStateMachine* Machine = GetPlayerMachine();
 	UCharacterMovementComponent* Movement = PlayerCharacter ? PlayerCharacter->GetCharacterMovement() : nullptr;
-	if (!IsValid(Movement) || !Machine) { return; }
+	if (!IsValid(Movement) || !Machine)
+	{
+		return;
+	}
 	SavedGravityScale = Movement->GravityScale;
 	bCustomJump = Machine->IsJumpRequested();
 	if (bCustomJump)
@@ -42,7 +50,10 @@ void UPlayerJumpState::OnEnter_Implementation()
 		{
 			if (UNoiseManager* Noise = World->GetSubsystem<UNoiseManager>())
 			{
-				if (JumpNoiseLevel > 0) { Noise->MakeNoise(JumpNoiseLevel, PlayerCharacter->GetActorLocation()); }
+				if (JumpNoiseLevel > 0)
+				{
+					Noise->MakeNoise(JumpNoiseLevel, PlayerCharacter->GetActorLocation());
+				}
 			}
 		}
 	}
@@ -55,12 +66,17 @@ void UPlayerJumpState::OnUpdate_Implementation(float DeltaTime)
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	UCharacterMovementComponent* Movement = PlayerCharacter ? PlayerCharacter->GetCharacterMovement() : nullptr;
-	if (!IsValid(Movement)) { return; }
+	if (!IsValid(Movement))
+	{
+		return;
+	}
 	if (bCustomJump)
 	{
 		Movement->Velocity.Z = FMath::Max(-static_cast<double>(FMath::Max(0.f, MaximumFallSpeed)),
-			static_cast<double>(Movement->Velocity.Z) - static_cast<double>(FMath::Pow(FMath::Max(1.f, GravityCurveBase), m_stateTimer)));
+										  static_cast<double>(Movement->Velocity.Z) -
+											  static_cast<double>(FMath::Pow(FMath::Max(1.f, GravityCurveBase), m_stateTimer)));
 	}
+
 	//着地直後は移動モードが空中のままなのでLanded側で戻す
 }
 
@@ -71,7 +87,10 @@ void UPlayerJumpState::OnExit_Implementation()
 {
 	if (APlayerCharacter* PlayerCharacter = GetPlayer())
 	{
-		if (UCharacterMovementComponent* Movement = PlayerCharacter->GetCharacterMovement()) { Movement->GravityScale = SavedGravityScale; }
+		if (UCharacterMovementComponent* Movement = PlayerCharacter->GetCharacterMovement())
+		{
+			Movement->GravityScale = SavedGravityScale;
+		}
 	}
 	bCustomJump = false;
 }

@@ -1,9 +1,14 @@
+//----------------------------------------------------------
+//概要：待機ステート
+//----------------------------------------------------------
+
 #include "State/Player/PlayerIdleState.h"
 
 //-----------------------------------------------------
 //コンストラクタ
 //-----------------------------------------------------
-UPlayerIdleState::UPlayerIdleState() {
+UPlayerIdleState::UPlayerIdleState()
+{
 	PlayerStatus = EPlayerStatus::Idle;
 	MoveSpeed = 300.f;
 }

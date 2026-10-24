@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：被ダメージステート
+//----------------------------------------------------------
+
 #include "Enemy/Modular/ModularEnemyDamageState.h"
 #include "Enemy/Modular/ModularEnemyCharacter.h"
 #include "Enemy/Modular/ModularEnemyAIController.h"
@@ -10,8 +14,14 @@
 //-----------------------------------------------------
 void UModularEnemyDamageState::OnEnter_Implementation()
 {
-	if (AModularEnemyAIController* AI = GetEnemyController()) { AI->StopEnemyLogic(); }
-	if (AModularEnemyCharacter* Enemy = GetEnemy()) { Enemy->CancelAttack(); }
+	if (AModularEnemyAIController* AI = GetEnemyController())
+	{
+		AI->StopEnemyLogic();
+	}
+	if (AModularEnemyCharacter* Enemy = GetEnemy())
+	{
+		Enemy->CancelAttack();
+	}
 }
 
 //-----------------------------------------------------
@@ -21,6 +31,9 @@ void UModularEnemyDamageState::OnUpdate_Implementation(float DeltaTime)
 {
 	if (m_stateTimer >= FMath::Max(0.f, RecoveryTime))
 	{
-		if (UModularEnemyStateMachine* Machine = GetEnemyMachine()) { Machine->ReturnToAction(); }
+		if (UModularEnemyStateMachine* Machine = GetEnemyMachine())
+		{
+			Machine->ReturnToAction();
+		}
 	}
 }

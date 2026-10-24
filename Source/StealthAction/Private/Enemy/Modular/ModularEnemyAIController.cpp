@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：新しい敵のAI制御
+//----------------------------------------------------------
+
 #include "Enemy/Modular/ModularEnemyAIController.h"
 #include "Enemy/Modular/ModularEnemyCharacter.h"
 #include "Enemy/Modular/ModularEnemyStateMachine.h"
@@ -44,11 +48,17 @@ AModularEnemyAIController::AModularEnemyAIController()
 	EnemyPerception->OnTargetPerceptionUpdated.AddDynamic(this, &AModularEnemyAIController::OnTargetPerceptionUpdated);
 }
 
+//-----------------------------------------------------
+//敵の操作開始
+//-----------------------------------------------------
 void AModularEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	AModularEnemyCharacter* Enemy = Cast<AModularEnemyCharacter>(InPawn);
-	if (Enemy && Enemy->HasActorBegunPlay()) { InitializeEnemy(Enemy); }
+	if (Enemy && Enemy->HasActorBegunPlay())
+	{
+		InitializeEnemy(Enemy);
+	}
 }
 
 //-----------------------------------------------------
@@ -56,14 +66,20 @@ void AModularEnemyAIController::OnPossess(APawn* InPawn)
 //-----------------------------------------------------
 void AModularEnemyAIController::InitializeEnemy(AModularEnemyCharacter* Enemy)
 {
-	if (bInitialized || !IsValid(Enemy) || GetPawn() != Enemy) { return; }
+	if (bInitialized || !IsValid(Enemy) || GetPawn() != Enemy)
+	{
+		return;
+	}
 	if (!IsValid(SharedBlackboard) || !StateMachineClass)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s: Set Shared Blackboard and State Machine Class."), *GetName());
 		return;
 	}
 	UBlackboardComponent* BB = nullptr;
-	if (!UseBlackboard(SharedBlackboard.Get(), BB) || !ValidateBlackboard()) { return; }
+	if (!UseBlackboard(SharedBlackboard.Get(), BB) || !ValidateBlackboard())
+	{
+		return;
+	}
 	BB->SetValueAsVector(TEXT("HomeLocation"), Enemy->GetActorLocation());
 	BB->SetValueAsVector(TEXT("PatrolLocation"), Enemy->GetActorLocation());
 	BB->SetValueAsBool(TEXT("CanSeeTarget"), false);
@@ -86,9 +102,12 @@ void AModularEnemyAIController::InitializeEnemy(AModularEnemyCharacter* Enemy)
 bool AModularEnemyAIController::ValidateBlackboard() const
 {
 	const UBlackboardComponent* BB = GetBlackboardComponent();
-	if (!BB) { return false; }
-	const FName VectorKeys[] = { TEXT("HomeLocation"), TEXT("PatrolLocation"), TEXT("LastKnownLocation"), TEXT("InvestigationLocation") };
-	const FName BoolKeys[] = { TEXT("CanSeeTarget"), TEXT("HasInvestigation") };
+	if (!BB)
+	{
+		return false;
+	}
+	const FName VectorKeys[] = {TEXT("HomeLocation"), TEXT("PatrolLocation"), TEXT("LastKnownLocation"), TEXT("InvestigationLocation")};
+	const FName BoolKeys[] = {TEXT("CanSeeTarget"), TEXT("HasInvestigation")};
 	bool bValid = true;
 	auto Check = [&](FName Key, UClass* Type)
 	{
@@ -100,8 +119,14 @@ bool AModularEnemyAIController::ValidateBlackboard() const
 		}
 	};
 	Check(TEXT("TargetActor"), UBlackboardKeyType_Object::StaticClass());
-	for (FName Key : VectorKeys) { Check(Key, UBlackboardKeyType_Vector::StaticClass()); }
-	for (FName Key : BoolKeys) { Check(Key, UBlackboardKeyType_Bool::StaticClass()); }
+	for (FName Key : VectorKeys)
+	{
+		Check(Key, UBlackboardKeyType_Vector::StaticClass());
+	}
+	for (FName Key : BoolKeys)
+	{
+		Check(Key, UBlackboardKeyType_Bool::StaticClass());
+	}
 	return bValid;
 }
 
@@ -110,9 +135,16 @@ bool AModularEnemyAIController::ValidateBlackboard() const
 //-----------------------------------------------------
 void AModularEnemyAIController::RequestBehaviorTree(UBehaviorTree* Tree)
 {
-	if (!bInitialized || !IsValid(EnemyBehaviorTree)) { return; }
+	if (!bInitialized || !IsValid(EnemyBehaviorTree))
+	{
+		return;
+	}
+
 	//同じBTを毎フレーム再起動しない
-	if ((bSwitchPending && PendingTree == Tree) || (!bSwitchPending && ActiveTree == Tree && EnemyBehaviorTree->IsRunning())) { return; }
+	if ((bSwitchPending && PendingTree == Tree) || (!bSwitchPending && ActiveTree == Tree && EnemyBehaviorTree->IsRunning()))
+	{
+		return;
+	}
 	StopMovement();
 	EnemyBehaviorTree->StopTree(EBTStopMode::Safe);
 	ActiveTree = nullptr;
@@ -127,7 +159,10 @@ void AModularEnemyAIController::RequestBehaviorTree(UBehaviorTree* Tree)
 //-----------------------------------------------------
 void AModularEnemyAIController::TryStartPendingTree(float DeltaTime)
 {
-	if (!bSwitchPending || !IsValid(EnemyBehaviorTree)) { return; }
+	if (!bSwitchPending || !IsValid(EnemyBehaviorTree))
+	{
+		return;
+	}
 	if (EnemyBehaviorTree->IsAbortPending() || EnemyBehaviorTree->TreeHasBeenStarted())
 	{
 		AbortWaitTime += FMath::Max(0.f, DeltaTime);
@@ -141,14 +176,21 @@ void AModularEnemyAIController::TryStartPendingTree(float DeltaTime)
 	UBehaviorTree* Next = PendingTree.Get();
 	PendingTree = nullptr;
 	bSwitchPending = false;
-	if (!IsValid(Next)) { return; }
+	if (!IsValid(Next))
+	{
+		return;
+	}
+
 	//異なるBlackboardへの切り替えは許可しない
 	if (Next->BlackboardAsset != SharedBlackboard)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s: Both behavior trees must use the exact Shared Blackboard asset."), *GetName());
 		return;
 	}
-	if (EnemyBehaviorTree->IsPaused()) { EnemyBehaviorTree->ResumeLogic(TEXT("Enemy state transition")); }
+	if (EnemyBehaviorTree->IsPaused())
+	{
+		EnemyBehaviorTree->ResumeLogic(TEXT("Enemy state transition"));
+	}
 	ActiveTree = Next;
 	EnemyBehaviorTree->StartTree(*Next, EBTExecutionMode::Looped);
 }
@@ -161,7 +203,10 @@ void AModularEnemyAIController::StopEnemyLogic(bool bForce)
 	PendingTree = nullptr;
 	ActiveTree = nullptr;
 	bSwitchPending = false;
-	if (IsValid(EnemyBehaviorTree)) { EnemyBehaviorTree->StopTree(bForce ? EBTStopMode::Forced : EBTStopMode::Safe); }
+	if (IsValid(EnemyBehaviorTree))
+	{
+		EnemyBehaviorTree->StopTree(bForce ? EBTStopMode::Forced : EBTStopMode::Safe);
+	}
 	StopMovement();
 	ClearFocus(EAIFocusPriority::Gameplay);
 }
@@ -173,15 +218,27 @@ void AModularEnemyAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStim
 {
 	const AModularEnemyCharacter* Enemy = Cast<AModularEnemyCharacter>(GetPawn());
 	const APawn* SensedPawn = Cast<APawn>(Actor);
-	if (!bInitialized || !Enemy || !Enemy->IsAlive() || !IsValid(Actor)) { return; }
-	UBlackboardComponent* BB = GetBlackboardComponent();
-	if (!BB) { return; }
-	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
+	if (!bInitialized || !Enemy || !Enemy->IsAlive() || !IsValid(Actor))
 	{
-		if (Stimulus.WasSuccessfullySensed()) { InvestigateLocation(Stimulus.StimulusLocation); }
 		return;
 	}
-	if (Stimulus.Type != UAISense::GetSenseID<UAISense_Sight>() || !SensedPawn || !SensedPawn->IsPlayerControlled()) { return; }
+	UBlackboardComponent* BB = GetBlackboardComponent();
+	if (!BB)
+	{
+		return;
+	}
+	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
+	{
+		if (Stimulus.WasSuccessfullySensed())
+		{
+			InvestigateLocation(Stimulus.StimulusLocation);
+		}
+		return;
+	}
+	if (Stimulus.Type != UAISense::GetSenseID<UAISense_Sight>() || !SensedPawn || !SensedPawn->IsPlayerControlled())
+	{
+		return;
+	}
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		CombatTarget = Actor;
@@ -200,16 +257,25 @@ void AModularEnemyAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStim
 	}
 }
 
+//-----------------------------------------------------
+//戦闘対象を覚えているか
+//-----------------------------------------------------
 bool AModularEnemyAIController::HasCombatTarget() const
 {
 	return CombatTarget.IsValid();
 }
 
+//-----------------------------------------------------
+//今見えている対象を取得
+//-----------------------------------------------------
 AActor* AModularEnemyAIController::GetVisibleTarget() const
 {
 	return bTargetVisible ? CombatTarget.Get() : nullptr;
 }
 
+//-----------------------------------------------------
+//戦闘対象の解除
+//-----------------------------------------------------
 void AModularEnemyAIController::ClearCombatTarget()
 {
 	CombatTarget.Reset();
@@ -222,10 +288,16 @@ void AModularEnemyAIController::ClearCombatTarget()
 	}
 }
 
+//-----------------------------------------------------
+//調査先の設定
+//-----------------------------------------------------
 void AModularEnemyAIController::InvestigateLocation(FVector Location)
 {
 	const AModularEnemyCharacter* Enemy = Cast<AModularEnemyCharacter>(GetPawn());
-	if (!bInitialized || !Enemy || !Enemy->IsAlive() || HasCombatTarget()) { return; }
+	if (!bInitialized || !Enemy || !Enemy->IsAlive() || HasCombatTarget())
+	{
+		return;
+	}
 	if (UBlackboardComponent* BB = GetBlackboardComponent())
 	{
 		BB->SetValueAsVector(TEXT("InvestigationLocation"), Location);
@@ -233,16 +305,28 @@ void AModularEnemyAIController::InvestigateLocation(FVector Location)
 	}
 }
 
+//-----------------------------------------------------
+//調査完了
+//-----------------------------------------------------
 void AModularEnemyAIController::FinishInvestigation()
 {
-	if (UBlackboardComponent* BB = GetBlackboardComponent()) { BB->SetValueAsBool(TEXT("HasInvestigation"), false); }
+	if (UBlackboardComponent* BB = GetBlackboardComponent())
+	{
+		BB->SetValueAsBool(TEXT("HasInvestigation"), false);
+	}
 }
 
+//-----------------------------------------------------
+//次の巡回地点をBlackboardへ設定
+//-----------------------------------------------------
 bool AModularEnemyAIController::SetNextPatrolLocation()
 {
 	AModularEnemyCharacter* Enemy = Cast<AModularEnemyCharacter>(GetPawn());
 	UBlackboardComponent* BB = GetBlackboardComponent();
-	if (!Enemy || !BB || !Enemy->IsAlive()) { return false; }
+	if (!Enemy || !BB || !Enemy->IsAlive())
+	{
+		return false;
+	}
 	BB->SetValueAsVector(TEXT("PatrolLocation"), Enemy->GetNextPatrolLocation());
 	return true;
 }
@@ -253,12 +337,18 @@ bool AModularEnemyAIController::SetNextPatrolLocation()
 void AModularEnemyAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (!bInitialized) { return; }
+	if (!bInitialized)
+	{
+		return;
+	}
 	if (CombatTarget.IsValid())
 	{
 		if (bTargetVisible)
 		{
-			if (UBlackboardComponent* BB = GetBlackboardComponent()) { BB->SetValueAsVector(TEXT("LastKnownLocation"), CombatTarget->GetActorLocation()); }
+			if (UBlackboardComponent* BB = GetBlackboardComponent())
+			{
+				BB->SetValueAsVector(TEXT("LastKnownLocation"), CombatTarget->GetActorLocation());
+			}
 		}
 		else
 		{
@@ -272,14 +362,26 @@ void AModularEnemyAIController::Tick(float DeltaTime)
 			}
 		}
 	}
-	else if (bTargetVisible) { ClearCombatTarget(); }
-	if (IsValid(StateMachine)) { StateMachine->Update(DeltaTime); }
+	else if (bTargetVisible)
+	{
+		ClearCombatTarget();
+	}
+	if (IsValid(StateMachine))
+	{
+		StateMachine->Update(DeltaTime);
+	}
 	TryStartPendingTree(DeltaTime);
 }
 
+//-----------------------------------------------------
+//敵の操作終了
+//-----------------------------------------------------
 void AModularEnemyAIController::OnUnPossess()
 {
-	if (IsValid(StateMachine)) { StateMachine->Stop(); }
+	if (IsValid(StateMachine))
+	{
+		StateMachine->Stop();
+	}
 	StopEnemyLogic(true);
 	StateMachine = nullptr;
 	bInitialized = false;
@@ -287,9 +389,15 @@ void AModularEnemyAIController::OnUnPossess()
 	Super::OnUnPossess();
 }
 
+//-----------------------------------------------------
+//終了処理
+//-----------------------------------------------------
 void AModularEnemyAIController::EndPlay(const EEndPlayReason::Type Reason)
 {
-	if (IsValid(StateMachine)) { StateMachine->Stop(); }
+	if (IsValid(StateMachine))
+	{
+		StateMachine->Stop();
+	}
 	StopEnemyLogic(true);
 	Super::EndPlay(Reason);
 }

@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：歩きステート
+//----------------------------------------------------------
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -5,13 +9,15 @@
 #include "PlayerWalkState.generated.h"
 
 UCLASS(Blueprintable)
+
 class STEALTHACTION_API UPlayerWalkState : public UPlayerLocomotionState
 {
 	GENERATED_BODY()
-public:
+
+  public:
+
 	//コンストラクタ
 	UPlayerWalkState();
 
-protected:
-
+  protected:
 };

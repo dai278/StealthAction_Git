@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：死亡ステート
+//----------------------------------------------------------
+
 #include "Enemy/Modular/ModularEnemyDeadState.h"
 #include "Enemy/Modular/ModularEnemyCharacter.h"
 #include "Enemy/Modular/ModularEnemyAIController.h"
@@ -10,5 +14,8 @@
 //-----------------------------------------------------
 void UModularEnemyDeadState::OnEnter_Implementation()
 {
-	if (AModularEnemyCharacter* Enemy = GetEnemy()) { Enemy->ApplyDeath(); }
+	if (AModularEnemyCharacter* Enemy = GetEnemy())
+	{
+		Enemy->ApplyDeath();
+	}
 }

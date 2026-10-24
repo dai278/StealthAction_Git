@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：戦闘ステート
+//----------------------------------------------------------
+
 #include "Enemy/Modular/ModularEnemyCombatState.h"
 #include "Enemy/Modular/ModularEnemyCharacter.h"
 #include "Enemy/Modular/ModularEnemyAIController.h"
@@ -16,7 +20,10 @@ void UModularEnemyCombatState::OnEnter_Implementation()
 	}
 	if (AModularEnemyAIController* AI = GetEnemyController())
 	{
-		if (!IsValid(BehaviorTree)) { UE_LOG(LogTemp, Warning, TEXT("%s: Set Behavior Tree in the Combat state BP."), *GetName()); }
+		if (!IsValid(BehaviorTree))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s: Set Behavior Tree in the Combat state BP."), *GetName());
+		}
 		AI->RequestBehaviorTree(BehaviorTree.Get());
 	}
 }

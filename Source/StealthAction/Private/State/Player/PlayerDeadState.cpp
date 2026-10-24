@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：死亡ステート
+//----------------------------------------------------------
+
 #include "State/Player/PlayerDeadState.h"
 #include "State/Player/PlayerStateMachine.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
@@ -27,22 +31,35 @@ void UPlayerDeadState::OnEnter_Implementation()
 	bTransitionRequested = false;
 	FadeStartTime = FMath::Max(0.f, GameOverDelay);
 	PlayingAnimInstance.Reset();
-	if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->CancelLocomotionRequests(); }
+	if (UPlayerStateMachine* Machine = GetPlayerMachine())
+	{
+		Machine->CancelLocomotionRequests();
+	}
 	APlayerCharacter* PlayerCharacter = GetPlayer();
-	if (!PlayerCharacter) { return; }
+	if (!PlayerCharacter)
+	{
+		return;
+	}
 	PlayerCharacter->m_playerInfo.isAlive = false;
 	PlayerCharacter->m_playerInfo.bIsGetKeyItem = 0;
-	if (UCharacterMovementComponent* Movement = PlayerCharacter->GetCharacterMovement()) { Movement->StopMovementImmediately(); }
+	if (UCharacterMovementComponent* Movement = PlayerCharacter->GetCharacterMovement())
+	{
+		Movement->StopMovementImmediately();
+	}
 	USkeletalMeshComponent* Mesh = PlayerCharacter->GetMesh();
 	UAnimInstance* AnimInstance = IsValid(Mesh) ? Mesh->GetAnimInstance() : nullptr;
 	if (IsValid(DeathMontage))
 	{
-		const float Duration = IsValid(AnimInstance)
-			? AnimInstance->Montage_Play(DeathMontage.Get(), FMath::Max(0.01f, MontagePlayRate), EMontagePlayReturnType::Duration) : 0.f;
+		const float Duration = IsValid(AnimInstance) ? AnimInstance->Montage_Play(DeathMontage.Get(), FMath::Max(0.01f, MontagePlayRate),
+																				  EMontagePlayReturnType::Duration)
+													 : 0.f;
 		if (Duration > 0.f)
 		{
 			PlayingAnimInstance = AnimInstance;
-			if (bWaitForDeathMontage) { FadeStartTime += Duration; }
+			if (bWaitForDeathMontage)
+			{
+				FadeStartTime += Duration;
+			}
 		}
 		else
 		{
@@ -50,7 +67,10 @@ void UPlayerDeadState::OnEnter_Implementation()
 			UE_LOG(LogTemp, Warning, TEXT("%s: Death montage could not be played. Continuing to game over."), *GetName());
 		}
 	}
-	if (FadeStartTime <= 0.f) { BeginGameOverTransition(); }
+	if (FadeStartTime <= 0.f)
+	{
+		BeginGameOverTransition();
+	}
 }
 
 //-----------------------------------------------------
@@ -58,7 +78,10 @@ void UPlayerDeadState::OnEnter_Implementation()
 //-----------------------------------------------------
 void UPlayerDeadState::OnUpdate_Implementation(float DeltaTime)
 {
-	if (!bTransitionRequested && m_stateTimer >= FadeStartTime) { BeginGameOverTransition(); }
+	if (!bTransitionRequested && m_stateTimer >= FadeStartTime)
+	{
+		BeginGameOverTransition();
+	}
 }
 
 //-----------------------------------------------------
@@ -67,7 +90,11 @@ void UPlayerDeadState::OnUpdate_Implementation(float DeltaTime)
 void UPlayerDeadState::BeginGameOverTransition()
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
-	if (bTransitionRequested || !bOpenGameOverLevel || GameOverLevel.IsNone() || !PlayerCharacter || !GetWorld()) { return; }
+	if (bTransitionRequested || !bOpenGameOverLevel || GameOverLevel.IsNone() || !PlayerCharacter || !GetWorld())
+	{
+		return;
+	}
+
 	//OpenLevelで終了処理が呼ばれても重ねて要求しない
 	bTransitionRequested = true;
 	UGameInstance* Instance = PlayerCharacter->GetGameInstance();
@@ -86,7 +113,10 @@ void UPlayerDeadState::OnExit_Implementation()
 	bTransitionRequested = true;
 	if (UAnimInstance* AnimInstance = PlayingAnimInstance.Get())
 	{
-		if (AnimInstance->Montage_IsActive(DeathMontage.Get())) { AnimInstance->Montage_Stop(0.f, DeathMontage.Get()); }
+		if (AnimInstance->Montage_IsActive(DeathMontage.Get()))
+		{
+			AnimInstance->Montage_Stop(0.f, DeathMontage.Get());
+		}
 	}
 	PlayingAnimInstance.Reset();
 }

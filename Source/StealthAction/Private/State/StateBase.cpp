@@ -1,5 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+//----------------------------------------------------------
+//概要：ステートの共通処理
+//----------------------------------------------------------
 
 #include "State/StateBase.h"
 #include "State/StateMachineComponent.h"
@@ -8,6 +9,9 @@ UStateBase::UStateBase()
 {
 }
 
+//-----------------------------------------------------
+//初期化
+//-----------------------------------------------------
 void UStateBase::Initialize(UStateMachine* _inStateMachine, AActor* _inOwner)
 {
 	m_pStateMachine = _inStateMachine;
@@ -31,7 +35,10 @@ void UStateBase::Enter()
 //-----------------------------------------------------
 void UStateBase::Update(const float& _deltaTime)
 {
-	if (m_bUseTimer) { m_stateTimer += _deltaTime; }
+	if (m_bUseTimer)
+	{
+		m_stateTimer += _deltaTime;
+	}
 	OnUpdate(_deltaTime);
 }
 
@@ -70,13 +77,51 @@ bool UStateBase::CanTransitionTo(const UStateBase* _newState) const
 //-----------------------------------------------------
 //BPで上書きしない場合の共通処理
 //-----------------------------------------------------
-void UStateBase::OnEnter_Implementation() {}
-void UStateBase::OnUpdate_Implementation(float DeltaTime) {}
-void UStateBase::OnExit_Implementation() {}
-bool UStateBase::CanEnterState_Implementation() const { return true; }
-bool UStateBase::CanExitState_Implementation() const { return true; }
-bool UStateBase::CanTransitionToState_Implementation(TSubclassOf<UStateBase> NewStateClass) const { return true; }
+void UStateBase::OnEnter_Implementation()
+{
+}
 
+//-----------------------------------------------------
+//更新処理
+//-----------------------------------------------------
+void UStateBase::OnUpdate_Implementation(float DeltaTime)
+{
+}
+
+//-----------------------------------------------------
+//終了処理
+//-----------------------------------------------------
+void UStateBase::OnExit_Implementation()
+{
+}
+
+//-----------------------------------------------------
+//開始条件
+//-----------------------------------------------------
+bool UStateBase::CanEnterState_Implementation() const
+{
+	return true;
+}
+
+//-----------------------------------------------------
+//終了条件
+//-----------------------------------------------------
+bool UStateBase::CanExitState_Implementation() const
+{
+	return true;
+}
+
+//-----------------------------------------------------
+//遷移条件
+//-----------------------------------------------------
+bool UStateBase::CanTransitionToState_Implementation(TSubclassOf<UStateBase> NewStateClass) const
+{
+	return true;
+}
+
+//-----------------------------------------------------
+//リセット処理
+//-----------------------------------------------------
 void UStateBase::Reset()
 {
 	m_stateTimer = 0.f;
@@ -85,7 +130,7 @@ void UStateBase::Reset()
 //タグを所持してるか
 bool UStateBase::HasTag(FName _tag)
 {
-	return m_tag==_tag;
+	return m_tag == _tag;
 }
 
 //========================================================
@@ -93,11 +138,14 @@ bool UStateBase::HasTag(FName _tag)
 //========================================================
 UStateBase* UStateBase::GetNextStateClassInstance()
 {
-	if (!IsValid(m_pStateMachine)) { return nullptr; }
-	if (!m_nextStateClass) { return nullptr; }
+	if (!IsValid(m_pStateMachine))
+	{
+		return nullptr;
+	}
+	if (!m_nextStateClass)
+	{
+		return nullptr;
+	}
 
 	return m_pStateMachine->GetStateBySubClass(m_nextStateClass);
 }
-
-
-

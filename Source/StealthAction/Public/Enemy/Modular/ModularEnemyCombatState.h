@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：戦闘ステート
+//----------------------------------------------------------
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -6,12 +10,17 @@
 
 //戦闘ステート
 UCLASS(Blueprintable)
+
 class STEALTHACTION_API UModularEnemyCombatState : public UModularEnemyState
 {
 	GENERATED_BODY()
-protected:
+
+  protected:
+
 	//このステートで動かすBT
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enemy State")
 	TObjectPtr<class UBehaviorTree> BehaviorTree = nullptr;
+
+	//開始処理
 	virtual void OnEnter_Implementation() override;
 };

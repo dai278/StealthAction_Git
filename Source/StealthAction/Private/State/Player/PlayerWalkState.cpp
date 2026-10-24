@@ -1,9 +1,14 @@
+//----------------------------------------------------------
+//概要：歩きステート
+//----------------------------------------------------------
+
 #include "State/Player/PlayerWalkState.h"
 
 //-----------------------------------------------------
 //コンストラクタ
 //-----------------------------------------------------
-UPlayerWalkState::UPlayerWalkState() {
+UPlayerWalkState::UPlayerWalkState()
+{
 	PlayerStatus = EPlayerStatus::Walk;
 	MoveSpeed = 300.f;
 }

@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：調査完了タスク
+//----------------------------------------------------------
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -6,11 +10,18 @@
 
 //調査済みの位置を繰り返し調べないようにする
 UCLASS()
+
 class STEALTHACTION_API UBTTask_ModularEnemyFinishInvestigation : public UBTTaskNode
 {
 	GENERATED_BODY()
-public:
+
+  public:
+
+	//コンストラクタ
 	UBTTask_ModularEnemyFinishInvestigation();
-protected:
+
+  protected:
+
+	//タスク開始
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 };

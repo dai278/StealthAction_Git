@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：影ステート
+//----------------------------------------------------------
+
 #include "State/Player/PlayerShadowState.h"
 #include "State/Player/PlayerStateMachine.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
@@ -21,7 +25,7 @@ UPlayerShadowState::UPlayerShadowState()
 {
 	PlayerStatus = EPlayerStatus::InShadow;
 	bOverrideCamera = true;
-	CameraSettings = { FRotator(0.f, 0.f, 0.f), 60.f, 300.f, FVector(0.f, 70.f, 20.f), 5.f };
+	CameraSettings = {FRotator(0.f, 0.f, 0.f), 60.f, 300.f, FVector(0.f, 70.f, 20.f), 5.f};
 	bAllowMovementInput = true;
 	StaminaConsumptionRate = 1.f;
 }
@@ -33,16 +37,19 @@ bool UPlayerShadowState::CanEnterState_Implementation() const
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	const UPlayerStateMachine* Machine = GetPlayerMachine();
-	
+
 	UWorld* World = GetWorld();
-	if (!PlayerCharacter || !Machine || !World || Machine->IsStaminaDepleted()
-		|| !IsValid(PlayerCharacter->GetCapsuleComponent()) || !IsValid(PlayerCharacter->GetMesh())) { return false; }
-	
+	if (!PlayerCharacter || !Machine || !World || Machine->IsStaminaDepleted() || !IsValid(PlayerCharacter->GetCapsuleComponent()) ||
+		!IsValid(PlayerCharacter->GetMesh()))
+	{
+		return false;
+	}
+
 	UExtendedSpotLightManager* Lights = World->GetSubsystem<UExtendedSpotLightManager>();
-	
+
 	const FVector Feet = PlayerCharacter->GetFeetLocation();
-	
-	return IsValid(Lights) && (!Lights->IsHitAllLight(Feet)|| (PlayerCharacter->m_bOnShadow && !Lights->IsHitEnemyLight(Feet)));
+
+	return IsValid(Lights) && (!Lights->IsHitAllLight(Feet) || (PlayerCharacter->m_bOnShadow && !Lights->IsHitEnemyLight(Feet)));
 }
 
 //-----------------------------------------------------
@@ -52,27 +59,36 @@ void UPlayerShadowState::OnEnter_Implementation()
 {
 	bShadowApplied = false;
 	APlayerCharacter* PlayerCharacter = GetPlayer();
-	
-	if (!PlayerCharacter) { return; }
-	if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->CancelLocomotionRequests(); }
-	
+
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+	if (UPlayerStateMachine* Machine = GetPlayerMachine())
+	{
+		Machine->CancelLocomotionRequests();
+	}
+
 	UCapsuleComponent* Capsule = PlayerCharacter->GetCapsuleComponent();
 	USkeletalMeshComponent* Mesh = PlayerCharacter->GetMesh();
-	
-	if (!IsValid(Capsule) || !IsValid(Mesh)) { return; }
-	
+
+	if (!IsValid(Capsule) || !IsValid(Mesh))
+	{
+		return;
+	}
+
 	bShadowApplied = true;
 
 	//Animationの停止
 	Mesh->bPauseAnims = true;
-	
+
 	//足元と元のサイズを保存
 	LastSafeFeet = PlayerCharacter->GetFeetLocation();
 	OriginalCapsuleRadius = Capsule->GetUnscaledCapsuleRadius();
 	OriginalCapsuleHalfHeight = Capsule->GetUnscaledCapsuleHalfHeight();
 	OriginalMeshLocation = Mesh->GetRelativeLocation();
 	const float PreviousHeight = Capsule->GetScaledCapsuleHalfHeight();
-	
+
 	//高さだけでなく半径も小さくする
 	OriginalCollisionProfile = Capsule->GetCollisionProfileName();
 	Capsule->SetCollisionProfileName(ShadowCollisionProfile);
@@ -80,7 +96,7 @@ void UPlayerShadowState::OnEnter_Implementation()
 	Capsule->SetCapsuleSize(Radius, FMath::Max(Radius, ShadowCapsuleHalfHeight));
 	const float HeightDifference = PreviousHeight - Capsule->GetScaledCapsuleHalfHeight();
 	PlayerCharacter->SetActorLocation(PlayerCharacter->GetActorLocation() - FVector(0.f, 0.f, HeightDifference));
-	
+
 	//カプセルが下がった分だけメッシュを補正してから沈める
 	Mesh->AddWorldOffset(FVector(0.f, 0.f, HeightDifference));
 	SinkStartMeshLocation = Mesh->GetRelativeLocation();
@@ -90,7 +106,7 @@ void UPlayerShadowState::OnEnter_Implementation()
 	SinkMaterials.Reset();
 	OriginalOpacities.Reset();
 	bool bMissingOpacity = false;
-	
+
 	for (int32 Index = 0; Index < Mesh->GetNumMaterials(); ++Index)
 	{
 		UMaterialInterface* Material = Mesh->GetMaterial(Index);
@@ -106,15 +122,19 @@ void UPlayerShadowState::OnEnter_Implementation()
 				Mesh->SetMaterial(Index, DynamicMaterial);
 			}
 		}
-		else if (IsValid(Material)) { bMissingOpacity = true; }
+		else if (IsValid(Material))
+		{
+			bMissingOpacity = true;
+		}
 		SinkMaterials.Add(DynamicMaterial);
 		OriginalOpacities.Add(Opacity);
 	}
 	if (bMissingOpacity)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s: Mesh materials need a scalar parameter '%s' connected to opacity for shadow fading."), *GetName(), *OpacityParameterName.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("%s: Mesh materials need a scalar parameter '%s' connected to opacity for shadow fading."),
+			   *GetName(), *OpacityParameterName.ToString());
 	}
-	
+
 	OriginalMeshCollision = Mesh->GetCollisionEnabled();
 	bOriginalOverlapEvents = Mesh->GetGenerateOverlapEvents();
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -122,15 +142,15 @@ void UPlayerShadowState::OnEnter_Implementation()
 	PlayerCharacter->m_cameraStatus = ECameraStatus::InShadow;
 	PlayerCharacter->m_bCameraSwitching = true;
 	PlayerCharacter->m_saveLastNotUpWallPos = PlayerCharacter->GetActorLocation();
-	
+
 	//沈むメッシュではなく移動用のルートへ追従させる
 	StopShadowEffect();
 	if (IsValid(ShadowEffectSystem))
 	{
-		ShadowEffect = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			ShadowEffectSystem.Get(), PlayerCharacter->GetRootComponent(), NAME_None,
-			PlayerCharacter->GetFeetLocation() + ShadowEffectOffset, FRotator::ZeroRotator,
-			EAttachLocation::KeepWorldPosition, true, false, ENCPoolMethod::None, false);
+		ShadowEffect =
+			UNiagaraFunctionLibrary::SpawnSystemAttached(ShadowEffectSystem.Get(), PlayerCharacter->GetRootComponent(), NAME_None,
+														 PlayerCharacter->GetFeetLocation() + ShadowEffectOffset, FRotator::ZeroRotator,
+														 EAttachLocation::KeepWorldPosition, true, false, ENCPoolMethod::None, false);
 		if (IsValid(ShadowEffect))
 		{
 			ShadowEffect->SetVariableFloat(ShadowAlphaParameterName, SinkDuration > 0.f ? 0.f : 1.f);
@@ -151,15 +171,24 @@ void UPlayerShadowState::OnUpdate_Implementation(float DeltaTime)
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	UWorld* World = GetWorld();
-	if (!PlayerCharacter) { return; }
+	if (!PlayerCharacter)
+	{
+		return;
+	}
 	UpdateSinkAppearance(DeltaTime);
 	const FVector Feet = PlayerCharacter->GetFeetLocation();
-	if (CanRestoreAtFeet(Feet)) { LastSafeFeet = Feet; }
-	UExtendedSpotLightManager* Lights = World ? World->GetSubsystem<UExtendedSpotLightManager>() : nullptr;
-	if (!IsValid(Lights) || Lights->IsHitAllLight(PlayerCharacter->GetFeetLocation())
-		|| (PlayerCharacter->m_bOnShadow && Lights->IsHitEnemyLight(PlayerCharacter->GetFeetLocation())))
+	if (CanRestoreAtFeet(Feet))
 	{
-		if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->ReturnToLocomotion(); }
+		LastSafeFeet = Feet;
+	}
+	UExtendedSpotLightManager* Lights = World ? World->GetSubsystem<UExtendedSpotLightManager>() : nullptr;
+	if (!IsValid(Lights) || Lights->IsHitAllLight(PlayerCharacter->GetFeetLocation()) ||
+		(PlayerCharacter->m_bOnShadow && Lights->IsHitEnemyLight(PlayerCharacter->GetFeetLocation())))
+	{
+		if (UPlayerStateMachine* Machine = GetPlayerMachine())
+		{
+			Machine->ReturnToLocomotion();
+		}
 	}
 }
 
@@ -168,11 +197,18 @@ void UPlayerShadowState::OnUpdate_Implementation(float DeltaTime)
 //-----------------------------------------------------
 void UPlayerShadowState::OnExit_Implementation()
 {
-	if (!bShadowApplied) { return; }
+	if (!bShadowApplied)
+	{
+		return;
+	}
 	bShadowApplied = false;
 	StopShadowEffect();
 	APlayerCharacter* PlayerCharacter = GetPlayer();
-	if (!PlayerCharacter) { return; }
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+
 	//狭い場所で解除した場合は最後に戻れる位置へ戻す
 	const FVector Feet = PlayerCharacter->GetFeetLocation();
 	const FVector RestoreFeet = CanRestoreAtFeet(Feet) ? Feet : LastSafeFeet;
@@ -197,6 +233,7 @@ void UPlayerShadowState::OnExit_Implementation()
 		//Animationの停止
 		Mesh->bPauseAnims = false;
 	}
+
 	//サイズとプリセットを戻した位置で対象を取り直す
 	PlayerCharacter->RefreshInteractTarget();
 	OriginalMaterials.Reset();
@@ -214,9 +251,13 @@ void UPlayerShadowState::UpdateSinkAppearance(float DeltaTime)
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	USkeletalMeshComponent* Mesh = PlayerCharacter ? PlayerCharacter->GetMesh() : nullptr;
-	if (!bShadowApplied || !IsValid(Mesh)) { return; }
+	if (!bShadowApplied || !IsValid(Mesh))
+	{
+		return;
+	}
 	SinkElapsed += FMath::Max(0.f, DeltaTime);
 	const float Alpha = SinkDuration > 0.f ? FMath::Clamp(SinkElapsed / SinkDuration, 0.f, 1.f) : 1.f;
+
 	//プレイヤーの移動に付いていきながら下へ沈む
 	Mesh->SetRelativeLocation(SinkStartMeshLocation - FVector(0.f, 0.f, FMath::Max(0.f, SinkDistance) * Alpha));
 	for (int32 Index = 0; Index < SinkMaterials.Num(); ++Index)
@@ -231,6 +272,7 @@ void UPlayerShadowState::UpdateSinkAppearance(float DeltaTime)
 		ShadowEffect->SetWorldLocation(PlayerCharacter->GetFeetLocation() + ShadowEffectOffset);
 		ShadowEffect->SetVariableFloat(ShadowAlphaParameterName, Alpha);
 	}
+
 	//潜り終わったら完全に非表示にする
 	Mesh->SetVisibility(bOriginalMeshVisible && Alpha < 1.f);
 }
@@ -258,12 +300,14 @@ bool UPlayerShadowState::CanRestoreAtFeet(const FVector& Feet) const
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	UWorld* World = GetWorld();
 	const UCapsuleComponent* Capsule = PlayerCharacter ? PlayerCharacter->GetCapsuleComponent() : nullptr;
-	if (!World || !IsValid(Capsule)) { return false; }
+	if (!World || !IsValid(Capsule))
+	{
+		return false;
+	}
 	const float Scale = Capsule->GetScaledCapsuleHalfHeight() / FMath::Max(1.f, Capsule->GetUnscaledCapsuleHalfHeight());
 	const float HalfHeight = OriginalCapsuleHalfHeight * Scale;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(PlayerCharacter);
-	return !World->OverlapBlockingTestByProfile(
-		Feet + FVector(0.f, 0.f, HalfHeight), Capsule->GetComponentQuat(), OriginalCollisionProfile,
-		FCollisionShape::MakeCapsule(OriginalCapsuleRadius * Scale, HalfHeight), Params);
+	return !World->OverlapBlockingTestByProfile(Feet + FVector(0.f, 0.f, HalfHeight), Capsule->GetComponentQuat(), OriginalCollisionProfile,
+												FCollisionShape::MakeCapsule(OriginalCapsuleRadius * Scale, HalfHeight), Params);
 }

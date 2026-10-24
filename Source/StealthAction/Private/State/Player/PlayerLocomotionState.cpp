@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：移動ステートの共通処理
+//----------------------------------------------------------
+
 #include "State/Player/PlayerLocomotionState.h"
 #include "State/Player/PlayerStateMachine.h"
 
@@ -15,5 +19,8 @@ UPlayerLocomotionState::UPlayerLocomotionState()
 //-----------------------------------------------------
 void UPlayerLocomotionState::OnUpdate_Implementation(float DeltaTime)
 {
-	if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->RefreshLocomotionState(); }
+	if (UPlayerStateMachine* Machine = GetPlayerMachine())
+	{
+		Machine->RefreshLocomotionState();
+	}
 }

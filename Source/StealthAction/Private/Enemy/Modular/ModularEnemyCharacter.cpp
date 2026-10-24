@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：新しい敵キャラクター
+//----------------------------------------------------------
+
 #include "Enemy/Modular/ModularEnemyCharacter.h"
 #include "Enemy/Modular/ModularEnemyAIController.h"
 #include "Enemy/Modular/ModularEnemyStateMachine.h"
@@ -30,7 +34,10 @@ void AModularEnemyCharacter::BeginPlay()
 	Super::BeginPlay();
 	Health = FMath::Max(1, MaximumHealth);
 	HomeLocation = GetActorLocation();
-	if (AModularEnemyAIController* AI = GetEnemyController()) { AI->InitializeEnemy(this); }
+	if (AModularEnemyAIController* AI = GetEnemyController())
+	{
+		AI->InitializeEnemy(this);
+	}
 }
 
 //-----------------------------------------------------
@@ -41,17 +48,24 @@ void AModularEnemyCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	DeltaTime = FMath::Max(0.f, DeltaTime);
 	CooldownRemaining = FMath::Max(0.f, CooldownRemaining - DeltaTime);
-	if (!bAttackActive) { return; }
+	if (!bAttackActive)
+	{
+		return;
+	}
 	AModularEnemyAIController* AI = GetEnemyController();
 	AActor* Target = AttackTarget.Get();
-	if (!IsAlive() || !AI || !IsValid(Target)) { CancelAttack(); return; }
+	if (!IsAlive() || !AI || !IsValid(Target))
+	{
+		CancelAttack();
+		return;
+	}
 	AttackElapsed += DeltaTime;
 	if (!bDamageApplied && AttackElapsed >= FMath::Max(0.f, AttackWindup))
 	{
 		//構えた時の対象にだけ1回判定する
 		bDamageApplied = true;
-		if (AI->GetVisibleTarget() == Target && AI->LineOfSightTo(Target)
-			&& FVector::DistSquared(GetActorLocation(), Target->GetActorLocation()) <= FMath::Square(FMath::Max(1.f, AttackRange)))
+		if (AI->GetVisibleTarget() == Target && AI->LineOfSightTo(Target) &&
+			FVector::DistSquared(GetActorLocation(), Target->GetActorLocation()) <= FMath::Square(FMath::Max(1.f, AttackRange)))
 		{
 			if (IDamageable* Damageable = Cast<IDamageable>(Target))
 			{
@@ -59,7 +73,10 @@ void AModularEnemyCharacter::Tick(float DeltaTime)
 			}
 		}
 	}
-	if (AttackElapsed >= FMath::Max(FMath::Max(0.f, AttackWindup), FMath::Max(0.01f, AttackDuration))) { CancelAttack(); }
+	if (AttackElapsed >= FMath::Max(FMath::Max(0.f, AttackWindup), FMath::Max(0.01f, AttackDuration)))
+	{
+		CancelAttack();
+	}
 }
 
 //-----------------------------------------------------
@@ -70,15 +87,21 @@ bool AModularEnemyCharacter::BeginAttack()
 	AModularEnemyAIController* AI = GetEnemyController();
 	UModularEnemyStateMachine* Machine = AI ? AI->GetEnemyStateMachine() : nullptr;
 	AActor* Target = AI ? AI->GetVisibleTarget() : nullptr;
-	if (!IsAlive() || bAttackActive || CooldownRemaining > 0.f || !Machine
-		|| !Machine->IsCurrentState<UModularEnemyCombatState>() || !IsValid(Target) || !AI->LineOfSightTo(Target)
-		|| FVector::DistSquared(GetActorLocation(), Target->GetActorLocation()) > FMath::Square(FMath::Max(1.f, AttackRange))) { return false; }
+	if (!IsAlive() || bAttackActive || CooldownRemaining > 0.f || !Machine || !Machine->IsCurrentState<UModularEnemyCombatState>() ||
+		!IsValid(Target) || !AI->LineOfSightTo(Target) ||
+		FVector::DistSquared(GetActorLocation(), Target->GetActorLocation()) > FMath::Square(FMath::Max(1.f, AttackRange)))
+	{
+		return false;
+	}
 	AI->StopMovement();
 	AttackTarget = Target;
 	AttackElapsed = 0.f;
 	bDamageApplied = false;
 	bAttackActive = true;
-	if (IsValid(AttackMontage)) { PlayAnimMontage(AttackMontage.Get()); }
+	if (IsValid(AttackMontage))
+	{
+		PlayAnimMontage(AttackMontage.Get());
+	}
 	return true;
 }
 
@@ -87,11 +110,17 @@ bool AModularEnemyCharacter::BeginAttack()
 //-----------------------------------------------------
 void AModularEnemyCharacter::CancelAttack()
 {
-	if (!bAttackActive) { return; }
+	if (!bAttackActive)
+	{
+		return;
+	}
 	bAttackActive = false;
 	AttackTarget.Reset();
 	CooldownRemaining = FMath::Max(0.f, AttackCooldown);
-	if (IsValid(AttackMontage)) { StopAnimMontage(AttackMontage.Get()); }
+	if (IsValid(AttackMontage))
+	{
+		StopAnimMontage(AttackMontage.Get());
+	}
 }
 
 //-----------------------------------------------------
@@ -99,15 +128,28 @@ void AModularEnemyCharacter::CancelAttack()
 //-----------------------------------------------------
 void AModularEnemyCharacter::OnDamage(int32 Damage, FVector Knockback, bool bSneakKill)
 {
-	if (!IsAlive() || Damage <= 0) { return; }
+	if (!IsAlive() || Damage <= 0)
+	{
+		return;
+	}
 	Health = Damage >= Health ? 0 : Health - Damage;
-	if (IsAlive() && !Knockback.IsNearlyZero()) { LaunchCharacter(Knockback, true, true); }
+	if (IsAlive() && !Knockback.IsNearlyZero())
+	{
+		LaunchCharacter(Knockback, true, true);
+	}
 	if (AModularEnemyAIController* AI = GetEnemyController())
 	{
-		if (UModularEnemyStateMachine* Machine = AI->GetEnemyStateMachine()) { Machine->NotifyDamage(); }
+		if (UModularEnemyStateMachine* Machine = AI->GetEnemyStateMachine())
+		{
+			Machine->NotifyDamage();
+		}
 	}
+
 	//設定失敗時も死亡後の攻撃は残さない
-	if (!IsAlive()) { ApplyDeath(); }
+	if (!IsAlive())
+	{
+		ApplyDeath();
+	}
 }
 
 //-----------------------------------------------------
@@ -116,7 +158,10 @@ void AModularEnemyCharacter::OnDamage(int32 Damage, FVector Knockback, bool bSne
 float AModularEnemyCharacter::TakeDamage(float Amount, const FDamageEvent& Event, AController* InstigatorController, AActor* Causer)
 {
 	const float Accepted = Super::TakeDamage(Amount, Event, InstigatorController, Causer);
-	if (!IsAlive() || Accepted <= 0.f) { return 0.f; }
+	if (!IsAlive() || Accepted <= 0.f)
+	{
+		return 0.f;
+	}
 	OnDamage(FMath::CeilToInt(Accepted), FVector::ZeroVector, false);
 	return Accepted;
 }
@@ -130,7 +175,10 @@ FVector AModularEnemyCharacter::GetNextPatrolLocation()
 	{
 		PatrolIndex %= PatrolPoints.Num();
 		AActor* Point = PatrolPoints[PatrolIndex++].Get();
-		if (IsValid(Point)) { return Point->GetActorLocation(); }
+		if (IsValid(Point))
+		{
+			return Point->GetActorLocation();
+		}
 	}
 	return HomeLocation;
 }
@@ -140,24 +188,39 @@ FVector AModularEnemyCharacter::GetNextPatrolLocation()
 //-----------------------------------------------------
 void AModularEnemyCharacter::ApplyDeath()
 {
-	if (bDeathApplied) { return; }
+	if (bDeathApplied)
+	{
+		return;
+	}
 	bDeathApplied = true;
 	CancelAttack();
-	if (AModularEnemyAIController* AI = GetEnemyController()) { AI->StopEnemyLogic(); }
+	if (AModularEnemyAIController* AI = GetEnemyController())
+	{
+		AI->StopEnemyLogic();
+	}
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->DisableMovement();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	OnDeath();
 }
 
+//-----------------------------------------------------
+//敵のAIコントローラー取得
+//-----------------------------------------------------
 AModularEnemyAIController* AModularEnemyCharacter::GetEnemyController() const
 {
 	return Cast<AModularEnemyAIController>(GetController());
 }
 
+//-----------------------------------------------------
+//終了処理
+//-----------------------------------------------------
 void AModularEnemyCharacter::EndPlay(const EEndPlayReason::Type Reason)
 {
 	CancelAttack();
-	if (AModularEnemyAIController* AI = GetEnemyController()) { AI->StopEnemyLogic(true); }
+	if (AModularEnemyAIController* AI = GetEnemyController())
+	{
+		AI->StopEnemyLogic(true);
+	}
 	Super::EndPlay(Reason);
 }

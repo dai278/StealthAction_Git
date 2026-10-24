@@ -1,4 +1,8 @@
-﻿#include "State/Player/PlayerDamageState.h"
+﻿//----------------------------------------------------------
+//概要：被ダメージステート
+//----------------------------------------------------------
+
+#include "State/Player/PlayerDamageState.h"
 #include "State/Player/PlayerDeadState.h"
 #include "State/Player/PlayerStateMachine.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
@@ -22,17 +26,22 @@ void UPlayerDamageState::ReceiveDamage(int32 Amount, const FVector& Knockback)
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	UPlayerStateMachine* Machine = GetPlayerMachine();
-	if (!PlayerCharacter || !Machine || !Machine->IsConfigured() || IsInvincible()
-		|| !PlayerCharacter->IsAlive() || Amount <= 0 || Machine->IsCurrentState<UPlayerDeadState>()) { return; }
-	
+	if (!PlayerCharacter || !Machine || !Machine->IsConfigured() || IsInvincible() || !PlayerCharacter->IsAlive() || Amount <= 0 ||
+		Machine->IsCurrentState<UPlayerDeadState>())
+	{
+		return;
+	}
+
 	//ステート変更できなかった場合にHPを戻すため保存
 	const int32 PreviousHP = PlayerCharacter->m_playerInfo.hp;
 	PlayerCharacter->m_playerInfo.hp = Amount >= PreviousHP ? 0 : PreviousHP - Amount;
-	
 	PendingKnockback = Knockback * FMath::Max(0.f, KnockbackMultiplier);
-	const TSubclassOf<UPlayerStateBase> Next = PlayerCharacter->m_playerInfo.hp <= 0 ? UPlayerDeadState::StaticClass() : UPlayerDamageState::StaticClass();
-	
-	if (!Machine->ChangePlayerState(Next)) { PlayerCharacter->m_playerInfo.hp = PreviousHP; }
+	const TSubclassOf<UPlayerStateBase> Next =
+		PlayerCharacter->m_playerInfo.hp <= 0 ? UPlayerDeadState::StaticClass() : UPlayerDamageState::StaticClass();
+	if (!Machine->ChangePlayerState(Next))
+	{
+		PlayerCharacter->m_playerInfo.hp = PreviousHP;
+	}
 }
 
 //-----------------------------------------------------
@@ -41,7 +50,10 @@ void UPlayerDamageState::ReceiveDamage(int32 Amount, const FVector& Knockback)
 void UPlayerDamageState::OnEnter_Implementation()
 {
 	InvincibilityRemaining = FMath::Max(InvincibilityDuration, RecoveryDuration);
-	if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->CancelDash(); }
+	if (UPlayerStateMachine* Machine = GetPlayerMachine())
+	{
+		Machine->CancelDash();
+	}
 	if (APlayerCharacter* PlayerCharacter = GetPlayer())
 	{
 		if (UCapsuleComponent* Capsule = PlayerCharacter->GetCapsuleComponent())
@@ -65,7 +77,10 @@ void UPlayerDamageState::OnUpdate_Implementation(float DeltaTime)
 {
 	if (m_stateTimer >= FMath::Max(0.f, RecoveryDuration))
 	{
-		if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->ReturnToLocomotion(); }
+		if (UPlayerStateMachine* Machine = GetPlayerMachine())
+		{
+			Machine->ReturnToLocomotion();
+		}
 	}
 }
 
@@ -74,9 +89,15 @@ void UPlayerDamageState::OnUpdate_Implementation(float DeltaTime)
 //-----------------------------------------------------
 void UPlayerDamageState::BackgroundUpdate(float DeltaTime)
 {
-	if (InvincibilityRemaining <= 0.f) { return; }
+	if (InvincibilityRemaining <= 0.f)
+	{
+		return;
+	}
 	InvincibilityRemaining = FMath::Max(0.f, InvincibilityRemaining - DeltaTime);
-	if (InvincibilityRemaining <= 0.f) { ClearProtection(); }
+	if (InvincibilityRemaining <= 0.f)
+	{
+		ClearProtection();
+	}
 }
 
 //-----------------------------------------------------

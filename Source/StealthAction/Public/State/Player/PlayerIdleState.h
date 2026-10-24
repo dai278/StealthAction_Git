@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：待機ステート
+//----------------------------------------------------------
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -5,13 +9,15 @@
 #include "PlayerIdleState.generated.h"
 
 UCLASS(Blueprintable)
+
 class STEALTHACTION_API UPlayerIdleState : public UPlayerLocomotionState
 {
 	GENERATED_BODY()
-public:
+
+  public:
+
 	//コンストラクタ
 	UPlayerIdleState();
 
-protected:
-
+  protected:
 };

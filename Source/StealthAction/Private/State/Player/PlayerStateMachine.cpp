@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：プレイヤーのステート管理
+//----------------------------------------------------------
+
 #include "State/Player/PlayerStateMachine.h"
 #include "State/Player/PlayerIdleState.h"
 #include "State/Player/PlayerWalkState.h"
@@ -39,27 +43,29 @@ void UPlayerStateMachine::Initialize(AActor* Owner)
 	}
 	StaminaUsed = 0.f;
 	CancelLocomotionRequests();
+
 	//入力で使うステートの登録確認
 	bool bValid = true;
-	const TSubclassOf<UPlayerStateBase> RequiredStates[] = {
-		UPlayerIdleState::StaticClass(),
-		UPlayerWalkState::StaticClass(),
-		UPlayerDashState::StaticClass(),
-		UPlayerJumpState::StaticClass(),
-		UPlayerCrouchState::StaticClass(),
-		UPlayerAttackState::StaticClass(),
-		UPlayerDamageState::StaticClass(),
-		UPlayerDeadState::StaticClass(),
-		UPlayerShadowState::StaticClass(),
-		UPlayerInteractState::StaticClass(),
-		UPlayerInteractAnimationState::StaticClass()
-	};
+	const TSubclassOf<UPlayerStateBase> RequiredStates[] = {UPlayerIdleState::StaticClass(),
+															UPlayerWalkState::StaticClass(),
+															UPlayerDashState::StaticClass(),
+															UPlayerJumpState::StaticClass(),
+															UPlayerCrouchState::StaticClass(),
+															UPlayerAttackState::StaticClass(),
+															UPlayerDamageState::StaticClass(),
+															UPlayerDeadState::StaticClass(),
+															UPlayerShadowState::StaticClass(),
+															UPlayerInteractState::StaticClass(),
+															UPlayerInteractAnimationState::StaticClass()};
 	for (const auto& StateClass : RequiredStates)
 	{
 		int32 Count = 0;
 		for (UStateBase* State : GetRegisteredStates())
 		{
-			if (IsValid(State) && State->IsA(StateClass)) { ++Count; }
+			if (IsValid(State) && State->IsA(StateClass))
+			{
+				++Count;
+			}
 		}
 		if (Count != 1)
 		{
@@ -67,11 +73,15 @@ void UPlayerStateMachine::Initialize(AActor* Owner)
 			bValid = false;
 		}
 	}
+
 	//通常攻撃は追加登録で有効化する。旧11ステートだけでも初期化は通す
 	int32 NormalAttackCount = 0;
 	for (UStateBase* State : GetRegisteredStates())
 	{
-		if (IsValid(State) && State->IsA<UPlayerNormalAttackState>()) { ++NormalAttackCount; }
+		if (IsValid(State) && State->IsA<UPlayerNormalAttackState>())
+		{
+			++NormalAttackCount;
+		}
 	}
 	if (NormalAttackCount > 1)
 	{
@@ -80,7 +90,10 @@ void UPlayerStateMachine::Initialize(AActor* Owner)
 	}
 	for (UStateBase* State : GetRegisteredStates())
 	{
-		if (!IsValid(Cast<UPlayerStateBase>(State))) { bValid = false; }
+		if (!IsValid(Cast<UPlayerStateBase>(State)))
+		{
+			bValid = false;
+		}
 	}
 	bConfigured = bValid;
 	if (bConfigured && !ChangePlayerState(InitialStateClass))
@@ -98,11 +111,19 @@ bool UPlayerStateMachine::ChangePlayerState(TSubclassOf<UPlayerStateBase> NewSta
 	UE_LOG(LogTemp, Error, TEXT("ステート変更できません"), bConfigured);
 	UE_LOG(LogTemp, Error, TEXT("ステート変更できません"), bTransitionInProgress);
 
-	if (!bConfigured || bTransitionInProgress) { return false; }
+	if (!bConfigured || bTransitionInProgress)
+	{
+		return false;
+	}
+
 	//開始や終了処理から重ねてステートを変更しないようにする
 	TGuardValue<bool> TransitionGuard(bTransitionInProgress, true);
 	UPlayerStateBase* State = GetPlayerState(NewStateClass);
-	if (!State || IsCurrentState<UPlayerDeadState>()) { return false; }
+	if (!State || IsCurrentState<UPlayerDeadState>())
+	{
+		return false;
+	}
+
 	//被ダメージと死亡は終了待ち中でも割り込む
 	if (State->IsA<UPlayerDamageState>() || State->IsA<UPlayerDeadState>())
 	{
@@ -119,13 +140,23 @@ bool UPlayerStateMachine::IsLocomotionState() const
 	return bConfigured && IsCurrentState<UPlayerLocomotionState>();
 }
 
+//-----------------------------------------------------
+//停止処理
+//-----------------------------------------------------
 void UPlayerStateMachine::Stop()
 {
-	if (bTransitionInProgress) { return; }
+	if (bTransitionInProgress)
+	{
+		return;
+	}
+
 	//開始や終了処理から重ねてステートを変更しないようにする
 	TGuardValue<bool> TransitionGuard(bTransitionInProgress, true);
 	Super::Stop();
-	if (UPlayerDamageState* DamageState = GetState<UPlayerDamageState>()) { DamageState->ClearProtection(); }
+	if (UPlayerDamageState* DamageState = GetState<UPlayerDamageState>())
+	{
+		DamageState->ClearProtection();
+	}
 	CancelLocomotionRequests();
 	bConfigured = false;
 }
@@ -135,11 +166,18 @@ void UPlayerStateMachine::Stop()
 //-----------------------------------------------------
 UPlayerStateBase* UPlayerStateMachine::GetPlayerState(TSubclassOf<UPlayerStateBase> StateClass) const
 {
-	if (!StateClass) { return nullptr; }
+	if (!StateClass)
+	{
+		return nullptr;
+	}
+
 	//親クラス指定でも登録したBPのステートを返す
 	for (UStateBase* State : GetRegisteredStates())
 	{
-		if (IsValid(State) && State->IsA(StateClass)) { return Cast<UPlayerStateBase>(State); }
+		if (IsValid(State) && State->IsA(StateClass))
+		{
+			return Cast<UPlayerStateBase>(State);
+		}
 	}
 	return nullptr;
 }
@@ -151,8 +189,7 @@ bool UPlayerStateMachine::CanControl() const
 {
 	const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwner());
 	const UPlayerStateBase* State = Cast<UPlayerStateBase>(GetCurrentState());
-	return bConfigured && IsValid(PlayerCharacter) && PlayerCharacter->m_bCanControl
-		&& State && State->AllowsManualControl();
+	return bConfigured && IsValid(PlayerCharacter) && PlayerCharacter->m_bCanControl && State && State->AllowsManualControl();
 }
 
 //-----------------------------------------------------
@@ -160,24 +197,41 @@ bool UPlayerStateMachine::CanControl() const
 //-----------------------------------------------------
 void UPlayerStateMachine::Update(float DeltaTime)
 {
-	if (!bConfigured) { return; }
+	if (!bConfigured)
+	{
+		return;
+	}
 	DeltaTime = FMath::Max(0.f, DeltaTime);
+
 	//待ち時間と無敵時間は他のステート中も進める
 	for (UStateBase* RegisteredState : GetRegisteredStates())
 	{
-		if (UPlayerStateBase* State = Cast<UPlayerStateBase>(RegisteredState)) { State->BackgroundUpdate(DeltaTime); }
+		if (UPlayerStateBase* State = Cast<UPlayerStateBase>(RegisteredState))
+		{
+			State->BackgroundUpdate(DeltaTime);
+		}
 	}
 	Super::Update(DeltaTime);
 	UPlayerStateBase* State = Cast<UPlayerStateBase>(GetCurrentState());
-	if (!IsValid(State)) { return; }
+	if (!IsValid(State))
+	{
+		return;
+	}
 	const float Rate = FMath::Max(0.f, State->GetStaminaConsumptionRate());
+
 	//消費しないステート中はスタミナを回復
 	if (Rate > 0.f)
 	{
 		StaminaUsed = FMath::Clamp(StaminaUsed + DeltaTime * Rate, 0.f, GetMaximumStamina());
-		if (IsStaminaDepleted()) { State->OnStaminaDepleted(); }
+		if (IsStaminaDepleted())
+		{
+			State->OnStaminaDepleted();
+		}
 	}
-	else { StaminaUsed = FMath::Max(0.f, StaminaUsed - DeltaTime * FMath::Max(0.f, StaminaRecoveryRate)); }
+	else
+	{
+		StaminaUsed = FMath::Max(0.f, StaminaUsed - DeltaTime * FMath::Max(0.f, StaminaRecoveryRate));
+	}
 }
 
 //-----------------------------------------------------
@@ -186,11 +240,23 @@ void UPlayerStateMachine::Update(float DeltaTime)
 TSubclassOf<UPlayerStateBase> UPlayerStateMachine::SelectLocomotionState(bool bAfterLanding) const
 {
 	const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwner());
-	if (!IsValid(PlayerCharacter)) { return UPlayerIdleState::StaticClass(); }
+	if (!IsValid(PlayerCharacter))
+	{
+		return UPlayerIdleState::StaticClass();
+	}
 	const UCharacterMovementComponent* Movement = PlayerCharacter->GetCharacterMovement();
-	if (!bAfterLanding && IsValid(Movement) && Movement->IsFalling()) { return UPlayerJumpState::StaticClass(); }
-	if (bCrouchRequested) { return UPlayerCrouchState::StaticClass(); }
-	if (bDashRequested && !IsStaminaDepleted() && !PlayerCharacter->m_charaMoveInput.IsNearlyZero(0.1f)) { return UPlayerDashState::StaticClass(); }
+	if (!bAfterLanding && IsValid(Movement) && Movement->IsFalling())
+	{
+		return UPlayerJumpState::StaticClass();
+	}
+	if (bCrouchRequested)
+	{
+		return UPlayerCrouchState::StaticClass();
+	}
+	if (bDashRequested && !IsStaminaDepleted() && !PlayerCharacter->m_charaMoveInput.IsNearlyZero(0.1f))
+	{
+		return UPlayerDashState::StaticClass();
+	}
 	return PlayerCharacter->m_charaMoveInput.IsNearlyZero(0.1f) ? UPlayerIdleState::StaticClass() : UPlayerWalkState::StaticClass();
 }
 
@@ -199,7 +265,10 @@ TSubclassOf<UPlayerStateBase> UPlayerStateMachine::SelectLocomotionState(bool bA
 //-----------------------------------------------------
 void UPlayerStateMachine::RefreshLocomotionState()
 {
-	if (IsLocomotionState() && !IsCurrentState<UPlayerJumpState>()) { ChangePlayerState(SelectLocomotionState()); }
+	if (IsLocomotionState() && !IsCurrentState<UPlayerJumpState>())
+	{
+		ChangePlayerState(SelectLocomotionState());
+	}
 }
 
 //-----------------------------------------------------
@@ -215,9 +284,15 @@ bool UPlayerStateMachine::ReturnToLocomotion(bool bAfterLanding)
 //-----------------------------------------------------
 void UPlayerStateMachine::MoveInput()
 {
-	if (!CanControl()) { return; }
+	if (!CanControl())
+	{
+		return;
+	}
 	RefreshLocomotionState();
-	if (UPlayerStateBase* State = Cast<UPlayerStateBase>(GetCurrentState())) { State->OnMoveInput(); }
+	if (UPlayerStateBase* State = Cast<UPlayerStateBase>(GetCurrentState()))
+	{
+		State->OnMoveInput();
+	}
 }
 
 //-----------------------------------------------------
@@ -225,7 +300,10 @@ void UPlayerStateMachine::MoveInput()
 //-----------------------------------------------------
 void UPlayerStateMachine::SetDashRequested(bool bRequested)
 {
-	if (bRequested && (!CanControl() || !IsLocomotionState() || bCrouchRequested || IsStaminaDepleted())) { return; }
+	if (bRequested && (!CanControl() || !IsLocomotionState() || bCrouchRequested || IsStaminaDepleted()))
+	{
+		return;
+	}
 	bDashRequested = bRequested;
 	RefreshLocomotionState();
 }
@@ -235,7 +313,10 @@ void UPlayerStateMachine::SetDashRequested(bool bRequested)
 //-----------------------------------------------------
 void UPlayerStateMachine::ToggleCrouch()
 {
-	if (!CanControl() || !IsLocomotionState()) { return; }
+	if (!CanControl() || !IsLocomotionState())
+	{
+		return;
+	}
 	bCrouchRequested = !bCrouchRequested;
 	RefreshLocomotionState();
 }
@@ -245,7 +326,10 @@ void UPlayerStateMachine::ToggleCrouch()
 //-----------------------------------------------------
 void UPlayerStateMachine::TryJump()
 {
-	if (!CanControl() || !IsLocomotionState() || IsCurrentState<UPlayerJumpState>()) { return; }
+	if (!CanControl() || !IsLocomotionState() || IsCurrentState<UPlayerJumpState>())
+	{
+		return;
+	}
 	bJumpRequested = true;
 	ChangePlayerState(UPlayerJumpState::StaticClass());
 	bJumpRequested = false;
@@ -256,8 +340,15 @@ void UPlayerStateMachine::TryJump()
 //-----------------------------------------------------
 void UPlayerStateMachine::TryAttack()
 {
-	if (!CanControl()) { return; }
-	if (IsCurrentState<UPlayerShadowState>() && !ReturnToLocomotion()) { return; }
+	if (!CanControl())
+	{
+		return;
+	}
+	if (IsCurrentState<UPlayerShadowState>() && !ReturnToLocomotion())
+	{
+		return;
+	}
+
 	//ステルスキルできる相手がいる場合だけ従来の攻撃を使う
 	UPlayerAttackState* SneakAttack = GetState<UPlayerAttackState>();
 	if (SneakAttack && SneakAttack->CanEnter())
@@ -278,9 +369,18 @@ void UPlayerStateMachine::TryAttack()
 //-----------------------------------------------------
 void UPlayerStateMachine::ToggleShadow()
 {
-	if (!CanControl()) { return; }
-	if (IsCurrentState<UPlayerShadowState>()) { ReturnToLocomotion(); }
-	else { ChangePlayerState(UPlayerShadowState::StaticClass()); }
+	if (!CanControl())
+	{
+		return;
+	}
+	if (IsCurrentState<UPlayerShadowState>())
+	{
+		ReturnToLocomotion();
+	}
+	else
+	{
+		ChangePlayerState(UPlayerShadowState::StaticClass());
+	}
 }
 
 //-----------------------------------------------------
@@ -288,7 +388,10 @@ void UPlayerStateMachine::ToggleShadow()
 //-----------------------------------------------------
 void UPlayerStateMachine::TryInteract()
 {
-	if (CanControl() && IsLocomotionState() && !IsCurrentState<UPlayerJumpState>()) { ChangePlayerState(UPlayerInteractState::StaticClass()); }
+	if (CanControl() && IsLocomotionState() && !IsCurrentState<UPlayerJumpState>())
+	{
+		ChangePlayerState(UPlayerInteractState::StaticClass());
+	}
 }
 
 //-----------------------------------------------------
@@ -296,7 +399,10 @@ void UPlayerStateMachine::TryInteract()
 //-----------------------------------------------------
 void UPlayerStateMachine::NotifyLanded()
 {
-	if (IsCurrentState<UPlayerJumpState>()) { ReturnToLocomotion(true); }
+	if (IsCurrentState<UPlayerJumpState>())
+	{
+		ReturnToLocomotion(true);
+	}
 }
 
 //-----------------------------------------------------
@@ -304,8 +410,14 @@ void UPlayerStateMachine::NotifyLanded()
 //-----------------------------------------------------
 void UPlayerStateMachine::NotifyAttackFinished()
 {
-	if (!IsCurrentState<UPlayerAttackState>()) { return; }
-	if (UPlayerAttackState* State = GetState<UPlayerAttackState>()) { State->NotifyAttackFinished(); }
+	if (!IsCurrentState<UPlayerAttackState>())
+	{
+		return;
+	}
+	if (UPlayerAttackState* State = GetState<UPlayerAttackState>())
+	{
+		State->NotifyAttackFinished();
+	}
 }
 
 //-----------------------------------------------------
@@ -313,8 +425,14 @@ void UPlayerStateMachine::NotifyAttackFinished()
 //-----------------------------------------------------
 void UPlayerStateMachine::NotifyInteractionFinished()
 {
-	if (!IsCurrentState<UPlayerInteractAnimationState>()) { return; }
-	if (UPlayerInteractAnimationState* State = GetState<UPlayerInteractAnimationState>()) { State->CompleteInteraction(); }
+	if (!IsCurrentState<UPlayerInteractAnimationState>())
+	{
+		return;
+	}
+	if (UPlayerInteractAnimationState* State = GetState<UPlayerInteractAnimationState>())
+	{
+		State->CompleteInteraction();
+	}
 }
 
 //-----------------------------------------------------
@@ -322,7 +440,10 @@ void UPlayerStateMachine::NotifyInteractionFinished()
 //-----------------------------------------------------
 void UPlayerStateMachine::ReceiveDamage(int32 Amount, const FVector& Knockback)
 {
-	if (UPlayerDamageState* State = GetState<UPlayerDamageState>()) { State->ReceiveDamage(Amount, Knockback); }
+	if (UPlayerDamageState* State = GetState<UPlayerDamageState>())
+	{
+		State->ReceiveDamage(Amount, Knockback);
+	}
 }
 
 //-----------------------------------------------------
@@ -340,7 +461,10 @@ bool UPlayerStateMachine::IsInvincible() const
 bool UPlayerStateMachine::IsAttacking() const
 {
 	const UPlayerAttackState* State = GetState<UPlayerAttackState>();
-	if (IsCurrentState<UPlayerAttackState>()) { return State && State->IsAttackActive(); }
+	if (IsCurrentState<UPlayerAttackState>())
+	{
+		return State && State->IsAttackActive();
+	}
 	const UPlayerNormalAttackState* NormalAttack = GetState<UPlayerNormalAttackState>();
 	return IsCurrentState<UPlayerNormalAttackState>() && NormalAttack && NormalAttack->IsAttackActive();
 }

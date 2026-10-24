@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//概要：インタラクト実行ステート
+//----------------------------------------------------------
+
 #include "State/Player/PlayerInteractAnimationState.h"
 #include "State/Player/PlayerInteractState.h"
 #include "State/Player/PlayerStateMachine.h"
@@ -24,11 +28,17 @@ bool UPlayerInteractAnimationState::BeginInteraction(AInteract* Target)
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	UPlayerStateMachine* Machine = GetPlayerMachine();
-	if (!PlayerCharacter || !Machine || Machine->IsCurrentState<UPlayerInteractAnimationState>()
-		|| !PlayerCharacter->IsInInteractRange(Target)) { return false; }
+	if (!PlayerCharacter || !Machine || Machine->IsCurrentState<UPlayerInteractAnimationState>() ||
+		!PlayerCharacter->IsInInteractRange(Target))
+	{
+		return false;
+	}
 	InteractionTarget = Target;
 	const bool bStarted = RequestPlayerState(UPlayerInteractAnimationState::StaticClass());
-	if (!bStarted) { InteractionTarget.Reset(); }
+	if (!bStarted)
+	{
+		InteractionTarget.Reset();
+	}
 	return bStarted;
 }
 
@@ -46,8 +56,7 @@ bool UPlayerInteractAnimationState::CanEnter() const
 bool UPlayerInteractAnimationState::IsTargetAvailable() const
 {
 	const APlayerCharacter* PlayerCharacter = GetPlayer();
-	return PlayerCharacter && InteractionTarget.IsValid()
-		&& PlayerCharacter->IsInInteractRange(InteractionTarget.Get());
+	return PlayerCharacter && InteractionTarget.IsValid() && PlayerCharacter->IsInInteractRange(InteractionTarget.Get());
 }
 
 //-----------------------------------------------------
@@ -60,7 +69,11 @@ void UPlayerInteractAnimationState::OnEnter_Implementation()
 	bMontageEnded = false;
 	bMontageCancelled = false;
 	PlayingAnimInstance.Reset();
-	if (!IsTargetAvailable()) { bMontageCancelled = true; return; }
+	if (!IsTargetAvailable())
+	{
+		bMontageCancelled = true;
+		return;
+	}
 	if (IsValid(InteractionMontage))
 	{
 		APlayerCharacter* PlayerCharacter = GetPlayer();
@@ -88,26 +101,46 @@ void UPlayerInteractAnimationState::OnEnter_Implementation()
 //-----------------------------------------------------
 void UPlayerInteractAnimationState::OnUpdate_Implementation(float DeltaTime)
 {
-	if (bInteractionExecuted) { CompleteInteraction(); return; }
+	if (bInteractionExecuted)
+	{
+		CompleteInteraction();
+		return;
+	}
 	if (!IsTargetAvailable() || bMontageCancelled || (bMontageStarted && !PlayingAnimInstance.IsValid()))
 	{
-		if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->ReturnToLocomotion(); }
+		if (UPlayerStateMachine* Machine = GetPlayerMachine())
+		{
+			Machine->ReturnToLocomotion();
+		}
 		return;
 	}
 	if (bMontageStarted)
 	{
-		if (!bMontageEnded) { return; }
+		if (!bMontageEnded)
+		{
+			return;
+		}
 		if (bWaitForAnimationNotify)
 		{
 			//通知が無いまま再生が終わった場合は実行せずに解除
 			UE_LOG(LogTemp, Warning, TEXT("%s: Interaction montage ended without the interaction notify."), *GetName());
-			if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->ReturnToLocomotion(); }
+			if (UPlayerStateMachine* Machine = GetPlayerMachine())
+			{
+				Machine->ReturnToLocomotion();
+			}
 		}
-		else { CompleteInteraction(); }
+		else
+		{
+			CompleteInteraction();
+		}
 		return;
 	}
+
 	//モンタージュ未設定の場合は従来の時間待ちを使う
-	if (!bWaitForAnimationNotify && m_stateTimer >= FMath::Max(0.f, InteractionDuration)) { CompleteInteraction(); }
+	if (!bWaitForAnimationNotify && m_stateTimer >= FMath::Max(0.f, InteractionDuration))
+	{
+		CompleteInteraction();
+	}
 }
 
 //-----------------------------------------------------
@@ -117,15 +150,29 @@ void UPlayerInteractAnimationState::CompleteInteraction()
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	UPlayerStateMachine* Machine = GetPlayerMachine();
-	if (!PlayerCharacter || !Machine || bMontageCancelled || !Machine->IsCurrentState<UPlayerInteractAnimationState>()) { return; }
+	if (!PlayerCharacter || !Machine || bMontageCancelled || !Machine->IsCurrentState<UPlayerInteractAnimationState>())
+	{
+		return;
+	}
+
 	//終了を待つ間に何度も実行しないようにする
 	if (!bInteractionExecuted)
 	{
-		if (!IsTargetAvailable()) { Machine->ReturnToLocomotion(); return; }
+		if (!IsTargetAvailable())
+		{
+			Machine->ReturnToLocomotion();
+			return;
+		}
 		bInteractionExecuted = true;
-		if (InteractionTarget.IsValid()) { InteractionTarget->Interact(PlayerCharacter); }
+		if (InteractionTarget.IsValid())
+		{
+			InteractionTarget->Interact(PlayerCharacter);
+		}
 	}
-	if (IsValid(Machine) && Machine->IsCurrentState<UPlayerInteractAnimationState>()) { Machine->ReturnToLocomotion(); }
+	if (IsValid(Machine) && Machine->IsCurrentState<UPlayerInteractAnimationState>())
+	{
+		Machine->ReturnToLocomotion();
+	}
 }
 
 //-----------------------------------------------------
@@ -154,7 +201,11 @@ void UPlayerInteractAnimationState::OnExit_Implementation()
 //-----------------------------------------------------
 void UPlayerInteractAnimationState::OnInteractionMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (!bMontageStarted || Montage != InteractionMontage.Get()) { return; }
+	if (!bMontageStarted || Montage != InteractionMontage.Get())
+	{
+		return;
+	}
+
 	//開始や終了処理の途中ではステートを変更しない
 	bMontageEnded = true;
 	bMontageCancelled = bInterrupted;
