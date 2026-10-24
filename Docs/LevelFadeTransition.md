@@ -42,3 +42,11 @@ LevelTransitionSubsystemはGameInstanceSubsystemなので自動生成されま�
 6. レベル名を間違えた場合はログを確認し、フェードの覆いが残らないことを確認します。
 
 `python Tests/LevelTransition/run_checks.py` は実際のフェード関数をUE／Slateの代用型でコンパイル・実行し、時間経過、ロード前後の順序、移動の重複防止、0秒、移動失敗の後片付けを検証します。UE本体の描画・実際のレベルロードはエディタで確認してください。
+
+## 死亡モンタージュ
+
+BP_PlayerDeadStateのDeath → Animation → Death Montageへ死亡モンタージュを指定します。Montage Play Rateは既定1、Wait For Death Montageは既定ONです。ONなら再生速度を反映したモンタージュの長さだけ待ち、Death → Fade → Game Over Delay（既定0秒）の追加待ちを挟んでから暗転します。OFFなら再生と並行して、Game Over Delay後に暗転します。
+
+AnimBPのポーズからOutput Poseまでの間に、死亡モンタージュと一致するSlotノードを接続してください。倒れた最後のポーズを保ちたい場合は、死亡モンタージュのEnable Auto Blend OutをOFFにします。この場合も遷移は終了イベントではなく再生時間で進めるので、最後のポーズを保持したまま暗転できます。ループするセクションは使わないでください。
+
+モンタージュ未設定や再生失敗の場合はアニメーション時間を待たず、追加待ち時間後にゲームオーバーへ進みます。Open Game Over LevelがOFFでも死亡モンタージュは再生します。BPでOn Enter／On Update／On Exitを上書きしている場合は親関数を呼び出してください。`python Tests/PlayerDeath/run_checks.py` で待ち時間、未設定／失敗時の遷移、移動の重複防止を検証できます。
