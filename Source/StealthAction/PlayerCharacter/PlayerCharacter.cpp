@@ -340,7 +340,7 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 
 	//カメラのステータスが俯瞰なら処理しない
 	if (m_cameraStatus == ECameraStatus::TopDownView) { return; }
-	if (CanAttack()) { return; }
+	if (IsValid(m_stateMachine) && m_stateMachine->IsCurrentState<UPlayerAttackState>()) { return; }
 	//if (m_bCameraSwitching) { return; }
 
 	//処理落ちしても一定速度でカメラが回るように補正

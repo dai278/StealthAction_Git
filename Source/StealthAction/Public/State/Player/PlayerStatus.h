@@ -18,4 +18,5 @@ enum class EPlayerStatus :uint8
 	InShadow     UMETA(DisplayName = "InShadow"),
 	Interact     UMETA(DisplayName = "Interact"),
 	InteractAnimation UMETA(DisplayName = "InteractAnimation"),
+	NormalAttack UMETA(DisplayName = "NormalAttack"),
 };

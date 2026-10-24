@@ -13,7 +13,7 @@
 1. ソースを取得して C++ をビルドします。
 2. `PlayerStateMachine` を親に `BP_PlayerStateMachine` を作成します。
 3. 下表の各 C++ ステートを親に、それぞれステート BP を作成します。
-4. マシーン BP の **Class Defaults → State Machine → State Classes** に、11個のステート BP クラスを重複なく登録します。順序は自由です。
+4. マシーン BP の **Class Defaults → State Machine → State Classes** に、従来の11個のステート BP クラスを重複なく登録します。通常攻撃を使う場合はPlayerNormalAttackStateのBPも追加し、合計12個にします。順序は自由です。
 5. プレイヤー BP の **Class Defaults → State Machine → Player State Machine Class** にマシーン BP を指定します。
 6. マシーン BP の **Initial State Class** を通常は `PlayerIdleState` にします。
 7. 各 BP をコンパイルして保存します。
@@ -32,6 +32,7 @@
 | `PlayerCrouchState` | Move Speed `100`、Capsule Height Ratio `0.8`、Footstep Noise Level `0` |
 | `PlayerJumpState` | Move Speed `300`、Jump Impulse `1500`、Gravity Curve Base `10000`、Maximum Fall Speed `1800`、Jump Noise Level `3` |
 | `PlayerAttackState` | Move Speed `0`、Attack Range `150`、Attack Radius `70`、Sneak Kill Damage `10`、Attack Duration `1`、Attack Cooldown `0.3`、Minimum Facing Dot `0.4`、Attack Gravity Scale `0.1` |
+| `PlayerNormalAttackState`（追加登録） | Attack Montage、Attack Damage `10`、Damage Start Time `0.15`、Damage Window Duration `0.15`、Attack Distance `100`、Attack Radius `50`、Attack Cooldown `0.3` |
 | `PlayerDamageState` | Move Speed `0`、Recovery Duration `1`、Invincibility Duration `5`、Knockback Multiplier `1` |
 | `PlayerDeadState` | Move Speed `0`、Open Game Over Level `true`、Game Over Level `GameOver` |
 | `PlayerShadowState` | Move Speed `300`、Stamina Consumption Rate `1`、Shadow Collision Profile `PlayerInShadow`、Shadow Effect System |
@@ -151,3 +152,30 @@ AnimBPのAnimGraphには、モンタージュが使用するSlot（例DefaultSlo
 対象の検出用コリジョンはQueryが有効でObject TypeがInteractになっている必要があります。操作できる範囲は対象の検出用Box等で設定してください。モンタージュのRoot Motionでその範囲から離れる場合もキャンセルになるため、演出に必要な範囲を確保してください。今回の変更にBP項目の追加設定は不要です。
 
 `python Tests/PlayerInteraction/run_checks.py` で対象再検出・範囲外キャンセル・対象なしでの遷移拒否・二重実行防止を検証できます。UE型の代用品を使ったC++テストのため、UEの実際のOverlap更新やBP／モンタージュ再生の検証はエディタで行ってください。
+
+### プレイヤーの通常攻撃
+
+PlayerNormalAttackStateを親にBP_PlayerNormalAttackStateを作成し、使用中のステートマシンBPのState Classesへ1つ追加します。既存のPlayerAttackStateはステルスキル用としてそのまま残します。通常攻撃を登録しなくても従来の11ステートの初期化は通りますが、通常攻撃入力時に登録を促す警告が出ます。
+
+BP_PlayerNormalAttackStateのAttack → Animation → Attack Montageへ使用するモンタージュを設定し、Montage Play Rateを調整します。AnimBPの通常ポーズからOutput Poseまでの間に、モンタージュと同じ名前のSlotを接続してください。モンタージュ未指定ならAttack Duration（既定0.6秒）で判定だけ実行します。指定済みなのに再生できない場合はダメージを与えずにキャンセルします。指定時は再生速度を反映したモンタージュの長さで攻撃を終了し、被ダメージ・死亡・他のモンタージュによる中断では判定も止めます。
+
+同じ攻撃入力で、従来のステルスキル条件を満たす場合はステルスキル、それ以外（敵に発見されている、向きが合わない、相手がいない等）は通常攻撃になります。相手がいない場合は空振りできます。攻撃中の移動入力は止めますが通常攻撃中のカメラ操作は継続します。コンボや先行入力の予約は追加していません。
+
+主なBP設定値は次のとおりです。判定時間は実時間の秒数で、モンタージュの刃が当たるタイミングに合わせます。再生速度を変更した場合も調整してください。
+
+| 設定 | 既定値 | 用途 |
+|---|---|---|
+| Attack Damage | 10 | 通常ダメージ |
+| Attack Cooldown | 0.3秒 | 終了から次の攻撃まで |
+| Damage Start Time | 0.15秒 | 判定開始時刻 |
+| Damage Window Duration | 0.15秒 | 判定を出している時間 |
+| Attack Offset | X=40cm | プレイヤー基準の判定開始位置 |
+| Attack Distance | 100cm | 前方へ判定を伸ばす距離 |
+| Attack Radius | 50cm | 判定の球の半径 |
+| Knockback Force | 500 | ノックバックの強さ |
+
+敵の検出用コリジョンはQueryが有効でObject TypeがEnemyである必要があります。前方へ球をSweepし、複数コリジョンや複数フレームで当たっても同じ敵には1振りで1回だけ通常ダメージを渡します。WorldStatic／WorldDynamicの壁・扉が間にある場合と、死亡した敵には当てません。新しいModularEnemyCharacterも既存IDamageableを通して対象になります。ステルスキルの対象検索は従来どおり旧EnemyManagerです。
+
+旧EnemyBaseのOnDamageはデバッグ用の無条件即死から、通常攻撃ではHP減少・HPが残れば戦闘継続、HPが0なら死亡する処理に変更しています。ステルスキル（bSneakKill=true）は従来の即死を維持します。AnimBP用EnumにNormalAttackを末尾追加しているので、既存の値の番号は変わりません。
+
+`python Tests/PlayerNormalAttack/run_checks.py` で攻撃の選択、判定時間、中断、旧敵のHP減少、壁越しの拒否、重複ヒット防止を検証できます。UEの代用型によるテストのため、UHT／実際のモンタージュ／衝突はUE側で確認が必要です。

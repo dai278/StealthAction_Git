@@ -2424,9 +2424,18 @@ void AEnemyBase::OnNoiseHeard(const int& _noiseVolume, const FVector& _pos)
 //------------------------------------------------------------------------------------------------------------
 void AEnemyBase::OnDamage(int32 Damage, FVector KnockBackValue, bool _bSneakKill)
 {
-
-	//体力減少
-	//デバック用に死亡
+	if (IsDead() || m_enemyInfo.bIsDead || Damage <= 0) { return; }
+	//通常攻撃はHPを減らし、ステルスキルだけ即死させる
+	m_enemyInfo.hp = _bSneakKill || Damage >= m_enemyInfo.hp ? 0 : m_enemyInfo.hp - Damage;
+	if (m_enemyInfo.hp > 0)
+	{
+		//攻撃されたらプレイヤーの位置を覚えて戦闘へ移る
+		if (IsValid(m_pPlayerChara)) { m_playerPos_LastSeen = m_pPlayerChara->GetActorLocation(); }
+		m_enemyCurrentState = EEnemyStatus::Battle;
+		if (!KnockBackValue.IsNearlyZero()) { LaunchCharacter(KnockBackValue, true, true); }
+		return;
+	}
+	//死亡演出は既存の処理へ渡す
 	m_deadCheck = false;
 	m_enemyCurrentState = EEnemyStatus::Dead;
 

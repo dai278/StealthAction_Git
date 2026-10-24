@@ -11,6 +11,7 @@
 #include "State/Player/PlayerStateBase.h"
 #include "State/Player/PlayerDamageState.h"
 #include "State/Player/PlayerAttackState.h"
+#include "State/Player/PlayerNormalAttackState.h"
 #include "State/Player/PlayerInteractAnimationState.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
@@ -65,6 +66,17 @@ void UPlayerStateMachine::Initialize(AActor* Owner)
 			UE_LOG(LogTemp, Error, TEXT("%s: Register exactly one subclass of %s."), *GetName(), *StateClass->GetName());
 			bValid = false;
 		}
+	}
+	//通常攻撃は追加登録で有効化する。旧11ステートだけでも初期化は通す
+	int32 NormalAttackCount = 0;
+	for (UStateBase* State : GetRegisteredStates())
+	{
+		if (IsValid(State) && State->IsA<UPlayerNormalAttackState>()) { ++NormalAttackCount; }
+	}
+	if (NormalAttackCount > 1)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s: Register only one PlayerNormalAttackState subclass."), *GetName());
+		bValid = false;
 	}
 	for (UStateBase* State : GetRegisteredStates())
 	{
@@ -246,7 +258,19 @@ void UPlayerStateMachine::TryAttack()
 {
 	if (!CanControl()) { return; }
 	if (IsCurrentState<UPlayerShadowState>() && !ReturnToLocomotion()) { return; }
-	ChangePlayerState(UPlayerAttackState::StaticClass());
+	//ステルスキルできる相手がいる場合だけ従来の攻撃を使う
+	UPlayerAttackState* SneakAttack = GetState<UPlayerAttackState>();
+	if (SneakAttack && SneakAttack->CanEnter())
+	{
+		ChangePlayerState(UPlayerAttackState::StaticClass());
+		return;
+	}
+	if (!GetState<UPlayerNormalAttackState>())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: Register a PlayerNormalAttackState BP in State Classes to use normal attacks."), *GetName());
+		return;
+	}
+	ChangePlayerState(UPlayerNormalAttackState::StaticClass());
 }
 
 //-----------------------------------------------------
@@ -316,5 +340,7 @@ bool UPlayerStateMachine::IsInvincible() const
 bool UPlayerStateMachine::IsAttacking() const
 {
 	const UPlayerAttackState* State = GetState<UPlayerAttackState>();
-	return IsCurrentState<UPlayerAttackState>() && State && State->IsAttackActive();
+	if (IsCurrentState<UPlayerAttackState>()) { return State && State->IsAttackActive(); }
+	const UPlayerNormalAttackState* NormalAttack = GetState<UPlayerNormalAttackState>();
+	return IsCurrentState<UPlayerNormalAttackState>() && NormalAttack && NormalAttack->IsAttackActive();
 }
