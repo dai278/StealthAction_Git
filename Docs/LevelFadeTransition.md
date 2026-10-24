@@ -45,8 +45,10 @@ LevelTransitionSubsystemはGameInstanceSubsystemなので自動生成されま�
 
 ## 死亡モンタージュ
 
-BP_PlayerDeadStateのDeath → Animation → Death Montageへ死亡モンタージュを指定します。Montage Play Rateは既定1、Wait For Death Montageは既定ONです。ONなら再生速度を反映したモンタージュの長さだけ待ち、Death → Fade → Game Over Delay（既定0秒）の追加待ちを挟んでから暗転します。OFFなら再生と並行して、Game Over Delay後に暗転します。
+BP_PlayerDeadStateのDeath → Animation → Death Montageへ死亡モンタージュを指定します。Montage Play Rateは既定1、Wait For Death Montageは既定OFFです。既定では死亡モンタージュの再生開始と同時に暗転を始めます。ONなら再生速度を反映したモンタージュの長さだけ待ち、Death → Fade → Game Over Delay（既定0秒）の追加待ちを挟んでから暗転します。OFFなら再生と並行して、Game Over Delay後に暗転します。
 
 AnimBPのポーズからOutput Poseまでの間に、死亡モンタージュと一致するSlotノードを接続してください。倒れた最後のポーズを保ちたい場合は、死亡モンタージュのEnable Auto Blend OutをOFFにします。この場合も遷移は終了イベントではなく再生時間で進めるので、最後のポーズを保持したまま暗転できます。ループするセクションは使わないでください。
 
 モンタージュ未設定や再生失敗の場合はアニメーション時間を待たず、追加待ち時間後にゲームオーバーへ進みます。Open Game Over LevelがOFFでも死亡モンタージュは再生します。BPでOn Enter／On Update／On Exitを上書きしている場合は親関数を呼び出してください。`python Tests/PlayerDeath/run_checks.py` で待ち時間、未設定／失敗時の遷移、移動の重複防止を検証できます。
+
+以前のBPでWait For Death MontageをONに保存している場合は、Death → AnimationでOFFに変更し、Game Over Delayを0にしてください。C++の既定値変更だけでは、BPで保存した上書き値は変わりません。
