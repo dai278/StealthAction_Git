@@ -21,7 +21,7 @@ protected:
 	float MontagePlayRate = 1.f;
 	//死亡アニメーションの長さだけ待ってから暗転するか
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Death|Animation")
-	bool bWaitForDeathMontage = true;
+	bool bWaitForDeathMontage = false;
 	//暗転開始までの追加の待ち時間
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Death|Fade", meta = (ClampMin = "0.0", Units = "s"))
 	float GameOverDelay = 0.f;

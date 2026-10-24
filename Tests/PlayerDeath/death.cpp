@@ -27,7 +27,7 @@ struct UGameplayStatics{static void OpenLevel(APlayerCharacter* player,FName){++
 struct UPlayerDeadState{
     APlayerCharacter* Player=nullptr;UPlayerStateMachine Machine;Ptr<UAnimMontage> DeathMontage;Weak<UAnimInstance> PlayingAnimInstance;
     float MontagePlayRate=1,GameOverDelay=0,FadeStartTime=0,m_stateTimer=0,FadeOutDuration=.5f,BlackHoldDuration=.1f,FadeInDuration=.5f;
-    bool bWaitForDeathMontage=true,bTransitionRequested=false,bOpenGameOverLevel=true,HasWorld=true;FName GameOverLevel;FLinearColor FadeColor;
+    bool bWaitForDeathMontage=false,bTransitionRequested=false,bOpenGameOverLevel=true,HasWorld=true;FName GameOverLevel;FLinearColor FadeColor;
     APlayerCharacter* GetPlayer(){return Player;}UPlayerStateMachine* GetPlayerMachine(){return &Machine;}void* GetWorld(){return HasWorld?this:nullptr;}
     void OnEnter_Implementation();void OnUpdate_Implementation(float);void BeginGameOverTransition();void OnExit_Implementation();
 };
@@ -35,12 +35,12 @@ struct UPlayerDeadState{
 int main(){
     APlayerCharacter player;UAnimInstance anim;UAnimMontage montage;ULevelTransitionSubsystem transition;
     player.Mesh.Anim=&anim;player.Instance.Transition=&transition;
-    UPlayerDeadState state;state.Player=&player;state.DeathMontage.P=&montage;state.MontagePlayRate=2;state.GameOverDelay=.25f;
+    UPlayerDeadState state;state.Player=&player;state.DeathMontage.P=&montage;state.MontagePlayRate=2;state.GameOverDelay=.25f;state.bWaitForDeathMontage=true;
     state.OnEnter_Implementation();assert(anim.Plays==1&&state.FadeStartTime==1.25f&&transition.Calls==0&&!player.m_playerInfo.isAlive&&!player.m_playerInfo.bIsGetKeyItem);
     state.m_stateTimer=1;state.OnUpdate_Implementation(1);assert(transition.Calls==0);
     state.m_stateTimer=1.25f;state.OnUpdate_Implementation(.25f);state.OnUpdate_Implementation(.25f);assert(transition.Calls==1&&player.Opens==0);
     state.OnExit_Implementation();assert(anim.Stops==1&&!state.PlayingAnimInstance.Get());
-    UPlayerDeadState noWait;noWait.Player=&player;noWait.DeathMontage.P=&montage;noWait.bWaitForDeathMontage=false;noWait.OnEnter_Implementation();assert(transition.Calls==2);
+    UPlayerDeadState noWait;noWait.Player=&player;noWait.DeathMontage.P=&montage;noWait.OnEnter_Implementation();assert(transition.Calls==2);
     UPlayerDeadState failure;failure.Player=&player;failure.DeathMontage.P=&montage;anim.CanPlay=false;failure.OnEnter_Implementation();assert(transition.Calls==3&&failure.FadeStartTime==0);
     UPlayerDeadState missing;missing.Player=&player;missing.OnEnter_Implementation();assert(transition.Calls==4); //未設定でも従来の暗転へ進む
     transition.Available=false;UPlayerDeadState fallback;fallback.Player=&player;fallback.OnEnter_Implementation();assert(player.Opens==1);fallback.OnUpdate_Implementation(1);assert(player.Opens==1);
