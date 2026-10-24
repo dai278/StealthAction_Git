@@ -10,7 +10,7 @@ struct FCameraViewSetting
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FRotator rotator; // ‰ñ“]
+    FRotator rotator = FRotator::ZeroRotator; // ‰ñ“]
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float fieldOfView = 90.0f; // ‹–ìŠp
@@ -19,7 +19,7 @@ struct FCameraViewSetting
     float springArmLength = 300.0f; // ’·‚³
 
     UPROPERTY(EditAnywhere,BlueprintReadWrite)
-    FVector ofSet;
+    FVector ofSet = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float InterpSpeed = 5.f; // ƒJƒƒ‰Ø‚è‘Ö‚¦‚ÌƒuƒŒƒ“ƒhŠÔ

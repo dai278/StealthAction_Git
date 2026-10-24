@@ -34,7 +34,7 @@ struct FCheckpointInfo
 	int32 Index=-1; // ID
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	FVector Location;//位置
+	FVector Location = FVector::ZeroVector;//位置
 };
 
 //エネミー情報構造体
