@@ -50,6 +50,23 @@ public:
 	UPROPERTY(EditAnywhere, Category = "UI")
 	UWidgetComponent* GoalUI;
 protected:
+	//クリア画面のレベル名
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clear|Fade")
+	FName ClearLevel = TEXT("GameClear");
+	//クリア前の暗転時間
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clear|Fade", meta = (ClampMin = "0.0", Units = "s"))
+	float FadeOutDuration = 0.5f;
+	//暗転後に待つ時間
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clear|Fade", meta = (ClampMin = "0.0", Units = "s"))
+	float BlackHoldDuration = 0.1f;
+	//クリア画面で明るく戻す時間
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clear|Fade", meta = (ClampMin = "0.0", Units = "s"))
+	float FadeInDuration = 0.5f;
+	//フェードの色
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clear|Fade")
+	FLinearColor FadeColor = FLinearColor::Black;
+
+protected:
 	// ===== オーバーラップイベント =====
 	UFUNCTION()
 	void OnOverlapBegin(

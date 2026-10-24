@@ -179,3 +179,7 @@ BP_PlayerNormalAttackStateのAttack → Animation → Attack Montageへ使用す
 旧EnemyBaseのOnDamageはデバッグ用の無条件即死から、通常攻撃ではHP減少・HPが残れば戦闘継続、HPが0なら死亡する処理に変更しています。ステルスキル（bSneakKill=true）は従来の即死を維持します。AnimBP用EnumにNormalAttackを末尾追加しているので、既存の値の番号は変わりません。
 
 `python Tests/PlayerNormalAttack/run_checks.py` で攻撃の選択、判定時間、中断、旧敵のHP減少、壁越しの拒否、重複ヒット防止を検証できます。UEの代用型によるテストのため、UHT／実際のモンタージュ／衝突はUE側で確認が必要です。
+
+### ゲームオーバー前後のフェード
+
+DeadステートのDeath → Fadeで暗転時間・暗転後の待ち時間・移動先の明転時間・色を設定できます。クリア時も同じ共通処理を使います。設定と確認方法は [LevelFadeTransition.md](LevelFadeTransition.md) を参照してください。

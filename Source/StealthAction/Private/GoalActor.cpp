@@ -2,6 +2,8 @@
 
 
 #include "GoalActor.h"
+#include "Engine/GameInstance.h"
+#include "UI/Transition/LevelTransitionSubsystem.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -84,8 +86,12 @@ void AGoalActor::OnOverlapBegin(
 
 	if (OtherActor->ActorHasTag(TEXT("Player")))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("GAME CLEAR"));
-		// クリア用レベルへ遷移
-		UGameplayStatics::OpenLevel(this, FName("GameClear")); // レベル名を設定
+		if (ClearLevel.IsNone()) { return; }
+		UGameInstance* Instance = GetGameInstance();
+		ULevelTransitionSubsystem* Transition = Instance ? Instance->GetSubsystem<ULevelTransitionSubsystem>() : nullptr;
+		if (!Transition || !Transition->OpenLevelWithFade(ClearLevel, FadeOutDuration, BlackHoldDuration, FadeInDuration, FadeColor))
+		{
+			UGameplayStatics::OpenLevel(this, ClearLevel);
+		}
 	}
 }

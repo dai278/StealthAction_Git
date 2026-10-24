@@ -3,6 +3,8 @@
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/GameInstance.h"
+#include "UI/Transition/LevelTransitionSubsystem.h"
 
 //-----------------------------------------------------
 //コンストラクタ
@@ -25,6 +27,15 @@ void UPlayerDeadState::OnEnter_Implementation()
 		PlayerCharacter->m_playerInfo.isAlive = false;
 		PlayerCharacter->m_playerInfo.bIsGetKeyItem = 0;
 		if (UCharacterMovementComponent* Movement = PlayerCharacter->GetCharacterMovement()) { Movement->StopMovementImmediately(); }
-		if (bOpenGameOverLevel && !GameOverLevel.IsNone() && GetWorld()) { UGameplayStatics::OpenLevel(PlayerCharacter, GameOverLevel); }
+		if (bOpenGameOverLevel && !GameOverLevel.IsNone() && GetWorld())
+		{
+			UGameInstance* Instance = PlayerCharacter->GetGameInstance();
+			ULevelTransitionSubsystem* Transition = Instance ? Instance->GetSubsystem<ULevelTransitionSubsystem>() : nullptr;
+			if (!Transition || !Transition->OpenLevelWithFade(GameOverLevel, FadeOutDuration, BlackHoldDuration, FadeInDuration, FadeColor))
+			{
+				//画面を取得できない場合もゲームオーバーへの移動は行う
+				UGameplayStatics::OpenLevel(PlayerCharacter, GameOverLevel);
+			}
+		}
 	}
 }
