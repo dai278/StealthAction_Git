@@ -1,4 +1,4 @@
-#include "State/Player/PlayerDamageState.h"
+﻿#include "State/Player/PlayerDamageState.h"
 #include "State/Player/PlayerDeadState.h"
 #include "State/Player/PlayerStateMachine.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
@@ -24,11 +24,14 @@ void UPlayerDamageState::ReceiveDamage(int32 Amount, const FVector& Knockback)
 	UPlayerStateMachine* Machine = GetPlayerMachine();
 	if (!PlayerCharacter || !Machine || !Machine->IsConfigured() || IsInvincible()
 		|| !PlayerCharacter->IsAlive() || Amount <= 0 || Machine->IsCurrentState<UPlayerDeadState>()) { return; }
+	
 	//ステート変更できなかった場合にHPを戻すため保存
 	const int32 PreviousHP = PlayerCharacter->m_playerInfo.hp;
 	PlayerCharacter->m_playerInfo.hp = Amount >= PreviousHP ? 0 : PreviousHP - Amount;
+	
 	PendingKnockback = Knockback * FMath::Max(0.f, KnockbackMultiplier);
 	const TSubclassOf<UPlayerStateBase> Next = PlayerCharacter->m_playerInfo.hp <= 0 ? UPlayerDeadState::StaticClass() : UPlayerDamageState::StaticClass();
+	
 	if (!Machine->ChangePlayerState(Next)) { PlayerCharacter->m_playerInfo.hp = PreviousHP; }
 }
 
