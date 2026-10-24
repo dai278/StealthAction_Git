@@ -11,6 +11,8 @@ class STEALTHACTION_API UPlayerInteractState : public UPlayerStateBase
 public:
 	//コンストラクタ
 	UPlayerInteractState();
+	//BPで開始条件を上書きしても対象なしでは開始しない
+	virtual bool CanEnter() const override;
 
 protected:
 	//インタラクト位置に着いたと判定する距離
@@ -19,7 +21,6 @@ protected:
 	//インタラクト位置に向かう移動の強さ
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interaction", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float ApproachInputScale = 0.5f;
-	virtual bool CanEnterState_Implementation() const override;
 	virtual void OnEnter_Implementation() override;
 	virtual void OnUpdate_Implementation(float DeltaTime) override;
 	virtual void OnExit_Implementation() override;

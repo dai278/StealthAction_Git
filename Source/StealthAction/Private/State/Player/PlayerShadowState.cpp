@@ -197,6 +197,8 @@ void UPlayerShadowState::OnExit_Implementation()
 		//Animationの停止
 		Mesh->bPauseAnims = false;
 	}
+	//サイズとプリセットを戻した位置で対象を取り直す
+	PlayerCharacter->RefreshInteractTarget();
 	OriginalMaterials.Reset();
 	SinkMaterials.Reset();
 	OriginalOpacities.Reset();

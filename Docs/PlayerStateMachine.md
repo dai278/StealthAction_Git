@@ -141,3 +141,13 @@ BP_PlayerInteractAnimationState の Interaction → Animation で Interaction Mo
 実行タイミングを通知で指定する場合は Wait For Animation Notify を有効にして、AnimNotifyからプレイヤーの On Interact Animation End を呼んでください。その時点で実行・終了します。通知が無いままモンタージュが終了した場合は警告を出してキャンセルします。対象のInteractは終了条件待ち中にも重複実行しません。
 
 AnimBPのAnimGraphには、モンタージュが使用するSlot（例DefaultSlot）のノードを通常のポーズとOutput Poseの間に接続してください。スケルトンが一致するモンタージュを使用し、自動終了させる場合はループやEnable Auto Blend Outの無効化を避けてください。BPでOn Enter / On Update / On Exitを上書きしている場合は親関数を呼び出してください。アセット自体の作成・割り当てはエディタで行ってください。
+
+### インタラクト対象の再確認
+
+インタラクト入力はStartedで1回の押下につき1回だけ受け付けます。対象は以前のBegin／End Overlapで保存したポインタだけで決めず、現在のカプセルとInteract Object Type（ECC_GameTraceChannel6）の重なりから取得します。複数ある場合は使用可能な最寄りの対象を選びます。影解除でカプセルとプリセットを復元した後も再取得します。
+
+接近中・モンタージュ開始前・実行時にも同じ対象が範囲内でCanInteractを満たすか確認します。範囲外へ離れた、対象が消えた、他の処理で使用不可になった場合は実行せずにキャンセルします。接近不要を表す既存GetInteractPositionのゼロ指定は残しますが、有効な接触対象がある場合に限ります。範囲外でアニメーションステートだけへ直接遷移することもできません。
+
+対象の検出用コリジョンはQueryが有効でObject TypeがInteractになっている必要があります。操作できる範囲は対象の検出用Box等で設定してください。モンタージュのRoot Motionでその範囲から離れる場合もキャンセルになるため、演出に必要な範囲を確保してください。今回の変更にBP項目の追加設定は不要です。
+
+`python Tests/PlayerInteraction/run_checks.py` で対象再検出・範囲外キャンセル・対象なしでの遷移拒否・二重実行防止を検証できます。UE型の代用品を使ったC++テストのため、UEの実際のOverlap更新やBP／モンタージュ再生の検証はエディタで行ってください。

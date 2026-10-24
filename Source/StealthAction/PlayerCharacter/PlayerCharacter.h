@@ -305,7 +305,17 @@ public:
 	//最大影潜り時間取得
 	float GetMaxShadowTime() const;
 
+public:
+	//今カプセルに触れている使用可能な対象を取得
+	AInteract* FindInteractTarget() const;
+	//対象が今も操作できる範囲内か
+	bool IsInInteractRange(const AInteract* Target) const;
+
 private:
+	//イベントの順番に依存せず現在の衝突から対象を調べる
+	void GetNearbyInteractTargets(TArray<AInteract*>& Targets) const;
+	//表示用の接触情報を更新
+	void RefreshInteractTarget();
 	bool IsUpPosWall(const FVector& _startPos)const;
 
 private:

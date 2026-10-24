@@ -29,6 +29,8 @@
 
 #include "Sword/SwordAttackComponent.h"
 #include "CollisionQueryParams.h"
+#include "Engine/OverlapResult.h"
+#include "CollisionShape.h"
 #include "Engine/EngineTypes.h"
 #include "Engine/CollisionProfile.h"
 #include "GameInstance/PlayDataInfo.h"
@@ -307,7 +309,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	//影潜り
 	if (IsValid(m_inShadowIA)) { EnhancedInput->BindAction(m_inShadowIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_InShadow); }
 	//インタラクト
-	if (IsValid(m_interactIA)) { EnhancedInput->BindAction(m_interactIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_Interact); }
+	if (IsValid(m_interactIA)) { EnhancedInput->BindAction(m_interactIA, ETriggerEvent::Started, this, &APlayerCharacter::Enhanced_Interact); }
 
 	//カメラPitch
 	if (IsValid(m_cameraPitchIA)) { EnhancedInput->BindAction(m_cameraPitchIA, ETriggerEvent::Triggered, this, &APlayerCharacter::Enhanced_CameraPitch); }
@@ -915,9 +917,7 @@ void APlayerCharacter::OnBeginOverlap(
 	//インタラクト可能オブジェクトに触れた時
 	if (OtherActor->ActorHasTag(TEXT("Interact")))
 	{
-		m_bHitIntteractObject = true;
-		m_hitInteractOb = Cast<AInteract>(OtherActor);
-		m_bHitIntteractObject = IsValid(m_hitInteractOb);
+		RefreshInteractTarget();
 	}
 
 }
@@ -946,8 +946,8 @@ void APlayerCharacter::OnEndOverlap(
 	//インタラクト可能オブジェクトに触れた時
 	if (OtherActor->ActorHasTag(TEXT("Interact")))
 	{
-		m_bHitIntteractObject = false;
-		m_hitInteractOb = nullptr;
+		//別の対象や別コンポーネントにまだ触れている場合も調べ直す
+		RefreshInteractTarget();
 	}
 }
 
@@ -1078,4 +1078,65 @@ const FCameraViewSetting& APlayerCharacter::GetCameraViewSetting() const
 		? Cast<UPlayerStateBase>(m_stateMachine->GetCurrentState()) : nullptr;
 	if (State && State->UsesCameraOverride()) { return State->GetCameraSettings(); }
 	return m_cameraStatus == ECameraStatus::TopDownView ? TopDownCamera : ThirdPersonCamera;
+}
+
+//-----------------------------------------------------
+//現在のカプセルと重なっているインタラクト対象を取得
+//-----------------------------------------------------
+void APlayerCharacter::GetNearbyInteractTargets(TArray<AInteract*>& Targets) const
+{
+	Targets.Reset();
+	const UCapsuleComponent* Capsule = GetCapsuleComponent();
+	UWorld* World = GetWorld();
+	if (!World || !IsValid(Capsule) || !Capsule->IsQueryCollisionEnabled()) { return; }
+	FCollisionObjectQueryParams Objects;
+	Objects.AddObjectTypesToQuery(ECC_GameTraceChannel6); //Interact
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	TArray<FOverlapResult> Overlaps;
+	World->OverlapMultiByObjectType(Overlaps, Capsule->GetComponentLocation(), Capsule->GetComponentQuat(),
+		Objects, Capsule->GetCollisionShape(), Params);
+	for (const FOverlapResult& Overlap : Overlaps)
+	{
+		AInteract* Target = Cast<AInteract>(Overlap.GetActor());
+		if (IsValid(Target) && Target->CanInteract()) { Targets.AddUnique(Target); }
+	}
+}
+
+//-----------------------------------------------------
+//現在の接触から一番近い対象を取得
+//-----------------------------------------------------
+AInteract* APlayerCharacter::FindInteractTarget() const
+{
+	TArray<AInteract*> Targets;
+	GetNearbyInteractTargets(Targets);
+	AInteract* Nearest = nullptr;
+	double BestDistance = 0.0;
+	for (AInteract* Target : Targets)
+	{
+		const double Distance = FVector::DistSquared(GetActorLocation(), Target->GetActorLocation());
+		if (!Nearest || Distance < BestDistance) { Nearest = Target; BestDistance = Distance; }
+	}
+	return Nearest;
+}
+
+//-----------------------------------------------------
+//操作中の対象が範囲内に残っているか
+//-----------------------------------------------------
+bool APlayerCharacter::IsInInteractRange(const AInteract* Target) const
+{
+	if (!IsValid(Target) || !Target->CanInteract()) { return false; }
+	TArray<AInteract*> Targets;
+	GetNearbyInteractTargets(Targets);
+	for (const AInteract* Candidate : Targets) { if (Candidate == Target) { return true; } }
+	return false;
+}
+
+//-----------------------------------------------------
+//影解除や接触終了後の対象を更新
+//-----------------------------------------------------
+void APlayerCharacter::RefreshInteractTarget()
+{
+	m_hitInteractOb = FindInteractTarget();
+	m_bHitIntteractObject = IsValid(m_hitInteractOb);
 }

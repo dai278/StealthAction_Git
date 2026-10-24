@@ -22,6 +22,10 @@ UPlayerInteractAnimationState::UPlayerInteractAnimationState()
 //-----------------------------------------------------
 bool UPlayerInteractAnimationState::BeginInteraction(AInteract* Target)
 {
+	APlayerCharacter* PlayerCharacter = GetPlayer();
+	UPlayerStateMachine* Machine = GetPlayerMachine();
+	if (!PlayerCharacter || !Machine || Machine->IsCurrentState<UPlayerInteractAnimationState>()
+		|| !PlayerCharacter->IsInInteractRange(Target)) { return false; }
 	InteractionTarget = Target;
 	const bool bStarted = RequestPlayerState(UPlayerInteractAnimationState::StaticClass());
 	if (!bStarted) { InteractionTarget.Reset(); }
@@ -31,10 +35,19 @@ bool UPlayerInteractAnimationState::BeginInteraction(AInteract* Target)
 //-----------------------------------------------------
 //開始条件
 //-----------------------------------------------------
-bool UPlayerInteractAnimationState::CanEnterState_Implementation() const
+bool UPlayerInteractAnimationState::CanEnter() const
 {
-	APlayerCharacter* PlayerCharacter = GetPlayer();
-	return InteractionTarget.IsValid() || (PlayerCharacter && IsValid(PlayerCharacter->m_hitInteractOb));
+	return IsTargetAvailable() && Super::CanEnter();
+}
+
+//-----------------------------------------------------
+//対象の状態と現在の範囲を確認
+//-----------------------------------------------------
+bool UPlayerInteractAnimationState::IsTargetAvailable() const
+{
+	const APlayerCharacter* PlayerCharacter = GetPlayer();
+	return PlayerCharacter && InteractionTarget.IsValid()
+		&& PlayerCharacter->IsInInteractRange(InteractionTarget.Get());
 }
 
 //-----------------------------------------------------
@@ -47,10 +60,7 @@ void UPlayerInteractAnimationState::OnEnter_Implementation()
 	bMontageEnded = false;
 	bMontageCancelled = false;
 	PlayingAnimInstance.Reset();
-	if (!InteractionTarget.IsValid())
-	{
-		if (APlayerCharacter* PlayerCharacter = GetPlayer()) { InteractionTarget = PlayerCharacter->m_hitInteractOb; }
-	}
+	if (!IsTargetAvailable()) { bMontageCancelled = true; return; }
 	if (IsValid(InteractionMontage))
 	{
 		APlayerCharacter* PlayerCharacter = GetPlayer();
@@ -78,12 +88,12 @@ void UPlayerInteractAnimationState::OnEnter_Implementation()
 //-----------------------------------------------------
 void UPlayerInteractAnimationState::OnUpdate_Implementation(float DeltaTime)
 {
-	if (!InteractionTarget.IsValid() || bMontageCancelled || (bMontageStarted && !PlayingAnimInstance.IsValid()))
+	if (bInteractionExecuted) { CompleteInteraction(); return; }
+	if (!IsTargetAvailable() || bMontageCancelled || (bMontageStarted && !PlayingAnimInstance.IsValid()))
 	{
 		if (UPlayerStateMachine* Machine = GetPlayerMachine()) { Machine->ReturnToLocomotion(); }
 		return;
 	}
-	if (bInteractionExecuted) { CompleteInteraction(); return; }
 	if (bMontageStarted)
 	{
 		if (!bMontageEnded) { return; }
@@ -111,6 +121,7 @@ void UPlayerInteractAnimationState::CompleteInteraction()
 	//終了を待つ間に何度も実行しないようにする
 	if (!bInteractionExecuted)
 	{
+		if (!IsTargetAvailable()) { Machine->ReturnToLocomotion(); return; }
 		bInteractionExecuted = true;
 		if (InteractionTarget.IsValid()) { InteractionTarget->Interact(PlayerCharacter); }
 	}

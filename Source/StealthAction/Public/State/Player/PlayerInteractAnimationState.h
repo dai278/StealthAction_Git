@@ -11,6 +11,8 @@ class STEALTHACTION_API UPlayerInteractAnimationState : public UPlayerStateBase
 public:
 	//コンストラクタ
 	UPlayerInteractAnimationState();
+	//対象なしでアニメーションだけ開始しない
+	virtual bool CanEnter() const override;
 	//対象を保存してインタラクト開始
 	bool BeginInteraction(class AInteract* Target);
 	//インタラクト実行
@@ -32,12 +34,13 @@ protected:
 	//時間ではなくアニメーション通知を待つか
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interaction")
 	bool bWaitForAnimationNotify = false;
-	virtual bool CanEnterState_Implementation() const override;
 	virtual void OnEnter_Implementation() override;
 	virtual void OnUpdate_Implementation(float DeltaTime) override;
 	virtual void OnExit_Implementation() override;
 
 private:
+	//実行対象が現在も使用可能で範囲内か
+	bool IsTargetAvailable() const;
 	//モンタージュ終了通知(ここでは結果だけ保存する)
 	void OnInteractionMontageEnded(class UAnimMontage* Montage, bool bInterrupted);
 	//再生したAnimInstanceの保存用
