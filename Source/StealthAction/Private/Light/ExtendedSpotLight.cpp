@@ -291,32 +291,6 @@ bool AExtendedSpotLight::IsHit(const FVector& _pos)const
 		Params
 	);
 
-	//当たったら赤、何も当たらなければ緑
-	DrawDebugLine(
-		GetWorld(),
-		lightPos,
-		_pos,
-		bHit ? FColor::Red : FColor::Green,
-		false,
-		0.1f,
-		0,
-		2.f
-	);
-
-	//当たった場所
-	if (bHit)
-	{
-		DrawDebugSphere(
-			GetWorld(),
-			Hit.ImpactPoint,
-			8.f,
-			12,
-			FColor::Yellow,
-			false,
-			0.1f
-		);
-	}
-
 	if (bHit)
 	{
 		// さえぎられず、少しマージン
