@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 #include "Components/WidgetComponent.h"
+#include "Engine/World.h"
 
 // Sets default values
 AInteract::AInteract()
@@ -57,28 +58,44 @@ AInteract::AInteract()
 void AInteract::BeginPlay()
 {
 	Super::BeginPlay();
-	if (!IsValid(m_pCollision)) { return; }
 
+	if (IsValid(m_intractUI))
+	{
+		m_intractUI->SetVisibility(false);
+	}
+	if (!IsValid(m_pCollision))
+	{
+		return;
+	}
 
-	//UIは初期は非表示
-	if (IsValid(m_intractUI)) { m_intractUI->SetVisibility(false); }
-	
-	//コリジョンのオーバーラップイベント登録
+	m_pCollision->SetCollisionProfileName(FName("Interact"));
 	m_pCollision->OnComponentBeginOverlap.AddDynamic(this, &AInteract::OnOverlapBegin);
 	m_pCollision->OnComponentEndOverlap.AddDynamic(this, &AInteract::OnOverlapEnd);
 
-	//コリジョンpresetをインタラクトに
-	m_pCollision->SetCollisionProfileName(FName("Interact"));
+	//開始時にすでに範囲内でも表示する。プレイヤーが後から生成されても取り直す
+	UpdateVisible();
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimer(m_uiUpdateTimer, this, &AInteract::UpdateVisible, 0.1f, true);
+	}
+}
 
-	m_pPlayer=Cast<APawn>( UGameplayStatics::GetPlayerCharacter(this, 0));
+//-----------------------------------------------------
+//終了処理
+//-----------------------------------------------------
+void AInteract::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(m_uiUpdateTimer);
+	}
+	Super::EndPlay(EndPlayReason);
 }
 
 // Called every frame
 void AInteract::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	UpdateVisible();
 }
 
 
@@ -100,24 +117,30 @@ FVector AInteract::GetInteractPosition(const AActor* _actor)
 //-----------------------------------------------------
 void AInteract::UpdateVisible()
 {
-	if (!IsValid(m_pPlayer) || !IsValid(m_intractUI)) { return; }
-
-	FVector vec = { GetActorLocation() - m_pPlayer->GetActorLocation()};
-	float lenght = vec.Length();
-
-	if (lenght > m_visibleUILenght)
+	if (!IsValid(m_intractUI))
 	{
-		if (IsValid(m_intractUI)) { m_intractUI->SetVisibility(false); }
-	}
-	else
-	{
-		FHitResult bHit;
-
-		
+		return;
 	}
 
+	//生成順やリスポーンで参照が変わっても、今のプレイヤーを使う
+	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	m_pPlayer = Player;
+	bool bVisible = false;
+	if (IsValid(Player) && IsValid(m_pCollision) && CanInteract())
+	{
+		const double distance = FVector::Distance(GetActorLocation(), Player->GetActorLocation());
+		if (distance <= m_visibleUILenght && !Player->IsInShadow())
+		{
+			//Overlapイベントの回数ではなく、操作判定と同じ現在の範囲で決める
+			bVisible = Player->IsInInteractRange(this);
+		}
+	}
+
+	if (m_intractUI->IsVisible() != bVisible)
+	{
+		m_intractUI->SetVisibility(bVisible);
+	}
 }
-
 
 void AInteract::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	AActor* OtherActor,
@@ -126,7 +149,10 @@ void AInteract::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	bool bFromSweep,
 	const FHitResult& SweepResult) 
 {
-	if (IsValid(m_intractUI)) { m_intractUI->SetVisibility(true); }
+	if (Cast<APlayerCharacter>(OtherActor))
+	{
+		UpdateVisible();
+	}
 }
 
 
@@ -135,7 +161,11 @@ void AInteract::OnOverlapEnd(UPrimitiveComponent* OverlappedComp,
 	UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex) {
 
-	if (IsValid(m_intractUI)) { m_intractUI->SetVisibility(false); }
+	//メッシュだけが範囲を抜けても、カプセルが残っていれば消さない
+	if (Cast<APlayerCharacter>(OtherActor))
+	{
+		UpdateVisible();
+	}
 }
 
 

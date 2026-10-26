@@ -26,6 +26,13 @@ def extract(path, name):
 
 
 CASES = {
+    "ui": [("Private/Interact/Interact.cpp", name) for name in [
+        "void AInteract::BeginPlay()",
+        "void AInteract::EndPlay(",
+        "void AInteract::UpdateVisible()",
+        "void AInteract::OnOverlapBegin(",
+        "void AInteract::OnOverlapEnd(",
+    ]],
     "detection": [("PlayerCharacter/PlayerCharacter.cpp", name) for name in [
         "void APlayerCharacter::GetNearbyInteractTargets",
         "AInteract* APlayerCharacter::FindInteractTarget",

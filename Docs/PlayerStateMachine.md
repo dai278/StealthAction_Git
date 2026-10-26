@@ -172,6 +172,8 @@ BP_PlayerShadowState の Shadow → Collision で Shadow Capsule Radius（半径
 
 ### インタラクトのモンタージュ
 
+インタラクトUIは `AInteract` が0.1秒間隔で更新します。プレイヤーが影状態以外で実際の操作範囲に入り、対象が `CanInteract()` を満たし、表示距離内にいる時に表示します。影解除・開始時点の接触・プレイヤーの生成やリスポーンでも取り直します。押せる箱などでActorのTickを停止してもUI更新は止まりません。Overlapイベントはプレイヤーだけを対象とし、メッシュなど一部のコンポーネントが抜けただけでは一律に非表示にしません。UI用のWidget Classや表示距離は従来のBP設定を使用します。
+
 BP_PlayerInteractAnimationState の Interaction → Animation で Interaction Montage を指定します。対象位置へ着くと再生し、通常はモンタージュの終了後に対象のInteractを1回実行して移動へ戻ります。Montage Play Rate（既定1）と Montage Blend Out Time（既定0.15秒）を調整できます。被ダメージ・対象消失・モンタージュの中断・再生失敗では実行せずに解除します。モンタージュ未設定なら以前のInteraction Durationを使います。
 
 実行タイミングを通知で指定する場合は Wait For Animation Notify を有効にして、AnimNotifyからプレイヤーの On Interact Animation End を呼んでください。その時点で実行・終了します。通知が無いままモンタージュが終了した場合は警告を出してキャンセルします。対象のInteractは終了条件待ち中にも重複実行しません。

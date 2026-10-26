@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Camera/CameraFocusProviderComponent.h"
+#include "TimerManager.h"
 
 #include "Interact.generated.h"
 
@@ -24,6 +25,9 @@ public:
 protected:
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
+
+	//表示更新のタイマーを止める
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
     // Called every frame
@@ -78,6 +82,9 @@ protected:
     //プレイヤー参照用
     UPROPERTY(Transient)
     APawn* m_pPlayer;
+
+	//ActorのTickを止めてもUIは更新する
+	FTimerHandle m_uiUpdateTimer;
 
     UPROPERTY(EditAnywhere, Category = "Interact")
     float m_visibleUILenght;
