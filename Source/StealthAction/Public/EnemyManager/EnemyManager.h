@@ -1,5 +1,6 @@
-//----------------------------------------------------------------
-// ƒGƒlƒ~[ƒ}ƒl[ƒWƒƒ[ƒNƒ‰ƒX
+ï»¿//----------------------------------------------------------------
+// ã‚¨ãƒãƒŸãƒ¼ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚¯ãƒ©ã‚¹
+// æ‹…å½“æ—¥é«™
 //----------------------------------------------------------------
 
 #pragma once
@@ -8,8 +9,8 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "EnemyManager.generated.h"
 
-//‘O•ûéŒ¾
-class AEnemyBase;//ƒGƒlƒ~[‚ÌŠî’êƒNƒ‰ƒX
+//å‰æ–¹å®£è¨€
+class AEnemyBase;//ã‚¨ãƒãƒŸãƒ¼ã®åŸºåº•ã‚¯ãƒ©ã‚¹
 
 
 UCLASS()
@@ -18,41 +19,41 @@ class STEALTHACTION_API UEnemyManager : public UWorldSubsystem
 	GENERATED_BODY()
 
 public:
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	UEnemyManager();
 
-	//BeginPlayŠÖ”
+	//BeginPlayé–¢æ•°
 	virtual void OnWorldBeginPlay(UWorld&)override;
 
 public:
-	//ƒGƒlƒ~[“o˜^ŠÖ”
+	//ã‚¨ãƒãƒŸãƒ¼ç™»éŒ²é–¢æ•°
 	void RegisterEnemy(AEnemyBase* _pEnemy);
 
-	//ƒGƒlƒ~[íœŠÖ”
+	//ã‚¨ãƒãƒŸãƒ¼å‰Šé™¤é–¢æ•°
 	void UnregisterEnemy(AEnemyBase* _pEnemy);
 	
 	void UnregisteredOtherEnemyBaseAll(AEnemyBase* _pEnemy);
 
-	//ˆê”Ô‹ß‚¢ƒGƒlƒ~[æ“¾ŠÖ”
+	//ä¸€ç•ªè¿‘ã„ã‚¨ãƒãƒŸãƒ¼å–å¾—é–¢æ•°
 	AEnemyBase* GetNearestEnemy(const FVector& _pos,const float& _maxDistance) ;
 	
-	//‘SƒGƒlƒ~[‚Ìî•ñ‚ğPlayData‚É‹L˜^‚·‚é
+	//å…¨ã‚¨ãƒãƒŸãƒ¼ã®æƒ…å ±ã‚’PlayDataã«è¨˜éŒ²ã™ã‚‹
 	void RegisterEnemyInfoAllToPlayData();
 
-	//ƒGƒlƒ~[‚ªƒvƒŒƒCƒ„[”­Œ©‚µ‚Ä‚¢‚é‚©æ“¾‚·‚éŠÖ”
+	//ã‚¨ãƒãƒŸãƒ¼ãŒãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ç™ºè¦‹ã—ã¦ã„ã‚‹ã‹å–å¾—ã™ã‚‹é–¢æ•°
 	UFUNCTION(BlueprintCallable, Category = "Enemy")
 	bool IsAnyEnemyPlayerFound() const;
 
-	////ƒGƒlƒ~[‘Sæ“¾ŠÖ”
+	////ã‚¨ãƒãƒŸãƒ¼å…¨å–å¾—é–¢æ•°
 	//const TArray<EnemyBase*>& GetAllEnemy() const { return m_pAllEnemy_1; }
 
 private:
 
-	//‘SƒGƒlƒ~[‚ÉƒGƒlƒ~[î•ñ‚ğ“o˜^‚·‚éŠÖ”
+	//å…¨ã‚¨ãƒãƒŸãƒ¼ã«ã‚¨ãƒãƒŸãƒ¼æƒ…å ±ã‚’ç™»éŒ²ã™ã‚‹é–¢æ•°
 	void SetEnemyInfoAll();
 
-	//ƒGƒlƒ~[”z—ñ
-	//@m_pAllEnemies[“G‚Ì‚¢‚éƒGƒŠƒA][‚»‚ÌƒGƒŠƒA‚Ì“G‘Sˆõ]
+	//ã‚¨ãƒãƒŸãƒ¼é…åˆ—
+	//ã€€m_pAllEnemies[æ•µã®ã„ã‚‹ã‚¨ãƒªã‚¢][ãã®ã‚¨ãƒªã‚¢ã®æ•µå…¨å“¡]
 	UPROPERTY(Transient)
 	TArray<AEnemyBase*> m_pAllEnemies;
 	

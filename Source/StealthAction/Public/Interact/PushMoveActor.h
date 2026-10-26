@@ -1,5 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+//æ‹…å½“æ—¥é«™
 #pragma once
 
 #include "CoreMinimal.h"
@@ -25,53 +25,53 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 public:
-	//ƒCƒ“ƒ^ƒ‰ƒNƒg‚ÌÀ‘•
+	//ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆã®å®Ÿè£…
 	virtual void Interact(AActor* _interactOwner) override;
 	virtual void Interact(AActor* _interactOwner, bool& _isPose) override;
 
-	//ãˆÚ“®
+	//ä¸Šç§»å‹•
 	void MoveUp(float DeltaTime);
-	//‰ºˆÚ“®
+	//ä¸‹ç§»å‹•
 	void MoveDown(float DeltaTime);
-	//‰EˆÚ“®
+	//å³ç§»å‹•
 	void MoveRight(float DeltaTime);
-	//¶ˆÚ“®
+	//å·¦ç§»å‹•
 	void MoveLeft(float DeltaTime);
 
 
-	//ƒCƒ“ƒ^ƒ‰ƒNƒg‚·‚éƒ|ƒWƒVƒ‡ƒ“‚ğæ“¾
+	//ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆã™ã‚‹ãƒã‚¸ã‚·ãƒ§ãƒ³ã‚’å–å¾—
 	virtual FVector GetInteractPosition(const AActor* _actor = nullptr)override;
 
-	//ˆÚ“®ƒŠƒZƒbƒg
+	//ç§»å‹•ãƒªã‚»ãƒƒãƒˆ
 	void ResetMove();
 
 private:
-	//ˆÚ“®‹——£
+	//ç§»å‹•è·é›¢
 	UPROPERTY(EditAnywhere, Category = "PushMoveActor")
 	float m_moveDistance = 200.f;
 
-	//ˆÚ“®‘¬“x
+	//ç§»å‹•é€Ÿåº¦
 	UPROPERTY(EditAnywhere, Category = "PushMoveActor")
 	float m_moveSpeed;
 
-	//ˆÚ“®’†ƒtƒ‰ƒO
+	//ç§»å‹•ä¸­ãƒ•ãƒ©ã‚°
 	bool m_bIsMoving = false;
 
-	//–Ú•WˆÊ’u
+	//ç›®æ¨™ä½ç½®
 	FVector m_targetLocation;
 
-	//ŠJnˆÊ’u
+	//é–‹å§‹ä½ç½®
 	FVector m_startLocation;
 
-	//‰ŠúˆÊ’u
+	//åˆæœŸä½ç½®
 	FVector m_initPos;
 
-	//ˆÚ“®is“x
+	//ç§»å‹•é€²è¡Œåº¦
 	float m_moveProgress = 0.f;
 
-	//ˆÚ“®•ûŒü
+	//ç§»å‹•æ–¹å‘
 	FVector m_moveDirection;
 	
-	//ˆÚ“®ˆ—
+	//ç§»å‹•å‡¦ç†
 	
 };

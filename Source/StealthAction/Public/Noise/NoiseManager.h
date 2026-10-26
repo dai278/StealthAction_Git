@@ -1,5 +1,6 @@
-//-----------------------------------------
-// ƒvƒŒƒC’†”­¶‚µ‚½‰¹‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+ï»¿//-----------------------------------------
+// ãƒ—ãƒ¬ã‚¤ä¸­ç™ºç”Ÿã—ãŸéŸ³ã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
+// æ‹…å½“æ—¥é«™
 //-----------------------------------------
 
 #pragma once
@@ -8,7 +9,7 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "NoiseManager.generated.h"
 
-//‘O•ûéŒ¾
+//å‰æ–¹å®£è¨€
 class UNoiseListenerComponent;
 /**
  * 
@@ -22,13 +23,13 @@ public:
 	//BeginPlay
 	virtual void OnWorldBeginPlay(UWorld&)override;
 
-	//‰¹‚ğ–Â‚ç‚·
+	//éŸ³ã‚’é³´ã‚‰ã™
 	void MakeNoise(const int& _noiseVolume, const FVector& _pos);
 
-	//ƒŠƒXƒi[‚Ì’Ç‰Á
+	//ãƒªã‚¹ãƒŠãƒ¼ã®è¿½åŠ 
 	void AddListener(UNoiseListenerComponent* _listener);
 
-	//ƒŠƒXƒi[‚Ìíœ
+	//ãƒªã‚¹ãƒŠãƒ¼ã®å‰Šé™¤
 	void RemoveListener(UNoiseListenerComponent* _listener);
 
 private:

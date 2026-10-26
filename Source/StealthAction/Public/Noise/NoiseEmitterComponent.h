@@ -1,5 +1,5 @@
-// ‰¹‚ğ–Â‚ç‚·ƒRƒ“ƒ|[ƒlƒ“ƒg
-
+ï»¿// éŸ³ã‚’é³´ã‚‰ã™ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
+//æ‹…å½“æ—¥é«™
 #pragma once
 
 #include "CoreMinimal.h"
@@ -25,7 +25,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	//‰¹‚ğ–Â‚ç‚·
+	//éŸ³ã‚’é³´ã‚‰ã™
 	void MakeNoise(const int& _volume, const FVector& _pos);
 
 };

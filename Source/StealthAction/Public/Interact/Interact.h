@@ -1,5 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+//æ‹…å½“æ—¥é«™
 #pragma once
 
 #include "CoreMinimal.h"
@@ -26,52 +26,52 @@ protected:
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
 
-	//•\¦XV‚Ìƒ^ƒCƒ}[‚ğ~‚ß‚é
+	//è¡¨ç¤ºæ›´æ–°ã®ã‚¿ã‚¤ãƒãƒ¼ã‚’æ­¢ã‚ã‚‹
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
     // Called every frame
     virtual void Tick(float DeltaTime) override;
 public:
-    //”h¶æ‚ÅƒCƒ“ƒ^ƒ‰ƒNƒg‚ğã‘‚«
+    //æ´¾ç”Ÿå…ˆã§ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆã‚’ä¸Šæ›¸ã
     virtual void Interact(AActor* _interactOwner) {};
 
 	virtual void Interact(AActor* _interactOwner, bool& _isPose) {};
 
-    //ƒCƒ“ƒ^ƒ‰ƒNƒg‰Â”\‚©H
+    //ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆå¯èƒ½ã‹ï¼Ÿ
 	virtual bool CanInteract() const { return m_IsUseInteract; }
 
-    //ƒCƒ“ƒ^ƒ‰ƒNƒg‚·‚éƒ|ƒWƒVƒ‡ƒ“‚ğæ“¾
+    //ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆã™ã‚‹ãƒã‚¸ã‚·ãƒ§ãƒ³ã‚’å–å¾—
     virtual FVector GetInteractPosition(const AActor* _actor = nullptr);
 
-    //•\¦”ñ•\¦Ø‚è‘Ö‚¦XV
+    //è¡¨ç¤ºéè¡¨ç¤ºåˆ‡ã‚Šæ›¿ãˆæ›´æ–°
     virtual void UpdateVisible();
 public:
-    //ƒCƒ“ƒfƒbƒNƒXæ“¾
+    //ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹å–å¾—
     virtual TArray<int32> GetIndexArray()const { return m_indexs; }
-    //ƒCƒ“ƒfƒbƒNƒXæ“¾
+    //ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹å–å¾—
     virtual int32 GetIndex()const { return m_indexs[0]; }
 
 protected:
-	//Õ“ËŠJnƒCƒxƒ“ƒgŠÖ”
+	//è¡çªé–‹å§‹ã‚¤ãƒ™ãƒ³ãƒˆé–¢æ•°
     UFUNCTION()
     void OnOverlapBegin(UPrimitiveComponent* OverlappedComp,AActor* OtherActor,UPrimitiveComponent* OtherComp,int32 OtherBodyIndex,bool bFromSweep,const FHitResult& SweepResult);
     
-	////Õ“ËI—¹ƒCƒxƒ“ƒgŠÖ”
+	////è¡çªçµ‚äº†ã‚¤ãƒ™ãƒ³ãƒˆé–¢æ•°
     UFUNCTION()
     void OnOverlapEnd(UPrimitiveComponent* OverlappedComp,AActor* OtherActor,UPrimitiveComponent* OtherComp,int32 OtherBodyIndex);
        
 protected:
     UPROPERTY(EditAnywhere, Category = "Collision")
-    UBoxComponent* m_pCollision;			//ƒRƒŠƒWƒ‡ƒ“ƒRƒ“ƒ|ƒlƒ“ƒg
+    UBoxComponent* m_pCollision;			//ã‚³ãƒªã‚¸ãƒ§ãƒ³ã‚³ãƒ³ãƒãƒãƒ³ãƒˆ
 
     UPROPERTY(VisibleAnywhere, Category = "Shadow/Mesh")
-    UStaticMeshComponent* m_pMesh;        	//ƒƒbƒVƒ…ƒRƒ“ƒ|ƒlƒ“ƒg
+    UStaticMeshComponent* m_pMesh;        	//ãƒ¡ãƒƒã‚·ãƒ¥ã‚³ãƒ³ãƒãƒãƒ³ãƒˆ
 
-    UBoxComponent* m_bodyCollision;//•Ç”»’è—pƒRƒŠƒWƒ‡ƒ“
+    UBoxComponent* m_bodyCollision;//å£åˆ¤å®šç”¨ã‚³ãƒªã‚¸ãƒ§ãƒ³
 
     UPROPERTY(EditAnywhere, Category = "Interact")
-    TArray<int32> m_indexs; 							//ƒCƒ“ƒ^ƒ‰ƒNƒg¯•Ê—pƒCƒ“ƒfƒbƒNƒX
+    TArray<int32> m_indexs; 							//ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆè­˜åˆ¥ç”¨ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
 
     UPROPERTY(EditAnywhere, Category = "UI")
     UWidgetComponent* m_intractUI;
@@ -79,11 +79,11 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Interact")
     TArray<FVector> InteractPos;
 
-    //ƒvƒŒƒCƒ„[QÆ—p
+    //ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼å‚ç…§ç”¨
     UPROPERTY(Transient)
     APawn* m_pPlayer;
 
-	//Actor‚ÌTick‚ğ~‚ß‚Ä‚àUI‚ÍXV‚·‚é
+	//Actorã®Tickã‚’æ­¢ã‚ã¦ã‚‚UIã¯æ›´æ–°ã™ã‚‹
 	FTimerHandle m_uiUpdateTimer;
 
     UPROPERTY(EditAnywhere, Category = "Interact")
@@ -94,13 +94,13 @@ protected:
 	bool m_IsUseInteract;
 
 
-    // ƒJƒƒ‰ƒtƒH[ƒJƒX—pƒRƒ“ƒ|[ƒlƒ“ƒg
+    // ã‚«ãƒ¡ãƒ©ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ç”¨ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
     TObjectPtr<UCameraFocusProviderComponent> FocusProviderComp;
 
     virtual FCameraFocusData GetCameraFocusData_Implementation() const override;
 
-	//ƒJƒƒ‰ƒtƒH[ƒJƒXŠJn
+	//ã‚«ãƒ¡ãƒ©ãƒ•ã‚©ãƒ¼ã‚«ã‚¹é–‹å§‹
     virtual void CameraFocusStart(AActor* OtherActor);
 
 

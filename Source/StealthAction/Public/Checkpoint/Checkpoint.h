@@ -1,5 +1,5 @@
-// ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒg
-
+ï»¿// ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆ
+//æ‹…å½“æ—¥é«™
 #pragma once
 
 #include "CoreMinimal.h"
@@ -35,7 +35,7 @@ public:
 	void SetHasCheckpoint(const bool _bHas);
 	
 
-	//ƒvƒŒƒCƒ„[‚ÆƒI[ƒo[ƒ‰ƒbƒv‚µ‚½uŠÔ‚ÌƒCƒxƒ“ƒgŠÖ”
+	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¨ã‚ªãƒ¼ãƒãƒ¼ãƒ©ãƒƒãƒ—ã—ãŸç¬é–“ã®ã‚¤ãƒ™ãƒ³ãƒˆé–¢æ•°
 	UFUNCTION()
 	void OnBeginOverlap(
 		UPrimitiveComponent* OverlappedComp,
@@ -49,15 +49,15 @@ public:
 	void SetCheckPointInfo(const FCheckpointInfo& _info) { m_checkpointInfo = m_checkpointInfo; }
 
 private:
-	//ƒƒbƒVƒ…ƒRƒ“ƒ|[ƒlƒ“ƒg
+	//ãƒ¡ãƒƒã‚·ãƒ¥ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Checkpoint", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* m_pMesh;
-	//ƒRƒŠƒWƒ‡ƒ“ƒRƒ“ƒ|[ƒlƒ“ƒg
+	//ã‚³ãƒªã‚¸ãƒ§ãƒ³ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Checkpoint", meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* m_pCollisionBox;
 
 
-	//ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒg‚Ìî•ñ
+	//ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆã®æƒ…å ±
 	UPROPERTY(EditAnywhere, Category = "info")
 	FCheckpointInfo m_checkpointInfo;
 

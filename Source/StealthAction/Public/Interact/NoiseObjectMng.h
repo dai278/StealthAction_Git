@@ -1,5 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+//æ‹…å½“æ—¥é«™
 #pragma once
 
 #include "CoreMinimal.h"
@@ -21,16 +21,16 @@ public:
 
 protected:
 	
-	//ƒxƒMƒ“ƒvƒŒƒC
+	//ãƒ™ã‚®ãƒ³ãƒ—ãƒ¬ã‚¤
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
 public:
 
-	//‰¹ƒIƒuƒWƒFƒNƒg“o˜^
+	//éŸ³ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç™»éŒ²
 	void RegisterNoiseObject(ANoiseObject* _pNoiseObject);
-	//‰¹ƒIƒuƒWƒFƒNƒg“o˜^‰ğœ
+	//éŸ³ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç™»éŒ²è§£é™¤
 	void UnregisterNoiseObject(ANoiseObject* _pNoiseObject);
-	//‰¹”­¶
+	//éŸ³ç™ºç”Ÿ
 	void MakeNoise(const int32& _noiseLevel, const FVector& _noiseLocation,const TArray<int32>& _index);
 
 private:

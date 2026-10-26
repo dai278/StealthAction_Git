@@ -1,5 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+//æ‹…å½“æ—¥é«™
 #pragma once
 
 #include "CoreMinimal.h"
@@ -15,23 +15,23 @@ class STEALTHACTION_API ANoiseSwitch : public AInteract
 	GENERATED_BODY()
 
 public:
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	ANoiseSwitch();
 protected:
-	// ƒxƒMƒ“ƒvƒŒƒC
+	// ãƒ™ã‚®ãƒ³ãƒ—ãƒ¬ã‚¤
 	virtual void BeginPlay() override;
 public:
 	
-	// XV
+	// æ›´æ–°
 	virtual void Tick(float DeltaTime) override;
 	
-	//ƒCƒ“ƒ^ƒ‰ƒNƒg
+	//ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆ
 	virtual void Interact(AActor* _interactOwner) override;
 	virtual void Interact(AActor* _interactOwner, bool& _isPose) override;
 
 private:
-	bool m_bIsOn;// ƒXƒCƒbƒ`‚Ìó‘Ô
+	bool m_bIsOn;// ã‚¹ã‚¤ãƒƒãƒã®çŠ¶æ…‹
 
 	UPROPERTY(EditAnywhere, Category = "NoiseSwitch")
-	TArray<int32> m_makeNoiseObjectIndex;// ‘›‰¹‚ğo‚·ƒIƒuƒWƒFƒNƒg‚ÌƒCƒ“ƒfƒbƒNƒX	
+	TArray<int32> m_makeNoiseObjectIndex;// é¨’éŸ³ã‚’å‡ºã™ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹	
 };

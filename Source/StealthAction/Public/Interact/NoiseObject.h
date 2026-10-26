@@ -1,5 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+//æ‹…å½“æ—¥é«™
 #pragma once
 
 #include "CoreMinimal.h"
@@ -34,23 +34,23 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Noise")
-	int32 m_noiseLevel;//‰¹‚Ì‘å‚«‚³
+	int32 m_noiseLevel;//éŸ³ã®å¤§ãã•
 
 	UPROPERTY(EditAnywhere, Category = "Noise")
-	float m_noiseTime;//‰¹‚ğo‚·ŠÔ
+	float m_noiseTime;//éŸ³ã‚’å‡ºã™æ™‚é–“
 
-	float m_noiseTimer;//‰¹‚ğo‚µ‚Ä‚¢‚éŠÔƒJƒEƒ“ƒg
+	float m_noiseTimer;//éŸ³ã‚’å‡ºã—ã¦ã„ã‚‹æ™‚é–“ã‚«ã‚¦ãƒ³ãƒˆ
 
-	//‰¹‚ªo‚Ä‚¢‚é‚©‚Ç‚¤‚©
+	//éŸ³ãŒå‡ºã¦ã„ã‚‹ã‹ã©ã†ã‹
 	bool m_bIsMakingNoise;
 
-	//‰¹‚ªo‚é‚Ü‚Å‚Ì‘Ò‹@ŠÔ
+	//éŸ³ãŒå‡ºã‚‹ã¾ã§ã®å¾…æ©Ÿæ™‚é–“
 	float m_noiseDelayTime;
 	
-	//‘Ò‹@ŠÔ’†‚©‚Ç‚¤‚©
+	//å¾…æ©Ÿæ™‚é–“ä¸­ã‹ã©ã†ã‹
 	bool m_bIsInDelay;
 
-	//‰¹ƒ}ƒl[ƒWƒƒ\ƒ|ƒCƒ“ƒ^
+	//éŸ³ãƒãƒãƒ¼ã‚¸ãƒ£â€•ãƒã‚¤ãƒ³ã‚¿
 	UPROPERTY(Transient)
 	UNoiseManager* m_pNoiseManager;
 };

@@ -1,6 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 //------------------------------------
-//“§‰ß‹@”\A‰e•`‰æ‹@”\‚ğ‚ÂƒAƒNƒ^[
+//é€éæ©Ÿèƒ½ã€å½±æç”»æ©Ÿèƒ½ã‚’æŒã¤ã‚¢ã‚¯ã‚¿ãƒ¼
+// æ‹…å½“æ—¥é«™
 //--------------------------------------
 
 
@@ -10,7 +11,7 @@
 #include "GameFramework/Actor.h"
 #include "SeeingThroughShadowActor.generated.h"
 
-//‘O•û‘OŒ¾
+//å‰æ–¹å‰è¨€
 class UStaticMeshComponent;
 class UShadowComponent;
 
@@ -20,7 +21,7 @@ class STEALTHACTION_API ASeeingThroughShadowActor : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	ASeeingThroughShadowActor();
 
 protected:
@@ -32,18 +33,18 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	static const float MinOpacity;// Å¬•s“§–¾“x
-	static const float MaxOpacity;// Å‘å•s“§–¾“x
+	static const float MinOpacity;// æœ€å°ä¸é€æ˜åº¦
+	static const float MaxOpacity;// æœ€å¤§ä¸é€æ˜åº¦
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* m_pMesh; //“§‰ß‚³‚¹‚éƒXƒ^ƒeƒBƒbƒNƒƒbƒVƒ…
+	UStaticMeshComponent* m_pMesh; //é€éã•ã›ã‚‹ã‚¹ã‚¿ãƒ†ã‚£ãƒƒã‚¯ãƒ¡ãƒƒã‚·ãƒ¥
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	UShadowComponent* m_pShadow;  //‰e
+	UShadowComponent* m_pShadow;  //å½±
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	float m_seeingThroughtime;		// “§‰ßˆ—‚·‚éŠÔ
+	float m_seeingThroughtime;		// é€éå‡¦ç†ã™ã‚‹æ™‚é–“
 
-	float m_timeCnt;	//“§‰ßŠÔƒJƒEƒ“ƒgƒ_ƒEƒ“
-	float m_bSeeingThrough; //“§‰ßˆ—ƒtƒ‰ƒO
+	float m_timeCnt;	//é€éæ™‚é–“ã‚«ã‚¦ãƒ³ãƒˆãƒ€ã‚¦ãƒ³
+	float m_bSeeingThrough; //é€éå‡¦ç†ãƒ•ãƒ©ã‚°
 };

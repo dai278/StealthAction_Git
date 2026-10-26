@@ -1,5 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+//æ‹…å½“æ—¥é«™
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,10 +7,10 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "CheckpointManager.generated.h"
 
-//ƒNƒ‰ƒX‚Ìƒƒ“ƒoŠÖ”‚ğƒmƒCƒYƒCƒxƒ“ƒg‚ÌƒR[ƒ‹ƒoƒbƒN‚É‚·‚é‚Æ‚«‚Ìƒ}ƒNƒ
+//ã‚¯ãƒ©ã‚¹ã®ãƒ¡ãƒ³ãƒé–¢æ•°ã‚’ãƒã‚¤ã‚ºã‚¤ãƒ™ãƒ³ãƒˆã®ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯ã«ã™ã‚‹ã¨ãã®ãƒã‚¯ãƒ­
 #define CreateOverlapCheckpointEvent(_func) std::bind(&_func, this)
 
-//‘O•ûéŒ¾
+//å‰æ–¹å®£è¨€
 class ACheckpoint;
 
 /**
@@ -21,44 +21,44 @@ class STEALTHACTION_API UCheckpointManager : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	UCheckpointManager();
 
-	//BeginPlayŠÖ”
+	//BeginPlayé–¢æ•°
 	virtual void OnWorldBeginPlay(UWorld&)override;
 	
 public:
-	//ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒg‚ğ“o˜^‚·‚éŠÖ”
+	//ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆã‚’ç™»éŒ²ã™ã‚‹é–¢æ•°
 	void AddCheckpoint(ACheckpoint* _checkpoint);
 	
-	//ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒg‚Ìæ“¾ŠÖ”
+	//ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆã®å–å¾—é–¢æ•°
 	ACheckpoint* GetCheckpoint(const int32 _index) const;
 
-	//Œ»İ‚Ìƒ`ƒFƒbƒNƒ|ƒCƒ“ƒgƒCƒ“ƒfƒbƒNƒX‚ğİ’è‚·‚éŠÖ”
+	//ç¾åœ¨ã®ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’è¨­å®šã™ã‚‹é–¢æ•°
 	FVector GetCurrentCheckpointLocation() const;
-	//Œ»İ‚Ìƒ`ƒFƒbƒNƒ|ƒCƒ“ƒg‚ğİ’è‚·‚éŠÖ”
+	//ç¾åœ¨ã®ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆã‚’è¨­å®šã™ã‚‹é–¢æ•°
 	void SetCurrentCheckpointIndex(const int32& _index);
-	//Œ»İ‚Ìƒ`ƒFƒbƒNƒ|ƒCƒ“ƒgƒCƒ“ƒfƒbƒNƒX‚ğæ“¾‚·‚éŠÖ”
+	//ç¾åœ¨ã®ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’å–å¾—ã™ã‚‹é–¢æ•°
 	int32 GetCurrentCheckpointIndex() const;
-	//ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒgG‚ê‚½Û‚ÌƒCƒxƒ“ƒgŠÖ”‚Ì’Ç‰Á
+	//ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆè§¦ã‚ŒãŸéš›ã®ã‚¤ãƒ™ãƒ³ãƒˆé–¢æ•°ã®è¿½åŠ 
 	void AddOnOverlapCheckpointEvent(std::function<void()> _func)
 	{
 		if (_func) { m_OnOverlapCheckpointFunctions.Add(_func);}
 	}
 
-	//ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒg‚ÉU‚ê‚½ÛŒÄ‚Ño‚·ŠÖ”
+	//ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆã«æŒ¯ã‚ŒãŸéš›å‘¼ã³å‡ºã™é–¢æ•°
 	void OnOverlapCheckpoint();
 
-	//‘Sƒ`ƒFƒbƒNƒ|ƒCƒ“ƒg‚Ìİ’è
+	//å…¨ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆã®è¨­å®š
 	void SetCheckPointAll();
 
 
 private:
 
 	UPROPERTY(Transient)
-	TArray<ACheckpoint*> m_checkpoints;//ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒg‚Ì”z—ñ
+	TArray<ACheckpoint*> m_checkpoints;//ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆã®é…åˆ—
 	
-	int32 m_currentCheckpointIndex;//Œ»İ‚Ìƒ`ƒFƒbƒNƒ|ƒCƒ“ƒgƒCƒ“ƒfƒbƒNƒX
+	int32 m_currentCheckpointIndex;//ç¾åœ¨ã®ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
 
-	TArray<std::function<void()>> m_OnOverlapCheckpointFunctions; //ƒCƒxƒ“ƒgŠÖ””z—ñ
+	TArray<std::function<void()>> m_OnOverlapCheckpointFunctions; //ã‚¤ãƒ™ãƒ³ãƒˆé–¢æ•°é…åˆ—
 };

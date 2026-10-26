@@ -1,5 +1,6 @@
-//--------------------------------------------------------
-//ƒ\[ƒh‚ÌUŒ‚ƒRƒ“ƒ|[ƒlƒ“ƒg(UŒ‚”»’è‚Ì‚İw’è‚ÌˆÊ’u‚É’u‚­)
+ï»¿//--------------------------------------------------------
+//ã‚½ãƒ¼ãƒ‰ã®æ”»æ’ƒã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ(æ”»æ’ƒåˆ¤å®šã®ã¿æŒ‡å®šã®ä½ç½®ã«ç½®ã)
+// æ‹…å½“æ—¥é«™
 //--------------------------------------------------------
 
 #pragma once
@@ -11,7 +12,7 @@
 
 class USphereComponent;
 
-//ƒNƒ‰ƒX‚Ìƒƒ“ƒoŠÖ”‚ğƒmƒCƒYƒCƒxƒ“ƒg‚ÌƒR[ƒ‹ƒoƒbƒN‚É‚·‚é‚Æ‚«‚Ìƒ}ƒNƒ
+//ã‚¯ãƒ©ã‚¹ã®ãƒ¡ãƒ³ãƒé–¢æ•°ã‚’ãƒã‚¤ã‚ºã‚¤ãƒ™ãƒ³ãƒˆã®ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯ã«ã™ã‚‹ã¨ãã®ãƒã‚¯ãƒ­
 #define CreateSwingEndCallback(_func) std::bind(&_func, this)
 
 
@@ -33,32 +34,32 @@ public:
 	// OnRegister
 	virtual void OnRegister()override;
 public:
-	//Õ“Ë‘ÎÛ‚Ì’Ç‰Á
+	//è¡çªå¯¾è±¡ã®è¿½åŠ 
 	void SetProfileName(const FName _name);
-	//Õ“Ë‘ÎÛ‚ÌƒNƒŠƒA
+	//è¡çªå¯¾è±¡ã®ã‚¯ãƒªã‚¢
 	void ClearCollisionObjectType();
-	//Œ•‚ÌUŒ‚”ÍˆÍ‚Ì‘å‚«‚³w’è
+	//å‰£ã®æ”»æ’ƒç¯„å›²ã®å¤§ãã•æŒ‡å®š
 	void SetSwordAttackScale(const float& _radius);
-	//‘±ŠÔİ’è
+	//æŒç¶šæ™‚é–“è¨­å®š
 	void SetAttackTime(const float& _time);
-	//ƒmƒbƒNƒoƒbƒN‚Ì‘å‚«‚³“o˜^
+	//ãƒãƒƒã‚¯ãƒãƒƒã‚¯ã®å¤§ãã•ç™»éŒ²
 	void SetKnockBackValu(const float& _knockBackValu) { m_KnockBackValu = _knockBackValu; }
-	//ƒmƒbƒNƒoƒbƒN‚Ì‘å‚«‚³æ“¾
+	//ãƒãƒƒã‚¯ãƒãƒƒã‚¯ã®å¤§ãã•å–å¾—
 	float GetKnockBackValu()const { return m_KnockBackValu; }
-	//ƒ_ƒ[ƒWæ“¾
+	//ãƒ€ãƒ¡ãƒ¼ã‚¸å–å¾—
 
-	//Œ•‚ğU‚é
-	//ˆø”Fƒ_ƒ[ƒW,”»’è‘±ŠÔ,”¼Œa,
-	//UŒ‚“ñ’i–Ú‚È‚Ç‚É‘Î‰‚Å‚«‚é‚æ‚¤ƒI[ƒo[ƒ[ƒh‚à—pˆÓ
-	//ˆø”–³‚µ‚Í–‘O‚Éİ’è‚µ‚½’l‚ğg‚¤
+	//å‰£ã‚’æŒ¯ã‚‹
+	//å¼•æ•°ï¼šãƒ€ãƒ¡ãƒ¼ã‚¸,åˆ¤å®šæŒç¶šæ™‚é–“,åŠå¾„,
+	//æ”»æ’ƒäºŒæ®µç›®ãªã©ã«å¯¾å¿œã§ãã‚‹ã‚ˆã†ã‚ªãƒ¼ãƒãƒ¼ãƒ­ãƒ¼ãƒ‰ã‚‚ç”¨æ„
+	//å¼•æ•°ç„¡ã—ã¯äº‹å‰ã«è¨­å®šã—ãŸå€¤ã‚’ä½¿ã†
 	void Swinging(const int& _damage, const FVector& _location, const float& _radius, const float& _attackTime, const bool& _bSneakKill);
 	void Swinging(const bool& _bSneakKill);
 	
-	//”CˆÓ‚Ìƒ^ƒCƒ~ƒ“ƒO‚Å~‚èI‚í‚ç‚¹‚ç‚ê‚é‚æ‚¤‚É‚·‚é
-	//ƒ_ƒ[ƒW‚­‚ç‚Á‚½‚È‚Ç
+	//ä»»æ„ã®ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§é™ã‚Šçµ‚ã‚ã‚‰ã›ã‚‰ã‚Œã‚‹ã‚ˆã†ã«ã™ã‚‹
+	//ãƒ€ãƒ¡ãƒ¼ã‚¸ãã‚‰ã£ãŸæ™‚ãªã©
 	void SwingEnd();
 
-	//Œ•‚ÌUŒ‚”»’è—pƒRƒŠƒWƒ‡ƒ“‚ÆÕ“Ë‚µ‚½uŠÔ‚ÌƒCƒxƒ“ƒgŠÖ”
+	//å‰£ã®æ”»æ’ƒåˆ¤å®šç”¨ã‚³ãƒªã‚¸ãƒ§ãƒ³ã¨è¡çªã—ãŸç¬é–“ã®ã‚¤ãƒ™ãƒ³ãƒˆé–¢æ•°
 	UFUNCTION()
 	void OnSwordBeginOverlap(
 		UPrimitiveComponent* OverlappedComp,
@@ -69,21 +70,21 @@ public:
 		const FHitResult& SweepResult
 	);
 		
-	//Œ•‚ğU‚èI‚í‚Á‚½‚±‚Æ’Ê’m—pƒR[ƒ‹ƒoƒbƒNŠÖ”“o˜^
+	//å‰£ã‚’æŒ¯ã‚Šçµ‚ã‚ã£ãŸã“ã¨é€šçŸ¥ç”¨ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°ç™»éŒ²
 	void RegisterSwingEndCallback(const std::function<void()>& func);
 
 private:
-	//Œ•‚ğU‚èI‚í‚Á‚½‚±‚Æ’Ê’m—pƒR[ƒ‹ƒoƒbƒNŠÖ”
+	//å‰£ã‚’æŒ¯ã‚Šçµ‚ã‚ã£ãŸã“ã¨é€šçŸ¥ç”¨ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°
 	std::function<void()> m_swingEndCallback;
 
 	UPROPERTY(VisibleAnywhere, Category = "SwordCollision")
-	USphereComponent* m_swordCollision;	//Œ•‚ÌUŒ‚”»’è—pƒRƒŠƒWƒ‡ƒ“
+	USphereComponent* m_swordCollision;	//å‰£ã®æ”»æ’ƒåˆ¤å®šç”¨ã‚³ãƒªã‚¸ãƒ§ãƒ³
 
-	int m_damage;						//—^‚¦‚éƒ_ƒ[ƒW
-	float m_radius;						//UŒ‚”ÍˆÍ‚Ì‘å‚«‚³
-	float m_timer;						//‘±ŠÔƒ^ƒCƒ}[
-	float m_swingEndTime;				//Œ•‚ğU‚èI‚í‚éŠÔ
-	bool m_bSneakKill;					//ƒXƒj[ƒNƒLƒ‹‚©‚Ç‚¤‚©
-	bool m_bIsSwinging;                 //Œ•‚ğU‚Á‚Ä‚¢‚éÅ’†‚©‚Ç‚¤‚©
-	float m_KnockBackValu;              //ƒmƒbƒNƒoƒbƒN‚Ì‘å‚«‚³
+	int m_damage;						//ä¸ãˆã‚‹ãƒ€ãƒ¡ãƒ¼ã‚¸
+	float m_radius;						//æ”»æ’ƒç¯„å›²ã®å¤§ãã•
+	float m_timer;						//æŒç¶šæ™‚é–“ã‚¿ã‚¤ãƒãƒ¼
+	float m_swingEndTime;				//å‰£ã‚’æŒ¯ã‚Šçµ‚ã‚ã‚‹æ™‚é–“
+	bool m_bSneakKill;					//ã‚¹ãƒ‹ãƒ¼ã‚¯ã‚­ãƒ«ã‹ã©ã†ã‹
+	bool m_bIsSwinging;                 //å‰£ã‚’æŒ¯ã£ã¦ã„ã‚‹æœ€ä¸­ã‹ã©ã†ã‹
+	float m_KnockBackValu;              //ãƒãƒƒã‚¯ãƒãƒƒã‚¯ã®å¤§ãã•
 };

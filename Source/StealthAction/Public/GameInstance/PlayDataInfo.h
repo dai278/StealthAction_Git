@@ -1,50 +1,51 @@
+ï»¿//æ‹…å½“æ—¥é«™
 #pragma once
 #include "CoreMinimal.h"
 #include "PlayDataInfo.generated.h"
 
-//ƒvƒŒƒCƒ„[\‘¢‘½
+//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ§‹é€ å¤š
 USTRUCT(BlueprintType)
 struct FPlayerInfo
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	int32 hp = 30; // ‘Ì—Í
+	int32 hp = 30; // ä½“åŠ›
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	bool isAlive = true; // ¶‘¶‚µ‚Ä‚¢‚é‚©
+	bool isAlive = true; // ç”Ÿå­˜ã—ã¦ã„ã‚‹ã‹
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	bool bIsGetKeyItem = false; // Œ®ƒAƒCƒeƒ€‚ğæ“¾‚µ‚Ä‚¢‚é‚©
+	bool bIsGetKeyItem = false; // éµã‚¢ã‚¤ãƒ†ãƒ ã‚’å–å¾—ã—ã¦ã„ã‚‹ã‹
 };
 
-//ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒg\‘¢‘Ì
+//ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆæ§‹é€ ä½“
 USTRUCT(BlueprintType)
 struct FCheckpointInfo
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	bool bHasCheckpoint = false; // ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒg‚ğg—p‚·‚é‚©
+	bool bHasCheckpoint = false; // ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆã‚’ä½¿ç”¨ã™ã‚‹ã‹
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	FName LevelName; // ƒŒƒxƒ‹‚Ì–¼‘O
+	FName LevelName; // ãƒ¬ãƒ™ãƒ«ã®åå‰
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
 	int32 Index=-1; // ID
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	FVector Location = FVector::ZeroVector;//ˆÊ’u
+	FVector Location = FVector::ZeroVector;//ä½ç½®
 };
 
-//ƒGƒlƒ~[î•ñ\‘¢‘Ì
+//ã‚¨ãƒãƒŸãƒ¼æƒ…å ±æ§‹é€ ä½“
 USTRUCT(BlueprintType)
 struct FEnemyInfo
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	int32 index=-1;//ƒGƒlƒ~[ƒCƒ“ƒfƒbƒNƒX
+	int32 index=-1;//ã‚¨ãƒãƒŸãƒ¼ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
 	int32 hp=100;
@@ -62,17 +63,17 @@ struct FPlayDataInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	FPlayerInfo PlayerInfo; // ƒvƒŒƒCƒ„[î•ñ
+	FPlayerInfo PlayerInfo; // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æƒ…å ±
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
 	TArray<FEnemyInfo> EnemyInfo;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	FCheckpointInfo LastCheckpointInfo; // ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒgî•ñ
+	FCheckpointInfo LastCheckpointInfo; // ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆæƒ…å ±
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	TArray<FName> ClearLevelNames; // ƒNƒŠƒA‚µ‚½ƒŒƒxƒ‹–¼
+	TArray<FName> ClearLevelNames; // ã‚¯ãƒªã‚¢ã—ãŸãƒ¬ãƒ™ãƒ«å
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayData")
-	bool IsContinued = false; // ƒRƒ“ƒeƒjƒ…[‚µ‚½‚©‚Ç‚¤‚©
+	bool IsContinued = false; // ã‚³ãƒ³ãƒ†ãƒ‹ãƒ¥ãƒ¼ã—ãŸã‹ã©ã†ã‹
 };

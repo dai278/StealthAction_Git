@@ -1,5 +1,6 @@
-// -------------------------------------
-//@‰¹‚ğŠ´’m‚·‚éƒRƒ“ƒ|[ƒlƒ“ƒg
+ï»¿// -------------------------------------
+//ã€€éŸ³ã‚’æ„ŸçŸ¥ã™ã‚‹ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
+// æ‹…å½“æ—¥é«™
 // -------------------------------------
 
 #pragma once
@@ -9,7 +10,7 @@
 #include "Components/ActorComponent.h"
 #include "NoiseListenerComponent.generated.h"
 
-//ƒNƒ‰ƒX‚Ìƒƒ“ƒoŠÖ”‚ğƒmƒCƒYƒCƒxƒ“ƒg‚ÌƒR[ƒ‹ƒoƒbƒN‚É‚·‚é‚Æ‚«‚Ìƒ}ƒNƒ
+//ã‚¯ãƒ©ã‚¹ã®ãƒ¡ãƒ³ãƒé–¢æ•°ã‚’ãƒã‚¤ã‚ºã‚¤ãƒ™ãƒ³ãƒˆã®ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯ã«ã™ã‚‹ã¨ãã®ãƒã‚¯ãƒ­
 #define CreateNoiseEventCallback(_func) std::bind(&_func, this, std::placeholders::_1, std::placeholders::_2)
 
 
@@ -33,17 +34,17 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	//ƒR[ƒ‹ƒoƒbƒNŠÖ”‚Ì“o˜^
+	//ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°ã®ç™»éŒ²
 	void SetCallBackFunction(const std::function<void(const int& _noiseVolume, const FVector& _posconst )>& _callbackFunc);
 	
-	//ƒR[ƒ‹ƒoƒbƒNŠÖ”‚ÌŒÄ‚Ño‚µ
+	//ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°ã®å‘¼ã³å‡ºã—
 	void OnNoiseHeard(const int& _noiseVolume, const FVector& _pos);
 
 	//EndPlay
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 private:
-	//ƒR[ƒ‹ƒoƒbƒNŠÖ”
-	//‚È‚Á‚½uŠÔ
+	//ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°
+	//ãªã£ãŸç¬é–“
 	std::function<void(const int& _noiseVolume, const FVector& _pos)> m_callBackFunc;	
 
 	

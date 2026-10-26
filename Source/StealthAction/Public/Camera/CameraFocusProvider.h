@@ -1,3 +1,4 @@
+ï»¿//æ‹…å½“æ—¥é«™
 #pragma once
 
 #include "CoreMinimal.h"
@@ -19,41 +20,41 @@ struct FCameraFocusData
     GENERATED_BODY()
 
  
-    // ƒMƒ~ƒbƒN‚²‚Æ‚É’u‚­ƒJƒƒ‰
+    // ã‚®ãƒŸãƒƒã‚¯ã”ã¨ã«ç½®ãã‚«ãƒ¡ãƒ©
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TObjectPtr<class ACameraActor> FocusCamera = nullptr;
 
 
-    // •âŠÔŠÔ
+    // è£œé–“æ™‚é–“
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float BlendTime = 10.f;
 
-	// –ß‚é‚Æ‚«‚Ì•âŠÔŠÔ
+	// æˆ»ã‚‹ã¨ãã®è£œé–“æ™‚é–“
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float BlendOutTime = 0.3f;
 
-	// ˆÊ’u‚ğ‹­§“I‚É‡‚í‚¹‚é‚©
+	// ä½ç½®ã‚’å¼·åˆ¶çš„ã«åˆã‚ã›ã‚‹ã‹
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bForceLocation = false;
 
-    // ‹­§“I‚É‰ñ“]‚³‚¹‚é‚©
+    // å¼·åˆ¶çš„ã«å›è»¢ã•ã›ã‚‹ã‹
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool bForceRotation = false;
 
-    //@ˆê’â~‚·‚é‚©
+    //ã€€ä¸€æ™‚åœæ­¢ã™ã‚‹ã‹
     UPROPERTY(EditAnywhere,BlueprintReadWrite)
     bool bPause=false;
 
-    //ƒ|[ƒYŠÔ
+    //ãƒãƒ¼ã‚ºæ™‚é–“
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float PauseTime = 5.f;
 
-	//Šª‚«–ß‚µƒgƒŠƒK[‚Ìƒ^ƒCƒv
+	//å·»ãæˆ»ã—ãƒˆãƒªã‚¬ãƒ¼ã®ã‚¿ã‚¤ãƒ—
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ERewindTriggerType RewindTriggerType = ERewindTriggerType::TimedAuto;
 };
 
-// “®“IƒfƒŠƒQ[ƒg‚ÌéŒ¾—á
+// å‹•çš„ãƒ‡ãƒªã‚²ãƒ¼ãƒˆã®å®£è¨€ä¾‹
 DECLARE_DYNAMIC_DELEGATE_OneParam(FObtainedDynamicDelegate, FCameraFocusData, _cameraFocusData);
 
 
@@ -69,7 +70,7 @@ class ICameraFocusProvider
 
 public:
 
-    // ƒJƒƒ‰ƒtƒH[ƒJƒX—p‚Ìî•ñ‚ğ•Ô‚·
+    // ã‚«ãƒ¡ãƒ©ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ç”¨ã®æƒ…å ±ã‚’è¿”ã™
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Camera")
     FCameraFocusData GetCameraFocusData() const;
 

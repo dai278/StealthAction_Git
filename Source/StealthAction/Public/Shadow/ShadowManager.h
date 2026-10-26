@@ -1,5 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+//æ‹…å½“æ—¥é«™ã€€ä»•æ§˜å¤‰æ›´ã«ã‚ˆã‚Šä½¿ç”¨ã—ã¦ã„ãªã„
 #pragma once
 
 #include "CoreMinimal.h"
@@ -9,7 +9,7 @@
 /**
  * 
  */
- // ‘O•û‘OŒ¾
+ // å‰æ–¹å‰è¨€
 class UShadowComponent;
 class UShadowTraversalComponent;
 
@@ -24,18 +24,18 @@ public:
 	//BeginPlay
 	virtual void OnWorldBeginPlay(UWorld&)override;
 
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	UShadowManager();
 
 public:
 
-	//ƒ‰ƒCƒg‚ğ‰e‚Éİ’è‚·‚é
+	//ãƒ©ã‚¤ãƒˆã‚’å½±ã«è¨­å®šã™ã‚‹
 	void AllLinkLights();
 
-	// ‰eƒRƒ“ƒ|[ƒlƒ“ƒg‚ğ’Ç‰Á
+	// å½±ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’è¿½åŠ 
 	void AddShadowComponent(UShadowComponent* _pShadowComponent);
 
 private:
-	//‰e‚ğŠÇ—‚·‚é“ñd”z—ñƒ‰ƒCƒgƒCƒ“ƒfƒbƒNƒX‚²‚Æ‚É•ª‚¯‚é
+	//å½±ã‚’ç®¡ç†ã™ã‚‹äºŒé‡é…åˆ—ãƒ©ã‚¤ãƒˆã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã”ã¨ã«åˆ†ã‘ã‚‹
 	TArray<TArray<TWeakObjectPtr<UShadowComponent>>> m_shadows;
 };

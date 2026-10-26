@@ -1,12 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+//æ‹…å½“æ—¥é«™
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "ExtendedSpotLightManager.generated.h"
 
-//‘O•ûéŒ¾
+//å‰æ–¹å®£è¨€
 class AExtendedSpotLight;
 
 /**
@@ -21,15 +21,15 @@ public:
 	//BeginPlay
 	virtual void OnWorldBeginPlay(UWorld&)override;
 
-	//ƒ‰ƒCƒg‚Ì’Ç‰Á
+	//ãƒ©ã‚¤ãƒˆã®è¿½åŠ 
 	void AddLight(AExtendedSpotLight* _pLight);
-	//íœ
+	//å‰Šé™¤
 	void UnRegisterLight(AExtendedSpotLight* _pLight);
 
-	//ƒ‰ƒCƒg‚Ìæ“¾
+	//ãƒ©ã‚¤ãƒˆã®å–å¾—
 	AExtendedSpotLight* GetLight(const int32 _lightIndex);
 
-	//light‚ÌÕ“Ëƒ`ƒFƒbƒN
+	//lightã®è¡çªãƒã‚§ãƒƒã‚¯
 	bool IsHitAllLight(const FVector& _pos)const;
 	bool IsHitEnemyLight(const FVector& _pos)const;
 	bool IsHitShadowDrawLight(const FVector& _pos)const;
@@ -38,10 +38,10 @@ public:
 
 	void OnRotateTargetAngleStop(const int32& _index);
 protected:
-	//ƒŒƒxƒ‹ã‚Ìƒ‰ƒCƒg‚ğŠÇ—‚·‚é
+	//ãƒ¬ãƒ™ãƒ«ä¸Šã®ãƒ©ã‚¤ãƒˆã‚’ç®¡ç†ã™ã‚‹
 	UPROPERTY(Transient)
 	TArray <AExtendedSpotLight*> m_pLights;
-	//“G‚Ìƒ‰ƒCƒg
+	//æ•µã®ãƒ©ã‚¤ãƒˆ
 	UPROPERTY(Transient)
 	TArray <AExtendedSpotLight*> m_pEnemyLights;
 

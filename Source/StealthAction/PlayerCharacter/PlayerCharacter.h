@@ -1,16 +1,15 @@
-//----------------------------------------------------------
-// ŠT—v				FƒvƒŒƒCƒ„[ƒLƒƒƒ‰‚ğ§Œä‚·‚éCharacterƒIƒuƒWƒFƒNƒg
-// XV“ú@@@@ @F11/19@
+ï»¿//----------------------------------------------------------
+// æ¦‚è¦				ï¼šãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚­ãƒ£ãƒ©ã‚’åˆ¶å¾¡ã™ã‚‹Characterã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+// æ›´æ–°æ—¥ã€€ã€€ã€€ã€€ ã€€ï¼š11/19ã€€ æ‹…å½“æ—¥é«™
 //----------------------------------------------------------
 
-//BP‚Åg‚¦‚é‚©‚Í“úûü‚Ì“Æ’f‚Æ•ÎŒ©‚ÅŒˆ‚ß‚é‚Ì‚ÅŒã‚Å•K—v‚É‰‚¶‚Ä•ÏX‚µ‚Ä—Ç‚µ
-//ƒJƒƒ‰‚Æ•½sˆÚ“®‚ÌÅ’áŒÀ‚­‚ç‚¢‚µ‚©‘‚«‚Ü‚¹‚ñ
+
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "GameInstance/PlayDataInfo.h"//ƒvƒŒƒCƒf[ƒ^\‘¢‘Ì‚ª•¡”‚ ‚é‚à‚ÌPlayerInfo‚Ì‚İg—p
+#include "GameInstance/PlayDataInfo.h"//ãƒ—ãƒ¬ã‚¤ãƒ‡ãƒ¼ã‚¿æ§‹é€ ä½“ãŒè¤‡æ•°ã‚ã‚‹ã‚‚ã®PlayerInfoã®ã¿ä½¿ç”¨
 #include "Damage/IDamage.h"
 #include "Camera/CameraInfo.h"
 #include "State/Player/PlayerStatus.h"
@@ -19,7 +18,7 @@
 
 class UPlayerStateBase;
 
-//‘O•ûéŒ¾
+//å‰æ–¹å®£è¨€
 class USpringArmComponent;
 class UCameraComponent;
 class UMaterialParamenterCooection;
@@ -29,8 +28,8 @@ struct FInputActionValue;
 class UPrimitiveComponent;
 class UNoiseListenerComponent;
 class AEnemyBase;
-class USwordAttackComponent;//ƒ\[ƒhUŒ‚ƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì‘O•ûéŒ¾
-class UCameraFocusDirectorComponent;//ƒJƒƒ‰ƒtƒH[ƒJƒXƒfƒBƒŒƒNƒ^[ƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì‘O•ûéŒ¾
+class USwordAttackComponent;//ã‚½ãƒ¼ãƒ‰æ”»æ’ƒã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã®å‰æ–¹å®£è¨€
+class UCameraFocusDirectorComponent;//ã‚«ãƒ¡ãƒ©ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ãƒ‡ã‚£ãƒ¬ã‚¯ã‚¿ãƒ¼ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã®å‰æ–¹å®£è¨€
 class AInteract;
 class UPlayerStateMachine;
 class UPlayerStateBase;
@@ -45,38 +44,38 @@ class UPlayerDeadState;
 class UPlayerInteractState;
 class UPlayerInteractAnimationState;
 
-//ƒvƒŒƒCƒ„[‚ÌƒJƒƒ‰‹“_ó‘Ô
-//enum class‚ÍƒNƒ‰ƒXŠO‚É‘‚©‚È‚¢‚Æ‚¢‚¯‚È‚¢‚ç‚µ‚¢‚µA‚±‚Ì‘‚«•û‚ª—Ç‚¢‚ç‚µ‚¢
-//ˆÃEƒV[ƒ“‚Æ‚©ƒJƒƒ‰•Ï‚¦‚é‚©‚à‚µ‚ê‚È‚¢‚©‚ç¡‚Í2í‚µ‚©‚È‚¢‚¯‚Çenum‚Å
+//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ã‚«ãƒ¡ãƒ©è¦–ç‚¹çŠ¶æ…‹
+//enum classã¯ã‚¯ãƒ©ã‚¹å¤–ã«æ›¸ã‹ãªã„ã¨ã„ã‘ãªã„ã‚‰ã—ã„ã—ã€ã“ã®æ›¸ãæ–¹ãŒè‰¯ã„ã‚‰ã—ã„
+//æš—æ®ºã‚·ãƒ¼ãƒ³ã¨ã‹ã‚«ãƒ¡ãƒ©å¤‰ãˆã‚‹ã‹ã‚‚ã—ã‚Œãªã„ã‹ã‚‰ä»Šã¯2ç¨®ã—ã‹ãªã„ã‘ã©enumã§
 UENUM(BlueprintType)
 enum class ECameraStatus : uint8
 {
-	ThirdPerson      UMETA(DisplayName = "Third Person"),//OlÌ
-	TopDownView      UMETA(DisplayName = "Top Down View"),//˜ëáÕ
-	InShadow		UMETA(DisplayName = "InShadow"),//‰e
-	Crouch			UMETA(DisplayName = "Crouch"),//‚µ‚á‚ª‚İ
-	Dash			UMETA(DisplayName = "Dash"),//ƒ_ƒbƒVƒ…
-	SneakKill		UMETA(DisplayName = "SneakKill"),//ˆÃE
-	Num			 UMETA(DisplayName = "Num")//”Œv‘ª—pAUMETA(DisplayName = "Num")‚ª•K—v‚©‚í‚©‚ç‚È‚¢‚¯‚Ç‘‚©‚È‚¢ƒoƒO‚è‚»‚¤‚È‹C‚ª‚µ‚½‚©‚ç‘‚¢‚Ä‚Ü‚·
+	ThirdPerson      UMETA(DisplayName = "Third Person"),//ä¸‰äººç§°
+	TopDownView      UMETA(DisplayName = "Top Down View"),//ä¿¯ç°
+	InShadow		UMETA(DisplayName = "InShadow"),//å½±
+	Crouch			UMETA(DisplayName = "Crouch"),//ã—ã‚ƒãŒã¿
+	Dash			UMETA(DisplayName = "Dash"),//ãƒ€ãƒƒã‚·ãƒ¥
+	SneakKill		UMETA(DisplayName = "SneakKill"),//æš—æ®º
+	Num			 UMETA(DisplayName = "Num")//æ•°è¨ˆæ¸¬ç”¨ã€UMETA(DisplayName = "Num")ãŒå¿…è¦ã‹ã‚ã‹ã‚‰ãªã„ã‘ã©æ›¸ã‹ãªã„ãƒã‚°ã‚Šãã†ãªæ°—ãŒã—ãŸã‹ã‚‰æ›¸ã„ã¦ã¾ã™
 };
 
 
-//ˆÃEŠJnƒCƒxƒ“ƒgƒfƒBƒXƒpƒbƒ`ƒƒ[
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSneakKillStarted); // ˆø”‚È‚µ—á
+//æš—æ®ºé–‹å§‹ã‚¤ãƒ™ãƒ³ãƒˆãƒ‡ã‚£ã‚¹ãƒ‘ãƒƒãƒãƒ£ãƒ¼
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSneakKillStarted); // å¼•æ•°ãªã—ä¾‹
 
-//‰e‚É“ü‚Á‚½‚Æo‚½‚Ì’Ê’m
+//å½±ã«å…¥ã£ãŸæ™‚ã¨å‡ºãŸæ™‚ã®é€šçŸ¥
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerEnteredShadow);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerExitedShadow);
 
 UCLASS()
 class STEALTHACTION_API APlayerCharacter : public ACharacter,public IDamageable
 {
-	////ƒJƒƒ‰‹“_İ’è\‘¢‘Ì
+	////ã‚«ãƒ¡ãƒ©è¦–ç‚¹è¨­å®šæ§‹é€ ä½“
 	//struct FCameraViewSetting
 	//{
-	//	FRotator rotator;//‰ñ“]
-	//	float fieldOfView;//‹–ìŠp
-	//	float springArmLength;//’·‚³
+	//	FRotator rotator;//å›è»¢
+	//	float fieldOfView;//è¦–é‡è§’
+	//	float springArmLength;//é•·ã•
 	//};
 
 	GENERATED_BODY()
@@ -96,35 +95,35 @@ class STEALTHACTION_API APlayerCharacter : public ACharacter,public IDamageable
 
 public:
 
-	//UŒ‚ŠJnƒR[ƒ‹ƒoƒbƒN
-// BP‘¤‚ÅƒCƒxƒ“ƒg‚ğ’Ç‰Á‚Å‚«‚éiAdd Event / Bindj
+	//æ”»æ’ƒé–‹å§‹ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯
+// BPå´ã§ã‚¤ãƒ™ãƒ³ãƒˆã‚’è¿½åŠ ã§ãã‚‹ï¼ˆAdd Event / Bindï¼‰
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnSneakKillStarted OnSneakKillStarted;
 
-	//‰e‚É“ü‚Á‚½
+	//å½±ã«å…¥ã£ãŸæ™‚
 	UPROPERTY(BlueprintAssignable, Category = "Events|Shadow")
 	FOnPlayerEnteredShadow OnEnteredShadow;
 
-	//‰e‚©‚ço‚½
+	//å½±ã‹ã‚‰å‡ºãŸæ™‚
 	UPROPERTY(BlueprintAssignable, Category = "Events|Shadow")
 	FOnPlayerExitedShadow OnExitedShadow;
 
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	APlayerCharacter();
 
 protected:
-	//ƒQ[ƒ€ƒXƒ^[ƒg–”‚Í¶¬ŒÄ‚Î‚ê‚é‰Šú‰»ˆ—
+	//ã‚²ãƒ¼ãƒ ã‚¹ã‚¿ãƒ¼ãƒˆåˆã¯ç”Ÿæˆæ™‚å‘¼ã°ã‚Œã‚‹åˆæœŸåŒ–å‡¦ç†
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-	// XV
+	// æ›´æ–°
 	virtual void Tick(float _deltaTime) override;
 
-	// Še“ü—ÍŠÖŒWƒƒ\ƒbƒh‚Æ‚ÌƒoƒCƒ“ƒhˆ—
+	// å„å…¥åŠ›é–¢ä¿‚ãƒ¡ã‚½ãƒƒãƒ‰ã¨ã®ãƒã‚¤ãƒ³ãƒ‰å‡¦ç†
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	//Õ“Ë‚µ‚½uŠÔ‚ÌƒCƒxƒ“ƒgŠÖ”
+	//è¡çªã—ãŸç¬é–“ã®ã‚¤ãƒ™ãƒ³ãƒˆé–¢æ•°
 	UFUNCTION()
 	void OnBeginOverlap(
 		UPrimitiveComponent* OverlappedComponent,
@@ -135,7 +134,7 @@ public:
 		const FHitResult& SweepResult
 	);
 
-	//Õ“Ë‚ªI‚í‚Á‚½uŠÔ‚ÌƒCƒxƒ“ƒgŠÖ”
+	//è¡çªãŒçµ‚ã‚ã£ãŸç¬é–“ã®ã‚¤ãƒ™ãƒ³ãƒˆé–¢æ•°
 	UFUNCTION()
 	void OnEndOverlap(
 		UPrimitiveComponent* OverlappedComponent,
@@ -149,56 +148,56 @@ public:
 
 	// PlayerCharacter.h
 	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
-	void OnSneakKillStarted_BP();   // BP‚Å’†g‚ğ‘‚­
+	void OnSneakKillStarted_BP();   // BPã§ä¸­èº«ã‚’æ›¸ã
 
-	// ƒLƒ‹ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌƒJƒƒ‰§Œä•ÏXƒCƒxƒ“ƒg
+	// ã‚­ãƒ«ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ã‚«ãƒ¡ãƒ©åˆ¶å¾¡å¤‰æ›´ã‚¤ãƒ™ãƒ³ãƒˆ
 	UFUNCTION(BlueprintCallable, Category = "Camera")
 	void SetEventCameraChange(FCameraViewSetting _viewSetting);   
 	
-	//ƒ_ƒ[ƒWˆ—
+	//ãƒ€ãƒ¡ãƒ¼ã‚¸å‡¦ç†
 	void OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakKill)override;
 
 private:
-	//ƒJƒƒ‰XV
+	//ã‚«ãƒ¡ãƒ©æ›´æ–°
 	void UpdateCamera(float _deltaTime);
 
-	//ƒJƒƒ‰èU‚ê•â³XVˆ—
+	//ã‚«ãƒ¡ãƒ©æ‰‹æŒ¯ã‚Œè£œæ­£æ›´æ–°å‡¦ç†
 	void UpdateCameraShake(float _deltaTime);
 
-	//ƒJƒƒ‰ƒRƒŠƒWƒ‡ƒ“”»’èˆ—
+	//ã‚«ãƒ¡ãƒ©ã‚³ãƒªã‚¸ãƒ§ãƒ³åˆ¤å®šå‡¦ç†
 	void UpdateCameraCollision();
 
-	//ƒJƒƒ‰‹“_Ø‚è‘Ö‚¦
+	//ã‚«ãƒ¡ãƒ©è¦–ç‚¹åˆ‡ã‚Šæ›¿ãˆ
 	void ViewpointSwitching(float _deltaTime);
 	const FCameraViewSetting& GetCameraViewSetting() const;
 
 private:
 
-	//‘«Œ³À•W‚Ìæ“¾
+	//è¶³å…ƒåº§æ¨™ã®å–å¾—
 	FVector GetFeetLocation()const;
 
 public:
 
-	//UŒ‚I—¹ƒR[ƒ‹ƒoƒbƒN
+	//æ”»æ’ƒçµ‚äº†ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void OnAttackEnd();
 
 	
-	//ƒJƒƒ‰ƒtƒH[ƒJƒXŠJnˆ—
+	//ã‚«ãƒ¡ãƒ©ãƒ•ã‚©ãƒ¼ã‚«ã‚¹é–‹å§‹å‡¦ç†
 	UFUNCTION( Category = "Camera")
 	void StartCameraFocus(AActor* const _cameraActor, float _blendTime);
 
-	//ƒJƒƒ‰ƒtƒH[ƒJƒXI—¹ˆ—
+	//ã‚«ãƒ¡ãƒ©ãƒ•ã‚©ãƒ¼ã‚«ã‚¹çµ‚äº†å‡¦ç†
 	void EndCameraFocus(const float& _blendTime);
 
-	//¶‚«‚Ä‚¢‚é‚©
+	//ç”Ÿãã¦ã„ã‚‹ã‹
 	UFUNCTION(BlueprintPure, Category = "Info")
 	bool IsAlive() const { return m_playerInfo.isAlive; }
 
 	UFUNCTION(BlueprintPure, Category = "state")
 	UPlayerStateBase* GetPlayerState() const;
 
-	//Œ»İƒXƒe[ƒg‚ÌAnimBP—p‚Ìó‘Ôæ“¾
+	//ç¾åœ¨ã‚¹ãƒ†ãƒ¼ãƒˆã®AnimBPç”¨ã®çŠ¶æ…‹å–å¾—
 	UFUNCTION(BlueprintPure, Category = "state")
 	EPlayerStatus GetPlayerStatus() const;
 
@@ -225,108 +224,108 @@ public:
 
 	bool CanReceivePlayerInput() const;
 
-	//HPæ“¾
+	//HPå–å¾—
 	int32 GetPlayerHP() const { return m_playerInfo.hp; }
 
 protected:
-	//---“ü—Í—p---
-	// Enhanced Input ŠÖ”
-	void Enhanced_Move(const FInputActionValue& Value);		//ˆÚ“®	
+	//---å…¥åŠ›ç”¨---
+	// Enhanced Input é–¢æ•°
+	void Enhanced_Move(const FInputActionValue& Value);		//ç§»å‹•	
 	void Enhanced_EndMove(const FInputActionValue& Value);
-	void Enhanced_OnInputDash(const FInputActionValue& Value);//ƒ_ƒbƒVƒ…“ü—ÍŠJn
-	void Enhanced_EndInputDash(const FInputActionValue& Value);//ƒ_ƒbƒVƒ…“ü—ÍI—¹
+	void Enhanced_OnInputDash(const FInputActionValue& Value);//ãƒ€ãƒƒã‚·ãƒ¥å…¥åŠ›é–‹å§‹
+	void Enhanced_EndInputDash(const FInputActionValue& Value);//ãƒ€ãƒƒã‚·ãƒ¥å…¥åŠ›çµ‚äº†
 
-	void Enhanced_MoveCrouch(const FInputActionValue& Value);		//‚µ‚á‚ª‚İ
-	void Enhanced_MoveJump(const FInputActionValue& Value);			//ƒWƒƒƒ“ƒv
-	void Enhanced_Attack(const FInputActionValue& Value);			//UŒ‚
-	void Enhanced_InShadow(const FInputActionValue& Value);			//‰eö‚è
-	void Enhanced_changeWeapon(const FInputActionValue& Value);		//•Ší•ÏX
-	void Enhanced_Interact(const FInputActionValue& Value);			//ƒCƒ“ƒ^ƒ‰ƒNƒg
+	void Enhanced_MoveCrouch(const FInputActionValue& Value);		//ã—ã‚ƒãŒã¿
+	void Enhanced_MoveJump(const FInputActionValue& Value);			//ã‚¸ãƒ£ãƒ³ãƒ—
+	void Enhanced_Attack(const FInputActionValue& Value);			//æ”»æ’ƒ
+	void Enhanced_InShadow(const FInputActionValue& Value);			//å½±æ½œã‚Š
+	void Enhanced_changeWeapon(const FInputActionValue& Value);		//æ­¦å™¨å¤‰æ›´
+	void Enhanced_Interact(const FInputActionValue& Value);			//ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆ
 
-	void Enhanced_CameraPitch(const FInputActionValue& Value);		//ƒJƒƒ‰ƒsƒbƒ`
-	void Enhanced_CameraYaw(const FInputActionValue& Value);		//ƒJƒƒ‰ƒˆ[
-	void Enhanced_CameraReset(const FInputActionValue& Value);		//ƒJƒƒ‰ƒŠƒZƒbƒg
-	void Enhanced_CameraSwitch(const FInputActionValue& Value);		//‹“_•ÏX
+	void Enhanced_CameraPitch(const FInputActionValue& Value);		//ã‚«ãƒ¡ãƒ©ãƒ”ãƒƒãƒ
+	void Enhanced_CameraYaw(const FInputActionValue& Value);		//ã‚«ãƒ¡ãƒ©ãƒ¨ãƒ¼
+	void Enhanced_CameraReset(const FInputActionValue& Value);		//ã‚«ãƒ¡ãƒ©ãƒªã‚»ãƒƒãƒˆ
+	void Enhanced_CameraSwitch(const FInputActionValue& Value);		//è¦–ç‚¹å¤‰æ›´
 
-	void Enhanced_CameraPitchReleased(const FInputActionValue& Value);	//ƒJƒƒ‰ƒsƒbƒ`
-	void Enhanced_CameraYawReleased(const FInputActionValue& Value);	//ƒJƒƒ‰ƒˆ[
+	void Enhanced_CameraPitchReleased(const FInputActionValue& Value);	//ã‚«ãƒ¡ãƒ©ãƒ”ãƒƒãƒ
+	void Enhanced_CameraYawReleased(const FInputActionValue& Value);	//ã‚«ãƒ¡ãƒ©ãƒ¨ãƒ¼
 
 protected:
-	// ƒfƒtƒHƒ‹ƒg‚Åg‚¤ Input Mapping Context
+	// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã§ä½¿ã† Input Mapping Context
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputMappingContext* DefaultMappingContext;
 
-	//ˆÚ“®
+	//ç§»å‹•
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* m_moveIA;
 
-	//ƒWƒƒƒ“ƒv
+	//ã‚¸ãƒ£ãƒ³ãƒ—
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* m_moveJumpIA;
 
-	//ƒ_ƒbƒVƒ…
+	//ãƒ€ãƒƒã‚·ãƒ¥
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* m_moveDashIA;
 
-	//‚µ‚á‚ª‚İ
+	//ã—ã‚ƒãŒã¿
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* m_moveCrouchIA;
 
-	//ƒJƒƒ‰Pitch
+	//ã‚«ãƒ¡ãƒ©Pitch
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* m_cameraPitchIA;
 
-	//ƒJƒƒ‰YAW
+	//ã‚«ãƒ¡ãƒ©YAW
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* m_cameraYawIA;
 
-	//ƒJƒƒ‰ƒŠƒZƒbƒg
+	//ã‚«ãƒ¡ãƒ©ãƒªã‚»ãƒƒãƒˆ
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* m_cameraResetIA;
 
-	//ƒJƒƒ‰‹“_•ÏXƒtƒ‰ƒO
+	//ã‚«ãƒ¡ãƒ©è¦–ç‚¹å¤‰æ›´ãƒ•ãƒ©ã‚°
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* m_cameraSwitchIA;
 
-	//•Ší•ÏX
+	//æ­¦å™¨å¤‰æ›´
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* m_changeWeaponIA;
 
-	//UŒ‚
+	//æ”»æ’ƒ
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* m_attackIA;
 
-	//‰eö‚è
+	//å½±æ½œã‚Š
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* m_inShadowIA;
 
-	//ƒCƒ“ƒ^ƒ‰ƒNƒg
+	//ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆ
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* m_interactIA;
 
 public:
-	//‰eó‘Ô‚©H
+	//å½±çŠ¶æ…‹ã‹ï¼Ÿ
 	bool IsInShadow()const;
 
-	//’n–Ê‚Â‚¢‚½‚ÉŒÄ‚Î‚ê‚éƒR[ƒ‹ƒoƒbƒNŠÖ”
+	//åœ°é¢ã¤ã„ãŸæ™‚ã«å‘¼ã°ã‚Œã‚‹ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°
 	virtual void Landed(const FHitResult& Hit) override;
 
-	//‰eö‚èŠÔæ“¾
+	//å½±æ½œã‚Šæ™‚é–“å–å¾—
 	float GetShadowTimer() const;
 
-	//Å‘å‰eö‚èŠÔæ“¾
+	//æœ€å¤§å½±æ½œã‚Šæ™‚é–“å–å¾—
 	float GetMaxShadowTime() const;
 
 public:
-	//¡ƒJƒvƒZƒ‹‚ÉG‚ê‚Ä‚¢‚ég—p‰Â”\‚È‘ÎÛ‚ğæ“¾
+	//ä»Šã‚«ãƒ—ã‚»ãƒ«ã«è§¦ã‚Œã¦ã„ã‚‹ä½¿ç”¨å¯èƒ½ãªå¯¾è±¡ã‚’å–å¾—
 	AInteract* FindInteractTarget() const;
-	//‘ÎÛ‚ª¡‚à‘€ì‚Å‚«‚é”ÍˆÍ“à‚©
+	//å¯¾è±¡ãŒä»Šã‚‚æ“ä½œã§ãã‚‹ç¯„å›²å†…ã‹
 	bool IsInInteractRange(const AInteract* Target) const;
 
 private:
-	//ƒCƒxƒ“ƒg‚Ì‡”Ô‚ÉˆË‘¶‚¹‚¸Œ»İ‚ÌÕ“Ë‚©‚ç‘ÎÛ‚ğ’²‚×‚é
+	//ã‚¤ãƒ™ãƒ³ãƒˆã®é †ç•ªã«ä¾å­˜ã›ãšç¾åœ¨ã®è¡çªã‹ã‚‰å¯¾è±¡ã‚’èª¿ã¹ã‚‹
 	void GetNearbyInteractTargets(TArray<AInteract*>& Targets) const;
-	//•\¦—p‚ÌÚGî•ñ‚ğXV
+	//è¡¨ç¤ºç”¨ã®æ¥è§¦æƒ…å ±ã‚’æ›´æ–°
 	void RefreshInteractTarget();
 	bool IsUpPosWall(const FVector& _startPos)const;
 
@@ -338,61 +337,61 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UPlayerStateMachine> m_stateMachine;
 
-	//BlueprintRedOnly‚Éw’è‚µ‚Ä‚¢‚é‚½‚ßƒuƒ‹[ƒvƒŠƒ“ƒg‚ÅŒ©‚ê‚é‚ªA•ÒW‚Í‚Å‚«‚È‚¢i•Ï”•ÛŒìj
+	//BlueprintRedOnlyã«æŒ‡å®šã—ã¦ã„ã‚‹ãŸã‚ãƒ–ãƒ«ãƒ¼ãƒ—ãƒªãƒ³ãƒˆã§è¦‹ã‚Œã‚‹ãŒã€ç·¨é›†ã¯ã§ããªã„ï¼ˆå¤‰æ•°ä¿è­·ï¼‰
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent* m_pSpringArm;				//ƒXƒvƒŠƒ“ƒOƒA[ƒ€
+	USpringArmComponent* m_pSpringArm;				//ã‚¹ãƒ—ãƒªãƒ³ã‚°ã‚¢ãƒ¼ãƒ 
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* m_pCamera;					//ƒJƒƒ‰
+	UCameraComponent* m_pCamera;					//ã‚«ãƒ¡ãƒ©
 
 	UPROPERTY()
-	TArray<AActor*>m_pHitActors;					//ƒqƒbƒgAcotr(SpringArm’¼ü‚ÆÕ“Ë‚µ‚Ä‚¢‚éActor
+	TArray<AActor*>m_pHitActors;					//ãƒ’ãƒƒãƒˆAcotr(SpringArmç›´ç·šã¨è¡çªã—ã¦ã„ã‚‹Actor
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
-	ECameraStatus m_cameraStatus;					//ƒJƒƒ‰‚ÌƒXƒe[ƒg
+	ECameraStatus m_cameraStatus;					//ã‚«ãƒ¡ãƒ©ã®ã‚¹ãƒ†ãƒ¼ãƒˆ
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
-	FVector2D m_cameraPitchLimit;					//ƒJƒƒ‰‚Ìƒsƒbƒ`”ÍˆÍ
+	FVector2D m_cameraPitchLimit;					//ã‚«ãƒ¡ãƒ©ã®ãƒ”ãƒƒãƒç¯„å›²
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
-	float m_cameraRotateSpeed;						//ƒJƒƒ‰‰ñ“]‘¬“x
+	float m_cameraRotateSpeed;						//ã‚«ãƒ¡ãƒ©å›è»¢é€Ÿåº¦
 
 	UPROPERTY()
-	UMaterialParameterCollection* m_pMPC;			//ƒ}ƒeƒŠƒAƒ‹ƒpƒ‰ƒ[ƒ^ƒRƒŒƒNƒVƒ‡ƒ“
+	UMaterialParameterCollection* m_pMPC;			//ãƒãƒ†ãƒªã‚¢ãƒ«ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚³ãƒ¬ã‚¯ã‚·ãƒ§ãƒ³
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
-	USkeletalMesh* m_defaultMesh;					//’Êí‚ÌƒƒbƒVƒ…
+	USkeletalMesh* m_defaultMesh;					//é€šå¸¸ã®ãƒ¡ãƒƒã‚·ãƒ¥
 
 	UPROPERTY(EditAnywhere, Category = "Collision")
-	UCapsuleComponent* m_Capsule;						//ƒJƒvƒZƒ‹ƒRƒ“ƒ|[ƒlƒ“ƒg
+	UCapsuleComponent* m_Capsule;						//ã‚«ãƒ—ã‚»ãƒ«ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
 
 	UPROPERTY(EditAnywhere, Category = "Collision")
-	float m_capsuleRadius;							//ƒJƒvƒZƒ‹”¼Œa
+	float m_capsuleRadius;							//ã‚«ãƒ—ã‚»ãƒ«åŠå¾„
 
 	UPROPERTY(EditAnywhere, Category = "Collision")
-	float m_capsuleHeight;							//ƒJƒvƒZƒ‹‚‚³
+	float m_capsuleHeight;							//ã‚«ãƒ—ã‚»ãƒ«é«˜ã•
 
-	//ƒJƒƒ‰ƒtƒH[ƒJƒX—p•Ï”
+	//ã‚«ãƒ¡ãƒ©ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ç”¨å¤‰æ•°
 	UPROPERTY(Transient)
-	AActor* m_pSaveCameraActor;//ƒtƒH[ƒJƒX‘O‚ÌƒJƒƒ‰ƒAƒNƒ^[•Û‘¶—p
+	AActor* m_pSaveCameraActor;//ãƒ•ã‚©ãƒ¼ã‚«ã‚¹å‰ã®ã‚«ãƒ¡ãƒ©ã‚¢ã‚¯ã‚¿ãƒ¼ä¿å­˜ç”¨
 
 	UPROPERTY(EditAnywhere, Category = "CameraFocus")
-	UCameraFocusDirectorComponent* m_pCameraFocusDirector;//ƒJƒƒ‰ƒtƒH[ƒJƒXƒfƒBƒŒƒNƒ^[ƒRƒ“ƒ|[ƒlƒ“ƒg
+	UCameraFocusDirectorComponent* m_pCameraFocusDirector;//ã‚«ãƒ¡ãƒ©ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ãƒ‡ã‚£ãƒ¬ã‚¯ã‚¿ãƒ¼ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
 
 	//UPROPERTY(EditAnywhere, Category = "weapon");
-	//USwordAttackComponent* m_pSword;			//ƒ\[ƒhUŒ‚ƒRƒ“ƒ|[ƒlƒ“ƒg
+	//USwordAttackComponent* m_pSword;			//ã‚½ãƒ¼ãƒ‰æ”»æ’ƒã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	USwordAttackComponent* m_sword;	//ƒ\[ƒhUŒ‚ƒRƒ“ƒ|[ƒlƒ“ƒg
+	USwordAttackComponent* m_sword;	//ã‚½ãƒ¼ãƒ‰æ”»æ’ƒã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
 
-	bool m_bCameraSwitching;						//ƒJƒƒ‰‹“_Ø‚è‘Ö‚¦’†‚©H
-	bool m_bCanControl;								//‘€ì‰Â”\ó‘Ô‚©
+	bool m_bCameraSwitching;						//ã‚«ãƒ¡ãƒ©è¦–ç‚¹åˆ‡ã‚Šæ›¿ãˆä¸­ã‹ï¼Ÿ
+	bool m_bCanControl;								//æ“ä½œå¯èƒ½çŠ¶æ…‹ã‹
 
 	UPROPERTY(VisibleAnywhere, Category = "Sahdow")
-	bool m_bOnShadow;                               //‰e‚Ìã‚É‚¢‚é‚©
+	bool m_bOnShadow;                               //å½±ã®ä¸Šã«ã„ã‚‹ã‹
 
-	FVector2D m_charaMoveInput;						//ƒLƒƒƒ‰ˆÚ“®“ü—Í—Ê
-	FVector2D m_cameraRotateInput;					//ƒJƒƒ‰‰ñ“]—Ê
+	FVector2D m_charaMoveInput;						//ã‚­ãƒ£ãƒ©ç§»å‹•å…¥åŠ›é‡
+	FVector2D m_cameraRotateInput;					//ã‚«ãƒ¡ãƒ©å›è»¢é‡
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	FCameraViewSetting ThirdPersonCamera;
@@ -404,7 +403,7 @@ private:
 	FCameraViewSetting EventCamera;
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
-	float m_maxOffsetY;	//ƒIƒtƒZƒbƒgYÀ•W‚ÌÅ‘å’l
+	float m_maxOffsetY;	//ã‚ªãƒ•ã‚»ãƒƒãƒˆYåº§æ¨™ã®æœ€å¤§å€¤
 
 	float m_OutcameraInputTimer;
 
@@ -412,11 +411,11 @@ private:
 	float m_initOffsetY;
 
 	UPROPERTY(Transient)
-	TArray <AActor*> m_hitActors;//Õ“Ë‘Îˆ‚ÌƒAƒhƒŒƒX
+	TArray <AActor*> m_hitActors;//è¡çªå¯¾å‡¦ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
 
-	//ƒCƒ“ƒ^ƒ‰ƒNƒg‰Â‚ÈƒIƒuƒWƒFƒNƒg‘€ì”ÍˆÍ“à‚©
+	//ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆå¯ãªã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆæ“ä½œç¯„å›²å†…ã‹
 	bool m_bHitIntteractObject;
-	//ƒCƒ“ƒ^ƒ‰ƒNƒg‚·‚éƒIƒuƒWƒFƒNƒg
+	//ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 	UPROPERTY(Transient)
 	AInteract* m_hitInteractOb;
 
@@ -425,17 +424,17 @@ private:
 	UFUNCTION(BlueprintCallable, Category = "Enemy")
 	AEnemyBase* GetNearestEnemy();
 
-	//ƒfƒoƒbƒN—p
+	//ãƒ‡ãƒãƒƒã‚¯ç”¨
 	UNoiseListenerComponent* noise;
 	public:
 	void OnNoiseHeard(const int& _noiseVolume, const FVector& _pos);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info")
-	FPlayerInfo m_playerInfo; //ƒvƒŒƒCƒ„[î•ñ\‘¢‘Ì
+	FPlayerInfo m_playerInfo; //ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æƒ…å ±æ§‹é€ ä½“
 
-	bool bIsCameraForced;//ƒJƒƒ‰‹­§ˆÚ“®’†‚©
+	bool bIsCameraForced;//ã‚«ãƒ¡ãƒ©å¼·åˆ¶ç§»å‹•ä¸­ã‹
 
-	//ƒL[ƒAƒCƒeƒ€‚ğæ“¾‚µ‚Ä‚¢‚é‚©
+	//ã‚­ãƒ¼ã‚¢ã‚¤ãƒ†ãƒ ã‚’å–å¾—ã—ã¦ã„ã‚‹ã‹
 	bool bHasKeyItem;
 
 	UFUNCTION(BlueprintCallable, Category = "Item")
@@ -444,7 +443,7 @@ private:
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	bool GetHasKeyItem() const { return bHasKeyItem; }
 	
-	//ŠJn‰‰o—pƒJƒƒ‰
+	//é–‹å§‹æ™‚æ¼”å‡ºç”¨ã‚«ãƒ¡ãƒ©
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class ACameraActor> m_focusMovieCamera ;
 
@@ -452,35 +451,35 @@ private:
 
 	
 public:
-		//Œ®æ“¾‚ÌŠÖ”
+		//éµå–å¾—æ™‚ã®é–¢æ•°
 	void OnGetKeyItem();
 
-	//‰eó‘ÔAÅŒã‚Ì•Ç‚ª–³‚¢êŠ‚Ì‹L˜^—p
+	//å½±çŠ¶æ…‹ã€æœ€å¾Œã®å£ãŒç„¡ã„å ´æ‰€ã®è¨˜éŒ²ç”¨
 	FVector m_saveLastNotUpWallPos;
 
 	protected:
-		//ƒJƒƒ‰•Ç‰ñ”ğ—p•Ï”
+		//ã‚«ãƒ¡ãƒ©å£å›é¿ç”¨å¤‰æ•°
 		UPROPERTY(EditAnywhere, Category = "Camera|WallAvoid")
-		float WallAvoidSideOffset = 35.f;   // ‰¡‚É“¦‚ª‚·—Êicmj
+		float WallAvoidSideOffset = 35.f;   // æ¨ªã«é€ƒãŒã™é‡ï¼ˆcmï¼‰
 
 		UPROPERTY(EditAnywhere, Category = "Camera|WallAvoid")
-		float WallAvoidInterpSpeed = 12.f;  // ’Ç]‘¬“x
+		float WallAvoidInterpSpeed = 12.f;  // è¿½å¾“é€Ÿåº¦
 
 		UPROPERTY(EditAnywhere, Category = "Camera|WallAvoid")
-		float WallAvoidTraceRadius = 8.f;   // ƒXƒtƒBƒA”¼Œaicmj
+		float WallAvoidTraceRadius = 8.f;   // ã‚¹ãƒ•ã‚£ã‚¢åŠå¾„ï¼ˆcmï¼‰
 
 		UPROPERTY(EditAnywhere, Category = "Camera|WallAvoid")
 		TEnumAsByte<ECollisionChannel> WallAvoidChannel = ECC_Camera;
 
 		float CurrentSideOffsetY = 0.f;
 
-		//ƒJƒƒ‰•Ç‰ñ”ğˆ—
+		//ã‚«ãƒ¡ãƒ©å£å›é¿å‡¦ç†
 		void UpdateCamerawallSiseOffset(float _deltaTime);
 
 
 
 private:
-	//ƒJƒƒ‰Ú‹ß‚É‚æ‚é”ñ•\¦‚¾‚¯‚ğXV‚·‚é
+	//ã‚«ãƒ¡ãƒ©æ¥è¿‘ã«ã‚ˆã‚‹éè¡¨ç¤ºã ã‘ã‚’æ›´æ–°ã™ã‚‹
 	void UpdateMeshCameraVisibility();
 
 };

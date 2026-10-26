@@ -1,4 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+//æ‹…å½“æ—¥é«™
 
 #pragma once
 
@@ -7,6 +8,7 @@
 #include "CameraFocusProvider.h"
 
 #include "CameraFocusDirectorComponent.generated.h"
+
 
 class APlayerController;
 
@@ -29,24 +31,24 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	
-    // ŠJnˆ—
+    // é–‹å§‹å‡¦ç†
     //UFUNCTION(BlueprintCallable, Category = "Camera")
     void StartFocusByProviderActor(AActor* ProviderActor,bool& isStart,APlayerController* _controller);
 
     void StartFocus(AActor* ProviderActor, bool& isStart, APlayerController* _controller);
 
 
-    // I—¹ˆ—
+    // çµ‚äº†å‡¦ç†
     UFUNCTION(BlueprintCallable, Category = "Camera")
     void ForceRestore();
 
 private:
     void RestoreInternal(bool bUnpause);
 
-	//ŠÔ‚Å‚Ì•œ‹Aˆ—
+	//æ™‚é–“ã§ã®å¾©å¸°å‡¦ç†
 	void RestoreByTime();
 
-	//è“®‚Å‚Ì•œ‹Aˆ—
+	//æ‰‹å‹•ã§ã®å¾©å¸°å‡¦ç†
 	void RestoreByInput();
 
 private:

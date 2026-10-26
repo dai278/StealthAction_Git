@@ -1,16 +1,17 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.//
+//æ‹…å½“æ—¥é«™ã€€
+//ä»•æ§˜å¤‰æ›´ã«ã‚ˆã‚Šä½¿ç”¨ã—ã¦ã„ãªã„
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
 #include "ShadowComponent.generated.h"
 
-//‘O•û‘OŒ¾
+//å‰æ–¹å‰è¨€
 class AExtendedSpotLight;
 class UBoxComponent;
 
-//‰e‚ÌŒ`ó
+//å½±ã®å½¢çŠ¶
 UENUM(BlueprintType)
 enum class EShadowShape :uint8
 {
@@ -20,13 +21,13 @@ enum class EShadowShape :uint8
 	Num,
 };
 
-//ƒXƒP[ƒ‹ƒ^ƒCƒv
+//ã‚¹ã‚±ãƒ¼ãƒ«ã‚¿ã‚¤ãƒ—
 UENUM(BlueprintType)
 enum class EShadowScaleType:uint8
 {
-	OriginalScale	UMETA(DisplayName = "OriginalScale"),//ƒI[ƒi[‚ÌƒXƒP[ƒ‹‚ğ”½‰f‚µ‚È‚¢
-	OwnerScaleX UMETA(DisplayName = "OwnerScaleX"),//Y²‚ÌŠg‘å‚ğ”½‰f
-	OwnerScaleY UMETA(DisplayName = "OwnerScaleY"),//X²‚ÌŠg‘å‚ğ”½‰f
+	OriginalScale	UMETA(DisplayName = "OriginalScale"),//ã‚ªãƒ¼ãƒŠãƒ¼ã®ã‚¹ã‚±ãƒ¼ãƒ«ã‚’åæ˜ ã—ãªã„
+	OwnerScaleX UMETA(DisplayName = "OwnerScaleX"),//Yè»¸ã®æ‹¡å¤§ã‚’åæ˜ 
+	OwnerScaleY UMETA(DisplayName = "OwnerScaleY"),//Xè»¸ã®æ‹¡å¤§ã‚’åæ˜ 
 };
 
 
@@ -37,7 +38,7 @@ class STEALTHACTION_API UShadowComponent : public USceneComponent
 	GENERATED_BODY()
 
 public:
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	UShadowComponent();
 
 protected:
@@ -46,8 +47,8 @@ protected:
 
 
 public:
-	//XVˆ—
-	//ELevelTick,FActorComponentTickFunction‚ÍŠî–{Supper‚É“n‚·‚­‚ç‚¢‚µ‚©g‚í‚È‚¢‚ç‚µ‚¢
+	//æ›´æ–°å‡¦ç†
+	//ELevelTick,FActorComponentTickFunctionã¯åŸºæœ¬Supperã«æ¸¡ã™ãã‚‰ã„ã—ã‹ä½¿ã‚ãªã„ã‚‰ã—ã„
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void OnRegister()override;
@@ -56,13 +57,13 @@ public:
 
 
 public:
-	//ƒ‰ƒCƒgƒCƒ“ƒfƒbƒNƒX‚Ìæ“¾
+	//ãƒ©ã‚¤ãƒˆã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã®å–å¾—
 	int32 GetLightIndex()const;
 
-	//ƒ‰ƒCƒg‚ğƒZƒbƒg
+	//ãƒ©ã‚¤ãƒˆã‚’ã‚»ãƒƒãƒˆ
 	void SetLight(const AExtendedSpotLight* _pLight);
 
-	//ˆÊ’u‚âŒ`‚È‚Ç‚ÌXV
+	//ä½ç½®ã‚„å½¢ãªã©ã®æ›´æ–°
 	void UpdateTransform();
 
 private:
@@ -70,39 +71,39 @@ private:
 protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Shadow/Mesh")
-	UStaticMeshComponent* m_pShadowMesh;        	//ƒƒbƒVƒ…ƒRƒ“ƒ|ƒlƒ“ƒg
+	UStaticMeshComponent* m_pShadowMesh;        	//ãƒ¡ãƒƒã‚·ãƒ¥ã‚³ãƒ³ãƒãƒãƒ³ãƒˆ
 
 	UPROPERTY(VisibleAnywhere, Category = "Shadow/Collision")
-	UBoxComponent* m_pCollisionBox;	        //ƒRƒŠƒWƒ‡ƒ“
+	UBoxComponent* m_pCollisionBox;	        //ã‚³ãƒªã‚¸ãƒ§ãƒ³
 
 	UPROPERTY(EditAnywhere, Category = "Shadow/Index")
-	int32 m_lightIndex;                     //©g‚ğ‰f‚·ƒ‰ƒCƒg‚ÌƒCƒ“ƒfƒbƒNƒX
+	int32 m_lightIndex;                     //è‡ªèº«ã‚’æ˜ ã™ãƒ©ã‚¤ãƒˆã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
 
 	UPROPERTY(EditAnywhere, Category = "Shadow/Transform")
-	EShadowShape m_shadowShape;             //‰e‚ÌŒ`ó
+	EShadowShape m_shadowShape;             //å½±ã®å½¢çŠ¶
 
 
 	UPROPERTY(EditAnywhere, Category = "Shadow/Transform")
-	float m_lengthScale;                    //‰e‚Ì’·‚³”{—¦
+	float m_lengthScale;                    //å½±ã®é•·ã•å€ç‡
 
 	UPROPERTY(EditAnywhere, Category = "Shadow/Transform")
-	float m_width;							//•‚Ì”{—¦
+	float m_width;							//å¹…ã®å€ç‡
 
 	UPROPERTY(EditAnywhere, Category = "Shadow/Transform")
-	EShadowScaleType m_scaleType;        //ƒXƒP[ƒ‹ƒ^ƒCƒv
+	EShadowScaleType m_scaleType;        //ã‚¹ã‚±ãƒ¼ãƒ«ã‚¿ã‚¤ãƒ—
 
 	UPROPERTY(EditAnywhere, Category = "Shadow/Transform")
-	bool  m_isUsingAbsoluteRotation; //‰ñ“]‚ğƒAƒ^ƒbƒ`‚·‚é‚©H
+	bool  m_isUsingAbsoluteRotation; //å›è»¢ã‚’ã‚¢ã‚¿ãƒƒãƒã™ã‚‹ã‹ï¼Ÿ
 
 
 
-	float m_yaw;                            //‰e‚ÌŒü‚«
+	float m_yaw;                            //å½±ã®å‘ã
 
-	float m_renderPos;						//•`‰æ‚·‚éˆÊ’u
+	float m_renderPos;						//æç”»ã™ã‚‹ä½ç½®
 
-	float m_length;                         //•`‰æ‚·‚é’·‚³
+	float m_length;                         //æç”»ã™ã‚‹é•·ã•
 
-	TWeakObjectPtr<const AExtendedSpotLight> m_pLight;    //QÆ‚·‚éƒ‰ƒCƒg‚ÌƒAƒhƒŒƒX
+	TWeakObjectPtr<const AExtendedSpotLight> m_pLight;    //å‚ç…§ã™ã‚‹ãƒ©ã‚¤ãƒˆã®ã‚¢ãƒ‰ãƒ¬ã‚¹
 
 	float m_collisionScaleZ;
 

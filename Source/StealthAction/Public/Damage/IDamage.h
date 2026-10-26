@@ -1,3 +1,5 @@
+ï»¿
+//æ‹…å½“æ—¥é«™
 #pragma once
 
 #include "CoreMinimal.h"
@@ -15,6 +17,6 @@ class STEALTHACTION_API IDamageable
 	GENERATED_BODY()
 
 public:
-	// ƒˆ‰¼‘zŠÖ”iBlueprint”ñ‘Î‰j
+	// ç´”ç²‹ä»®æƒ³é–¢æ•°ï¼ˆBlueprintéå¯¾å¿œï¼‰
 	virtual void OnDamage(int32 Damage, FVector KnockBackVec, bool bSneakKill) = 0;
 };

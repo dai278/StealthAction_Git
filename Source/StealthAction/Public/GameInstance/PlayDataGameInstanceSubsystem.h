@@ -1,6 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 //--------------------------------------------
-// ƒvƒŒƒCƒf[ƒ^ŠÇ——pGameInstanceSubsystem
+// ãƒ—ãƒ¬ã‚¤ãƒ‡ãƒ¼ã‚¿ç®¡ç†ç”¨GameInstanceSubsystem
+// // æ‹…å½“æ—¥é«™
 //------------------------------------------------
 
 #pragma once
@@ -18,94 +19,94 @@ class STEALTHACTION_API UPlayDataGameInstanceSubsystem : public UGameInstanceSub
 	GENERATED_BODY()
 
 public:
-	//ƒQ[ƒ€‹N“®ˆê“x‚Ì‚İŒÄ‚Î‚ê‚é‰Šú‰»ˆ—
+	//ã‚²ãƒ¼ãƒ èµ·å‹•æ™‚ä¸€åº¦ã®ã¿å‘¼ã°ã‚Œã‚‹åˆæœŸåŒ–å‡¦ç†
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	//ƒQ[ƒ€I—¹ˆê“x‚Ì‚İŒÄ‚Î‚ê‚éI—¹ˆ—
+	//ã‚²ãƒ¼ãƒ çµ‚äº†æ™‚ä¸€åº¦ã®ã¿å‘¼ã°ã‚Œã‚‹çµ‚äº†å‡¦ç†
 	virtual void Deinitialize() override;
 	
-	//ƒvƒŒƒCƒ„[‚Ìî•ñ“o˜^
+	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®æƒ…å ±ç™»éŒ²
 	UFUNCTION(BlueprintCallable, Category = "PlayData|Player")
 	void SetPlayerInfo(const FPlayerInfo _playInfo) { m_playDataInfo.PlayerInfo = _playInfo; }
-	//ƒvƒŒƒCƒ„[î•ñ‚Ìæ“¾
+	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æƒ…å ±ã®å–å¾—
 	UFUNCTION(BlueprintPure, Category = "PlayData|Player")
 	FPlayerInfo GetPlayerInfo()const { return m_playDataInfo.PlayerInfo; }
-	//ƒvƒŒƒCƒ„[î•ñ‚ÌƒŠƒZƒbƒg
+	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æƒ…å ±ã®ãƒªã‚»ãƒƒãƒˆ
 	UFUNCTION(BlueprintCallable, Category = "PlayData|Player")
 	void ResetPlayerInfo() { m_playDataInfo.PlayerInfo = FPlayerInfo(); }
 		
-	//ƒGƒlƒ~[î•ñ‚Ì“o˜^
+	//ã‚¨ãƒãƒŸãƒ¼æƒ…å ±ã®ç™»éŒ²
 	UFUNCTION(BlueprintCallable, Category = "PlayData|Enemy")
 	void SetEnemyInfo(const TArray<FEnemyInfo> _enemyInfo)
 	{
-		//ˆê“xƒŠƒZƒbƒg
+		//ä¸€åº¦ãƒªã‚»ãƒƒãƒˆ
 		m_playDataInfo.EnemyInfo.Empty();
 		m_playDataInfo.EnemyInfo = _enemyInfo;
 	}
 	
-	//ƒGƒlƒ~[î•ñ‚Ìæ“¾
+	//ã‚¨ãƒãƒŸãƒ¼æƒ…å ±ã®å–å¾—
 	UFUNCTION(BlueprintPure, Category = "PlayData|Enemy")
 	FEnemyInfo GetEnemyInfo(const int32 _index)const;
-	//‘SƒGƒlƒ~[î•ñ‚Ìæ“¾
+	//å…¨ã‚¨ãƒãƒŸãƒ¼æƒ…å ±ã®å–å¾—
 	TArray<FEnemyInfo> GetAllEnemyInfo()const { return m_playDataInfo.EnemyInfo; }
 	
-	//ƒGƒlƒ~[î•ñ‚ÌƒŠƒZƒbƒg
+	//ã‚¨ãƒãƒŸãƒ¼æƒ…å ±ã®ãƒªã‚»ãƒƒãƒˆ
 	UFUNCTION(BlueprintCallable, Category = "PlayData|Enemy")
 	void ResetEnemyInfo() { m_playDataInfo.EnemyInfo.Empty(); }
 
-	//ƒNƒŠƒA‚µ‚½ƒXƒe[ƒW
+	//ã‚¯ãƒªã‚¢ã—ãŸã‚¹ãƒ†ãƒ¼ã‚¸
 	UFUNCTION()
 	void SetClearedStage(const FName& _levelName){m_playDataInfo.ClearLevelNames.Add(_levelName);}
 
 	
-	//ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒgî•ñ‚ÌXV
+	//ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆæƒ…å ±ã®æ›´æ–°
 	UFUNCTION()
 	void SetCheckpointInfo(const FCheckpointInfo& _checkpointInfo) { m_playDataInfo.LastCheckpointInfo = _checkpointInfo; }
-	//ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒgî•ñ‚Ìæ“¾
+	//ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆæƒ…å ±ã®å–å¾—
 	UFUNCTION()
 	FCheckpointInfo GetCheckpointInfo()const { return m_playDataInfo.LastCheckpointInfo; }
-	//ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒg‚ÌƒŠƒZƒbƒg
+	//ãƒã‚§ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆã®ãƒªã‚»ãƒƒãƒˆ
 	UFUNCTION()
 	void ResetCheckpointInfo() { m_playDataInfo.LastCheckpointInfo = FCheckpointInfo(); }
 
 
-	//ƒNƒŠƒA‚µ‚½ƒXƒe[ƒW‚Ìæ“¾
+	//ã‚¯ãƒªã‚¢ã—ãŸã‚¹ãƒ†ãƒ¼ã‚¸ã®å–å¾—
 	UFUNCTION()
 	TArray<FName> GetClearedStages()const { return m_playDataInfo.ClearLevelNames; }
-	//w’è‚µ‚½ƒXƒe[ƒW‚ªƒNƒŠƒAÏ‚İ‚©//ContainsŠÖ”‚ÍTArray‚Éw’è‚µ‚½—v‘f‚ªŠÜ‚Ü‚ê‚Ä‚¢‚é‚©‚ğ’²‚×‚éŠÖ”
+	//æŒ‡å®šã—ãŸã‚¹ãƒ†ãƒ¼ã‚¸ãŒã‚¯ãƒªã‚¢æ¸ˆã¿ã‹//Containsé–¢æ•°ã¯TArrayã«æŒ‡å®šã—ãŸè¦ç´ ãŒå«ã¾ã‚Œã¦ã„ã‚‹ã‹ã‚’èª¿ã¹ã‚‹é–¢æ•°
 	UFUNCTION()
 	bool IsStageCleared(const FName& _levelName)const { return m_playDataInfo.ClearLevelNames.Contains(_levelName); }
-	//ƒNƒŠƒA‚µ‚½ƒXƒe[ƒW‚ğ’Ç‰Á
+	//ã‚¯ãƒªã‚¢ã—ãŸã‚¹ãƒ†ãƒ¼ã‚¸ã‚’è¿½åŠ 
 	UFUNCTION()
 	void AddClearedStage(const FName& _levelName) { m_playDataInfo.ClearLevelNames.Add(_levelName); }	
-	//ƒNƒŠƒA‚µ‚½ƒXƒe[ƒW‚ğƒŠƒZƒbƒg
+	//ã‚¯ãƒªã‚¢ã—ãŸã‚¹ãƒ†ãƒ¼ã‚¸ã‚’ãƒªã‚»ãƒƒãƒˆ
 	UFUNCTION()
 	void ResetClearedStages() { m_playDataInfo.ClearLevelNames.Empty(); }
 
 
-	//ƒvƒŒƒCƒf[ƒ^î•ñ‚Ìæ“¾
+	//ãƒ—ãƒ¬ã‚¤ãƒ‡ãƒ¼ã‚¿æƒ…å ±ã®å–å¾—
 	UFUNCTION()
 	FPlayDataInfo GetPlayDataInfo()const { return m_playDataInfo; }
-	//ƒvƒŒƒCƒf[ƒ^î•ñ‚Ìİ’è
+	//ãƒ—ãƒ¬ã‚¤ãƒ‡ãƒ¼ã‚¿æƒ…å ±ã®è¨­å®š
 	UFUNCTION()
 	void SetPlayDataInfo(const FPlayDataInfo& _playDataInfo) { m_playDataInfo = _playDataInfo; }
 	
-	//ƒvƒŒƒCƒf[ƒ^î•ñ‚ÌƒŠƒZƒbƒg
+	//ãƒ—ãƒ¬ã‚¤ãƒ‡ãƒ¼ã‚¿æƒ…å ±ã®ãƒªã‚»ãƒƒãƒˆ
 	UFUNCTION(BlueprintCallable, Category = "PlayData")
 	void ResetPlayDataInfo() { m_playDataInfo = FPlayDataInfo(); }
 
-	//ƒXƒe[ƒWƒNƒŠƒA‚Ìˆ—
+	//ã‚¹ãƒ†ãƒ¼ã‚¸ã‚¯ãƒªã‚¢æ™‚ã®å‡¦ç†
 	UFUNCTION(BlueprintCallable, Category = "PlayData")
 	void OnStageClear(const FName& _levelName);
 
-	//ƒXƒe[ƒWƒZƒŒƒNƒg‚É–ß‚é‚Ìˆ—
+	//ã‚¹ãƒ†ãƒ¼ã‚¸ã‚»ãƒ¬ã‚¯ãƒˆã«æˆ»ã‚‹æ™‚ã®å‡¦ç†
 	UFUNCTION(BlueprintCallable, Category = "PlayData")
 	void OnReturnToStageSelect();
 
-	//ƒRƒ“ƒeƒjƒ…[‚Ìˆ—
+	//ã‚³ãƒ³ãƒ†ãƒ‹ãƒ¥ãƒ¼æ™‚ã®å‡¦ç†
 	UFUNCTION(BlueprintCallable, Category = "PlayData")
 	void OnContinue();
 
-	//ƒRƒ“ƒeƒjƒ…[‚µ‚½‚©H
+	//ã‚³ãƒ³ãƒ†ãƒ‹ãƒ¥ãƒ¼ã—ãŸã‹ï¼Ÿ
 	UFUNCTION(BlueprintCallable, Category = "PlayData")
 	bool IsIsContinued()const { return m_playDataInfo.IsContinued; }
 private:
@@ -113,6 +114,6 @@ private:
 	//BeginPlay
 	void BeginPlayHandler(UWorld* World);
 
-	//ƒvƒŒƒCƒf[ƒ^î•ñ
+	//ãƒ—ãƒ¬ã‚¤ãƒ‡ãƒ¼ã‚¿æƒ…å ±
 	FPlayDataInfo m_playDataInfo;
 };

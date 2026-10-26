@@ -1,26 +1,27 @@
+ï»¿//æ‹…å½“æ—¥é«™
 #pragma once
 
 #include "CoreMinimal.h"
 #include "CameraInfo.generated.h"
 
-// ƒJƒƒ‰‹“_İ’è\‘¢‘Ì
+// ã‚«ãƒ¡ãƒ©è¦–ç‚¹è¨­å®šæ§‹é€ ä½“
 USTRUCT(BlueprintType)
 struct FCameraViewSetting
 {
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FRotator rotator = FRotator::ZeroRotator; // ‰ñ“]
+    FRotator rotator = FRotator::ZeroRotator; // å›è»¢
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float fieldOfView = 90.0f; // ‹–ìŠp
+    float fieldOfView = 90.0f; // è¦–é‡è§’
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float springArmLength = 300.0f; // ’·‚³
+    float springArmLength = 300.0f; // é•·ã•
 
     UPROPERTY(EditAnywhere,BlueprintReadWrite)
     FVector ofSet = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float InterpSpeed = 5.f; // ƒJƒƒ‰Ø‚è‘Ö‚¦‚ÌƒuƒŒƒ“ƒhŠÔ
+    float InterpSpeed = 5.f; // ã‚«ãƒ¡ãƒ©åˆ‡ã‚Šæ›¿ãˆã®ãƒ–ãƒ¬ãƒ³ãƒ‰æ™‚é–“
 };

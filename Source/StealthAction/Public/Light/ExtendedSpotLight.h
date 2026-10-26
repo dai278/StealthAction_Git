@@ -1,24 +1,24 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+//æ‹…å½“æ—¥é«™
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ExtendedSpotLight.generated.h"
 
-//‘O•ûéŒ¾
+//å‰æ–¹å®£è¨€
 class USpotLightComponent;
 
 UENUM(BlueprintType)
 enum class ELightStatus : uint8
 {
 	None UMETA(DisplayName = "None"),
-	AutoYawRotate      UMETA(DisplayName = "AutoYaw"),//©“®‰ñ“]Yaw
-	AutoPitchRotate     UMETA(DisplayName = "AutoPitch"),//©“®‰ñ“]Pitch
+	AutoYawRotate      UMETA(DisplayName = "AutoYaw"),//è‡ªå‹•å›è»¢Yaw
+	AutoPitchRotate     UMETA(DisplayName = "AutoPitch"),//è‡ªå‹•å›è»¢Pitch
 	AutoRollRotate  UMETA(DisplayName = "AutoRoll"),
-	ManualYawRotate   UMETA(DisplayName = "ManualYaw"),//è“®‰ñ“]
-	ManualPitchRotat   UMETA(DisplayName = "ManualPitch"),//è“®‰ñ“]
-	Blink    UMETA(DisplayName = "Blink")//“_–Å
+	ManualYawRotate   UMETA(DisplayName = "ManualYaw"),//æ‰‹å‹•å›è»¢
+	ManualPitchRotat   UMETA(DisplayName = "ManualPitch"),//æ‰‹å‹•å›è»¢
+	Blink    UMETA(DisplayName = "Blink")//ç‚¹æ»…
 };
 
 
@@ -41,63 +41,63 @@ public:
 
 
 public:
-	//ƒ‰ƒCƒgƒCƒ“ƒfƒbƒNƒX‚Ìæ“¾
+	//ãƒ©ã‚¤ãƒˆã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã®å–å¾—
 	int32 GetIndex()const;
 
-	//ƒ‰ƒCƒg‚ÌˆÊ’uæ“¾
+	//ãƒ©ã‚¤ãƒˆã®ä½ç½®å–å¾—
 	FVector GetLightLocation()const;
 
-	//ƒ‰ƒCƒg‚ÌŒü‚«æ“¾
+	//ãƒ©ã‚¤ãƒˆã®å‘ãå–å¾—
 	FVector GetLightForwardVector()const;
 
-	//ÆË”ÍˆÍ
-	//‰~‚Ì“à‘¤Šp“x
+	//ç…§å°„ç¯„å›²
+	//å††éŒã®å†…å´è§’åº¦
 	float GetLightInnerAngle()const;
 
-	//‰~ŠO‘¤Šp“x
+	//å††éŒå¤–å´è§’åº¦
 	float GetLightOuterAngle()const;
 
-	//Œõ‚Ì“Í‚­‹——£
+	//å…‰ã®å±Šãè·é›¢
 	float GetLightLength()const;
 
-	//ƒ‰ƒCƒg‚ª“®‚­‚©?
+	//ãƒ©ã‚¤ãƒˆãŒå‹•ãã‹?
 	bool IsMove()const;
 
-	//ƒ‰ƒCƒg‚Ìon,offİ’è
+	//ãƒ©ã‚¤ãƒˆã®on,offè¨­å®š
 	UFUNCTION(BlueprintCallable)
 	void SetVisibility(const bool isVisibility);
 
-	//ƒ‰ƒCƒg‚Æ‚ÌÕ“Ëƒ`ƒFƒbƒN
+	//ãƒ©ã‚¤ãƒˆã¨ã®è¡çªãƒã‚§ãƒƒã‚¯
 	bool IsHit(const FVector& _pos)const;
 
-	//‰e‚ğ—‚Æ‚·ƒ‰ƒCƒg‚©
+	//å½±ã‚’è½ã¨ã™ãƒ©ã‚¤ãƒˆã‹
 	bool IsShadowDrawLight()const { return m_isShadowDrawLight; }
 
 protected:
 	
 	UPROPERTY(VisibleAnywhere)
-	USpotLightComponent* m_pSpotLight;           //ƒXƒ|ƒbƒgƒ‰ƒCƒgƒRƒ“ƒ|[ƒlƒ“ƒg
+	USpotLightComponent* m_pSpotLight;           //ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
 
 	UPROPERTY(EditAnywhere, Category = "Index")
-	int32 m_lightIndex;   //ƒ‰ƒCƒg‚ÌƒCƒ“ƒfƒbƒNƒX
+	int32 m_lightIndex;   //ãƒ©ã‚¤ãƒˆã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
 
 	UPROPERTY(EditAnywhere, Category = "Tick")
-	bool m_bCanEverTick;                        //–ˆƒtƒŒ[ƒ€XV‚·‚é‚©ABp‚Å‚àİ’è‚Å‚«‚é‚æ‚¤‚É‚·‚é
+	bool m_bCanEverTick;                        //æ¯ãƒ•ãƒ¬ãƒ¼ãƒ æ›´æ–°ã™ã‚‹ã‹ã€Bpã§ã‚‚è¨­å®šã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
-	UStaticMeshComponent* m_pMesh; //ƒƒbƒVƒ…	
+	UStaticMeshComponent* m_pMesh; //ãƒ¡ãƒƒã‚·ãƒ¥	
 
-	bool m_isEnemy;//ŠÒ‚ª“G‚©
+	bool m_isEnemy;//æ‰€æŒè€…ãŒæ•µã‹
 
 public:
 
 	UFUNCTION()
-	void TurnOn();//•t‚¯‚é
+	void TurnOn();//ä»˜ã‘ã‚‹
 
 	UFUNCTION()
-	void TurnOff();//Á‚·
+	void TurnOff();//æ¶ˆã™
 
-	UFUNCTION()//ƒ‰ƒCƒg‚ÌƒIƒ“ƒIƒt‹t“]
+	UFUNCTION()//ãƒ©ã‚¤ãƒˆã®ã‚ªãƒ³ã‚ªãƒ•é€†è»¢
 	void SwitchTurn();
 
 	UFUNCTION()
@@ -107,76 +107,76 @@ public:
 	//void EndPlay(const EEndPlayReason::Type EndPlayReason)override;
 
 private:
-	//Yaw‰ñ“]‚ÌXVˆ—
+	//Yawå›è»¢ã®æ›´æ–°å‡¦ç†
 	void UpdateAutoYawRotate(const float& _deltaTime);
-	//Pitch‰ñ“]
+	//Pitchå›è»¢
 	void UpdateAutoPitchRotate(const float& _deltaTime);
-	//Roll‰ñ“]
+	//Rollå›è»¢
 	void UpdateAutoRollRotate(const float& _deltaTime);
 
-	//è“®‰ñ“]
+	//æ‰‹å‹•å›è»¢
 	void UpdateManualYawRotate(const float& _deltaTime);
 	void UpdateManualPitchRotate(const float& _deltaTime);
 
-	//“_–Å‚ÌXVˆ—
+	//ç‚¹æ»…ã®æ›´æ–°å‡¦ç†
 	void UpdateBlink(const float& _deltaTime);
 protected:
 	UPROPERTY(EditAnywhere, Category = "Light")
-	bool m_isShadowDrawLight; //‰e‚ğ•`‰æ‚·‚éƒ‰ƒCƒg‚©
+	bool m_isShadowDrawLight; //å½±ã‚’æç”»ã™ã‚‹ãƒ©ã‚¤ãƒˆã‹
 
 	UPROPERTY(EditAnywhere, Category = "Rotate")
-	bool m_bAutomaticRotateYaw;//Yaw•ûŒü‚É©“®‰ñ“]‚·‚é‚©
+	bool m_bAutomaticRotateYaw;//Yawæ–¹å‘ã«è‡ªå‹•å›è»¢ã™ã‚‹ã‹
 
 	UPROPERTY(EditAnywhere, Category = "Rotate")
-	float m_automaticRotateYawSpeed;//Yaw•ûŒü‰ñ“]ƒXƒs[ƒh
+	float m_automaticRotateYawSpeed;//Yawæ–¹å‘å›è»¢ã‚¹ãƒ”ãƒ¼ãƒ‰
 
 	UPROPERTY(EditAnywhere, Category = "Rotate")
-	bool m_bRotateTurn;                  //‰ñ“]’†ƒ^[ƒ“‚·‚é‚©@ƒIƒt‚È‚ç‰ñ‚è‘±‚¯‚é
+	bool m_bRotateTurn;                  //å›è»¢ä¸­ã‚¿ãƒ¼ãƒ³ã™ã‚‹ã‹ã€€ã‚ªãƒ•ãªã‚‰å›ã‚Šç¶šã‘ã‚‹
 
-	bool m_bManualRotateing;//‰ñ“]ŠJn‚µ‚Ä‚¢‚é‚©
+	bool m_bManualRotateing;//å›è»¢é–‹å§‹ã—ã¦ã„ã‚‹ã‹
 	
 	UPROPERTY(EditAnywhere, Category = "Rotate")
-	float m_minTurnRotate; //ƒ^[ƒ“‚·‚éŠp“x
+	float m_minTurnRotate; //ã‚¿ãƒ¼ãƒ³ã™ã‚‹è§’åº¦
 
 	UPROPERTY(EditAnywhere, Category = "Rotate")
-	float m_maxTurnRotate;//ƒ^[ƒ“‚·‚éÅ‘åŠp“x
+	float m_maxTurnRotate;//ã‚¿ãƒ¼ãƒ³ã™ã‚‹æœ€å¤§è§’åº¦
 
 	UPROPERTY(EditAnywhere, Category = "Rotate")
 	int32 m_turnDir;
 
 	UPROPERTY(EditAnywhere, Category = "Rotate")
-	ELightStatus m_LightStatus;//‰ñ“]•ûŒü‚¢‚Ü‚Ì‚Æ‚±‚ëm_bRotateTargetAngleStop‚É‚Ì‚İ
+	ELightStatus m_LightStatus;//å›è»¢æ–¹å‘ã„ã¾ã®ã¨ã“ã‚m_bRotateTargetAngleStopã«ã®ã¿
 
 
 	UPROPERTY(EditAnywhere, Category = "Rotate")
-	bool m_bAutomaticRotatePitch;//Yaw•ûŒü‚É©“®‰ñ“]‚·‚é‚©
+	bool m_bAutomaticRotatePitch;//Yawæ–¹å‘ã«è‡ªå‹•å›è»¢ã™ã‚‹ã‹
 
 	UPROPERTY(EditAnywhere, Category = "Rotate")
-	float m_automaticRotatePitchSpeed;//Yaw•ûŒü‰ñ“]ƒXƒs[ƒh
+	float m_automaticRotatePitchSpeed;//Yawæ–¹å‘å›è»¢ã‚¹ãƒ”ãƒ¼ãƒ‰
 
 	UPROPERTY(EditAnywhere, Category = "Rotate")
-	float m_automaticRollYawSpeed;//Yaw•ûŒü‰ñ“]ƒXƒs[ƒh
+	float m_automaticRollYawSpeed;//Yawæ–¹å‘å›è»¢ã‚¹ãƒ”ãƒ¼ãƒ‰
 
 
 	UPROPERTY(EditAnywhere, Category = "blink")
-	bool m_bBlink;     //“_–Å‚·‚é‚©
+	bool m_bBlink;     //ç‚¹æ»…ã™ã‚‹ã‹
 
 	UPROPERTY(EditAnywhere, Category = "blink")
-	float m_blinkOnTime;//‚Â‚¢‚Ä‚¢‚é‚¶‚©‚ñ
+	float m_blinkOnTime;//ã¤ã„ã¦ã„ã‚‹ã˜ã‹ã‚“
 
 	UPROPERTY(EditAnywhere, Category = "blink")
-	float m_blinkOffTime;//Á‚¦‚Ä‚¢‚éŠÔ
+	float m_blinkOffTime;//æ¶ˆãˆã¦ã„ã‚‹æ™‚é–“
 
 	UPROPERTY(EditAnywhere, Category = "blink")
-	bool m_bIsOn;//‚Â‚¢‚Ä‚¢‚é‚©	
+	bool m_bIsOn;//ã¤ã„ã¦ã„ã‚‹ã‹	
 	
-	float m_blinkTimer;//Œo‰ßŠÔŒv‘ª—pƒ^ƒCƒ}[
+	float m_blinkTimer;//çµŒéæ™‚é–“è¨ˆæ¸¬ç”¨ã‚¿ã‚¤ãƒãƒ¼
 
 	UPROPERTY(EditAnywhere, Category = "blink")
-	bool m_canItBeTurned;//ONOFF‚Ì‘€ì‰Â”\‚©
+	bool m_canItBeTurned;//ONOFFã®æ“ä½œå¯èƒ½ã‹
 
 	UPROPERTY(EditAnywhere, Category = "blink")
-	float m_LightOffTime;//ƒ‰ƒCƒg‚ªÁ‚¦‚Ä‚¢‚éŠÔ
+	float m_LightOffTime;//ãƒ©ã‚¤ãƒˆãŒæ¶ˆãˆã¦ã„ã‚‹æ™‚é–“
 
 	float m_bLightOff;
 	float m_lightOffTimer;

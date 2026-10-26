@@ -1,5 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+//æ‹…å½“æ—¥é«™
 #pragma once
 
 #include "CoreMinimal.h"
@@ -28,7 +28,7 @@ public:
     //Tick
 	virtual void Tick(float DeltaTime) override;
     
-    //”h¶æ‚ÅƒCƒ“ƒ^ƒ‰ƒNƒg‚ğã‘‚«
+    //æ´¾ç”Ÿå…ˆã§ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆã‚’ä¸Šæ›¸ã
     virtual void Interact(AActor* _interactOwner)override;
 
 
