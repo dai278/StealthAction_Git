@@ -275,8 +275,8 @@ void APlayerCharacter::Tick(float _deltaTime)
 //-----------------------------------------------------
 void APlayerCharacter::UpdateMeshCameraVisibility()
 {
-	USkeletalMeshComponent* Mesh = GetMesh();
-	if (!IsValid(Mesh))
+	USkeletalMeshComponent* PlayerMesh = GetMesh();
+	if (!IsValid(PlayerMesh))
 	{
 		return;
 	}
@@ -288,10 +288,10 @@ void APlayerCharacter::UpdateMeshCameraVisibility()
 		const UCameraComponent* Cam = FindComponentByClass<UCameraComponent>();
 		if (IsValid(Cam))
 		{
-			bHideForCamera = FVector::Distance(Cam->GetComponentLocation(), Mesh->GetComponentLocation()) < 150.f;
+			bHideForCamera = FVector::Distance(Cam->GetComponentLocation(), PlayerMesh->GetComponentLocation()) < 150.f;
 		}
 	}
-	Mesh->SetHiddenInGame(bHideForCamera, true);
+	PlayerMesh->SetHiddenInGame(bHideForCamera, true);
 }
 
 //----------------------------------------------------------
