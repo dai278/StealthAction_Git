@@ -116,6 +116,9 @@ class STEALTHACTION_API UPlayerStateMachine : public UStateMachine
 	UFUNCTION(BlueprintCallable, Category = "Player State Machine")
 	bool ChangePlayerState(TSubclassOf<UPlayerStateBase> NewStateClass);
 
+	//終了処理から今回の遷移先を確認する。遷移中以外はnull
+	const UPlayerStateBase* GetTransitionTarget() const { return TransitionTarget; }
+
 	//移動系ステートか
 	UFUNCTION(BlueprintPure, Category = "Player State Machine")
 	bool IsLocomotionState() const;
@@ -161,4 +164,7 @@ class STEALTHACTION_API UPlayerStateMachine : public UStateMachine
 
 	//ステート変更処理中か
 	bool bTransitionInProgress = false;
+
+	//登録済みステートへの一時参照。遷移処理が終わったら戻す
+	const UPlayerStateBase* TransitionTarget = nullptr;
 };

@@ -221,6 +221,10 @@ void APlayerCharacter::BeginPlay()
 		Controller->SetControlRotation(GetActorRotation());
 	}
 
+	//初期ステートがしゃがみでも、退避先は立った時の中心で持つ
+	const float InitialCapsuleScale = m_Capsule->GetScaledCapsuleHalfHeight() / FMath::Max(1.f, m_Capsule->GetUnscaledCapsuleHalfHeight());
+	m_saveLastNotUpWallPos = GetFeetLocation() + FVector(0.f, 0.f, FMath::Max(m_capsuleRadius, m_capsuleHeight) * InitialCapsuleScale);
+
 	if (m_stateMachineClass)
 	{
 		m_stateMachine = NewObject<UPlayerStateMachine>(this, m_stateMachineClass);
@@ -265,7 +269,14 @@ void APlayerCharacter::Tick(float _deltaTime)
 	//現在位置で通常状態に戻ったら壁にのめり込むか
 	if (!IsUpPosWall(GetFeetLocation()))
 	{
-		m_saveLastNotUpWallPos = GetActorLocation();
+		//しゃがみ中でも、立った時の中心位置として保存する
+		const UCapsuleComponent* PlayerCapsule = GetCapsuleComponent();
+		if (IsValid(PlayerCapsule))
+		{
+			const float Scale = PlayerCapsule->GetScaledCapsuleHalfHeight() / FMath::Max(1.f, PlayerCapsule->GetUnscaledCapsuleHalfHeight());
+			const float StandingHeight = FMath::Max(m_capsuleRadius, m_capsuleHeight) * Scale;
+			m_saveLastNotUpWallPos = GetFeetLocation() + FVector(0.f, 0.f, StandingHeight);
+		}
 	}
 
 	UpdateMeshCameraVisibility();

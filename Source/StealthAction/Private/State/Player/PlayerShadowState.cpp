@@ -131,6 +131,11 @@ void UPlayerShadowState::OnEnter_Implementation()
 
 	//高さだけでなく半径も小さくする
 	OriginalCollisionProfile = Capsule->GetCollisionProfileName();
+	//しゃがみから低い場所で入った時は、立てる場所を解除時の退避先にする
+	if (!CanRestoreAtFeet(LastSafeFeet))
+	{
+		LastSafeFeet = PlayerCharacter->m_saveLastNotUpWallPos - FVector(0.f, 0.f, PreviousHeight);
+	}
 	Capsule->SetCollisionProfileName(ShadowCollisionProfile);
 	const float Radius = FMath::Max(1.f, ShadowCapsuleRadius);
 	Capsule->SetCapsuleSize(Radius, FMath::Max(Radius, ShadowCapsuleHalfHeight));
@@ -145,7 +150,6 @@ void UPlayerShadowState::OnEnter_Implementation()
 	Mesh->SetGenerateOverlapEvents(false);
 	PlayerCharacter->m_cameraStatus = ECameraStatus::InShadow;
 	PlayerCharacter->m_bCameraSwitching = true;
-	PlayerCharacter->m_saveLastNotUpWallPos = PlayerCharacter->GetActorLocation();
 
 	//沈むメッシュではなく移動用のルートへ追従させる
 	StopShadowEffect();

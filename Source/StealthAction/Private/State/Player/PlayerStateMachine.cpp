@@ -123,6 +123,7 @@ bool UPlayerStateMachine::ChangePlayerState(TSubclassOf<UPlayerStateBase> NewSta
 	}
 
 	//被ダメージと死亡は終了待ち中でも割り込む
+	TGuardValue<const UPlayerStateBase*> TargetGuard(TransitionTarget, State);
 	if (State->IsA<UPlayerDamageState>() || State->IsA<UPlayerDeadState>())
 	{
 		return ForceChangeState(State);

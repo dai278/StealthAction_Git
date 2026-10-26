@@ -5,8 +5,10 @@
 
 #include "State/Player/PlayerCrouchState.h"
 #include "State/Player/PlayerStateMachine.h"
+#include "State/Player/PlayerShadowState.h"
 #include "StealthAction/PlayerCharacter/PlayerCharacter.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 //-----------------------------------------------------
 //コンストラクタ
@@ -31,10 +33,8 @@ void UPlayerCrouchState::OnEnter_Implementation()
 	}
 	if (APlayerCharacter* PlayerCharacter = GetPlayer())
 	{
-		if (UCapsuleComponent* Capsule = PlayerCharacter->GetCapsuleComponent())
-		{
-			Capsule->SetCapsuleHalfHeight(PlayerCharacter->m_capsuleHeight * FMath::Clamp(CapsuleHeightRatio, 0.01f, 1.f));
-		}
+		ResizeCapsuleAtFeet(PlayerCharacter->m_capsuleHeight * FMath::Clamp(CapsuleHeightRatio, 0.01f, 1.f),
+			PlayerCharacter->GetFeetLocation());
 		PlayerCharacter->m_cameraStatus = ECameraStatus::Crouch;
 		PlayerCharacter->m_bCameraSwitching = true;
 	}
@@ -47,15 +47,48 @@ void UPlayerCrouchState::OnExit_Implementation()
 {
 	if (APlayerCharacter* PlayerCharacter = GetPlayer())
 	{
-		if (PlayerCharacter->IsUpPosWall(PlayerCharacter->GetFeetLocation()))
+		UCapsuleComponent* Capsule = PlayerCharacter->GetCapsuleComponent();
+		if (!IsValid(Capsule))
 		{
-			PlayerCharacter->SetActorLocation(PlayerCharacter->m_saveLastNotUpWallPos);
+			return;
 		}
-		if (UCapsuleComponent* Capsule = PlayerCharacter->GetCapsuleComponent())
+		FVector Feet = PlayerCharacter->GetFeetLocation();
+		const UPlayerStateMachine* Machine = GetPlayerMachine();
+		const UPlayerStateBase* NextState = Machine ? Machine->GetTransitionTarget() : nullptr;
+		const bool bEnteringShadow = NextState && NextState->IsA<UPlayerShadowState>();
+
+		//影へは同じ足元から潜る。通常状態へ戻す場合だけ退避位置を使う
+		if (!bEnteringShadow && PlayerCharacter->IsUpPosWall(Feet))
 		{
-			Capsule->SetCapsuleHalfHeight(PlayerCharacter->m_capsuleHeight);
+			const float Scale = Capsule->GetScaledCapsuleHalfHeight() / FMath::Max(1.f, Capsule->GetUnscaledCapsuleHalfHeight());
+			const float StandingHeight = FMath::Max(Capsule->GetUnscaledCapsuleRadius(), PlayerCharacter->m_capsuleHeight) * Scale;
+			Feet = PlayerCharacter->m_saveLastNotUpWallPos - FVector(0.f, 0.f, StandingHeight);
 		}
+		ResizeCapsuleAtFeet(PlayerCharacter->m_capsuleHeight, Feet);
 		PlayerCharacter->m_cameraStatus = ECameraStatus::ThirdPerson;
 		PlayerCharacter->m_bCameraSwitching = true;
+	}
+}
+
+//-----------------------------------------------------
+//足元を固定してカプセルの高さを変更
+//-----------------------------------------------------
+void UPlayerCrouchState::ResizeCapsuleAtFeet(float HalfHeight, const FVector& Feet)
+{
+	APlayerCharacter* PlayerCharacter = GetPlayer();
+	UCapsuleComponent* Capsule = PlayerCharacter ? PlayerCharacter->GetCapsuleComponent() : nullptr;
+	if (!IsValid(Capsule))
+	{
+		return;
+	}
+
+	const float PreviousHeight = Capsule->GetScaledCapsuleHalfHeight();
+	Capsule->SetCapsuleHalfHeight(HalfHeight);
+	const float NewHeight = Capsule->GetScaledCapsuleHalfHeight();
+	PlayerCharacter->SetActorLocation(Feet + FVector(0.f, 0.f, NewHeight));
+	if (USkeletalMeshComponent* Mesh = PlayerCharacter->GetMesh())
+	{
+		//カプセルの中心が動いた分だけメッシュを戻す
+		Mesh->AddWorldOffset(FVector(0.f, 0.f, PreviousHeight - NewHeight));
 	}
 }

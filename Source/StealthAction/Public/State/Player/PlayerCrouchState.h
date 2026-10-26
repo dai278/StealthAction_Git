@@ -31,4 +31,9 @@ class STEALTHACTION_API UPlayerCrouchState : public UPlayerLocomotionState
 
 	//終了処理
 	virtual void OnExit_Implementation() override;
+
+  private:
+
+	//足元を固定して高さを変え、メッシュの位置も補正する
+	void ResizeCapsuleAtFeet(float HalfHeight, const FVector& Feet);
 };
