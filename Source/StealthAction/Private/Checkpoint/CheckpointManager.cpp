@@ -1,3 +1,4 @@
+//’S“–“úîà
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
@@ -40,7 +41,6 @@ void UCheckpointManager::OnWorldBeginPlay(UWorld& InWorld)
 	UPlayDataGameInstanceSubsystem* pPlayData = (GetWorld() && GetWorld()->GetGameInstance() ? GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>() : nullptr);
 	if (!pPlayData)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("UPlayDataGameInstanceSubsystem Genereted Miss"));
 		return;
 	}
 	FCheckpointInfo info= pPlayData->GetCheckpointInfo();
@@ -82,7 +82,6 @@ void UCheckpointManager::AddCheckpoint(ACheckpoint* _checkpoint)
 				return;
 			}
 
-			//UE_LOG(LogTemp, Display, TEXT("Light‚ÌIndex‚ª‚©‚Ô‚Á‚Ä‚¢‚Ü‚·"), i);
 			return;
 		}
 
@@ -138,15 +137,12 @@ void UCheckpointManager::SetCurrentCheckpointIndex(const int32& _index)
 	if (!m_checkpoints.IsValidIndex(_index) || !IsValid(m_checkpoints[_index])
 		|| _index < m_currentCheckpointIndex)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("SetCurrentCheckpointIndex,Miss"));
 		return;
 	}
 	if(_index < m_currentCheckpointIndex)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("SetCurrentCheckpointIndex,Miss"));
 		return;
 	}
-	//UE_LOG(LogTemp, Display, TEXT("indexF"),_index);
 	//@•s³‚È’l‚Å‚È‚¯‚ê‚ÎƒCƒ“ƒfƒbƒNƒX‚ðÝ’è
 	m_currentCheckpointIndex = _index;
 
@@ -154,7 +150,6 @@ void UCheckpointManager::SetCurrentCheckpointIndex(const int32& _index)
 	UPlayDataGameInstanceSubsystem* pPlayData = (GetWorld() && GetWorld()->GetGameInstance() ? GetWorld()->GetGameInstance()->GetSubsystem<UPlayDataGameInstanceSubsystem>() : nullptr);
 	if (!pPlayData)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("UPlayDataGameInstanceSubsystem Genereted Miss"));
 		return;
 	}
 
@@ -176,7 +171,6 @@ int32 UCheckpointManager::GetCurrentCheckpointIndex() const
 //-----------------------------------------------------------
 void UCheckpointManager::OnOverlapCheckpoint()
 {
-	//UE_LOG(LogTemp, Display, TEXT("OnOverlapCheckpoint"));
 	int32 num = m_OnOverlapCheckpointFunctions.Num();
 	for (std::function<void()>& func : m_OnOverlapCheckpointFunctions)
 	{

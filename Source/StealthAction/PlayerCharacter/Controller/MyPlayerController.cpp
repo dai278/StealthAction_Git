@@ -25,7 +25,6 @@
 //
 //	if (!PlayerCharacter)
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter not found"));
 //	}
 //
 //
@@ -42,7 +41,6 @@
 //	}
 //	else
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("HUDWidgetClass is not set"));
 //	}
 //
 //	if (ShadowEffect) {
@@ -50,7 +48,6 @@
 //		m_pShadowEffect = CreateWidget<UShadowEffect>(this, ShadowEffect);
 //		m_pShadowEffect->AddToViewport();
 //		m_pShadowEffect->SetVisibility(ESlateVisibility::Hidden);
-//		UE_LOG(LogTemp, Display, TEXT("seisei"));
 //
 //	}
 //	//============================
@@ -60,7 +57,6 @@
 //    // レーダーUIのクラスが設定されていなければ何もしない
 //    if (!RadarWidgetClass)
 //    {
-//        UE_LOG(LogTemp, Warning, TEXT("RadarWidgetClass is not set"));
 //        return;
 //    }
 //
@@ -68,7 +64,6 @@
 //    RadarWidget = CreateWidget<URadarWidget>(this, RadarWidgetClass);
 //    if (!RadarWidget)
 //    {
-//        UE_LOG(LogTemp, Warning, TEXT("Failed to create RadarWidget"));
 //        return;
 //    }
 //
@@ -77,7 +72,6 @@
 //
 //
 //
-//    UE_LOG(LogTemp, Warning, TEXT("RadarWidget created and added to viewport"));
 //}
 //
 //void AMyPlayerController::Tick(float DeltaSeconds)
@@ -87,7 +81,7 @@
 //
 //}
 
-#include "StealthAction/PlayerCharacter/Controller/MyPlayerController.h" // ★必ず最上段
+#include "StealthAction/PlayerCharacter/Controller/MyPlayerController.h" //自身のヘッダーを最初にincludeする
 
 #include "EnhancedInputSubsystems.h"
 #include "Blueprint/UserWidget.h"
@@ -119,7 +113,6 @@ void AMyPlayerController::BeginPlay()
 	PlayerCharacter = Cast<APlayerCharacter>(GetPawn());
 	if (!PlayerCharacter)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter not found"));
 	}
 
 	// ============================
@@ -175,8 +168,6 @@ void AMyPlayerController::BeginPlay()
 		SetInputMode_Player();
 	}
 
-	//UE_LOG(LogTemp, Warning, TEXT("PlayerIMC: %s"), PlayerIMC ? TEXT("OK") : TEXT("NULL"));
-	//UE_LOG(LogTemp, Warning, TEXT("MenuIMC: %s"), MenuIMC ? TEXT("OK") : TEXT("NULL"));
 
 	// ポーズ中もTick可能にする設定
 	// 自作PlayerControllerのBeginPlay等で
@@ -239,7 +230,6 @@ void AMyPlayerController::ApplyIMC(EInputModeType NewMode)
 {
 	if (!IsValid(GetLocalPlayer())) { return; }
 
-	//UE_LOG(LogTemp, Warning, TEXT("ApplyIMC: %d"), (int32)NewMode);
 
 	if (CurrentInputMode == NewMode) return;
 

@@ -117,7 +117,7 @@ protected:
 	void ApplyIMC(EInputModeType NewMode);
 
 	// ============================
-	// Input Mapping ContextišBP‚Åİ’è‚·‚éj
+	//Input Mapping Context‚ÍBP‚Åİ’è‚·‚é
 	// ============================
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* PlayerIMC;

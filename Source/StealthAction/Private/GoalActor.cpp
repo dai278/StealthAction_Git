@@ -23,7 +23,7 @@ AGoalActor::AGoalActor()
 	//Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
 	//Collision->SetupAttachment(RootComponent);
 
-	// ★ オーバーラップ専用設定 ★
+	//オーバーラップ専用設定
 	//Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	//Collision->SetCollisionResponseToAllChannels(ECR_Overlap);
 

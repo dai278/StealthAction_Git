@@ -152,8 +152,8 @@
 //
 //public:
 //	//プレイヤーを見つけているかどうか
-//	//確認が取れてないので仮でfalse返す
-//	//確認取れたらCpp側で実装予定
+//
+//
 //	bool IsPlayerFound() const { return m_battleCheck; }
 //
 //public:

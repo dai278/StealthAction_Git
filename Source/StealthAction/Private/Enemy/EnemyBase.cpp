@@ -177,7 +177,6 @@ AEnemyBase::AEnemyBase()
 	noise = CreateDefaultSubobject<UNoiseListenerComponent>(TEXT("NoiseListener"));
 	if (noise)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("ノイズリスナー生成完了"));
 		noise->SetCallBackFunction(CreateNoiseEventCallback(AEnemyBase::OnNoiseHeard));
 		noise->SetActive(true);
 	}
@@ -227,7 +226,6 @@ void AEnemyBase::BeginPlay()
 
 
 
-	//UE_LOG(LogTemp, Warning, TEXT("AEnemyBase BeginPlay"));
 
 	//ゲーム全体び対するActorの検索処理はコストが高いため、BeingPlayで一回保存しておくだけにする
 	// 9
@@ -235,7 +233,6 @@ void AEnemyBase::BeginPlay()
 
 	if (!m_pPlayerChara)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Can't find PlayerChara"));
 	}
 
 
@@ -305,11 +302,9 @@ void AEnemyBase::BeginPlay()
 	UEnemy_RouteManager* RouteManager = (GetWorld() ? GetWorld()->GetSubsystem<UEnemy_RouteManager>() : nullptr);
 	if (!RouteManager)
 	{
-		//UE_LOG(LogTemp, Error, TEXT("RouteManager is NULL"));
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("RouteManager Found"));
 		m_pEnemy_Route = RouteManager->AddRoute(m_routeNum, m_randomRoute);
 	}
 
@@ -433,12 +428,10 @@ void AEnemyBase::BeginPlay()
 
 	if (IsValid(m_effectPool))
 	{
-		//UE_LOG(LogTemp, Error, TEXT("m_effectPool BeginPlay: BulletStorage FOUND"));
 	}
 
 	if (!m_effectPool)
 	{
-		//UE_LOG(LogTemp, Error, TEXT("m_effectPool BeginPlay: BulletStorage NOT FOUND"));
 	}
 
 	Tags.AddUnique(FName("Effect"));
@@ -451,11 +444,9 @@ void AEnemyBase::BeginPlay()
 
 	if (IsValid(m_effectPool))
 	{
-		//UE_LOG(LogTemp, Display, TEXT("m_effectPool: FOUND"));
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("m_effectPool: NOT FOUND"));
 	}
 
 }
@@ -478,13 +469,11 @@ void AEnemyBase::Tick(float DeltaTime)
 	if (!GetWorld() || !IsValid(GetCharacterMovement())) { return; }
 
 
-	//UE_LOG(LogTemp, Warning, TEXT("m_currentChaseSpeed= %d"), m_stopCheck);
 
 	// ===== 検証用：Kキーで強制死亡 =====
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (IsValid(PC) && PC->WasInputKeyJustPressed(EKeys::K))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("[[]]K Pressed"));
 		m_enemyInfo.hp = 0;
 	}
 	//死亡判定
@@ -573,7 +562,6 @@ void AEnemyBase::CaseDead(float _deltaTime)
 	// 初回のみ実行
 	if (!m_enemyInfo.bIsDead)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("[[]]Dead"));
 
 		m_deadCheck = true;
 		m_enemyInfo.bIsDead = true;
@@ -846,7 +834,6 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 
 	}
 
-	//UE_LOG(LogTemp, Warning, TEXT("m_hearingTime= %f"), m_hearingTime);
 
 	//OnNoiseが呼ばれていれば更新許可
 	if (m_isCallOnNoise_Fleam)
@@ -987,7 +974,6 @@ void AEnemyBase::UpdateHearing(float _deltaTime)
 		m_noiseCheck = false;		//物音チェックOF
 	}
 
-	//UE_LOG(LogTemp, Warning, TEXT("m_noiseLevel= %d"), m_noiseLevel);
 
 }
 
@@ -1038,7 +1024,6 @@ void AEnemyBase::UpdateSearch(float _deltaTime)
  		else if (m_visionLevel == 2)
 		{
 			m_enemyCurrentState = EEnemyStatus::Doubt;
-			//UE_LOG(LogTemp, Log, TEXT("のいずずずずずずずずずずずずずずずずずずずうずずずｚ"));
 		}
 		//注意
 		else if (m_visionLevel == 3)
@@ -1339,7 +1324,6 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 	//呼び始め1回のみ
 	if (!m_patrolCheck)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Patrol"));
 
 		m_patrolCheck = true;
 		m_currentChaseSpeed = m_chaseSpeed_Slow;		//追跡速度の変更
@@ -1353,7 +1337,6 @@ void AEnemyBase::CasePatrol(float _deltaTime)
 	//移動中止
 	if (m_patrolCancel)
 	{
-		//	UE_LOG(LogTemp, Warning, TEXT("m_moveStop"));
 		return;
 	}
 
@@ -1522,7 +1505,6 @@ void AEnemyBase::CaseDoubt(float _deltaTime)
 	//呼び始め1回のみ
 	if (!m_doubtCheck)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Doubt"));
 
 		m_doubtCheck = true;
 		m_currentChaseSpeed = m_chaseSpeed_Normal;		//追跡速度の変更
@@ -1571,7 +1553,6 @@ void AEnemyBase::CaseDoubt_Noise(float _deltaTime)
 	//呼び始め1回のみ
 	if (!m_doubtNoiseCheck)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Doubt_Noise"));
 
 		m_doubtNoiseCheck = true;
 
@@ -1610,7 +1591,6 @@ void AEnemyBase::CaseCaution(float _deltaTime)
 	//呼び始め1回のみ
 	if (!m_cautionCheck)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Caution"));
 
 		m_cautionCheck = true;
 		m_cautionPriorityCheck = true;
@@ -1667,7 +1647,6 @@ void AEnemyBase::CaseCaution_Noise(float _deltaTime)
 	//呼び始め1回のみ
 	if (!m_cautionNoiseCheck)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Caution_Noise"));
 
 		m_cautionNoiseCheck = true;
 		m_currentChaseSpeed = m_chaseSpeed_Normal;		//追跡速度の変更
@@ -1721,7 +1700,6 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 	//呼び始め1回のみ
 	if (!m_battleCheck)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Battle"));
 
 		m_battleCheck = true;//戦闘中
 		m_alertCheck = true;	//警戒状態ON
@@ -1907,7 +1885,6 @@ void AEnemyBase::CaseBattle(float _deltaTime)
 	//もしプレイヤーがいた位置に近づいた場合
 	if (m_visionCheck == false &&  m_notFoundTime > m_notFoundTime_Limit)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Nooooooooooooooooooooooooo"));
 
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
@@ -1929,7 +1906,6 @@ void AEnemyBase::CaseBattle_Noise(float _deltaTime)
 	//呼び始め1回のみ
 	if (!m_battleNoiseCheck)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Battle_Noise"));
 
 		m_battleNoiseCheck = true;//戦闘中
 		m_alertCheck = true;	//警戒状態ON
@@ -1963,7 +1939,6 @@ void AEnemyBase::CaseBattle_Noise(float _deltaTime)
 
 	if (m_stopDistance_Noise > distance_2D || m_notFoundNoiseTime > m_notFoundNoiseTime_Limit)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Battle_NoiseStop"));
 
 		m_moveStop_Nav = true;		//停止（Nav）
 		UpdateMove_Nav(_deltaTime);
@@ -1986,7 +1961,6 @@ void AEnemyBase::CaseMiss(float _deltaTime)
 	if (!m_missCheck)
 	{
 		//
-		//UE_LOG(LogTemp, Warning, TEXT("Miss"));
 		m_missCheck = true;//失踪中
 		m_visionCheck = false;
 		m_noiseCheck = false;
@@ -2145,7 +2119,6 @@ void AEnemyBase::CaseReturn(float _deltaTime)
 	if (!m_returnCheck)
 	{
 		//
-		//UE_LOG(LogTemp, Warning, TEXT("Return"));
 
 		m_currentChaseSpeed = m_chaseSpeed_Normal;	//追跡速度の変更
 		GetCharacterMovement()->MaxWalkSpeed = m_currentChaseSpeed;
@@ -2177,7 +2150,6 @@ void AEnemyBase::CaseReturn(float _deltaTime)
 		m_returnTime = 0;					//帰還時間リセット
 		m_returnCheck = false;	//帰還終了
 		//
-		//UE_LOG(LogTemp, Warning, TEXT("ReturnOK"));
 
 	}
 }
@@ -2350,7 +2322,6 @@ void AEnemyBase::UpdateMove_Nav(float _deltaTime)
 //------------------------------------------------------------------------------------------------------------
 void AEnemyBase::UpdateAttack(float _deltaTime)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Attack"));
 
 	if (m_animationAttackTime<=0)
 	{
@@ -2365,7 +2336,6 @@ void AEnemyBase::UpdateAttack(float _deltaTime)
 	{
 		if (IsValid(m_sword))
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Swing"));
 			m_sword->Swinging(false);
 			m_animationAttackTime = 0;
 			m_attackTime = 0;
@@ -2450,11 +2420,9 @@ void AEnemyBase::OnDamage(int32 Damage, FVector KnockBackValue, bool _bSneakKill
 
 	if (_bSneakKill)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Sneak Kill"));
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Sneak Miss"));
 	}
 }
 

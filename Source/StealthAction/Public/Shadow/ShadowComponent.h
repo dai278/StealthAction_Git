@@ -48,7 +48,7 @@ protected:
 
 public:
 	//更新処理
-	//ELevelTick,FActorComponentTickFunctionは基本Supperに渡すくらいしか使わないらしい
+	//Tick情報は基底クラスへ渡す
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void OnRegister()override;

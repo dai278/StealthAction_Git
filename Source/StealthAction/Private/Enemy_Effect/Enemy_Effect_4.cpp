@@ -24,7 +24,6 @@ AEnemy_Effect_4::AEnemy_Effect_4()
 
 void AEnemy_Effect_4::ActivateEffect(const FVector& StartPos, AActor* TargetActor)
 {
-    //UE_LOG(LogTemp, Warning, TEXT("EffectActiveX"));
 
     // 以前のタイマーが残っていると再利用時に事故る
     if (UWorld* TimerWorld = GetWorld())

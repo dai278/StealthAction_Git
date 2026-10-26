@@ -1,3 +1,4 @@
+//’S“–“úîà
 #include "PlayerCharacter.h"
 #include "State/Player/PlayerCrouchState.h"
 #include "State/Player/PlayerShadowState.h"
@@ -409,7 +410,7 @@ void APlayerCharacter::UpdateCamera(float _deltaTime)
 			//Œ»ÝˆÊ’u‚Æ‰ŠúƒIƒtƒZƒbƒg‚Ì·
 			float socketLeght = socketOffsetPosY - m_initOffsetY;
 
-			//‰ŠúˆÊ’u‚É‚¢‚È‚¯‚ê‚Îˆ—H
+			//‰ŠúˆÊ’u‚©‚ç‚¸‚ê‚Ä‚¢‚éê‡‚Í–ß‚·
 			if (!FMath::IsNearlyZero(abs(socketLeght)))
 			{
 				//’†‰›+-‚ª‚Ç‚Á‚¿‚©
@@ -446,8 +447,8 @@ void APlayerCharacter::UpdateCameraShake(float _deltaTime)
 //----------------------------------------------------------
 void APlayerCharacter::UpdateCameraCollision()
 {
-	//Œš•¨‚ª“§‰ß‚³‚ê‚é‚Ì‚Íœæ¶‚ªì‚Á‚½ƒNƒ‰ƒX‚Ì‹@”\‚¾‚©‚çˆê’U•ú’u
-	//‘Š’k’†
+	//ƒJƒƒ‰Õ“Ëˆ—‚ÌŠg’£—p
+
 }
 
 //ƒXƒ^ƒ~ƒiÁ”ï
@@ -882,7 +883,6 @@ void APlayerCharacter::Enhanced_CameraSwitch(const FInputActionValue& Value)
 	m_cameraStatus = (m_cameraStatus == ECameraStatus::ThirdPerson) ? ECameraStatus::TopDownView : ECameraStatus::ThirdPerson;
 
 	if (m_bCameraSwitching) {
-		//UE_LOG(LogTemp, Display, TEXT("trueeeeeeeeeeeeeeeeeeeeeeeeeee"));
 	}
 }
 
@@ -916,7 +916,6 @@ void APlayerCharacter::OnBeginOverlap(
 	const FHitResult& SweepResult
 )
 {
-	//UE_LOG(LogTemp, Display, TEXT("unnti"));
 
 	if (!IsValid(OtherActor) || !IsValid(OtherComp)) { return; }
 	//‰eƒIƒuƒWƒFƒNƒg‚ÆÕ“Ë‚µ‚½‚©
@@ -945,7 +944,6 @@ void APlayerCharacter::OnEndOverlap(
 	int32 OtherBodyIndex
 )
 {
-	//UE_LOG(LogTemp, Display, TEXT("end Hit"));
 	if (!IsValid(OtherActor) || !IsValid(OtherComp)) { return; }
 
 	if (OtherComp->ComponentHasTag(TEXT("Shadow")))

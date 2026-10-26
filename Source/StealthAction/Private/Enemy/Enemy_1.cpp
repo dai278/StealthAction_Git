@@ -147,7 +147,6 @@
 //	noise = CreateDefaultSubobject<UNoiseListenerComponent>(TEXT("NoiseListener"));
 //	if (noise)
 //	{
-//		UE_LOG(LogTemp, Display, TEXT("ノイズリスナー生成完了"));
 //		noise->SetCallBackFunction(CreateNoiseEventCallback(AEnemy_1::OnNoiseHeard));
 //		noise->SetActive(true);
 //	}
@@ -187,7 +186,6 @@
 //	EnableInput(GetWorld()->GetFirstPlayerController());
 //
 //
-//	UE_LOG(LogTemp, Warning, TEXT("AEnemy_1 BeginPlay"));
 //
 //	//ゲーム全体び対するActorの検索処理はコストが高いため、BeingPlayで一回保存しておくだけにする
 //	// 
@@ -195,7 +193,6 @@
 //
 //	if (!m_pPlayerChara)
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("Can't find PlayerChara"));
 //	}
 //
 //
@@ -248,11 +245,9 @@
 //	UEnemy_RouteManager* RouteManager = GetWorld()->GetSubsystem<UEnemy_RouteManager>();
 //	if (!RouteManager)
 //	{
-//		UE_LOG(LogTemp, Error, TEXT("RouteManager is NULL"));
 //	}
 //	else
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("RouteManager Found"));
 //		m_pEnemy_Route = RouteManager->AddRoute(m_routeNum, m_randomRoute);
 //	}
 //
@@ -361,7 +356,6 @@
 //	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 //	if (PC && PC->WasInputKeyJustPressed(EKeys::K))
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("[[]]K Pressed"));
 //		m_HP = 0;
 //	}
 //	//死亡判定
@@ -411,7 +405,6 @@
 //	// 初回のみ実行
 //	if (!m_deadCheck)
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("[[]]Dead"));
 //
 //		m_deadCheck = true;
 //
@@ -723,7 +716,6 @@
 ////------------------------------------------------------------------------------------------------------------
 //void AEnemy_1::UpdateAttack(float _deltaTime)
 //{
-//		UE_LOG(LogTemp, Warning, TEXT("Attack"));
 //		//m_attackingTime += _deltaTime;
 //
 //		//m_pEnemy_Weapon->BulletFire(m_allTime, this);
@@ -792,11 +784,9 @@
 //
 //	if(_bSneakKill)
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("Sneak Kill"));
 //	}
 //	else
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("Sneak Miss"));
 //	}
 //}
 ////------------------------------------------------------------------------------------------------------------
@@ -1000,7 +990,6 @@
 //	//呼び始め1回のみ
 //	if (!m_patrolCheck)
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("Patrol"));
 //
 //		m_patrolCheck = true;
 //		m_currentChaseSpeed = m_chaseSpeed_Slow;		//追跡速度の変更
@@ -1014,7 +1003,6 @@
 //	//移動中止
 //	if (m_patrolCancel)
 //	{
-//		//	UE_LOG(LogTemp, Warning, TEXT("m_moveStop"));
 //		return;
 //	}
 //
@@ -1024,7 +1012,6 @@
 //	if (m_pEnemy_Route.Num() == 0)
 //	{
 //		//
-//		UE_LOG(LogTemp, Warning, TEXT("Patrol_NULL"));
 //
 //		FHitResult HitCollision;	//ヒットした（＝コリジョン判定を受けた）オブジェクトを格納する変数
 //
@@ -1298,7 +1285,6 @@
 //	//呼び始め1回のみ
 //	if (!m_doubtCheck)
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("Doubt"));
 //
 //		m_doubtCheck = true;
 //		m_currentChaseSpeed = m_chaseSpeed_Normal;		//追跡速度の変更
@@ -1336,7 +1322,6 @@
 //	//呼び始め1回のみ
 //	if (!m_doubtNoiseCheck)
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("Doubt_Noise"));
 //
 //		m_doubtNoiseCheck = true;
 //	}
@@ -1366,7 +1351,6 @@
 //	//呼び始め1回のみ
 //	if (!m_cautionCheck)
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("Caution"));
 //
 //		m_cautionCheck = true;
 //		m_currentChaseSpeed = m_chaseSpeed_Normal;		//追跡速度の変更
@@ -1419,7 +1403,6 @@
 //	//呼び始め1回のみ
 //	if (!m_cautionNoiseCheck)
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("Caution_Noise"));
 //
 //		m_cautionNoiseCheck = true;
 //		m_currentChaseSpeed = m_chaseSpeed_Normal;		//追跡速度の変更
@@ -1465,7 +1448,6 @@
 //	//呼び始め1回のみ
 //	if (!m_battleCheck)
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("Battle"));
 //
 //		m_battleCheck = true;//戦闘中
 //		m_alertCheck = true;	//警戒状態ON
@@ -1511,7 +1493,6 @@
 //
 //		if (m_sword)
 //		{
-//			UE_LOG(LogTemp, Warning, TEXT("Swing"));
 //			m_sword->Swinging(false);
 //		}
 //
@@ -1577,7 +1558,6 @@
 //	//呼び始め1回のみ
 //	if (!m_battleNoiseCheck)
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("Battle_Noise"));
 //
 //		m_battleNoiseCheck = true;//戦闘中
 //		m_alertCheck = true;	//警戒状態ON
@@ -1616,7 +1596,6 @@
 //
 //	if (m_stopDistance_Noise > distance_2D)
 //	{
-//		UE_LOG(LogTemp, Warning, TEXT("Battle_NoiseStop"));
 //
 //		m_moveStop_Nav = true;		//停止（Nav）
 //		UpdateMove_Nav(_deltaTime);
@@ -1637,7 +1616,6 @@
 //	if (!m_missCheck)
 //	{
 //		//
-//		UE_LOG(LogTemp, Warning, TEXT("Miss"));
 //		m_missCheck = true;//失踪中
 //		m_visionCheck = false;
 //		m_noiseCheck = false;
@@ -1747,7 +1725,6 @@
 //	if (!m_returnCheck)
 //	{
 //		//
-//		UE_LOG(LogTemp, Warning, TEXT("Return"));
 //
 //		m_currentChaseSpeed = m_chaseSpeed_Normal;	//追跡速度の変更
 //		GetCharacterMovement()->MaxWalkSpeed = m_currentChaseSpeed;
@@ -1776,7 +1753,6 @@
 //		m_returnTime = 0;					//帰還時間リセット
 //		m_returnCheck = false;	//帰還終了
 //		//
-//		//UE_LOG(LogTemp, Warning, TEXT("ReturnOK"));
 //
 //	}
 //}

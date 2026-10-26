@@ -1,3 +1,4 @@
+//’S“–“úîà
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
@@ -24,7 +25,7 @@ UShadowComponent::UShadowComponent()
 	, m_scaleType(EShadowScaleType::OriginalScale)
 	, m_isUsingAbsoluteRotation(true)
 {
-	// Tick‚ğ—LŒø‚É‚·‚é‚È‚ñ‚©—LŒø‚©‚µ‚È‚©‚Á‚½‚©‚ç‚¢‚Á‚Ï‚¢‚µ‚Ä‚é
+	//‰e‚ÌˆÊ’u‚ÆŒ`ó‚ğ–ˆƒtƒŒ[ƒ€XV‚·‚é
 	PrimaryComponentTick.bCanEverTick = true;
 	SetComponentTickEnabled(true);
 	SetAutoActivate(true);
@@ -78,7 +79,7 @@ void UShadowComponent::OnRegister()
 		m_pCollisionBox->SetupAttachment(this);
 	}
 
-	// ‰ñ“]‚ğe‚Ì‰e‹¿‚É‚µ‚È‚¢i‚ ‚È‚½‚ÌˆÓ}’Ê‚èj
+	//e‚Ì‰ñ“]‚É‰e‹¿‚³‚ê‚È‚¢‚æ‚¤‚É‚·‚é
 	SetUsingAbsoluteRotation(true);
 
 }
@@ -151,7 +152,6 @@ void UShadowComponent::BeginPlay()
 void UShadowComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	//UE_LOG(LogTemp, Warning, TEXT("Shadow Tick!!"));
 	UpdateTransform();
 }
 

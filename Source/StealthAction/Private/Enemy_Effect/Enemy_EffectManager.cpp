@@ -21,7 +21,6 @@ void AEnemy_EffectManager::BeginPlay()
 	UWorld* World = GetWorld();
 	if (!World)
 	{
-		//UE_LOG(LogTemp, Error, TEXT("AEnemy_EffectManager::BeginPlay World is null"));
 		return;
 	}
 

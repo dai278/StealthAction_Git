@@ -54,7 +54,7 @@ struct FCameraFocusData
 	ERewindTriggerType RewindTriggerType = ERewindTriggerType::TimedAuto;
 };
 
-// 動的デリゲートの宣言例
+//動的デリゲートの宣言
 DECLARE_DYNAMIC_DELEGATE_OneParam(FObtainedDynamicDelegate, FCameraFocusData, _cameraFocusData);
 
 

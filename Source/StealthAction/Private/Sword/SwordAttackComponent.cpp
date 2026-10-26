@@ -1,3 +1,4 @@
+//’S“–“úîà
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
@@ -25,7 +26,6 @@ USwordAttackComponent::USwordAttackComponent()
 	//ƒRƒŠƒWƒ‡ƒ“¶¬
 	m_swordCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SwordCollision"));
 	if (!IsValid(m_swordCollision)) {
-		////UE_LOG(LogTemp, Display, TEXT("Œ•ƒRƒŠƒWƒ‡ƒ“¶¬¸”s"));
 	}
 	else
 	{
@@ -52,7 +52,6 @@ void USwordAttackComponent::BeginPlay()
 	m_swordCollision->SetGenerateOverlapEvents(false);
 
 	//debug
-	//UE_LOG(LogTemp, Warning, TEXT("SwordCollision Registered=%d"), m_swordCollision->IsRegistered());
 }
 
 // OnRegister
@@ -80,7 +79,6 @@ void USwordAttackComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 	FName name= m_swordCollision->GetCollisionProfileName();
 
-	//UE_LOG(LogTemp, Display, TEXT(""),name);
 
 	//ŠÔŒv‘ª
 	m_timer += DeltaTime;
@@ -161,7 +159,6 @@ void USwordAttackComponent::Swinging(const bool& _bSneakKill)
 		//‚·‚Å‚ÉU‚Á‚Ä‚¢‚é‚È‚ç–³‹
 		return;
 	}
-	//UE_LOG(LogTemp, Display, TEXT("KenHutta"));
 	SetComponentTickEnabled(true);
 	m_bIsSwinging = true;
 	m_timer = 0.0f;
@@ -220,7 +217,6 @@ void USwordAttackComponent::OnSwordBeginOverlap(
 	IDamageable* Damageable = Cast<IDamageable>(OtherActor);
 	if (!Damageable) { return; }
 
-	//UE_LOG(LogTemp, Display, TEXT("NanikaniHit"));
 
 	//ƒmƒbƒNƒoƒbƒN
 	FVector knockBackvector = OtherActor->GetActorLocation()-Owner->GetActorLocation() ;
@@ -229,7 +225,6 @@ void USwordAttackComponent::OnSwordBeginOverlap(
 	knockBackvector *= m_KnockBackValu;
 
 	
-	//UE_LOG(LogTemp, Display, TEXT("Hit to Enemy"));
 	//ƒ_ƒ[ƒW—^‚¦‚éˆ—
 	Damageable->OnDamage(m_damage, knockBackvector,m_bSneakKill);
 

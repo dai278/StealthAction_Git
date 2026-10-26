@@ -150,8 +150,8 @@ public:
 
 public:
 	//プレイヤーを見つけているかどうか
-	//確認が取れてないので仮でfalse返す
-	//確認取れたらCpp側で実装予定
+
+
 	UFUNCTION(BlueprintCallable, Category = "Enemy")
 	bool IsPlayerFound() const { 
 		//死んでたらキル出来ない様にするためtureを返す
@@ -497,7 +497,7 @@ protected:
 	EEnemyStatus m_prevState;
 
 
-	//日髙変更点
+	//コンテキストアニメーション連携
 	bool bInContextualAnimation;	//コンテキストアニメーション中かどう
 
 	

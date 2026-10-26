@@ -39,7 +39,6 @@ void AItemKey::BeginPlay()
     }
     else
     {
-        //UE_LOG(LogTemp, Error, TEXT("[]Failed to get KeyItemSubsystem"));
     }
 
 	// 初期状態で非表示にする場合はここで設定
@@ -52,11 +51,9 @@ void AItemKey::HandleOverlap(AActor* OtherActor)
 
 	if (!IsValid(OtherActor)) return;
 
-	//UE_LOG(LogTemp, Warning, TEXT("[]HandleOverlap called: %s"), *OtherActor->GetName());
 
 	if (OtherActor->ActorHasTag(TEXT("Player")))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("[]KEY GET"));
 
 		// ゴール生成
         if (GoalClass)
@@ -83,7 +80,6 @@ void AItemKey::HandleOverlap(AActor* OtherActor)
                     SpawnedGoal->Mesh->SetHiddenInGame(false);
                 }
 
-                //UE_LOG(LogTemp, Warning, TEXT("[]Goal is now visible"));
             }
 
 			// キーアイテムUI表示
@@ -103,7 +99,6 @@ void AItemKey::HandleOverlap(AActor* OtherActor)
         }
 		else
 		{
-			//UE_LOG(LogTemp, Error, TEXT("[]GoalClass is NULL"));
 		}
 
 		Destroy();

@@ -27,12 +27,10 @@ void AEnemy_Weapon_1::BeginPlay()
 
     if (m_bulletPool)
     {
-        //UE_LOG(LogTemp, Error, TEXT("Weapon BeginPlay: BulletStorage FOUND"));
     }
 
     if (!IsValid(m_bulletPool))
     {
-        //UE_LOG(LogTemp, Error, TEXT("Weapon BeginPlay: BulletStorage NOT FOUND"));
     }
 
     Tags.AddUnique(FName("Weapon"));

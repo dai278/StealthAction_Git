@@ -12,7 +12,7 @@ AItemBase::AItemBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	// ★ BoxをRootにする（重要）
+	//Boxをルートに設定する
 	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Collision"));
 	RootComponent = Collision;
 
@@ -48,7 +48,6 @@ void AItemBase::BeginPlay()
 		&AItemBase::OnOverlapBegin
 	);
 
-	//UE_LOG(LogTemp, Warning, TEXT("Item Spawned"));
 }
 
 
@@ -62,7 +61,6 @@ void AItemBase::OnOverlapBegin(
 	const FHitResult& SweepResult
 )
 {
-	//UE_LOG(LogTemp, Warning, TEXT("[]ItemBase Overlap Begin"));
 
 	HandleOverlap(OtherActor);
 }

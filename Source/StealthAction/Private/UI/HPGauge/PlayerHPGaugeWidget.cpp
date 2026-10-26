@@ -18,7 +18,6 @@ void UPlayerHPGaugeWidget::NativeConstruct()
 
 	if (!IsValid(PlayerCharacter))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter not found"));
 		return;
 	}
 

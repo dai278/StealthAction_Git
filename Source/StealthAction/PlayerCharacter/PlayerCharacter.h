@@ -45,8 +45,8 @@ class UPlayerInteractState;
 class UPlayerInteractAnimationState;
 
 //プレイヤーのカメラ視点状態
-//enum classはクラス外に書かないといけないらしいし、この書き方が良いらしい
-//暗殺シーンとかカメラ変えるかもしれないから今は2種しかないけどenumで
+//BPから参照するカメラ状態を定義する
+
 UENUM(BlueprintType)
 enum class ECameraStatus : uint8
 {
@@ -56,12 +56,12 @@ enum class ECameraStatus : uint8
 	Crouch			UMETA(DisplayName = "Crouch"),//しゃがみ
 	Dash			UMETA(DisplayName = "Dash"),//ダッシュ
 	SneakKill		UMETA(DisplayName = "SneakKill"),//暗殺
-	Num			 UMETA(DisplayName = "Num")//数計測用、UMETA(DisplayName = "Num")が必要かわからないけど書かないバグりそうな気がしたから書いてます
+	Num			 UMETA(DisplayName = "Num")//状態の要素数
 };
 
 
 //暗殺開始イベントディスパッチャー
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSneakKillStarted); // 引数なし例
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSneakKillStarted); //引数なし
 
 //影に入った時と出た時の通知
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerEnteredShadow);

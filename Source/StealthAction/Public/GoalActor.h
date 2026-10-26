@@ -42,7 +42,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UBoxComponent* Collision;
 
-	// 見た目（★ BP からメッシュ変更可能）
+	//見た目のメッシュはBPで設定する
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* Mesh;
 

@@ -1,3 +1,4 @@
+//’S“–“úîà
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
@@ -88,7 +89,6 @@ void ACheckpoint::OnBeginOverlap(
 )
 {
 
-	//UE_LOG(LogTemp, Display, TEXT("checkpointHit"));
 	//ƒI[ƒo[ƒ‰ƒbƒv‚µ‚½ƒAƒNƒ^[‚ªƒvƒŒƒCƒ„[‚È‚ç
 	//ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒgƒ}ƒl[ƒWƒƒ[‚ÉŒ»İ‚Ìƒ`ƒFƒbƒNƒ|ƒCƒ“ƒg‚ğİ’è‚·‚é
 	//(ƒvƒŒƒCƒ„[”»’è‚ÍActor‚Ìƒ^ƒO‚Ås‚¤)

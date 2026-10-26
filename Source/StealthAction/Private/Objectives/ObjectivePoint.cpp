@@ -64,7 +64,6 @@ void AObjectivePoint::OnOverlap(
 
         if (IsValid(Manager))
         {
-            //UE_LOG(LogTemp, Warning, TEXT("Switching Objective"));
             Manager->SetCurrentObjective(NextObjective);
         }
     }

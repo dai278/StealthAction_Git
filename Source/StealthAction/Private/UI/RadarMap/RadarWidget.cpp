@@ -23,7 +23,6 @@ URadarWidget::URadarWidget(const FObjectInitializer& ObjectInitializer)
 void URadarWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	//UE_LOG(LogTemp, Warning, TEXT("RadarWidget NativeConstruct"));
 }
 
 //===============================
@@ -67,11 +66,11 @@ int32 URadarWidget::NativePaint(
 	if (!IsValid(PlayerCharacter)) return LayerId;
 
 	//===============================
-	// š ‰eö‚è’†‚ÍƒŒ[ƒ_[”ñ•\¦
+	//‰eö‚è’†‚ÍƒŒ[ƒ_[”ñ•\¦
 	//===============================
 	if (PlayerCharacter->IsInShadow())
 	{
-		return LayerId; // © ‚±‚±‚Å‰½‚à•`‚©‚¸I—¹
+		return LayerId; //‰eó‘Ô‚Å‚Í•`‰æ‚µ‚È‚¢
 	}
 
 	const FVector PlayerLocation = PlayerPawn->GetActorLocation();
@@ -118,7 +117,7 @@ int32 URadarWidget::NativePaint(
 		RadarPos.Y = (-Rotated.X / RadarRange) * RadarRadius;
 
 		//’Ç‰Á
-		// š ‰~Œ`ƒŒ[ƒ_[ŠO‚Í•`‰æ‚µ‚È‚¢
+		//‰~Œ`ƒŒ[ƒ_[ŠO‚Í•`‰æ‚µ‚È‚¢
 		if (RadarPos.Size() > RadarRadius)
 		{
 			continue;

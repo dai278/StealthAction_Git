@@ -1,3 +1,4 @@
+//’S“–“úîà
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
@@ -48,7 +49,6 @@ void UExtendedSpotLightManager::AddLight(AExtendedSpotLight* _pLight)
 				return;
 			}
 			
-			//UE_LOG(LogTemp, Display, TEXT("Light‚ÌIndex‚ª‚©‚Ô‚Á‚Ä‚¢‚Ü‚·"),i);
 			return;
 		}
 
@@ -83,7 +83,6 @@ AExtendedSpotLight* UExtendedSpotLightManager::GetLight(const int32 _lightIndex)
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Display, TEXT("–³Œø‚ÈIndex‚Ì‚½‚ßnull‚ð•Ô‚µ‚Ü‚·"));
 
 		return nullptr;
 	}

@@ -1,3 +1,4 @@
+//’S“–“úîà
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
@@ -82,7 +83,6 @@ void UShadowManager::AddShadowComponent(UShadowComponent* _pShadowComponent)
 	//lightIndex‚ª-1iBPã‚Å–¢Ý’è‚È‚çˆ—‚µ‚È‚¢
 	if (_pShadowComponent->GetLightIndex() < 0)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("ƒ‰ƒCƒgIndex‚ªÝ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñFShadowManager:AddShadowComponent"));
 		return;
 	}
 
