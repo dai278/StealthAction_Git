@@ -119,7 +119,7 @@ Shadow BP の Shadow → Appearance で Sink Duration（既定0.4秒）、Sink D
 
 **マテリアル設定が必要です。** プレイヤーの全マテリアルに Scalar Parameter「Opacity」（既定1）を用意し、Maskedなら DitherTemporalAA の Alpha Threshold に接続し、その出力を Opacity Mask へ接続します（既存のマスクがあれば掛け合わせます）。Translucentなら Opacity に接続します。Opaqueのまま、またはパラメータを追加しただけでは透明になりません。パラメータが無いマテリアルは警告を出し、沈む動作と最後の非表示のみになります。この環境ではマテリアルアセット自体は変更していません。
 
-演出には一時的な動的マテリアルを使い、元のマテリアルインスタンスや他のキャラクターの値を変更しません。BPでOn Enter / On Update / On Exitを上書きする場合は「親関数を呼び出す」を接続してください。
+演出には一時的な動的マテリアルを使い、元のマテリアルインスタンスや他のキャラクターの値を変更しません。BPでOn Enter / On Updateを上書きする場合は「親関数を呼び出す」を接続してください。影の終了時の復元はC++のExitで行い、BPのOn Exit処理の後、コリジョン復元のOverlap処理が終わってから必ず実行します。カメラ接近によるHidden In Gameは影状態・カメラ切り替え中には解除し、影のVisibilityと重ねて非表示にしません。通常時にカメラが近すぎる場合は従来通り非表示にします。
 
 ### 影への出入りの通知
 
@@ -141,7 +141,7 @@ Player->OnExitedShadow.AddUniqueDynamic(this, &AMyActor::HandleExitedShadow);
 
 受信クラスのヘッダーには `UFUNCTION() void HandleEnteredShadow();` と `UFUNCTION() void HandleExitedShadow();` を宣言し、cppで `StealthAction/PlayerCharacter/PlayerCharacter.h` をincludeします。解除する時は対応する `RemoveDynamic`、BPでは `Unbind Event` を使います。
 
-通知は影ステートの開始・終了処理内で送ります。特に終了通知の時点ではマシーンの現在ステートの差し替えがまだ終わっていないため、通知内の `Is In Shadow` で判定し直さず、受け取ったイベントで出入りを判断してください。BPで影ステートの開始・終了処理を上書きしている場合は、親関数を呼んでください。
+通知は影ステートの開始・終了処理内で送ります。特に終了通知の時点ではマシーンの現在ステートの差し替えがまだ終わっていないため、通知内の `Is In Shadow` で判定し直さず、受け取ったイベントで出入りを判断してください。BPで影ステートの開始処理を上書きしている場合は、親関数を呼んでください。終了側の復元と通知はBPのOn Exit終了後にC++から実行します。
 
 ### 影エフェクトのNiagara設定
 
@@ -154,7 +154,7 @@ BP_PlayerShadowState のクラスデフォルト → Shadow → Effect で、出
 | Enter Shadow Effect Offset / Exit Shadow Effect Offset | 各エフェクトの足元からの位置調整（既定Z=2cm） |
 | Shadow Effect Tail Duration | 常駐エフェクトを解除後に残す最大時間（既定0.5秒、0なら即破棄） |
 
-同じNiagaraを両方に指定しても使えます。未設定ならその演出だけ省略します。出入り用はワンショット（System / Emitter の Loop Behavior を Once、粒子は有限の寿命）にしてください。発生した場所に残り、再生終了後に自動破棄されます。影の途中で解除しても終了エフェクトは生成され、狭い場所から安全な位置へ戻る場合は戻った足元に出ます。BPで開始・終了処理を上書きしている場合は、それぞれ親関数の呼び出しが必要です。
+同じNiagaraを両方に指定しても使えます。未設定ならその演出だけ省略します。出入り用はワンショット（System / Emitter の Loop Behavior を Once、粒子は有限の寿命）にしてください。発生した場所に残り、再生終了後に自動破棄されます。影の途中で解除しても終了エフェクトは生成され、狭い場所から安全な位置へ戻る場合は戻った足元に出ます。BPで開始処理を上書きしている場合は親関数の呼び出しが必要です。終了エフェクトはBPのOn Exit後、C++の復元処理から生成します。
 
 出入り用はプレイヤーの影ステートごとに、入る時・出る時を合わせて同時に2個までです。3個目を生成する前に一番古いものを強制破棄します。再生が完了して破棄されたものは管理対象から外します。Niagaraが未設定なら新しく生成しません。この制限は常駐エフェクトとは別枠です。
 

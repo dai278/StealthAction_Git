@@ -78,6 +78,10 @@ void UPlayerShadowState::OnEnter_Implementation()
 	}
 
 	bShadowApplied = true;
+	//コリジョン変更でOverlapが発生する前に保存する
+	bOriginalMeshVisible = Mesh->IsVisible();
+	OriginalMeshCollision = Mesh->GetCollisionEnabled();
+	bOriginalOverlapEvents = Mesh->GetGenerateOverlapEvents();
 
 	//Animationの停止
 	Mesh->bPauseAnims = true;
@@ -89,18 +93,7 @@ void UPlayerShadowState::OnEnter_Implementation()
 	OriginalMeshLocation = Mesh->GetRelativeLocation();
 	const float PreviousHeight = Capsule->GetScaledCapsuleHalfHeight();
 
-	//高さだけでなく半径も小さくする
-	OriginalCollisionProfile = Capsule->GetCollisionProfileName();
-	Capsule->SetCollisionProfileName(ShadowCollisionProfile);
-	const float Radius = FMath::Max(1.f, ShadowCapsuleRadius);
-	Capsule->SetCapsuleSize(Radius, FMath::Max(Radius, ShadowCapsuleHalfHeight));
-	const float HeightDifference = PreviousHeight - Capsule->GetScaledCapsuleHalfHeight();
-	PlayerCharacter->SetActorLocation(PlayerCharacter->GetActorLocation() - FVector(0.f, 0.f, HeightDifference));
 
-	//カプセルが下がった分だけメッシュを補正してから沈める
-	Mesh->AddWorldOffset(FVector(0.f, 0.f, HeightDifference));
-	SinkStartMeshLocation = Mesh->GetRelativeLocation();
-	bOriginalMeshVisible = Mesh->IsVisible();
 	SinkElapsed = 0.f;
 	OriginalMaterials.Reset();
 	SinkMaterials.Reset();
@@ -135,8 +128,18 @@ void UPlayerShadowState::OnEnter_Implementation()
 			   *GetName(), *OpacityParameterName.ToString());
 	}
 
-	OriginalMeshCollision = Mesh->GetCollisionEnabled();
-	bOriginalOverlapEvents = Mesh->GetGenerateOverlapEvents();
+	//高さだけでなく半径も小さくする
+	OriginalCollisionProfile = Capsule->GetCollisionProfileName();
+	Capsule->SetCollisionProfileName(ShadowCollisionProfile);
+	const float Radius = FMath::Max(1.f, ShadowCapsuleRadius);
+	Capsule->SetCapsuleSize(Radius, FMath::Max(Radius, ShadowCapsuleHalfHeight));
+	const float HeightDifference = PreviousHeight - Capsule->GetScaledCapsuleHalfHeight();
+	PlayerCharacter->SetActorLocation(PlayerCharacter->GetActorLocation() - FVector(0.f, 0.f, HeightDifference));
+
+	//カプセルが下がった分だけメッシュを補正してから沈める
+	Mesh->AddWorldOffset(FVector(0.f, 0.f, HeightDifference));
+	SinkStartMeshLocation = Mesh->GetRelativeLocation();
+
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Mesh->SetGenerateOverlapEvents(false);
 	PlayerCharacter->m_cameraStatus = ECameraStatus::InShadow;
@@ -199,7 +202,16 @@ void UPlayerShadowState::OnUpdate_Implementation(float DeltaTime)
 //-----------------------------------------------------
 //終了処理
 //-----------------------------------------------------
-void UPlayerShadowState::OnExit_Implementation()
+void UPlayerShadowState::Exit()
+{
+	Super::Exit();
+	RestoreShadowState();
+}
+
+//-----------------------------------------------------
+//影で変更した設定を元に戻す
+//-----------------------------------------------------
+void UPlayerShadowState::RestoreShadowState()
 {
 	if (!bShadowApplied)
 	{
@@ -224,6 +236,10 @@ void UPlayerShadowState::OnExit_Implementation()
 	}
 	if (USkeletalMeshComponent* Mesh = PlayerCharacter->GetMesh())
 	{
+		//Overlap側の処理が終わってから見た目を戻す
+		Mesh->SetCollisionEnabled(OriginalMeshCollision);
+		Mesh->SetGenerateOverlapEvents(bOriginalOverlapEvents);
+
 		//途中で解除されても位置とマテリアルを元に戻す
 		Mesh->SetRelativeLocation(OriginalMeshLocation);
 		for (int32 Index = 0; Index < OriginalMaterials.Num(); ++Index)
@@ -231,8 +247,6 @@ void UPlayerShadowState::OnExit_Implementation()
 			Mesh->SetMaterial(Index, OriginalMaterials[Index].Get());
 		}
 		Mesh->SetVisibility(bOriginalMeshVisible);
-		Mesh->SetCollisionEnabled(OriginalMeshCollision);
-		Mesh->SetGenerateOverlapEvents(bOriginalOverlapEvents);
 
 		//Animationの停止
 		Mesh->bPauseAnims = false;
@@ -246,6 +260,7 @@ void UPlayerShadowState::OnExit_Implementation()
 
 	PlayerCharacter->m_cameraStatus = ECameraStatus::ThirdPerson;
 	PlayerCharacter->m_bCameraSwitching = true;
+	PlayerCharacter->UpdateMeshCameraVisibility();
 
 	//狭い場所から戻された場合も、実際に出た足元に出す
 	SpawnTransitionEffect(ExitShadowEffectSystem.Get(), ExitShadowEffectOffset);

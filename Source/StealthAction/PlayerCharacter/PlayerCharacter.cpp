@@ -267,18 +267,31 @@ void APlayerCharacter::Tick(float _deltaTime)
 		m_saveLastNotUpWallPos = GetActorLocation();
 	}
 
-	//カメラとの距離が近すぎるときはメッシュを消す
-	const UCameraComponent* Cam = FindComponentByClass<UCameraComponent>();
-	if (!IsValid(Cam) || !IsValid(GetMesh())) return;
+	UpdateMeshCameraVisibility();
+}
 
-	const float D = FVector::Distance(Cam->GetComponentLocation(), GetMesh()->GetComponentLocation());
-	if (D < 150) {
-		GetMesh()->SetHiddenInGame(true, true); 
+//-----------------------------------------------------
+//カメラが近い時のメッシュ表示
+//-----------------------------------------------------
+void APlayerCharacter::UpdateMeshCameraVisibility()
+{
+	USkeletalMeshComponent* Mesh = GetMesh();
+	if (!IsValid(Mesh))
+	{
+		return;
 	}
-	else {
-		GetMesh()->SetHiddenInGame(false, true);
+
+	//影の出入りでは、沈む処理とカメラの非表示を重ねない
+	bool bHideForCamera = false;
+	if (!IsShadow() && !m_bCameraSwitching)
+	{
+		const UCameraComponent* Cam = FindComponentByClass<UCameraComponent>();
+		if (IsValid(Cam))
+		{
+			bHideForCamera = FVector::Distance(Cam->GetComponentLocation(), Mesh->GetComponentLocation()) < 150.f;
+		}
 	}
-	
+	Mesh->SetHiddenInGame(bHideForCamera, true);
 }
 
 //----------------------------------------------------------

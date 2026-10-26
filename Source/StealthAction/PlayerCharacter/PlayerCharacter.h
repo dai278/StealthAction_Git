@@ -479,4 +479,8 @@ public:
 
 
 
+private:
+	//カメラ接近による非表示だけを更新する
+	void UpdateMeshCameraVisibility();
+
 };

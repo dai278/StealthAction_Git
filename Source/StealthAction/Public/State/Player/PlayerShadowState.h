@@ -21,6 +21,9 @@ class STEALTHACTION_API UPlayerShadowState : public UPlayerStateBase
 	//コンストラクタ
 	UPlayerShadowState();
 
+	//BPの終了処理の後に必ず元へ戻す
+	virtual void Exit() override;
+
   protected:
 
 	//影状態のコリジョン設定
@@ -88,10 +91,10 @@ class STEALTHACTION_API UPlayerShadowState : public UPlayerStateBase
 	//更新処理
 	virtual void OnUpdate_Implementation(float DeltaTime) override;
 
-	//終了処理
-	virtual void OnExit_Implementation() override;
-
   private:
+
+	//影で変更した設定を元に戻す
+	void RestoreShadowState();
 
 	//元のサイズで戻れる場所か
 	bool CanRestoreAtFeet(const FVector& Feet) const;
