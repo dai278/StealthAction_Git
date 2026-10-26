@@ -108,9 +108,6 @@ void UPlayerStateMachine::Initialize(AActor* Owner)
 //-----------------------------------------------------
 bool UPlayerStateMachine::ChangePlayerState(TSubclassOf<UPlayerStateBase> NewStateClass)
 {
-	UE_LOG(LogTemp, Error, TEXT("ステート変更できません"), bConfigured);
-	UE_LOG(LogTemp, Error, TEXT("ステート変更できません"), bTransitionInProgress);
-
 	if (!bConfigured || bTransitionInProgress)
 	{
 		return false;

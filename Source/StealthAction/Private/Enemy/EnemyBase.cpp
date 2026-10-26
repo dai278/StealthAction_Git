@@ -226,8 +226,6 @@ void AEnemyBase::BeginPlay()
 	if (!GetWorld() || !IsValid(GetCharacterMovement())) { return; }
 
 
-	// 入力を有効化（検証用）
-	EnableInput(GetWorld()->GetFirstPlayerController());
 
 	//UE_LOG(LogTemp, Warning, TEXT("AEnemyBase BeginPlay"));
 
