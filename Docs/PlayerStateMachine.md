@@ -121,6 +121,28 @@ Shadow BP の Shadow → Appearance で Sink Duration（既定0.4秒）、Sink D
 
 演出には一時的な動的マテリアルを使い、元のマテリアルインスタンスや他のキャラクターの値を変更しません。BPでOn Enter / On Update / On Exitを上書きする場合は「親関数を呼び出す」を接続してください。
 
+### 影への出入りの通知
+
+プレイヤーに `OnEnteredShadow`（入った時）と `OnExitedShadow`（出た時）のDynamic Multicast Delegateを公開しています。影ステートに入ってコリジョン・見た目の設定を反映した直後と、終了処理で元に戻した直後に、それぞれ1回通知します。潜るアニメーションの完了待ちはしません。被ダメージ・死亡・スタミナ切れなどによる解除でも、同じ終了通知を受け取れます。開始条件を満たさず影に入れなかった場合は通知しません。
+
+他のActor BPでは次の順につなぎます。
+
+1. `Event BeginPlay` → `Get Player Character`（Player Index 0）→ `Cast To PlayerCharacter`。
+2. キャスト結果から `Bind Event to On Entered Shadow` を呼び、Eventピンにカスタムイベントを接続。
+3. 続けて同じプレイヤーから `Bind Event to On Exited Shadow` を呼び、別のカスタムイベントを接続。
+4. プレイヤー参照を保持し、必要に応じて `Is In Shadow` で登録時点の状態も取得します。Bindは過去の通知を再送しません。
+
+C++では受信クラスの引数なし `UFUNCTION()` に次のように登録します（`Player` は有効な `APlayerCharacter*`）。
+
+```cpp
+Player->OnEnteredShadow.AddUniqueDynamic(this, &AMyActor::HandleEnteredShadow);
+Player->OnExitedShadow.AddUniqueDynamic(this, &AMyActor::HandleExitedShadow);
+```
+
+受信クラスのヘッダーには `UFUNCTION() void HandleEnteredShadow();` と `UFUNCTION() void HandleExitedShadow();` を宣言し、cppで `StealthAction/PlayerCharacter/PlayerCharacter.h` をincludeします。解除する時は対応する `RemoveDynamic`、BPでは `Unbind Event` を使います。
+
+通知は影ステートの開始・終了処理内で送ります。特に終了通知の時点ではマシーンの現在ステートの差し替えがまだ終わっていないため、通知内の `Is In Shadow` で判定し直さず、受け取ったイベントで出入りを判断してください。BPで影ステートの開始・終了処理を上書きしている場合は、親関数を呼んでください。
+
 ### 影エフェクトのNiagara設定
 
 BP_PlayerShadowState のクラスデフォルト → Shadow → Effect で、出入りのエフェクトも設定できます。

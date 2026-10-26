@@ -163,6 +163,9 @@ void UPlayerShadowState::OnEnter_Implementation()
 	}
 	UpdateSinkAppearance(0.f);
 	SpawnTransitionEffect(EnterShadowEffectSystem.Get(), EnterShadowEffectOffset);
+
+	//影の設定を反映してから他のクラスへ知らせる
+	PlayerCharacter->OnEnteredShadow.Broadcast();
 }
 
 //-----------------------------------------------------
@@ -246,6 +249,9 @@ void UPlayerShadowState::OnExit_Implementation()
 
 	//狭い場所から戻された場合も、実際に出た足元に出す
 	SpawnTransitionEffect(ExitShadowEffectSystem.Get(), ExitShadowEffectOffset);
+
+	//見た目とコリジョンを戻してから知らせる
+	PlayerCharacter->OnExitedShadow.Broadcast();
 }
 
 //-----------------------------------------------------

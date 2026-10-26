@@ -64,6 +64,10 @@ enum class ECameraStatus : uint8
 //暗殺開始イベントディスパッチャー
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSneakKillStarted); // 引数なし例
 
+//影に入った時と出た時の通知
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerEnteredShadow);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerExitedShadow);
+
 UCLASS()
 class STEALTHACTION_API APlayerCharacter : public ACharacter,public IDamageable
 {
@@ -96,6 +100,14 @@ public:
 // BP側でイベントを追加できる（Add Event / Bind）
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnSneakKillStarted OnSneakKillStarted;
+
+	//影に入った時
+	UPROPERTY(BlueprintAssignable, Category = "Events|Shadow")
+	FOnPlayerEnteredShadow OnEnteredShadow;
+
+	//影から出た時
+	UPROPERTY(BlueprintAssignable, Category = "Events|Shadow")
+	FOnPlayerExitedShadow OnExitedShadow;
 
 	//コンストラクタ
 	APlayerCharacter();
