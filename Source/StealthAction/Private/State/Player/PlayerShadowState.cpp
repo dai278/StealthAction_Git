@@ -253,6 +253,13 @@ void UPlayerShadowState::OnExit_Implementation()
 //-----------------------------------------------------
 void UPlayerShadowState::SpawnTransitionEffect(UNiagaraSystem* EffectSystem, const FVector& Offset)
 {
+	//入る時と出る時で重ならないように前のものを消す
+	if (IsValid(TransitionEffect))
+	{
+		TransitionEffect->DestroyComponent();
+	}
+	TransitionEffect = nullptr;
+
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	UWorld* World = GetWorld();
 	if (!IsValid(EffectSystem) || !IsValid(PlayerCharacter) || !IsValid(World))
@@ -261,7 +268,7 @@ void UPlayerShadowState::SpawnTransitionEffect(UNiagaraSystem* EffectSystem, con
 	}
 
 	//移動しても発生した場所に残し、再生が終わったら自動で消す
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, EffectSystem, PlayerCharacter->GetFeetLocation() + Offset,
+	TransitionEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, EffectSystem, PlayerCharacter->GetFeetLocation() + Offset,
 		FRotator::ZeroRotator, FVector::OneVector, true, true, ENCPoolMethod::None, false);
 }
 
@@ -303,12 +310,48 @@ void UPlayerShadowState::UpdateSinkAppearance(float DeltaTime)
 //-----------------------------------------------------
 void UPlayerShadowState::StopShadowEffect()
 {
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		World->GetTimerManager().ClearTimer(ShadowEffectTailTimer);
+	}
+
+	//入り直した時に前回の余韻を残さない
+	if (IsValid(StoppedShadowEffect))
+	{
+		StoppedShadowEffect->DestroyComponent();
+	}
+	StoppedShadowEffect = nullptr;
+
 	if (IsValid(ShadowEffect))
 	{
-		//残った粒子はその場で消し、完了後に自動破棄する
+		//まず放出を止めて、残った粒子だけその場に残す
 		ShadowEffect->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 		ShadowEffect->SetAutoDestroy(true);
 		ShadowEffect->Deactivate();
+
+		if (IsValid(ShadowEffect))
+		{
+			if (World && ShadowEffectTailDuration > 0.f)
+			{
+				StoppedShadowEffect = ShadowEffect;
+				const TWeakObjectPtr<UNiagaraComponent> Effect = StoppedShadowEffect.Get();
+
+				//ステートが更新されていなくても時間が来たら消す
+				World->GetTimerManager().SetTimer(ShadowEffectTailTimer,
+					FTimerDelegate::CreateWeakLambda(StoppedShadowEffect.Get(), [Effect]()
+					{
+						if (Effect.IsValid())
+						{
+							Effect->DestroyComponent();
+						}
+					}), ShadowEffectTailDuration, false);
+			}
+			else
+			{
+				ShadowEffect->DestroyComponent();
+			}
+		}
 	}
 	ShadowEffect = nullptr;
 }

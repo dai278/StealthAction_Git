@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "State/Player/PlayerStateBase.h"
 #include "Engine/EngineTypes.h"
+#include "TimerManager.h"
 #include "PlayerShadowState.generated.h"
 
 UCLASS(Blueprintable)
@@ -58,6 +59,10 @@ class STEALTHACTION_API UPlayerShadowState : public UPlayerStateBase
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow|Effect")
 	FVector ExitShadowEffectOffset = FVector(0.f, 0.f, 2.f);
 
+	//解除後の影エフェクトを残す時間。0ならすぐ消す
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow|Effect", meta = (ClampMin = "0.0", Units = "s"))
+	float ShadowEffectTailDuration = 0.5f;
+
 	//潜る進行度を渡すNiagaraのパラメータ名
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow|Effect")
 	FName ShadowAlphaParameterName = TEXT("User.ShadowAlpha");
@@ -106,6 +111,17 @@ class STEALTHACTION_API UPlayerShadowState : public UPlayerStateBase
 	//生成した影エフェクト
 	UPROPERTY(Transient)
 	TObjectPtr<class UNiagaraComponent> ShadowEffect = nullptr;
+
+	//出入り用は両方合わせて一個まで
+	UPROPERTY(Transient)
+	TObjectPtr<class UNiagaraComponent> TransitionEffect = nullptr;
+
+	//解除後の余韻用。入り直したらこれも消す
+	UPROPERTY(Transient)
+	TObjectPtr<class UNiagaraComponent> StoppedShadowEffect = nullptr;
+
+	//余韻を強制終了するタイマー
+	FTimerHandle ShadowEffectTailTimer;
 
 	//影エフェクト停止
 	void StopShadowEffect();

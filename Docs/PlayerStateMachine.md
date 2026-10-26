@@ -130,14 +130,17 @@ BP_PlayerShadowState のクラスデフォルト → Shadow → Effect で、出
 | Enter Shadow Effect System | 影に入った瞬間に1回生成するNiagara |
 | Exit Shadow Effect System | 影から出た瞬間に1回生成するNiagara |
 | Enter Shadow Effect Offset / Exit Shadow Effect Offset | 各エフェクトの足元からの位置調整（既定Z=2cm） |
+| Shadow Effect Tail Duration | 常駐エフェクトを解除後に残す最大時間（既定0.5秒、0なら即破棄） |
 
 同じNiagaraを両方に指定しても使えます。未設定ならその演出だけ省略します。出入り用はワンショット（System / Emitter の Loop Behavior を Once、粒子は有限の寿命）にしてください。発生した場所に残り、再生終了後に自動破棄されます。影の途中で解除しても終了エフェクトは生成され、狭い場所から安全な位置へ戻る場合は戻った足元に出ます。BPで開始・終了処理を上書きしている場合は、それぞれ親関数の呼び出しが必要です。
+
+出入り用はプレイヤーの影ステートごとに、入る時・出る時を合わせて同時に1個までです。次の出入り時は前のものを強制破棄します。次に使うNiagaraが未設定でも前のものは消します。この制限は常駐エフェクトとは別枠です。
 
 BP_PlayerShadowState のクラスデフォルトで Shadow Effect System にNiagara Systemを指定します。旧ShadowEffectChildとActorクラス指定は廃止しました。以前のエフェクトActorはそのまま指定できないため、使用するNiagara Systemを指定し直してください。この変更で新しいNiagaraアセット自体は作成していません。
 
 Shadow Effect Offset は足元からの位置調整（既定Z=2cm）です。エフェクトはメッシュではなくルートに追従するため、メッシュと一緒には沈みません。Shadow Alpha Parameter Name（既定User.ShadowAlpha）へ潜る進行度0～1を渡します。Niagara側にFloatのUser Parameter「ShadowAlpha」を追加し、粒子の色のAlphaや大きさなどへ接続すると潜る演出に合わせて表示できます。
 
-解除・被ダメージ・終了時に生成したNiagaraを切り離して停止し、完了後に自動破棄します。NiagaraのEmitter StateでInactive ResponseをCompleteにし、粒子に有限の寿命を設定してください。影の間ずっと表示する場合はシステムをループさせてください。Niagaraプラグインとモジュール依存も追加しています。エディタを閉じてC++をビルドし直した後、プレイヤーBPを再コンパイルしてください。
+影解除・被ダメージなどで影ステートを終了すると、常駐Niagaraを切り離して停止します。自然に完了すれば自動破棄し、完了しなくても Shadow Effect Tail Duration の経過後に強制破棄します（ゲーム時間基準）。入り直した場合は前回の余韻をすぐに消すため、常駐エフェクトの残留も重なりません。NiagaraのEmitter StateでInactive ResponseをCompleteにし、粒子に有限の寿命を設定してください。影の間ずっと表示する場合はシステムをループさせてください。Niagaraプラグインとモジュール依存も追加しています。エディタを閉じてC++をビルドし直した後、プレイヤーBPを再コンパイルしてください。
 
 ### 影状態のカプセルサイズ
 
