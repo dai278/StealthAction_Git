@@ -162,6 +162,7 @@ void UPlayerShadowState::OnEnter_Implementation()
 		UE_LOG(LogTemp, Warning, TEXT("%s: Set Shadow Effect System in the shadow state BP."), *GetName());
 	}
 	UpdateSinkAppearance(0.f);
+	SpawnTransitionEffect(EnterShadowEffectSystem.Get(), EnterShadowEffectOffset);
 }
 
 //-----------------------------------------------------
@@ -242,6 +243,26 @@ void UPlayerShadowState::OnExit_Implementation()
 
 	PlayerCharacter->m_cameraStatus = ECameraStatus::ThirdPerson;
 	PlayerCharacter->m_bCameraSwitching = true;
+
+	//狭い場所から戻された場合も、実際に出た足元に出す
+	SpawnTransitionEffect(ExitShadowEffectSystem.Get(), ExitShadowEffectOffset);
+}
+
+//-----------------------------------------------------
+//出入りのエフェクトを足元に出す
+//-----------------------------------------------------
+void UPlayerShadowState::SpawnTransitionEffect(UNiagaraSystem* EffectSystem, const FVector& Offset)
+{
+	APlayerCharacter* PlayerCharacter = GetPlayer();
+	UWorld* World = GetWorld();
+	if (!IsValid(EffectSystem) || !IsValid(PlayerCharacter) || !IsValid(World))
+	{
+		return;
+	}
+
+	//移動しても発生した場所に残し、再生が終わったら自動で消す
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, EffectSystem, PlayerCharacter->GetFeetLocation() + Offset,
+		FRotator::ZeroRotator, FVector::OneVector, true, true, ENCPoolMethod::None, false);
 }
 
 //-----------------------------------------------------

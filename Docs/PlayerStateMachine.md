@@ -123,6 +123,16 @@ Shadow BP の Shadow → Appearance で Sink Duration（既定0.4秒）、Sink D
 
 ### 影エフェクトのNiagara設定
 
+BP_PlayerShadowState のクラスデフォルト → Shadow → Effect で、出入りのエフェクトも設定できます。
+
+| 項目 | 用途 |
+| --- | --- |
+| Enter Shadow Effect System | 影に入った瞬間に1回生成するNiagara |
+| Exit Shadow Effect System | 影から出た瞬間に1回生成するNiagara |
+| Enter Shadow Effect Offset / Exit Shadow Effect Offset | 各エフェクトの足元からの位置調整（既定Z=2cm） |
+
+同じNiagaraを両方に指定しても使えます。未設定ならその演出だけ省略します。出入り用はワンショット（System / Emitter の Loop Behavior を Once、粒子は有限の寿命）にしてください。発生した場所に残り、再生終了後に自動破棄されます。影の途中で解除しても終了エフェクトは生成され、狭い場所から安全な位置へ戻る場合は戻った足元に出ます。BPで開始・終了処理を上書きしている場合は、それぞれ親関数の呼び出しが必要です。
+
 BP_PlayerShadowState のクラスデフォルトで Shadow Effect System にNiagara Systemを指定します。旧ShadowEffectChildとActorクラス指定は廃止しました。以前のエフェクトActorはそのまま指定できないため、使用するNiagara Systemを指定し直してください。この変更で新しいNiagaraアセット自体は作成していません。
 
 Shadow Effect Offset は足元からの位置調整（既定Z=2cm）です。エフェクトはメッシュではなくルートに追従するため、メッシュと一緒には沈みません。Shadow Alpha Parameter Name（既定User.ShadowAlpha）へ潜る進行度0～1を渡します。Niagara側にFloatのUser Parameter「ShadowAlpha」を追加し、粒子の色のAlphaや大きさなどへ接続すると潜る演出に合わせて表示できます。

@@ -42,6 +42,22 @@ class STEALTHACTION_API UPlayerShadowState : public UPlayerStateBase
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow|Effect")
 	FVector ShadowEffectOffset = FVector(0.f, 0.f, 2.f);
 
+	//影に入った瞬間のエフェクト
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow|Effect")
+	TObjectPtr<class UNiagaraSystem> EnterShadowEffectSystem = nullptr;
+
+	//入る時の足元からの位置調整
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow|Effect")
+	FVector EnterShadowEffectOffset = FVector(0.f, 0.f, 2.f);
+
+	//影から出た瞬間のエフェクト
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow|Effect")
+	TObjectPtr<class UNiagaraSystem> ExitShadowEffectSystem = nullptr;
+
+	//出る時の足元からの位置調整
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow|Effect")
+	FVector ExitShadowEffectOffset = FVector(0.f, 0.f, 2.f);
+
 	//潜る進行度を渡すNiagaraのパラメータ名
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow|Effect")
 	FName ShadowAlphaParameterName = TEXT("User.ShadowAlpha");
@@ -93,6 +109,9 @@ class STEALTHACTION_API UPlayerShadowState : public UPlayerStateBase
 
 	//影エフェクト停止
 	void StopShadowEffect();
+
+	//出入りのエフェクトを足元に出す
+	void SpawnTransitionEffect(class UNiagaraSystem* EffectSystem, const FVector& Offset);
 
 	//移動は止めずにメッシュだけ影に沈める
 	void UpdateSinkAppearance(float DeltaTime);
