@@ -24,4 +24,4 @@ with tempfile.TemporaryDirectory(prefix="push-move-") as folder:
     subprocess.run([os.environ.get("CXX", "g++"), "-std=c++17", "-Wall", "-Wextra", "-Werror",
                     str(path), "-o", str(binary)], check=True)
     subprocess.run([str(binary)], check=True)
-    print("PASS: four sides, rotation, translation, rectangular bounds, scale, invalid input, overshoot, blocking")
+    print("PASS: four sides, corner facing and position jitter, rotation, translation, rectangular bounds, scale, invalid input, overshoot, blocking")

@@ -89,24 +89,40 @@ void APushMoveActor::Interact(AActor* _interactOwner)
 		return;
 	}
 
-	//細長い箱でも横の面から押したら横へ動くようにする
+	//箱の向きに沿った二方向を用意する。高さ方向には動かさない
 	const FVector extent = m_bodyCollision->GetUnscaledBoxExtent();
-	const float sideX = FMath::Abs(localPosition.X) / FMath::Max(1.0, extent.X);
-	const float sideY = FMath::Abs(localPosition.Y) / FMath::Max(1.0, extent.Y);
-	FVector localDirection = FVector::ZeroVector;
-	if (sideX >= sideY)
+	const FVector localX(localPosition.X > 0.f ? -1.f : 1.f, 0.f, 0.f);
+	const FVector localY(0.f, localPosition.Y > 0.f ? -1.f : 1.f, 0.f);
+	FVector pushX = bodyTransform.TransformVector(localX);
+	FVector pushY = bodyTransform.TransformVector(localY);
+	pushX.Z = 0.f;
+	pushY.Z = 0.f;
+	pushX = pushX.GetSafeNormal();
+	pushY = pushY.GetSafeNormal();
+
+	const bool outsideX = FMath::Abs(localPosition.X) >= extent.X;
+	const bool outsideY = FMath::Abs(localPosition.Y) >= extent.Y;
+	if (outsideX && outsideY)
 	{
-		localDirection.X = localPosition.X > 0.f ? -1.f : 1.f;
+		//角では中心からの角度で決めず、プレイヤーが向いている方へ押す
+		FVector facing = _interactOwner->GetActorForwardVector();
+		facing.Z = 0.f;
+		facing = facing.GetSafeNormal();
+		const float facingX = FVector::DotProduct(facing, pushX);
+		const float facingY = FVector::DotProduct(facing, pushY);
+		if (FMath::Max(facingX, facingY) <= 0.f)
+		{
+			return;
+		}
+		m_moveDirection = facingX >= facingY ? pushX : pushY;
 	}
 	else
 	{
-		localDirection.Y = localPosition.Y > 0.f ? -1.f : 1.f;
+		//面の途中では、今まで通りその面の反対側へ押す
+		const float sideX = FMath::Abs(localPosition.X) / FMath::Max(1.0, extent.X);
+		const float sideY = FMath::Abs(localPosition.Y) / FMath::Max(1.0, extent.Y);
+		m_moveDirection = sideX >= sideY ? pushX : pushY;
 	}
-
-	//箱の向きに合わせて戻す。高さ方向には動かさない
-	m_moveDirection = bodyTransform.TransformVector(localDirection);
-	m_moveDirection.Z = 0.f;
-	m_moveDirection = m_moveDirection.GetSafeNormal();
 	if (m_moveDirection.IsNearlyZero())
 	{
 		return;

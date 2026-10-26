@@ -5,7 +5,10 @@
 struct FVector
 {
 	double X = 0, Y = 0, Z = 0;
+	FVector() = default;
+	FVector(double x, double y, double z) : X(x), Y(y), Z(z) {}
 	static const FVector ZeroVector;
+	static double DotProduct(FVector a, FVector b) { return a.X * b.X + a.Y * b.Y + a.Z * b.Z; }
 	FVector operator+(FVector b) const { return {X + b.X, Y + b.Y, Z + b.Z}; }
 	FVector operator-(FVector b) const { return {X - b.X, Y - b.Y, Z - b.Z}; }
 	FVector operator*(double n) const { return {X * n, Y * n, Z * n}; }
@@ -47,7 +50,9 @@ struct FHitResult { bool bBlockingHit = false; };
 struct AActor
 {
 	FVector location;
+	FVector forward{1, 0, 0};
 	FVector GetActorLocation() const { return location; }
+	FVector GetActorForwardVector() const { return forward; }
 };
 struct UBoxComponent
 {
@@ -109,6 +114,46 @@ int main()
 			}
 		}
 	}
+	// 四隅では位置のわずかな差より向きを優先し、斜めには押さない。
+	for (double yaw : {0., .7, 1.5707963267948966})
+	{
+		for (FVector scale : {FVector{1, 1, 1}, FVector{2, .5, 1}, FVector{-1, 2, 1}})
+		{
+			for (double xSign : {-1., 1.})
+			{
+				for (double ySign : {-1., 1.})
+				{
+					for (bool useX : {false, true})
+					{
+						for (double offset : {-.1, 0., .1})
+						{
+							APushMoveActor corner;
+							corner.location = {900, -300, 50};
+							corner.body.extent = {200, 50, 50};
+							corner.body.transform = {corner.location, scale, yaw};
+							const auto transform = corner.body.transform;
+							const FVector pushX = transform.TransformVector({-xSign, 0, 0}).GetSafeNormal();
+							const FVector pushY = transform.TransformVector({0, -ySign, 0}).GetSafeNormal();
+							const FVector expected = useX ? pushX : pushY;
+							AActor pusher;
+							pusher.location = corner.location + transform.TransformVector({xSign * (220 + offset), ySign * 70, 90});
+							pusher.forward = (expected + (useX ? pushY : pushX) * .2).GetSafeNormal();
+							corner.Interact(&pusher);
+							assert(corner.m_bIsMoving);
+							Check(corner.m_moveDirection, expected);
+						}
+					}
+				}
+			}
+		}
+	}
+	APushMoveActor away;
+	AActor facingAway;
+	facingAway.location = {80, 80, 90};
+	facingAway.forward = {1, 1, 0};
+	away.Interact(&facingAway);
+	assert(!away.m_bIsMoving);
+
 	APushMoveActor wide;
 	wide.body.extent = {200, 50, 50};
 	AActor player;
@@ -122,6 +167,7 @@ int main()
 
 	APushMoveActor invalid;
 	invalid.Interact(nullptr);
+	player.forward = {-1, 0, 0};
 	invalid.Interact(&player); // 正常に開始できる。
 	assert(invalid.m_bIsMoving);
 	APushMoveActor zero;
