@@ -112,9 +112,9 @@ class STEALTHACTION_API UPlayerShadowState : public UPlayerStateBase
 	UPROPERTY(Transient)
 	TObjectPtr<class UNiagaraComponent> ShadowEffect = nullptr;
 
-	//出入り用は両方合わせて一個まで
+	//出入り用は両方合わせて二個まで
 	UPROPERTY(Transient)
-	TObjectPtr<class UNiagaraComponent> TransitionEffect = nullptr;
+	TArray<TObjectPtr<class UNiagaraComponent>> TransitionEffects;
 
 	//解除後の余韻用。入り直したらこれも消す
 	UPROPERTY(Transient)

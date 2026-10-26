@@ -253,12 +253,11 @@ void UPlayerShadowState::OnExit_Implementation()
 //-----------------------------------------------------
 void UPlayerShadowState::SpawnTransitionEffect(UNiagaraSystem* EffectSystem, const FVector& Offset)
 {
-	//入る時と出る時で重ならないように前のものを消す
-	if (IsValid(TransitionEffect))
+	//再生が終わって消えたものを外す
+	TransitionEffects.RemoveAll([](const TObjectPtr<UNiagaraComponent>& Effect)
 	{
-		TransitionEffect->DestroyComponent();
-	}
-	TransitionEffect = nullptr;
+		return !IsValid(Effect);
+	});
 
 	APlayerCharacter* PlayerCharacter = GetPlayer();
 	UWorld* World = GetWorld();
@@ -267,9 +266,23 @@ void UPlayerShadowState::SpawnTransitionEffect(UNiagaraSystem* EffectSystem, con
 		return;
 	}
 
+	//三個目を出す前に古いものから消す
+	while (TransitionEffects.Num() >= 2)
+	{
+		if (IsValid(TransitionEffects[0]))
+		{
+			TransitionEffects[0]->DestroyComponent();
+		}
+		TransitionEffects.RemoveAt(0);
+	}
+
 	//移動しても発生した場所に残し、再生が終わったら自動で消す
-	TransitionEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, EffectSystem, PlayerCharacter->GetFeetLocation() + Offset,
+	UNiagaraComponent* Effect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, EffectSystem, PlayerCharacter->GetFeetLocation() + Offset,
 		FRotator::ZeroRotator, FVector::OneVector, true, true, ENCPoolMethod::None, false);
+	if (IsValid(Effect))
+	{
+		TransitionEffects.Add(Effect);
+	}
 }
 
 //-----------------------------------------------------
