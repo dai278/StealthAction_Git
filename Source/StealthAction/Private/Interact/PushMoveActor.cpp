@@ -2,6 +2,7 @@
 
 
 #include "Interact/PushMoveActor.h"
+#include "Components/BoxComponent.h"
 
 //----------------------------------------------------------
 // // コンストラクタ
@@ -45,90 +46,77 @@ void APushMoveActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//移動処理
-	if (m_bIsMoving)
+	if (!m_bIsMoving)
 	{
-		m_moveProgress += m_moveSpeed * DeltaTime;
-		FVector newLocation = FMath::Lerp(m_startLocation, m_targetLocation, m_moveProgress / m_moveDistance);
-		
-		FHitResult hit;
-		
-		SetActorLocation(newLocation,true,&hit);
-		
-		if(hit.bBlockingHit)
-		{
-			// 衝突が発生した場合、移動を停止
-			m_bIsMoving = false;
-			m_moveProgress = 0.f;
-			SetActorTickEnabled(false);
-			return;
-		}
-		//移動完了判定
-		if (m_moveProgress >= m_moveDistance)
-		{
-			SetActorLocation(m_targetLocation, true, &hit);
-			m_bIsMoving = false;
-			m_moveProgress = 0.f;
-		}
+		return;
+	}
+
+	//フレーム落ちしても目標位置を通り越さないようにする
+	m_moveProgress = FMath::Min(m_moveProgress + m_moveSpeed * FMath::Max(0.f, DeltaTime), m_moveDistance);
+	const FVector newLocation = FMath::Lerp(m_startLocation, m_targetLocation, m_moveProgress / m_moveDistance);
+	FHitResult hit;
+	SetActorLocation(newLocation, true, &hit);
+
+	//壁に当たった時と移動が終わった時は止める
+	if (hit.bBlockingHit || m_moveProgress >= m_moveDistance)
+	{
+		m_bIsMoving = false;
+		m_moveProgress = 0.f;
+		SetActorTickEnabled(false);
 	}
 }
-
 
 //----------------------------------------------------------
 // インタラクトの実装
 //----------------------------------------------------------
 void APushMoveActor::Interact(AActor* _interactOwner)
 {
-	if (!IsValid(_interactOwner)) { return; }
-	if (m_bIsMoving) { return; }
-	m_bIsMoving = true;
-	SetActorTickEnabled(true);
-	
-
-	//角度floatに変換
-	FVector Vec = _interactOwner->GetActorLocation()- GetActorLocation();	
-	Vec.Z = 0.f;
-	
-	float deg = FMath::Fmod(FMath::RadiansToDegrees(FMath::Atan2(Vec.Y, Vec.X)) + 360.0f, 360.0f);
-
-	//UE_LOG(LogTemp, Warning, TEXT("Vec=(%.3f,%.3f) deg=%.9f IsNaN=%d"),
-		//Vec.X, Vec.Y, deg, FMath::IsNaN(deg));
-
-	//移動方向決定
-	FVector moveDir = FVector::ZeroVector;
-	
-	//なぜか変数化しないとバグる
-	const bool bA = (deg >= 0.f && deg < 45.f);
-	const bool bB = (deg >= 315.f && deg < 360.f);
-
-	//UE_LOG(LogTemp, Warning, TEXT("deg=%.9f  bA=%d bB=%d"), deg, bA, bB);
-
-	if (bA || bB)
+	if (!IsValid(_interactOwner) || !IsValid(m_bodyCollision) || m_bIsMoving)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("BRANCH: FIRST IF"));
-		moveDir = FVector(-1.f, 0.f, 0.f);
+		return;
 	}
-	else if (deg >= 45.f && deg < 135.f)
+	if (m_moveDistance <= 0.f || m_moveSpeed <= 0.f)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("BRANCH: 90-180"));
-		moveDir = FVector(0.f, -1.f, 0.f);
+		return;
 	}
-	else if (deg >= 135.f && deg < 225.f) // ←ここは後述の通り修正して
+
+	//ワールドの角度ではなく、本体コリジョンから見た位置で押す面を決める
+	const FTransform bodyTransform = m_bodyCollision->GetComponentTransform();
+	FVector localPosition = bodyTransform.InverseTransformPosition(_interactOwner->GetActorLocation());
+	localPosition.Z = 0.f;
+	if (localPosition.IsNearlyZero())
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("BRANCH: 180-270"));
-		moveDir = FVector(1.f, 0.f, 0.f);
+		return;
+	}
+
+	//細長い箱でも横の面から押したら横へ動くようにする
+	const FVector extent = m_bodyCollision->GetUnscaledBoxExtent();
+	const float sideX = FMath::Abs(localPosition.X) / FMath::Max(1.0, extent.X);
+	const float sideY = FMath::Abs(localPosition.Y) / FMath::Max(1.0, extent.Y);
+	FVector localDirection = FVector::ZeroVector;
+	if (sideX >= sideY)
+	{
+		localDirection.X = localPosition.X > 0.f ? -1.f : 1.f;
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("BRANCH: ELSE"));
-		moveDir = FVector(0.f, 1.f, 0.f); // デバッグ用：見分けるため
+		localDirection.Y = localPosition.Y > 0.f ? -1.f : 1.f;
 	}
-	
 
-	
-	m_moveDirection = moveDir;
+	//箱の向きに合わせて戻す。高さ方向には動かさない
+	m_moveDirection = bodyTransform.TransformVector(localDirection);
+	m_moveDirection.Z = 0.f;
+	m_moveDirection = m_moveDirection.GetSafeNormal();
+	if (m_moveDirection.IsNearlyZero())
+	{
+		return;
+	}
+
 	m_startLocation = GetActorLocation();
 	m_targetLocation = m_startLocation + m_moveDirection * m_moveDistance;
+	m_moveProgress = 0.f;
+	m_bIsMoving = true;
+	SetActorTickEnabled(true);
 }
 
 //インタラクトの実装（ポーズするかどうか）
