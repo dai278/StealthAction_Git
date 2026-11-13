@@ -77,6 +77,11 @@ protected:
 	//必要な場合だけStaticMeshの複雑なコリジョンで判定する
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Light|Occlusion")
 	bool bTraceComplexForOcclusion = false;
+
+	//足元の床を遮蔽物と誤判定しないための終点の許容幅
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Light|Occlusion", meta = (ClampMin = "0.0", Units = "cm"))
+	float OcclusionEndTolerance = 1.f;
+
 	
 	UPROPERTY(VisibleAnywhere)
 	USpotLightComponent* m_pSpotLight;           //スポットライトコンポーネント

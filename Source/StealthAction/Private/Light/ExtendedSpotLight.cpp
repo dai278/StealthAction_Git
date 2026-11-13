@@ -297,7 +297,8 @@ bool AExtendedSpotLight::IsHit(const FVector& _pos)const
 		//遮蔽物はStaticMeshとSkeletalMeshだけにする
 		if (Cast<UStaticMeshComponent>(HitComponent) || Cast<USkeletalMeshComponent>(HitComponent))
 		{
-			return Hit.Distance >= distance;
+			//終点付近の床へのヒットは、光を遮った扱いにしない
+			return Hit.Distance >= distance - FMath::Max(0.f, OcclusionEndTolerance);
 		}
 		Params.AddIgnoredComponent(HitComponent);
 	}
