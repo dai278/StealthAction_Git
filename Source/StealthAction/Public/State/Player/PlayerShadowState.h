@@ -94,6 +94,9 @@ class STEALTHACTION_API UPlayerShadowState : public UPlayerStateBase
 
   private:
 
+	//足元が影に入っているか
+	bool IsFeetInShadow() const;
+
 	//影で変更した設定を元に戻す
 	void RestoreShadowState();
 

@@ -74,7 +74,7 @@ struct AExtendedSpotLight
 {
 	World* world=nullptr;
 	USpotLightComponent* m_pSpotLight=nullptr;
-	bool m_bIsOn=true, bTraceComplexForOcclusion=true;
+	bool m_bIsOn=true, bTraceComplexForOcclusion=false;
 	World* GetWorld() const { return world; }
 	bool IsHit(const FVector&) const;
 };
@@ -92,7 +92,7 @@ int main()
 	UStaticMeshComponent mesh;
 	USkeletalMeshComponent enemy;
 	const FVector feet{80,0,0};
-	assert(light.IsHit(feet) && world.lastComplex);
+	assert(light.IsHit(feet) && !world.lastComplex);
 	world.hits={{&capsule,10},{&box,15}};
 	world.calls=0;
 	assert(light.IsHit(feet) && world.calls==3);
@@ -105,8 +105,8 @@ int main()
 	world.hits={{&mesh,80}};
 	world.calls=0;
 	assert(light.IsHit(feet));
-	light.bTraceComplexForOcclusion=false;
-	assert(light.IsHit(feet) && !world.lastComplex);
+	light.bTraceComplexForOcclusion=true;
+	assert(light.IsHit(feet) && world.lastComplex);
 	const int calls=world.calls;
 	assert(!light.IsHit({200,0,0}));
 	assert(!light.IsHit({0,80,0}));

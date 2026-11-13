@@ -74,9 +74,9 @@ public:
 	bool IsShadowDrawLight()const { return m_isShadowDrawLight; }
 
 protected:
-	//StaticMesh�̕��G�ȃR���W�����Ń��C���肷��
+	//必要な場合だけStaticMeshの複雑なコリジョンで判定する
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Light|Occlusion")
-	bool bTraceComplexForOcclusion = true;
+	bool bTraceComplexForOcclusion = false;
 	
 	UPROPERTY(VisibleAnywhere)
 	USpotLightComponent* m_pSpotLight;           //スポットライトコンポーネント

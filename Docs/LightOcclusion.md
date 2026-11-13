@@ -14,7 +14,7 @@ Box・カプセルなどに当たった場合は、そのコンポーネント�
 
 Object Typeの検索対象は従来通りWorldStatic・WorldDynamic・EnemyMeshです。判定対象を決めるために専用のタグや新しいチャンネルを追加する必要はありません。
 
-ライトBPの `Light → Occlusion → Trace Complex For Occlusion` は既定でONです。StaticMeshではComplex Collisionを使用して形状に沿った判定を要求します。メッシュアセットのCollision Complexity設定によっては簡易形状が使われるため、必要に応じてアセット側も確認してください。OFFでは簡易形状を使用します。
+ライトBPの `Light → Occlusion → Trace Complex For Occlusion` は既定でOFFです。従来の簡易コリジョンを使いつつ、対象コンポーネントだけをメッシュに限定します。ONにするとStaticMeshのComplex Collisionを使用して形状に沿った判定を要求します。メッシュアセットのCollision Complexity設定によっては簡易形状が使われるため、必要に応じてアセット側も確認してください。BlockAllは衝突応答のプリセットで、複雑な衝突データを自動で用意する設定ではありません。以前の値をBPに保存している場合は、ライトBPでこの項目をOFFにして比較してください。
 
 SkeletalMeshの通常のレイ判定にはPhysics Assetの形状が使われます。描画されるスキニング後の三角形と完全一致する判定ではありません。敵の形状に合わせてPhysics Assetを調整してください。
 

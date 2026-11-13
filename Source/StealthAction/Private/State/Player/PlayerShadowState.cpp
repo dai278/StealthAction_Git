@@ -46,11 +46,7 @@ bool UPlayerShadowState::CanEnterState_Implementation() const
 		return false;
 	}
 
-	UExtendedSpotLightManager* Lights = World->GetSubsystem<UExtendedSpotLightManager>();
-
-	const FVector Feet = PlayerCharacter->GetFeetLocation();
-
-	return IsValid(Lights) && (!Lights->IsHitAllLight(Feet) || (PlayerCharacter->m_bOnShadow && !Lights->IsHitEnemyLight(Feet)));
+	return IsFeetInShadow();
 }
 
 //-----------------------------------------------------
@@ -182,7 +178,6 @@ void UPlayerShadowState::OnEnter_Implementation()
 void UPlayerShadowState::OnUpdate_Implementation(float DeltaTime)
 {
 	APlayerCharacter* PlayerCharacter = GetPlayer();
-	UWorld* World = GetWorld();
 	if (!PlayerCharacter)
 	{
 		return;
@@ -193,9 +188,7 @@ void UPlayerShadowState::OnUpdate_Implementation(float DeltaTime)
 	{
 		LastSafeFeet = Feet;
 	}
-	UExtendedSpotLightManager* Lights = World ? World->GetSubsystem<UExtendedSpotLightManager>() : nullptr;
-	if (!IsValid(Lights) || Lights->IsHitAllLight(PlayerCharacter->GetFeetLocation()) ||
-		(PlayerCharacter->m_bOnShadow && Lights->IsHitEnemyLight(PlayerCharacter->GetFeetLocation())))
+	if (!IsFeetInShadow())
 	{
 		if (UPlayerStateMachine* Machine = GetPlayerMachine())
 		{
@@ -413,4 +406,21 @@ bool UPlayerShadowState::CanRestoreAtFeet(const FVector& Feet) const
 	Params.AddIgnoredActor(PlayerCharacter);
 	return !World->OverlapBlockingTestByProfile(Feet + FVector(0.f, 0.f, HalfHeight), Capsule->GetComponentQuat(), OriginalCollisionProfile,
 												FCollisionShape::MakeCapsule(OriginalCapsuleRadius * Scale, HalfHeight), Params);
+}
+
+//-----------------------------------------------------
+//開始と継続で同じ足元の影判定を使う
+//-----------------------------------------------------
+bool UPlayerShadowState::IsFeetInShadow() const
+{
+	APlayerCharacter* PlayerCharacter = GetPlayer();
+	UWorld* World = GetWorld();
+	UExtendedSpotLightManager* Lights = World ? World->GetSubsystem<UExtendedSpotLightManager>() : nullptr;
+	if (!IsValid(PlayerCharacter) || !IsValid(Lights))
+	{
+		return false;
+	}
+
+	const FVector Feet = PlayerCharacter->GetFeetLocation();
+	return !Lights->IsHitAllLight(Feet) || (PlayerCharacter->m_bOnShadow && !Lights->IsHitEnemyLight(Feet));
 }
