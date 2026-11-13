@@ -74,6 +74,9 @@ public:
 	bool IsShadowDrawLight()const { return m_isShadowDrawLight; }
 
 protected:
+	//StaticMesh‚Ì•¡G‚ÈƒRƒŠƒWƒ‡ƒ“‚ÅƒŒƒC”»’è‚·‚é
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Light|Occlusion")
+	bool bTraceComplexForOcclusion = true;
 	
 	UPROPERTY(VisibleAnywhere)
 	USpotLightComponent* m_pSpotLight;           //ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ

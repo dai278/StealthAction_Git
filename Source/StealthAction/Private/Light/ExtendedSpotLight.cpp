@@ -5,6 +5,8 @@
 #include "Light/ExtendedSpotLight.h"
 #include "Engine/World.h"
 #include "Components/SpotLightComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 #include "Light/ExtendedSpotLightManager.h"
 
@@ -280,25 +282,24 @@ bool AExtendedSpotLight::IsHit(const FVector& _pos)const
 	ObjParams.AddObjectTypesToQuery(ECC_GameTraceChannel8);
 	// Shadow専用ObjectTypeは「入れない」
 
-	FCollisionQueryParams Params(SCENE_QUERY_STAT(LightOcclusion), false);
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(LightOcclusion), bTraceComplexForOcclusion);
 	Params.AddIgnoredActor(this);
 
-	/* 影が複数コンポーネントなら全部 AddIgnoredComponent */
-	bool bHit = GetWorld()->LineTraceSingleByObjectType(
-		Hit,
-		lightPos,
-		_pos,
-		ObjParams,
-		Params
-	);
-
-	if (bHit)
+	//Boxやカプセルに当たっても、その奥のメッシュまで調べる
+	while (GetWorld()->LineTraceSingleByObjectType(Hit, lightPos, _pos, ObjParams, Params))
 	{
-		// さえぎられず、少しマージン
-		if (Hit.Distance < distance)
+		UPrimitiveComponent* HitComponent = Hit.GetComponent();
+		if (!IsValid(HitComponent))
 		{
-			return false;
+			break;
 		}
+
+		//遮蔽物はStaticMeshとSkeletalMeshだけにする
+		if (Cast<UStaticMeshComponent>(HitComponent) || Cast<USkeletalMeshComponent>(HitComponent))
+		{
+			return Hit.Distance >= distance;
+		}
+		Params.AddIgnoredComponent(HitComponent);
 	}
 
 	return true;
