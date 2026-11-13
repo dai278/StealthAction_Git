@@ -15,6 +15,7 @@ struct FVector
 };
 struct FMath
 {
+	template <class T> static T Max(T a,T b) { return std::max(a,b); }
 	static double Cos(double n) { return std::cos(n); }
 	static double DegreesToRadians(double n) { return n*3.141592653589793/180.; }
 };
@@ -75,6 +76,7 @@ struct AExtendedSpotLight
 	World* world=nullptr;
 	USpotLightComponent* m_pSpotLight=nullptr;
 	bool m_bIsOn=true, bTraceComplexForOcclusion=false;
+	float OcclusionEndTolerance=1.f;
 	World* GetWorld() const { return world; }
 	bool IsHit(const FVector&) const;
 };
@@ -105,6 +107,11 @@ int main()
 	world.hits={{&mesh,80}};
 	world.calls=0;
 	assert(light.IsHit(feet));
+	world.hits={{&mesh,79.9f}};
+	assert(light.IsHit(feet)); // 足元の床の微小なずれは遮蔽物にしない。
+	world.hits={{&mesh,78.f}};
+	assert(!light.IsHit(feet));
+	world.hits={{&mesh,80}};
 	light.bTraceComplexForOcclusion=true;
 	assert(light.IsHit(feet) && world.lastComplex);
 	const int calls=world.calls;

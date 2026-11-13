@@ -422,5 +422,6 @@ bool UPlayerShadowState::IsFeetInShadow() const
 	}
 
 	const FVector Feet = PlayerCharacter->GetFeetLocation();
-	return !Lights->IsHitAllLight(Feet) || (PlayerCharacter->m_bOnShadow && !Lights->IsHitEnemyLight(Feet));
+	//旧方式の影コリジョンに触れていても、光が当たっていれば入れない
+	return !Lights->IsHitAllLight(Feet);
 }

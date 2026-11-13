@@ -39,9 +39,12 @@ int main()
 	lights.allHit = true;
 	assert(!state.IsFeetInShadow());
 	player.m_bOnShadow = true;
-	assert(state.IsFeetInShadow()); // 入れた直後、同じ条件で解除されない。
+	assert(!state.IsFeetInShadow()); // 旧影コリジョンとの接触で照射判定を無視しない。
 	lights.enemyHit = true;
 	assert(!state.IsFeetInShadow());
+	lights.allHit = false;
+	lights.enemyHit = false;
+	assert(state.IsFeetInShadow());
 	world.manager = nullptr;
 	assert(!state.IsFeetInShadow());
 	state.world = nullptr;
